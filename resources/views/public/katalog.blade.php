@@ -90,9 +90,28 @@
             </form>
         </div>
 
-        <!-- Book Grid Showcase -->
-        <div class="lg:col-span-3">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Book Grid Showcase with Loading Skeleton -->
+        <div class="lg:col-span-3" x-data="{ isLoading: true }" x-init="setTimeout(() => isLoading = false, 350)">
+            
+            <!-- Book Cards Skeleton -->
+            <div x-show="isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse" x-cloak>
+                @for($i=0; $i<6; $i++)
+                    <div class="bg-white rounded-2xl border-2 border-gray-200 p-4 space-y-4">
+                        <div class="flex gap-4">
+                            <div class="w-20 h-28 bg-gray-200 rounded-xl shrink-0"></div>
+                            <div class="flex-1 space-y-2">
+                                <div class="h-3 w-16 bg-gray-200 rounded-lg"></div>
+                                <div class="h-4 w-full bg-gray-300 rounded-lg"></div>
+                                <div class="h-3 w-24 bg-gray-100 rounded-lg"></div>
+                            </div>
+                        </div>
+                        <div class="h-8 bg-gray-100 rounded-xl w-full"></div>
+                    </div>
+                @endfor
+            </div>
+
+            <!-- Actual Book Cards Showcase -->
+            <div x-show="!isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" x-transition.opacity.duration.300ms>
                 @forelse($buku as $item)
                     @php
                         $available = $item->jumlah_tersedia;

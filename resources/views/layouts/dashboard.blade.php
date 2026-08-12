@@ -271,30 +271,71 @@
             </div>
         </header>
 
-        <!-- Dynamic Content Body -->
-        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-gray-100/60">
-            <!-- Flash Message Alerts -->
-            @if(session('success'))
-                <div class="mb-6 p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-200 flex items-center justify-between text-xs font-bold text-emerald-800 shadow-sm" x-data="{ show: true }" x-show="show">
-                    <div class="flex items-center gap-2.5">
-                        <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span>{{ session('success') }}</span>
+        <!-- Dynamic Content Body with Smooth Loading Skeleton -->
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-gray-100/60" x-data="{ isLoading: true }" x-init="setTimeout(() => isLoading = false, 350)">
+            
+            <!-- Skeleton Loader UI (Displayed briefly when switching pages / loading) -->
+            <div x-show="isLoading" class="space-y-6 animate-pulse" x-cloak>
+                <div class="h-20 bg-white rounded-2xl border-2 border-gray-200 p-5 flex items-center justify-between">
+                    <div class="space-y-2">
+                        <div class="h-4 w-48 bg-gray-200 rounded-lg"></div>
+                        <div class="h-3 w-72 bg-gray-100 rounded-lg"></div>
                     </div>
-                    <button @click="show = false" class="text-emerald-500 hover:text-emerald-800 text-base">&times;</button>
+                    <div class="h-9 w-36 bg-gray-200 rounded-xl"></div>
                 </div>
-            @endif
 
-            @if(session('error'))
-                <div class="mb-6 p-4 rounded-2xl bg-rose-50 border-2 border-rose-200 flex items-center justify-between text-xs font-bold text-rose-800 shadow-sm" x-data="{ show: true }" x-show="show">
-                    <div class="flex items-center gap-2.5">
-                        <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span>{{ session('error') }}</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="h-24 bg-white rounded-2xl border-2 border-gray-200 p-5 space-y-3">
+                        <div class="h-3 w-20 bg-gray-200 rounded-lg"></div>
+                        <div class="h-6 w-12 bg-gray-300 rounded-lg"></div>
                     </div>
-                    <button @click="show = false" class="text-rose-500 hover:text-rose-800 text-base">&times;</button>
+                    <div class="h-24 bg-white rounded-2xl border-2 border-gray-200 p-5 space-y-3">
+                        <div class="h-3 w-20 bg-gray-200 rounded-lg"></div>
+                        <div class="h-6 w-12 bg-gray-300 rounded-lg"></div>
+                    </div>
+                    <div class="h-24 bg-white rounded-2xl border-2 border-gray-200 p-5 space-y-3">
+                        <div class="h-3 w-20 bg-gray-200 rounded-lg"></div>
+                        <div class="h-6 w-12 bg-gray-300 rounded-lg"></div>
+                    </div>
+                    <div class="h-24 bg-white rounded-2xl border-2 border-gray-200 p-5 space-y-3">
+                        <div class="h-3 w-20 bg-gray-200 rounded-lg"></div>
+                        <div class="h-6 w-12 bg-gray-300 rounded-lg"></div>
+                    </div>
                 </div>
-            @endif
 
-            @yield('content')
+                <div class="bg-white rounded-2xl border-2 border-gray-200 p-6 space-y-4">
+                    <div class="h-10 bg-gray-100 rounded-xl w-full"></div>
+                    <div class="h-12 bg-gray-50 rounded-xl w-full"></div>
+                    <div class="h-12 bg-gray-50 rounded-xl w-full"></div>
+                    <div class="h-12 bg-gray-50 rounded-xl w-full"></div>
+                </div>
+            </div>
+
+            <!-- Actual Page Content (Smooth Fade In) -->
+            <div x-show="!isLoading" x-transition.opacity.duration.300ms>
+                <!-- Flash Message Alerts -->
+                @if(session('success'))
+                    <div class="mb-6 p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-200 flex items-center justify-between text-xs font-bold text-emerald-800 shadow-sm" x-data="{ show: true }" x-show="show">
+                        <div class="flex items-center gap-2.5">
+                            <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span>{{ session('success') }}</span>
+                        </div>
+                        <button @click="show = false" class="text-emerald-500 hover:text-emerald-800 text-base">&times;</button>
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="mb-6 p-4 rounded-2xl bg-rose-50 border-2 border-rose-200 flex items-center justify-between text-xs font-bold text-rose-800 shadow-sm" x-data="{ show: true }" x-show="show">
+                        <div class="flex items-center gap-2.5">
+                            <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span>{{ session('error') }}</span>
+                        </div>
+                        <button @click="show = false" class="text-rose-500 hover:text-rose-800 text-base">&times;</button>
+                    </div>
+                @endif
+
+                @yield('content')
+            </div>
         </main>
     </div>
 
