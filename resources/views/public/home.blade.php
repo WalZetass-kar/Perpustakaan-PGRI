@@ -19,7 +19,7 @@
             <div class="lg:col-span-7 space-y-6 text-center lg:text-left" data-aos="fade-right" data-aos-duration="1000">
 
                 <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight text-white drop-shadow-md">
-                    Integrated Library System <br class="hidden sm:inline"><span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-red-100 to-emerald-200">(Inlislite)</span>
+                    Perpustakaan SMK PGRI Pekanbaru <br class="hidden sm:inline"><span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-red-100 to-emerald-200">(Inlislite)</span>
                 </h1>
                 <p class="text-sm sm:text-base text-red-100 max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
                     Sebuah Perpustakaan Digital Sekolah yang dikembangkan langsung untuk menghimpun koleksi kejuruan, referensi modul, dan pelayanan perpustakaan dalam bentuk digital.
