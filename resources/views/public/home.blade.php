@@ -20,7 +20,7 @@
                 <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-bold bg-white/10 text-brand-100 border border-white/20 shadow-xs backdrop-blur-md hover:bg-white/20 transition duration-300 transform hover:scale-105 cursor-default">
                     <img src="https://simpeg.smkpgripekanbaru.sch.id/images/logo.png" alt="Logo SMK PGRI" class="w-4 h-4 object-contain">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    <span>Integrated Library System SMK PGRI</span>
+                    <span>Perpustakaan SMK PGRI Pekanbaru</span>
                 </div>
                 <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight text-white drop-shadow-md">
                     Integrated Library System <br class="hidden sm:inline"><span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-red-100 to-emerald-200">(Inlislite)</span>
