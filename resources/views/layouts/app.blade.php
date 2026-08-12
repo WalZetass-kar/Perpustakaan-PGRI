@@ -14,6 +14,10 @@
         tailwind.config = {
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
                     colors: {
                         brand: {
                             50: '#fef2f2',
@@ -37,19 +41,19 @@
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-    <!-- Inter Font -->
+    <!-- Official Google Fonts: Poppins (Official SMK PGRI Font) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
     
     <style>
         html { scroll-behavior: smooth; }
-        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        body { font-family: 'Poppins', sans-serif; overflow-x: hidden; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen font-sans">
 
-    <!-- Header Navigation (Enlarged Top Bar Height & Larger Typography) -->
+    <!-- Header Navigation (Enlarged Top Bar Height & Poppins Font) -->
     <header class="bg-white/95 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 transition duration-300 shadow-xs">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             
@@ -58,11 +62,11 @@
                 <img src="https://simpeg.smkpgripekanbaru.sch.id/images/logo.png" alt="Logo SMK PGRI" class="w-12 h-12 object-contain transform group-hover:scale-110 transition duration-300 drop-shadow-sm">
                 <div>
                     <span class="text-base sm:text-lg font-black text-gray-900 leading-tight block group-hover:text-brand-700 transition">Perpustakaan PGRI</span>
-                    <span class="text-xs text-gray-500 font-bold tracking-wider uppercase block">SMK PGRI</span>
+                    <span class="text-xs text-gray-500 font-bold tracking-wider uppercase block">SMK PGRI Pekanbaru</span>
                 </div>
             </a>
 
-            <!-- Desktop Navigation Links (Enlarged Font & Spacing) -->
+            <!-- Desktop Navigation Links (Enlarged Poppins Font & Spacing) -->
             <nav class="hidden md:flex items-center gap-10 text-sm font-bold">
                 <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'text-brand-700 border-b-2 border-brand-700 py-6' : 'text-gray-700 hover:text-brand-700 transition' }}">Beranda</a>
                 <a href="{{ route('katalog') }}" class="{{ request()->routeIs('katalog') ? 'text-brand-700 border-b-2 border-brand-700 py-6' : 'text-gray-700 hover:text-brand-700 transition' }}">Katalog Buku</a>
@@ -115,7 +119,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 mt-16 py-10">
+    <footer class="bg-white border-t border-gray-200 mt-16 py-10 font-sans">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 pb-8 border-b border-gray-100 text-xs">
                 
@@ -124,8 +128,8 @@
                     <div class="flex items-center gap-3">
                         <img src="https://simpeg.smkpgripekanbaru.sch.id/images/logo.png" alt="Logo SMK PGRI" class="w-10 h-10 object-contain">
                         <div>
-                            <span class="font-extrabold text-gray-900 block leading-tight text-sm">Perpustakaan PGRI</span>
-                            <span class="text-[11px] text-gray-500 font-semibold tracking-wider uppercase">SMK PGRI</span>
+                            <span class="font-black text-gray-900 block leading-tight text-sm">Perpustakaan PGRI</span>
+                            <span class="text-[11px] text-gray-500 font-bold tracking-wider uppercase">SMK PGRI Pekanbaru</span>
                         </div>
                     </div>
                     <p class="text-gray-500 leading-relaxed text-[11px]">
@@ -157,7 +161,7 @@
                 <div class="space-y-2">
                     <h4 class="font-bold text-gray-900 uppercase tracking-wider text-[11px]">Alamat & Kontak</h4>
                     <p class="text-gray-600 leading-relaxed text-[11px]">
-                        Jl. Pendidikan No. 45, Gedung Utama Perpustakaan SMK PGRI.<br>
+                        Jl. Pendidikan No. 45, Gedung Utama Perpustakaan SMK PGRI Pekanbaru.<br>
                         Email: perpustakaan@smkpgri.sch.id<br>
                         Telp: (021) 7890-1234
                     </p>
@@ -166,7 +170,7 @@
             </div>
 
             <div class="pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-gray-500 gap-3">
-                <span>Perpustakaan SMK PGRI &copy; {{ date('Y') }}. All rights reserved.</span>
+                <span>Perpustakaan SMK PGRI Pekanbaru &copy; {{ date('Y') }}. All rights reserved.</span>
                 <span class="font-medium text-gray-400">Sistem Informasi Perpustakaan Sekolah Terpadu</span>
             </div>
         </div>
