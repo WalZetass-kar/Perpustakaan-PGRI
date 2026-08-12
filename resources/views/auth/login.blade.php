@@ -53,9 +53,8 @@
     <!-- Main Flip/Slide Container Card -->
     <div class="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-gray-200 grid grid-cols-1 md:grid-cols-12 transition-all duration-500">
         
-        <!-- Left Side: Interactive Dynamic Banner (Animated Color Transition) -->
-        <div class="md:col-span-5 p-8 sm:p-10 flex flex-col justify-between relative transition-all duration-700"
-             :class="roleTab === 'admin' ? 'bg-gradient-to-br from-gray-950 via-gray-900 to-brand-950 text-white' : 'bg-gradient-to-br from-brand-800 via-brand-700 to-red-900 text-white'">
+        <!-- Left Side: Interactive Dynamic Banner (Unified Red Brand Theme) -->
+        <div class="md:col-span-5 bg-gradient-to-br from-brand-800 via-brand-700 to-red-900 text-white p-8 sm:p-10 flex flex-col justify-between relative transition-all duration-500">
             
             <div class="space-y-6">
                 <!-- Back Home Button -->
@@ -222,7 +221,7 @@
                         <span class="text-gray-400 font-medium">Akses Back-Office</span>
                     </div>
 
-                    <button type="submit" class="w-full py-3.5 bg-gray-900 text-white font-extrabold text-xs rounded-xl hover:bg-black transition duration-300 shadow-md hover:shadow-lg transform active:scale-95 flex items-center justify-center gap-2">
+                    <button type="submit" class="w-full py-3.5 bg-brand-700 text-white font-extrabold text-xs rounded-xl hover:bg-brand-800 transition duration-300 shadow-md hover:shadow-lg transform active:scale-95 flex items-center justify-center gap-2">
                         <span>Masuk Portal Admin</span>
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                     </button>
