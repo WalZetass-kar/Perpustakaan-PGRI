@@ -4,7 +4,7 @@
 @section('page_heading', 'Manajemen Eksemplar & Barcode ID')
 
 @section('content')
-<div class="space-y-6" x-data="{ openAddModal: false, openEditModal: false, editData: {} }">
+<div class="space-y-6" x-data="{ openAddModal: false, openEditModal: false, editData: {} }" x-init="openAddModal = false; openEditModal = false; editData = {}">
 
     <!-- Information Banner -->
     <div class="p-5 rounded-2xl bg-gradient-to-r from-brand-900 to-brand-800 text-white border-2 border-brand-950 shadow-md flex items-center justify-between gap-4">

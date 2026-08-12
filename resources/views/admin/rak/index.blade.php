@@ -4,7 +4,7 @@
 @section('page_heading', 'Manajemen Lokasi Rak Buku')
 
 @section('content')
-<div class="space-y-6" x-data="{ openAddModal: false, openEditModal: false, editData: {} }">
+<div class="space-y-6" x-data="{ openAddModal: false, openEditModal: false, editData: {} }" x-init="openAddModal = false; openEditModal = false; editData = {}">
     
     <!-- Top Action Toolbar -->
     <div class="bg-white p-5 rounded-2xl border-2 border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
