@@ -79,7 +79,7 @@
                 <!-- Action Button Workflow based on User Auth -->
                 <div class="pt-4 border-t border-gray-100 flex flex-wrap items-center gap-4">
                     @auth
-                        @if(auth()->user()->role->name === 'mahasiswa')
+                        @if((auth()->user()->role->name ?? '') === 'mahasiswa')
                             @if($userLoan)
                                 <div class="px-4 py-2 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-semibold">
                                     Status: Buku ini sedang Anda pinjam (Jatuh Tempo: {{ $userLoan->tanggal_jatuh_tempo }})

@@ -56,8 +56,8 @@
                                 <span class="text-[10px] text-gray-400">{{ $user->phone ?? '-' }}</span>
                             </td>
                             <td class="py-3.5 px-5">
-                                <span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase {{ $user->role->name === 'admin' ? 'bg-rose-50 text-rose-700 border border-rose-200' : ($user->role->name === 'pustakawan' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200') }}">
-                                    {{ $user->role->display_name ?? $user->role->name }}
+                                <span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase {{ ($user->role->name ?? '') === 'admin' ? 'bg-rose-50 text-rose-700 border border-rose-200' : (($user->role->name ?? '') === 'pustakawan' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200') }}">
+                                    {{ $user->role->display_name ?? ($user->role->name ?? 'Anggota') }}
                                 </span>
                             </td>
                             <td class="py-3.5 px-5 font-bold text-gray-700">{{ $anggota->program_studi ?? '-' }}</td>
