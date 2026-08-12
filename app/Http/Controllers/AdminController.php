@@ -22,6 +22,7 @@ use App\Models\Penulis;
 use App\Models\Penerbit;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
@@ -164,6 +165,30 @@ class AdminController extends Controller
         return back()->with('success', 'Kategori baru berhasil ditambahkan.');
     }
 
+    public function kategoriUpdate(Request $request, $id)
+    {
+        $kategori = Kategori::findOrFail($id);
+        $request->validate([
+            'nama' => 'required|max:255|unique:kategori,nama,' . $id,
+            'deskripsi' => 'nullable|string',
+        ]);
+
+        $kategori->update([
+            'nama' => $request->nama,
+            'slug' => Str::slug($request->nama),
+            'deskripsi' => $request->deskripsi,
+        ]);
+
+        return back()->with('success', 'Kategori berhasil diperbarui.');
+    }
+
+    public function kategoriDestroy($id)
+    {
+        $kategori = Kategori::findOrFail($id);
+        $kategori->delete();
+        return back()->with('success', 'Kategori berhasil dihapus.');
+    }
+
     // --- RAK PERPUSTAKAAN --- //
     public function rakIndex()
     {
@@ -183,6 +208,27 @@ class AdminController extends Controller
 
         Rak::create($request->all());
         return back()->with('success', 'Rak baru berhasil ditambahkan.');
+    }
+
+    public function rakUpdate(Request $request, $id)
+    {
+        $rak = Rak::findOrFail($id);
+        $request->validate([
+            'kode_rak' => 'required|unique:rak,kode_rak,' . $id,
+            'nama_rak' => 'required|string',
+            'lokasi' => 'required|string',
+            'kategori_id' => 'nullable|exists:kategori,id',
+        ]);
+
+        $rak->update($request->all());
+        return back()->with('success', 'Data rak berhasil diperbarui.');
+    }
+
+    public function rakDestroy($id)
+    {
+        $rak = Rak::findOrFail($id);
+        $rak->delete();
+        return back()->with('success', 'Rak berhasil dihapus.');
     }
 
     // --- EKSEMPLAR BUKU --- //
@@ -216,11 +262,125 @@ class AdminController extends Controller
         return back()->with('success', 'Eksemplar baru berhasil didaftarkan.');
     }
 
-    // --- ANGGOTA --- //
+    public function eksemplarUpdate(Request $request, $id)
+    {
+        $eksemplar = Eksemplar::findOrFail($id);
+        $request->validate([
+            'kode_eksemplar' => 'required|unique:eksemplar,kode_eksemplar,' . $id,
+            'barcode' => 'required|unique:eksemplar,barcode,' . $id,
+            'kondisi' => 'required|in:baik,rusak_ringan,rusak_berat',
+            'rak_id' => 'required|exists:rak,id',
+            'status' => 'required|in:tersedia,dipinjam,hilang,rusak',
+        ]);
+
+        $eksemplar->update($request->all());
+        return back()->with('success', 'Data eksemplar berhasil diperbarui.');
+    }
+
+    public function eksemplarDestroy($id)
+    {
+        $eksemplar = Eksemplar::findOrFail($id);
+        $eksemplar->delete();
+        return back()->with('success', 'Eksemplar berhasil dihapus.');
+    }
+
+    // --- ANGGOTA & USER MANAGEMENT --- //
     public function anggotaIndex()
     {
-        $anggotaList = Anggota::with('user')->paginate(10);
-        return view('admin.anggota.index', compact('anggotaList'));
+        $anggotaList = Anggota::with('user.role')->latest()->paginate(10);
+        $roles = Role::all();
+        return view('admin.anggota.index', compact('anggotaList', 'roles'));
+    }
+
+    public function anggotaStore(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
+            'role_id' => 'required|exists:roles,id',
+            'phone' => 'nullable|string',
+            'nim' => 'required|unique:anggota,nim',
+            'program_studi' => 'required|string',
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role_id' => $request->role_id,
+            'phone' => $request->phone,
+            'status' => 'active',
+        ]);
+
+        // Auto-generate Nomor Anggota ID
+        $nomorAnggota = 'LIB-' . date('Y') . '-' . str_pad(Anggota::count() + 1, 3, '0', STR_PAD_LEFT);
+
+        Anggota::create([
+            'user_id' => $user->id,
+            'nomor_anggota' => $nomorAnggota,
+            'nim' => $request->nim,
+            'program_studi' => $request->program_studi,
+            'status' => 'aktif',
+        ]);
+
+        AuditLog::create([
+            'user_id' => auth()->id(),
+            'user_name' => auth()->user()->name,
+            'aktivitas' => 'TAMBAH_USER',
+            'deskripsi' => "Mendaftarkan pengguna/anggota baru: {$user->name} ({$user->email})",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', 'Anggota/Pengguna baru berhasil didaftarkan.');
+    }
+
+    public function anggotaUpdate(Request $request, $id)
+    {
+        $anggota = Anggota::findOrFail($id);
+        $user = $anggota->user;
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'role_id' => 'required|exists:roles,id',
+            'phone' => 'nullable|string',
+            'nim' => 'required|unique:anggota,nim,' . $id,
+            'program_studi' => 'required|string',
+            'status' => 'required|in:aktif,nonaktif,dibekukan',
+        ]);
+
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'role_id' => $request->role_id,
+            'phone' => $request->phone,
+        ]);
+
+        if ($request->filled('password')) {
+            $user->update(['password' => Hash::make($request->password)]);
+        }
+
+        $anggota->update([
+            'nim' => $request->nim,
+            'program_studi' => $request->program_studi,
+            'status' => $request->status,
+        ]);
+
+        return back()->with('success', 'Data anggota/pengguna berhasil diperbarui.');
+    }
+
+    public function anggotaDestroy($id)
+    {
+        $anggota = Anggota::findOrFail($id);
+        $user = $anggota->user;
+
+        $anggota->delete();
+        if ($user) {
+            $user->delete();
+        }
+
+        return back()->with('success', 'Data anggota/pengguna berhasil dihapus.');
     }
 
     // --- LAPORAN & EXPORT --- //

@@ -26,7 +26,7 @@ Route::middleware(['auth'])->group(function () {
         return redirect()->route('mahasiswa.dashboard');
     })->name('dashboard');
 
-    // --- MAHASISWA ROUTES --- //
+    // --- MAHASISWA / SISWA ROUTES --- //
     Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
         Route::get('/dashboard', [MahasiswaController::class, 'dashboard'])->name('dashboard');
         Route::get('/peminjaman', [MahasiswaController::class, 'peminjamanSaya'])->name('peminjaman');
@@ -58,26 +58,41 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/denda/bayar/{id}', [PustakawanController::class, 'bayarDenda'])->name('denda.bayar');
     });
 
-    // --- ADMIN ROUTES --- //
+    // --- ADMIN ROUTES (FULL CRUD) --- //
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         
-        // Buku
+        // Buku CRUD
         Route::get('/buku', [AdminController::class, 'bukuIndex'])->name('buku');
         Route::post('/buku', [AdminController::class, 'bukuStore'])->name('buku.store');
         Route::post('/buku/update/{id}', [AdminController::class, 'bukuUpdate'])->name('buku.update');
         Route::post('/buku/delete/{id}', [AdminController::class, 'bukuDestroy'])->name('buku.delete');
         
-        // Kategori & Rak & Eksemplar
+        // Kategori CRUD
         Route::get('/kategori', [AdminController::class, 'kategoriIndex'])->name('kategori');
         Route::post('/kategori', [AdminController::class, 'kategoriStore'])->name('kategori.store');
+        Route::post('/kategori/update/{id}', [AdminController::class, 'kategoriUpdate'])->name('kategori.update');
+        Route::post('/kategori/delete/{id}', [AdminController::class, 'kategoriDestroy'])->name('kategori.delete');
+
+        // Rak CRUD
         Route::get('/rak', [AdminController::class, 'rakIndex'])->name('rak');
         Route::post('/rak', [AdminController::class, 'rakStore'])->name('rak.store');
+        Route::post('/rak/update/{id}', [AdminController::class, 'rakUpdate'])->name('rak.update');
+        Route::post('/rak/delete/{id}', [AdminController::class, 'rakDestroy'])->name('rak.delete');
+
+        // Eksemplar CRUD
         Route::get('/eksemplar', [AdminController::class, 'eksemplarIndex'])->name('eksemplar');
         Route::post('/eksemplar', [AdminController::class, 'eksemplarStore'])->name('eksemplar.store');
+        Route::post('/eksemplar/update/{id}', [AdminController::class, 'eksemplarUpdate'])->name('eksemplar.update');
+        Route::post('/eksemplar/delete/{id}', [AdminController::class, 'eksemplarDestroy'])->name('eksemplar.delete');
 
-        // Anggota & Audit & Pengaturan & Laporan
+        // Anggota & User Management CRUD
         Route::get('/anggota', [AdminController::class, 'anggotaIndex'])->name('anggota');
+        Route::post('/anggota', [AdminController::class, 'anggotaStore'])->name('anggota.store');
+        Route::post('/anggota/update/{id}', [AdminController::class, 'anggotaUpdate'])->name('anggota.update');
+        Route::post('/anggota/delete/{id}', [AdminController::class, 'anggotaDestroy'])->name('anggota.delete');
+
+        // Audit, Pengaturan & Laporan
         Route::get('/laporan', [AdminController::class, 'laporanIndex'])->name('laporan');
         Route::get('/audit-log', [AdminController::class, 'auditLogIndex'])->name('audit-log');
         Route::get('/pengaturan', [AdminController::class, 'pengaturanIndex'])->name('pengaturan');
