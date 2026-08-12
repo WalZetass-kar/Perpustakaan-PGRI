@@ -33,6 +33,9 @@
             }
         }
     </script>
+    <!-- SweetAlert2 CDN for Modern Premium Dialog Popups -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
@@ -209,7 +212,7 @@
                         <span>Notifikasi</span>
                     </a>
                     <a href="{{ route('mahasiswa.profil') }}" class="flex items-center gap-3 px-3.5 py-2.5 text-xs font-bold rounded-xl transition-all duration-200 border {{ request()->routeIs('mahasiswa.profil') ? 'bg-brand-700 text-white border-brand-800 shadow-md transform translate-x-1' : 'text-gray-700 border-transparent hover:bg-gray-100 hover:text-brand-700' }}">
-                        <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                         <span>Profil Saya</span>
                     </a>
                 @endif
@@ -294,5 +297,32 @@
         </main>
     </div>
 
+    <script>
+        function confirmDelete(event, titleText = 'Apakah Anda yakin?', messageText = 'Data ini akan dihapus permanen!') {
+            event.preventDefault();
+            const form = event.target.closest('form');
+            
+            Swal.fire({
+                title: titleText,
+                text: messageText,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#B91C1C',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Ya, Hapus Data!',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    popup: 'rounded-3xl border-2 border-gray-200 shadow-2xl font-sans',
+                    confirmButton: 'px-5 py-2.5 rounded-xl font-bold text-xs',
+                    cancelButton: 'px-5 py-2.5 rounded-xl font-bold text-xs'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+            return false;
+        }
+    </script>
 </body>
 </html>

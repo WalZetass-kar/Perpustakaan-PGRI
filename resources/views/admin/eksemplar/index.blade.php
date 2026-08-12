@@ -87,7 +87,7 @@
                                 }; openEditModal = true" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs">
                                     Edit
                                 </button>
-                                <form action="{{ route('admin.eksemplar.delete', $ex->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus eksemplar fisik ini?')">
+                                <form action="{{ route('admin.eksemplar.delete', $ex->id) }}" method="POST" class="inline" onsubmit="return confirmDelete(event, 'Hapus Eksemplar Buku?', 'Fisik eksemplar ini akan dihapus permanen dari perpustakaan.')">
                                     @csrf
                                     <button type="submit" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs">
                                         Hapus
