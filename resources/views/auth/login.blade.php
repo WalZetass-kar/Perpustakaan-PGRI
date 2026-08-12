@@ -193,7 +193,7 @@
                     <p class="text-xs text-gray-500 mt-1">Masukkan email Administrator atau Petugas Pustakawan.</p>
                 </div>
 
-                <form action="{{ route('login') }}" method="POST" class="space-y-4 text-xs">
+                <form action="{{ route('admin.login') }}" method="POST" class="space-y-4 text-xs">
                     @csrf
                     <div>
                         <label for="email_admin" class="block font-bold text-gray-700 mb-1.5">Email Pengelola <span class="text-rose-500">*</span></label>

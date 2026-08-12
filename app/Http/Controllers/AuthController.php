@@ -8,7 +8,7 @@ use App\Models\AuditLog;
 
 class AuthController extends Controller
 {
-    // General / Siswa Login Form
+    // General / Siswa Dedicated Login Form
     public function showLoginForm()
     {
         if (Auth::check()) {
@@ -26,7 +26,8 @@ class AuthController extends Controller
         return view('auth.login-admin');
     }
 
-    public function login(Request $request)
+    // Siswa Login Submission
+    public function loginSiswa(Request $request)
     {
         $credentials = $request->validate([
             'email' => ['required', 'email'],
@@ -34,14 +35,64 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
             $user = Auth::user();
+            $roleName = $user->role->name ?? '';
+
+            // Strict Role Validation: Siswa only allowed
+            if (in_array($roleName, ['admin', 'pustakawan'])) {
+                Auth::logout();
+                $request->session()->invalidate();
+                return back()->withErrors([
+                    'email' => 'Akun Pengelola (Admin/Pustakawan) tidak diizinkan masuk melalui Portal Siswa. Silakan gunakan Portal Login Admin.',
+                ])->onlyInput('email');
+            }
+
+            $request->session()->regenerate();
 
             AuditLog::create([
                 'user_id' => $user->id,
                 'user_name' => $user->name,
                 'aktivitas' => 'USER_LOGIN',
-                'deskripsi' => "User logged in with role {$user->role->name}",
+                'deskripsi' => "Siswa logged in via Student Portal ({$user->email})",
+                'ip_address' => $request->ip(),
+            ]);
+
+            return redirect()->intended(route('mahasiswa.dashboard'));
+        }
+
+        return back()->withErrors([
+            'email' => 'Kombinasi email dan kata sandi siswa tidak cocok.',
+        ])->onlyInput('email');
+    }
+
+    // Admin & Staff Login Submission
+    public function loginAdmin(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $user = Auth::user();
+            $roleName = $user->role->name ?? '';
+
+            // Strict Role Validation: Admin & Pustakawan only allowed
+            if (!in_array($roleName, ['admin', 'pustakawan'])) {
+                Auth::logout();
+                $request->session()->invalidate();
+                return back()->withErrors([
+                    'email' => 'Akun Siswa tidak memiliki hak akses ke Portal Pengelola Administrator.',
+                ])->onlyInput('email');
+            }
+
+            $request->session()->regenerate();
+
+            AuditLog::create([
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'aktivitas' => 'USER_LOGIN',
+                'deskripsi' => "Staff logged in via Admin Portal ({$user->role->name})",
                 'ip_address' => $request->ip(),
             ]);
 
@@ -49,7 +100,7 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'Kombinasi email dan kata sandi tidak cocok.',
+            'email' => 'Kombinasi email dan kata sandi pengelola tidak cocok.',
         ])->onlyInput('email');
     }
 

@@ -12,10 +12,13 @@ Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/katalog', [PublicController::class, 'katalog'])->name('katalog');
 Route::get('/buku/{id}', [PublicController::class, 'detailBuku'])->name('buku.detail');
 
-// Auth Routes (Separated Siswa & Admin Login)
+// Auth Routes (Strict Separated Siswa & Admin Authentication)
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'loginSiswa']);
+
 Route::get('/admin/login', [AuthController::class, 'showAdminLoginForm'])->name('admin.login.form');
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/admin/login', [AuthController::class, 'loginAdmin'])->name('admin.login');
+
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Authenticated Router Redirect
