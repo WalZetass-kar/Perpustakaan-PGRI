@@ -40,7 +40,7 @@
     <!-- Inter Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <style>
         html { scroll-behavior: smooth; }
@@ -49,61 +49,61 @@
 </head>
 <body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
 
-    <!-- Header Navigation -->
-    <header class="bg-white/95 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 transition duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <!-- Header Navigation (Enlarged Top Bar Height & Larger Typography) -->
+    <header class="bg-white/95 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 transition duration-300 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             
-            <!-- Official SMK PGRI Logo & Brand Name -->
-            <a href="{{ route('home') }}" class="flex items-center gap-3 shrink-0 group">
-                <img src="https://simpeg.smkpgripekanbaru.sch.id/images/logo.png" alt="Logo SMK PGRI" class="w-10 h-10 object-contain transform group-hover:scale-110 transition duration-300 drop-shadow-xs">
+            <!-- Official SMK PGRI Logo & Brand Name (Enlarged) -->
+            <a href="{{ route('home') }}" class="flex items-center gap-3.5 shrink-0 group">
+                <img src="https://simpeg.smkpgripekanbaru.sch.id/images/logo.png" alt="Logo SMK PGRI" class="w-12 h-12 object-contain transform group-hover:scale-110 transition duration-300 drop-shadow-sm">
                 <div>
-                    <span class="text-sm sm:text-base font-extrabold text-gray-900 leading-tight block group-hover:text-brand-700 transition">Perpustakaan PGRI</span>
-                    <span class="text-[10px] text-gray-500 font-semibold tracking-wider uppercase block">SMK PGRI</span>
+                    <span class="text-base sm:text-lg font-black text-gray-900 leading-tight block group-hover:text-brand-700 transition">Perpustakaan PGRI</span>
+                    <span class="text-xs text-gray-500 font-bold tracking-wider uppercase block">SMK PGRI</span>
                 </div>
             </a>
 
-            <!-- Desktop Navigation Links -->
-            <nav class="hidden md:flex items-center gap-8 text-xs font-semibold">
-                <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'text-brand-700 border-b-2 border-brand-700 py-5' : 'text-gray-600 hover:text-brand-700 transition' }}">Beranda</a>
-                <a href="{{ route('katalog') }}" class="{{ request()->routeIs('katalog') ? 'text-brand-700 border-b-2 border-brand-700 py-5' : 'text-gray-600 hover:text-brand-700 transition' }}">Katalog Buku</a>
-                <a href="{{ route('home') }}#pusat-data-section" class="text-gray-600 hover:text-brand-700 transition">Pusat Data</a>
-                <a href="{{ route('home') }}#fitur-section" class="text-gray-600 hover:text-brand-700 transition">Fitur Utama</a>
+            <!-- Desktop Navigation Links (Enlarged Font & Spacing) -->
+            <nav class="hidden md:flex items-center gap-10 text-sm font-bold">
+                <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'text-brand-700 border-b-2 border-brand-700 py-6' : 'text-gray-700 hover:text-brand-700 transition' }}">Beranda</a>
+                <a href="{{ route('katalog') }}" class="{{ request()->routeIs('katalog') ? 'text-brand-700 border-b-2 border-brand-700 py-6' : 'text-gray-700 hover:text-brand-700 transition' }}">Katalog Buku</a>
+                <a href="{{ route('home') }}#pusat-data-section" class="text-gray-700 hover:text-brand-700 transition">Pusat Data</a>
+                <a href="{{ route('home') }}#fitur-section" class="text-gray-700 hover:text-brand-700 transition">Fitur Utama</a>
             </nav>
 
-            <!-- Right Actions -->
-            <div class="hidden md:flex items-center gap-3">
+            <!-- Right Actions (Enlarged Buttons) -->
+            <div class="hidden md:flex items-center gap-4">
                 @auth
-                    <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-brand-700 rounded-xl hover:bg-brand-800 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                    <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-extrabold text-white bg-brand-700 rounded-xl hover:bg-brand-800 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
                         <span>Dashboard</span>
-                        <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </a>
                 @else
-                    <a href="{{ route('login') }}" class="px-4 py-2 text-xs font-semibold text-gray-700 hover:text-brand-700 transition">Masuk</a>
-                    <a href="{{ route('katalog') }}" class="px-4.5 py-2 text-xs font-bold text-white bg-brand-700 rounded-xl hover:bg-brand-800 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">Cari Buku</a>
+                    <a href="{{ route('login') }}" class="px-4 py-2.5 text-xs sm:text-sm font-bold text-gray-700 hover:text-brand-700 transition">Masuk</a>
+                    <a href="{{ route('katalog') }}" class="px-5 py-2.5 text-xs sm:text-sm font-extrabold text-white bg-brand-700 rounded-xl hover:bg-brand-800 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">Cari Buku</a>
                 @endauth
             </div>
 
             <!-- Mobile Hamburger Button -->
             <div class="flex md:hidden items-center gap-2">
-                <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-show="!mobileMenuOpen"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-show="mobileMenuOpen" x-cloak><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2.5 rounded-xl text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-show="!mobileMenuOpen"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-show="mobileMenuOpen" x-cloak><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
         </div>
 
-        <!-- Mobile Drawer Menu -->
-        <div x-show="mobileMenuOpen" x-cloak class="md:hidden border-t border-gray-100 bg-white px-4 pt-2 pb-4 space-y-2">
-            <a href="{{ route('home') }}" class="block px-3 py-2 rounded-lg text-xs font-semibold text-gray-700 hover:bg-brand-50 hover:text-brand-700">Beranda</a>
-            <a href="{{ route('katalog') }}" class="block px-3 py-2 rounded-lg text-xs font-semibold text-gray-700 hover:bg-brand-50 hover:text-brand-700">Katalog Buku</a>
-            <a href="{{ route('home') }}#pusat-data-section" class="block px-3 py-2 rounded-lg text-xs font-semibold text-gray-700 hover:bg-brand-50 hover:text-brand-700">Pusat Data</a>
-            <a href="{{ route('home') }}#fitur-section" class="block px-3 py-2 rounded-lg text-xs font-semibold text-gray-700 hover:bg-brand-50 hover:text-brand-700">Fitur Utama</a>
-            <div class="pt-2 border-t border-gray-100 flex items-center justify-between">
+        <!-- Mobile Drawer Menu (Enlarged) -->
+        <div x-show="mobileMenuOpen" x-cloak class="md:hidden border-t border-gray-100 bg-white px-5 pt-3 pb-5 space-y-3 shadow-lg">
+            <a href="{{ route('home') }}" class="block px-4 py-2.5 rounded-xl text-sm font-bold text-gray-800 hover:bg-brand-50 hover:text-brand-700">Beranda</a>
+            <a href="{{ route('katalog') }}" class="block px-4 py-2.5 rounded-xl text-sm font-bold text-gray-800 hover:bg-brand-50 hover:text-brand-700">Katalog Buku</a>
+            <a href="{{ route('home') }}#pusat-data-section" class="block px-4 py-2.5 rounded-xl text-sm font-bold text-gray-800 hover:bg-brand-50 hover:text-brand-700">Pusat Data</a>
+            <a href="{{ route('home') }}#fitur-section" class="block px-4 py-2.5 rounded-xl text-sm font-bold text-gray-800 hover:bg-brand-50 hover:text-brand-700">Fitur Utama</a>
+            <div class="pt-3 border-t border-gray-100 flex items-center justify-between gap-3">
                 @auth
-                    <a href="{{ route('dashboard') }}" class="w-full text-center px-4 py-2 text-xs font-bold text-white bg-brand-700 rounded-lg hover:bg-brand-800">Dashboard</a>
+                    <a href="{{ route('dashboard') }}" class="w-full text-center px-5 py-2.5 text-sm font-extrabold text-white bg-brand-700 rounded-xl hover:bg-brand-800">Dashboard</a>
                 @else
-                    <a href="{{ route('login') }}" class="px-4 py-2 text-xs font-semibold text-gray-700">Masuk</a>
-                    <a href="{{ route('katalog') }}" class="px-4 py-2 text-xs font-bold text-white bg-brand-700 rounded-lg hover:bg-brand-800">Cari Buku</a>
+                    <a href="{{ route('login') }}" class="w-1/2 text-center px-4 py-2.5 text-sm font-bold text-gray-700 bg-gray-100 rounded-xl">Masuk</a>
+                    <a href="{{ route('katalog') }}" class="w-1/2 text-center px-4 py-2.5 text-sm font-extrabold text-white bg-brand-700 rounded-xl hover:bg-brand-800">Cari Buku</a>
                 @endauth
             </div>
         </div>
@@ -122,10 +122,10 @@
                 <!-- Col 1: Brand & Official Logo -->
                 <div class="md:col-span-1 space-y-3">
                     <div class="flex items-center gap-3">
-                        <img src="https://simpeg.smkpgripekanbaru.sch.id/images/logo.png" alt="Logo SMK PGRI" class="w-9 h-9 object-contain">
+                        <img src="https://simpeg.smkpgripekanbaru.sch.id/images/logo.png" alt="Logo SMK PGRI" class="w-10 h-10 object-contain">
                         <div>
-                            <span class="font-extrabold text-gray-900 block leading-tight">Perpustakaan PGRI</span>
-                            <span class="text-[10px] text-gray-500 font-semibold tracking-wider uppercase">SMK PGRI</span>
+                            <span class="font-extrabold text-gray-900 block leading-tight text-sm">Perpustakaan PGRI</span>
+                            <span class="text-[11px] text-gray-500 font-semibold tracking-wider uppercase">SMK PGRI</span>
                         </div>
                     </div>
                     <p class="text-gray-500 leading-relaxed text-[11px]">
