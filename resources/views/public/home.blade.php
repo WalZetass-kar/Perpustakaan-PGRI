@@ -3,21 +3,22 @@
 @section('title', 'Beranda - ' . $nama_perpustakaan)
 
 @section('content')
-<!-- SECTION 1: HERO HEADER (Red-White Theme with Emerald Accents) -->
-<section class="relative bg-gradient-to-r from-brand-900 via-brand-800 to-red-950 text-white py-16 lg:py-20 overflow-hidden shadow-lg">
-    <!-- Subtle Background Glow -->
+<!-- SECTION 1: HERO HEADER (With SMK PGRI Official Background Image & Overlay) -->
+<section class="relative bg-gradient-to-r from-brand-900/90 via-brand-800/85 to-red-950/90 text-white py-16 lg:py-20 overflow-hidden shadow-lg">
+    <!-- SMK PGRI Background Image with Red Overlay -->
+    <div class="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-30 pointer-events-none" style="background-image: url('https://smkpgripekanbaru.sch.id/images/pgri.webp');"></div>
     <div class="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
             <!-- Left Hero Content -->
             <div class="lg:col-span-7 space-y-5 text-center lg:text-left">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-white/10 text-brand-100 border border-white/20 shadow-xs">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-white/10 text-brand-100 border border-white/20 shadow-xs backdrop-blur-xs">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                     <span>Integrated Library System SMK PGRI</span>
                 </div>
-                <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight text-white">
+                <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight text-white drop-shadow-sm">
                     Integrated Library System <br class="hidden sm:inline">(Inlislite)
                 </h1>
                 <p class="text-sm sm:text-base text-red-100 max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
@@ -72,28 +73,28 @@
     </div>
 </section>
 
-<!-- SECTION 2: PUSAT DATA DAN INFORMASI (Deep Charcoal/Red Section) -->
-<section class="bg-gray-950 text-white py-16 lg:py-20 border-b border-gray-800">
+<!-- SECTION 2: PUSAT DATA DAN INFORMASI (Clean White Section - Replaced Black Background) -->
+<section class="bg-white text-gray-800 py-16 lg:py-20 border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
         
         <!-- Header Pill Badge -->
         <div>
-            <span class="inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-brand-700 text-white shadow-xs mb-3 border border-brand-600">
+            <span class="inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-brand-50 text-brand-700 shadow-xs mb-3 border border-brand-200">
                 Pusat Data dan Informasi
             </span>
-            <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight">
+            <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-gray-900">
                 Perpustakaan SMK PGRI
             </h2>
-            <p class="mt-3 text-xs sm:text-sm text-gray-400 max-w-3xl mx-auto leading-relaxed">
-                Kenali <strong class="text-white">"Inlislite"</strong>, satu aplikasi dengan berbagai kemudahan dalam genggaman Anda. Mulai dari pencarian koleksi, peminjaman, keanggotaan hingga akses literatur digital kejuruan. Temukan inspirasi, referensi, dan wawasan baru dalam satu aplikasi ini. 
-                <span class="text-emerald-400 font-bold block mt-1">#SalamLiterasi</span>
+            <p class="mt-3 text-xs sm:text-sm text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                Kenali <strong class="text-brand-700">"Inlislite"</strong>, satu aplikasi dengan berbagai kemudahan dalam genggaman Anda. Mulai dari pencarian koleksi, peminjaman, keanggotaan hingga akses literatur digital kejuruan. Temukan inspirasi, referensi, dan wawasan baru dalam satu aplikasi ini. 
+                <span class="text-emerald-600 font-bold block mt-1">#SalamLiterasi</span>
             </p>
         </div>
 
-        <!-- Preview Aplikasi Card Layout -->
-        <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 lg:p-8 text-left max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center shadow-xl">
+        <!-- Preview Aplikasi Card Layout (Clean Light White Container) -->
+        <div class="bg-gray-50 border border-gray-200 rounded-3xl p-6 lg:p-8 text-left max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center shadow-sm">
             <!-- Left Mockup Graphic -->
-            <div class="lg:col-span-6 bg-gradient-to-tr from-gray-800 to-gray-900 border border-gray-700/60 rounded-2xl p-4 shadow-inner">
+            <div class="lg:col-span-6 bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
                 <div class="flex items-center gap-2 mb-3">
                     <div class="w-3 h-3 rounded-full bg-rose-500"></div>
                     <div class="w-3 h-3 rounded-full bg-amber-500"></div>
@@ -101,38 +102,38 @@
                     <span class="text-[10px] font-mono text-gray-400 ml-2">Dashboard Management Inlislite</span>
                 </div>
                 <div class="grid grid-cols-2 gap-3 text-xs font-bold text-white mb-3">
-                    <div class="bg-brand-700/90 p-3 rounded-xl">
+                    <div class="bg-brand-700 p-3 rounded-xl shadow-2xs">
                         <span class="text-[10px] text-brand-100 font-normal block">Total Koleksi</span>
                         <span class="text-lg font-black">{{ number_format($stats['total_koleksi']) }} Judul</span>
                     </div>
-                    <div class="bg-emerald-600/90 p-3 rounded-xl">
+                    <div class="bg-emerald-600 p-3 rounded-xl shadow-2xs">
                         <span class="text-[10px] text-emerald-100 font-normal block">Eksemplar Fisik</span>
                         <span class="text-lg font-black">{{ number_format($stats['buku_tersedia']) }} Buku</span>
                     </div>
                 </div>
-                <div class="bg-gray-800 p-3 rounded-xl text-[11px] text-gray-300 font-mono flex items-center justify-between">
+                <div class="bg-gray-100 p-3 rounded-xl text-[11px] text-gray-700 font-mono flex items-center justify-between border border-gray-200">
                     <span>System INLISLite v11</span>
-                    <span class="text-emerald-400 font-bold">● Operational</span>
+                    <span class="text-emerald-600 font-bold">● Operational</span>
                 </div>
             </div>
 
             <!-- Right Content Text -->
             <div class="lg:col-span-6 space-y-4">
-                <h3 class="text-xl font-bold text-white">Preview Aplikasi</h3>
-                <p class="text-xs text-gray-400 leading-relaxed">
+                <h3 class="text-xl font-bold text-gray-900">Preview Aplikasi</h3>
+                <p class="text-xs text-gray-600 leading-relaxed">
                     Aplikasi ini dirancang langsung untuk memberikan pengalaman terbaik dalam mengelola perpustakaan berbasis digital demi mewujudkan modernisasi di lingkup sekolah kejuruan.
                 </p>
-                <ul class="space-y-2.5 text-xs text-gray-300 font-medium">
+                <ul class="space-y-2.5 text-xs text-gray-700 font-medium">
                     <li class="flex items-center gap-2.5">
-                        <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                         <span>Dashboard yang mudah dipahami dan informatif.</span>
                     </li>
                     <li class="flex items-center gap-2.5">
-                        <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                         <span>Manajemen data sirkulasi cepat dan efisien.</span>
                     </li>
                     <li class="flex items-center gap-2.5">
-                        <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                         <span>Integrasi Kartu Digital & Barcode Siswa.</span>
                     </li>
                 </ul>
@@ -161,7 +162,7 @@
             <!-- Card 2 -->
             <div class="bg-white p-8 rounded-2xl border border-gray-200/80 shadow-sm hover:border-emerald-200 hover:shadow-md transition text-center space-y-4">
                 <div class="w-16 h-16 rounded-2xl bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-xs">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 7v10a2 2 0 002-2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
                 </div>
                 <h3 class="text-lg font-bold text-gray-900">Open Source</h3>
             </div>
@@ -177,17 +178,17 @@
     </div>
 </section>
 
-<!-- SECTION 4: FITUR UTAMA KAMI (Red-White-Emerald Feature Cards) -->
-<section class="bg-gray-950 text-white py-16 lg:py-20 border-b border-gray-800">
+<!-- SECTION 4: FITUR UTAMA KAMI (Clean White Background Section - Replaced Black Background) -->
+<section class="bg-white text-gray-800 py-16 lg:py-20 border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
         <div>
-            <span class="inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-brand-700 text-white shadow-xs mb-3 border border-brand-600">
+            <span class="inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-brand-50 text-brand-700 shadow-xs mb-3 border border-brand-200">
                 Fitur & Modul Inlislite
             </span>
-            <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight">
+            <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-gray-900">
                 Fitur Utama Kami
             </h2>
-            <p class="mt-2 text-xs sm:text-sm text-gray-400 max-w-2xl mx-auto">
+            <p class="mt-2 text-xs sm:text-sm text-gray-600 max-w-2xl mx-auto">
                 Kenali beberapa fitur utama yang kami miliki untuk kelola seluruh administrasi perpustakaan mulai dari katalog digital canggih, pengelolaan anggota, buku tamu hingga pengaturan back-office secara real-time.
             </p>
         </div>
@@ -196,7 +197,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto text-left">
             
             <!-- Card 1 (Red Brand) -->
-            <div class="bg-brand-700 rounded-2xl p-6 space-y-3 shadow-md hover:bg-brand-800 transition border border-brand-600">
+            <div class="bg-brand-700 text-white rounded-2xl p-6 space-y-3 shadow-md hover:bg-brand-800 transition">
                 <div class="flex items-center gap-3">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                     <h3 class="text-sm font-bold text-white">Form Entri Katalog Sederhana</h3>
@@ -207,7 +208,7 @@
             </div>
 
             <!-- Card 2 (Emerald Accent) -->
-            <div class="bg-emerald-600 rounded-2xl p-6 space-y-3 shadow-md hover:bg-emerald-500 transition border border-emerald-500">
+            <div class="bg-emerald-600 text-white rounded-2xl p-6 space-y-3 shadow-md hover:bg-emerald-500 transition">
                 <div class="flex items-center gap-3">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     <h3 class="text-sm font-bold text-white">Kardeks Terbitan Berkala</h3>
@@ -218,7 +219,7 @@
             </div>
 
             <!-- Card 3 (Dark Red Brand) -->
-            <div class="bg-brand-900 rounded-2xl p-6 space-y-3 shadow-md hover:bg-brand-800 transition border border-brand-700">
+            <div class="bg-brand-900 text-white rounded-2xl p-6 space-y-3 shadow-md hover:bg-brand-800 transition">
                 <div class="flex items-center gap-3">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                     <h3 class="text-sm font-bold text-white">Pilihan Model Kartu Anggota</h3>
@@ -229,7 +230,7 @@
             </div>
 
             <!-- Card 4 (Red Row 2) -->
-            <div class="bg-brand-700 md:col-span-2 rounded-2xl p-6 space-y-2 shadow-md hover:bg-brand-800 transition border border-brand-600">
+            <div class="bg-brand-700 text-white md:col-span-2 rounded-2xl p-6 space-y-2 shadow-md hover:bg-brand-800 transition">
                 <div class="flex items-center gap-3">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     <h3 class="text-sm font-bold text-white">Facet Search pada Modul OPAC</h3>
@@ -240,7 +241,7 @@
             </div>
 
             <!-- Card 5 (Emerald Accent Row 2) -->
-            <div class="bg-emerald-600 rounded-2xl p-6 space-y-2 shadow-md hover:bg-emerald-500 transition border border-emerald-500">
+            <div class="bg-emerald-600 text-white rounded-2xl p-6 space-y-2 shadow-md hover:bg-emerald-500 transition">
                 <div class="flex items-center gap-3">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                     <h3 class="text-sm font-bold text-white">Autoresponsive</h3>
