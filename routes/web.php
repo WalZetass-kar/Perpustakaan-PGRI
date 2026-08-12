@@ -12,8 +12,9 @@ Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/katalog', [PublicController::class, 'katalog'])->name('katalog');
 Route::get('/buku/{id}', [PublicController::class, 'detailBuku'])->name('buku.detail');
 
-// Auth Routes
+// Auth Routes (Separated Siswa & Admin Login)
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::get('/admin/login', [AuthController::class, 'showAdminLoginForm'])->name('admin.login.form');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 

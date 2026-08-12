@@ -8,12 +8,22 @@ use App\Models\AuditLog;
 
 class AuthController extends Controller
 {
+    // General / Siswa Login Form
     public function showLoginForm()
     {
         if (Auth::check()) {
             return redirect()->route('dashboard');
         }
-        return view('auth.login');
+        return view('auth.login-siswa');
+    }
+
+    // Admin & Staff Dedicated Login Form
+    public function showAdminLoginForm()
+    {
+        if (Auth::check()) {
+            return redirect()->route('dashboard');
+        }
+        return view('auth.login-admin');
     }
 
     public function login(Request $request)
