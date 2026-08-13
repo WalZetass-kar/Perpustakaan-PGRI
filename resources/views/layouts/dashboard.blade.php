@@ -272,7 +272,42 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3">
+                <!-- Live Notification Bell Drawer -->
+                @php
+                    $unreadNotifCount = \App\Models\Notifikasi::where('user_id', auth()->id())->where('status_baca', 'belum_dibaca')->count();
+                    $recentNotifs = \App\Models\Notifikasi::where('user_id', auth()->id())->latest()->take(5)->get();
+                @endphp
+                <div class="relative" x-data="{ notifOpen: false }">
+                    <button @click="notifOpen = !notifOpen" class="p-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl border border-gray-200 transition relative">
+                        <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                        @if($unreadNotifCount > 0)
+                            <span class="absolute -top-1 -right-1 w-4 h-4 bg-rose-600 text-white font-black text-[9px] rounded-full flex items-center justify-center border border-white">
+                                {{ $unreadNotifCount }}
+                            </span>
+                        @endif
+                    </button>
+
+                    <!-- Dropdown Content -->
+                    <div x-show="notifOpen" @click.away="notifOpen = false" class="absolute right-0 mt-3 w-80 bg-white rounded-2xl border-2 border-gray-200 shadow-2xl z-50 p-4 space-y-3" x-cloak>
+                        <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+                            <h3 class="text-xs font-black text-gray-900 uppercase">Notifikasi Sistem</h3>
+                            <span class="text-[10px] font-bold text-brand-700 bg-brand-50 px-2 py-0.5 rounded-full">{{ $unreadNotifCount }} Baru</span>
+                        </div>
+                        <div class="space-y-2 max-h-64 overflow-y-auto">
+                            @forelse($recentNotifs as $n)
+                                <div class="p-2.5 rounded-xl border border-gray-100 bg-gray-50/70 text-xs space-y-0.5">
+                                    <p class="font-bold text-gray-900">{{ $n->judul }}</p>
+                                    <p class="text-[11px] text-gray-600 leading-snug">{{ $n->pesan }}</p>
+                                    <span class="text-[9px] text-gray-400 font-mono block pt-1">{{ $n->created_at->diffForHumans() }}</span>
+                                </div>
+                            @empty
+                                <p class="text-xs text-gray-400 text-center py-4 font-medium">Belum ada notifikasi baru.</p>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+
                 <a href="{{ route('katalog') }}" target="_blank" class="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-gray-700 bg-gray-50 hover:bg-brand-50 hover:text-brand-700 rounded-xl border border-gray-200 transition">
                     <svg class="w-4 h-4 text-brand-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                     <span>Pratinjau Katalog OPAC</span>

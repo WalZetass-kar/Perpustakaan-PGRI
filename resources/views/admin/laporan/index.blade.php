@@ -28,8 +28,11 @@
         </div>
 
         <div class="flex items-center gap-2">
-            <button type="submit" class="px-5 py-2 bg-brand-700 text-white font-bold rounded-lg hover:bg-brand-800 transition">Filter Laporan</button>
-            <button type="button" onclick="window.print()" class="px-4 py-2 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition">Cetak PDF / Print</button>
+            <button type="submit" class="px-5 py-2.5 bg-brand-700 text-white font-bold rounded-xl hover:bg-brand-800 transition">Filter Laporan</button>
+            <a href="{{ route('admin.laporan.cetak', ['type' => $type, 'start_date' => $startDate, 'end_date' => $endDate]) }}" target="_blank" class="px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-brand-950 font-extrabold rounded-xl transition shadow-2xs flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                <span>Cetak Laporan Resmi (A4)</span>
+            </a>
         </div>
     </form>
 

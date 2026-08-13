@@ -108,6 +108,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Audit, Pengaturan & Laporan
         Route::get('/laporan', [AdminController::class, 'laporanIndex'])->name('laporan');
+        Route::get('/laporan/cetak', [AdminController::class, 'laporanCetak'])->name('laporan.cetak');
         Route::get('/audit-log', [AdminController::class, 'auditLogIndex'])->name('audit-log');
         Route::get('/pengaturan', [AdminController::class, 'pengaturanIndex'])->name('pengaturan');
         Route::post('/pengaturan', [AdminController::class, 'pengaturanUpdate'])->name('pengaturan.update');

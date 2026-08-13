@@ -83,9 +83,21 @@ class AdminController extends Controller
             'rak_id' => 'required|exists:rak,id',
             'tahun_terbit' => 'required|integer',
             'sinopsis' => 'nullable|string',
+            'cover' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'file_pdf' => 'nullable|mimes:pdf|max:10240',
         ]);
 
-        $buku = Buku::create($request->all());
+        $data = $request->except(['cover', 'file_pdf']);
+
+        if ($request->hasFile('cover')) {
+            $data['cover'] = $request->file('cover')->store('covers', 'public');
+        }
+
+        if ($request->hasFile('file_pdf')) {
+            $data['file_pdf'] = $request->file('file_pdf')->store('ebooks', 'public');
+        }
+
+        $buku = Buku::create($data);
 
         AuditLog::create([
             'user_id' => auth()->id(),
@@ -110,9 +122,21 @@ class AdminController extends Controller
             'rak_id' => 'required|exists:rak,id',
             'tahun_terbit' => 'required|integer',
             'sinopsis' => 'nullable|string',
+            'cover' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'file_pdf' => 'nullable|mimes:pdf|max:10240',
         ]);
 
-        $buku->update($request->all());
+        $data = $request->except(['cover', 'file_pdf']);
+
+        if ($request->hasFile('cover')) {
+            $data['cover'] = $request->file('cover')->store('covers', 'public');
+        }
+
+        if ($request->hasFile('file_pdf')) {
+            $data['file_pdf'] = $request->file('file_pdf')->store('ebooks', 'public');
+        }
+
+        $buku->update($data);
 
         AuditLog::create([
             'user_id' => auth()->id(),
@@ -517,6 +541,31 @@ class AdminController extends Controller
         }
 
         return view('admin.laporan.index', compact('type', 'startDate', 'endDate', 'reportData'));
+    }
+
+    public function laporanCetak(Request $request)
+    {
+        $type = $request->get('type', 'peminjaman');
+        $startDate = $request->get('start_date', Carbon::today()->startOfMonth()->toDateString());
+        $endDate = $request->get('end_date', Carbon::today()->toDateString());
+
+        $reportData = [];
+
+        if ($type === 'peminjaman') {
+            $reportData = Peminjaman::with(['user', 'buku', 'eksemplar'])
+                ->whereBetween('tanggal_pinjam', [$startDate, $endDate])
+                ->get();
+        } else if ($type === 'pengembalian') {
+            $reportData = Pengembalian::with(['peminjaman.user', 'peminjaman.buku'])
+                ->whereBetween('tanggal_kembali', [$startDate, $endDate])
+                ->get();
+        } else if ($type === 'denda') {
+            $reportData = Denda::with(['user', 'peminjaman.buku'])
+                ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
+                ->get();
+        }
+
+        return view('admin.laporan.cetak', compact('type', 'startDate', 'endDate', 'reportData'));
     }
 
     // --- AUDIT LOGS --- //
