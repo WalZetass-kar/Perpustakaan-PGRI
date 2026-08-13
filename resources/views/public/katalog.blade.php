@@ -578,9 +578,9 @@
                             <span class="text-xs font-black text-emerald-600" x-text="modalData.tersedia + ' Tersedia / ' + modalData.total + ' Eksemplar Total'"></span>
                         </div>
                         @auth
-                            <form :action="'{{ url('/mahasiswa/reservasi/buat') }}/' + modalData.id" method="POST" class="inline">
+                            <form :action="'{{ url('/mahasiswa/reservasi/buat') }}/' + modalData.id" method="POST" class="inline" onsubmit="return confirmAction(event, 'Booking Buku Ini?', 'Konfirmasi pengajuan booking online untuk buku ini.', 'Ya, Booking Sekarang!')">
                                 @csrf
-                                <button type="submit" onclick="return confirm('Konfirmasi booking / reservasi online untuk buku ini?')" class="px-5 py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-xs rounded-xl transition shadow-md flex items-center gap-1.5">
+                                <button type="submit" class="px-5 py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-xs rounded-xl transition shadow-md flex items-center gap-1.5">
                                     <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                     <span>Booking / Reservasi Buku Ini</span>
                                 </button>

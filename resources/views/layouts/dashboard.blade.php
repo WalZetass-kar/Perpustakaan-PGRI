@@ -393,6 +393,32 @@
             @endif
         });
 
+        function confirmAction(event, titleText = 'Apakah Anda yakin?', messageText = 'Konfirmasi tindakan Anda.', confirmBtnText = 'Ya, Lanjutkan!') {
+            event.preventDefault();
+            const form = event.target.closest('form');
+            
+            Swal.fire({
+                title: titleText,
+                text: messageText,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#B91C1C',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: confirmBtnText,
+                cancelButtonText: 'Batal',
+                customClass: {
+                    popup: 'rounded-3xl border-2 border-gray-200 shadow-2xl font-sans',
+                    confirmButton: 'px-5 py-2.5 rounded-xl font-bold text-xs shadow-md',
+                    cancelButton: 'px-5 py-2.5 rounded-xl font-bold text-xs'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+            return false;
+        }
+
         function confirmDelete(event, titleText = 'Apakah Anda yakin?', messageText = 'Data ini akan dihapus permanen!') {
             event.preventDefault();
             const form = event.target.closest('form');

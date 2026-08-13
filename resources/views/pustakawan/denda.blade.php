@@ -51,9 +51,9 @@
                             </td>
                             <td class="py-3.5 px-5 text-right">
                                 @if($denda->status_pembayaran === 'belum_lunas')
-                                    <form action="{{ route('pustakawan.denda.bayar', $denda->id) }}" method="POST" class="inline">
+                                    <form action="{{ route('pustakawan.denda.bayar', $denda->id) }}" method="POST" class="inline" onsubmit="return confirmAction(event, 'Terima Pembayaran Denda?', 'Konfirmasi penerimaan pembayaran denda ini.', 'Ya, Terima Pembayaran!')">
                                         @csrf
-                                        <button type="submit" onclick="return confirm('Konfirmasi penerimaan pembayaran denda ini?')"
+                                        <button type="submit"
                                             class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-lg text-[11px] transition shadow-2xs">
                                             Terima Pembayaran
                                         </button>

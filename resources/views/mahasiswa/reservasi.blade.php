@@ -41,9 +41,9 @@
                         </td>
                         <td class="py-3.5 px-5 text-right">
                             @if(in_array($res->status, ['menunggu', 'tersedia']))
-                                <form action="{{ route('mahasiswa.reservasi.batalkan', $res->id) }}" method="POST">
+                                <form action="{{ route('mahasiswa.reservasi.batalkan', $res->id) }}" method="POST" onsubmit="return confirmAction(event, 'Batalkan Reservasi?', 'Antrean booking buku ini akan dibatalkan.', 'Ya, Batalkan!')">
                                     @csrf
-                                    <button type="submit" onclick="return confirm('Yakin ingin membatalkan antrean reservasi ini?')" 
+                                    <button type="submit" 
                                         class="px-3 py-1 bg-rose-50 text-rose-700 border border-rose-200 font-medium rounded-lg text-xs hover:bg-rose-100 transition">
                                         Batalkan
                                     </button>

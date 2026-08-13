@@ -41,9 +41,9 @@
                         </td>
                         <td class="py-3.5 px-5 text-right">
                             @if($res->status === 'menunggu')
-                                <form action="{{ route('pustakawan.reservasi.proses', $res->id) }}" method="POST" class="inline">
+                                <form action="{{ route('pustakawan.reservasi.proses', $res->id) }}" method="POST" class="inline" onsubmit="return confirmAction(event, 'Setujui Reservasi?', 'Aktifkan transaksi peminjaman fisik untuk buku ini.', 'Ya, Setujui &amp; Serahkan!')">
                                     @csrf
-                                    <button type="submit" onclick="return confirm('Setujui & aktifkan peminjaman fisik untuk buku ini?')"
+                                    <button type="submit"
                                         class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-xs transition shadow-2xs">
                                         Setujui &amp; Serahkan Buku
                                     </button>
