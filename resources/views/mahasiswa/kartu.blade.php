@@ -4,37 +4,42 @@
 @section('page_heading', 'Kartu Tanda Anggota Digital')
 
 @section('content')
-<!-- Print Specific CSS Styling - Standard CR80 / KTP Dimension (85.6mm x 54mm) -->
+<!-- Print Specific CSS Styling - Preserves Exact Web Design, Colors & Dimensions -->
 <style>
     @media print {
         @page {
-            size: 85.6mm 54.0mm;
-            margin: 0;
+            size: auto;
+            margin: 15mm;
         }
-        body {
+        html, body {
             background-color: #ffffff !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            color-adjust: exact !important;
         }
         body * {
             visibility: hidden !important;
         }
         #printable-card, #printable-card * {
             visibility: visible !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
         }
         #printable-card {
             position: absolute !important;
             left: 50% !important;
-            top: 50% !important;
-            transform: translate(-50%, -50%) !important;
-            width: 480px !important;
-            max-width: 480px !important;
+            top: 20px !important;
+            transform: translateX(-50%) !important;
+            width: 460px !important;
+            max-width: 460px !important;
             margin: 0 auto !important;
             box-shadow: none !important;
             border: 2px solid #b91c1c !important;
-            border-radius: 16px !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
+            border-radius: 20px !important;
+            overflow: hidden !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
         }
     }
 </style>
