@@ -4,28 +4,49 @@
 @section('page_heading', 'Kartu Perpustakaan Digital')
 
 @section('content')
+<!-- Print Specific CSS Styling for perfect ID Card Dimension -->
+<style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #printable-card, #printable-card * {
+            visibility: visible;
+        }
+        #printable-card {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100% !important;
+            max-width: 450px !important;
+            border: 2px solid #000 !important;
+            box-shadow: none !important;
+        }
+    }
+</style>
+
 <div class="max-w-2xl mx-auto space-y-6">
 
     <!-- Action Bar (Print & Download Options) -->
-    <div class="flex items-center justify-between bg-white p-4 rounded-xl border border-gray-200 shadow-2xs">
+    <div class="flex items-center justify-between bg-white p-5 rounded-2xl border-2 border-gray-200 shadow-xs">
         <div>
-            <h2 class="text-sm font-bold text-gray-900">Kartu Anggota Resmi Siswa</h2>
-            <p class="text-[11px] text-gray-500">Tunjukkan barcode / QR code ini ke Pustakawan untuk transaksi sirkulasi.</p>
+            <h2 class="text-sm font-black text-gray-900">Kartu Tanda Anggota Digital Resmi</h2>
+            <p class="text-[11px] text-gray-500 mt-0.5">Tunjukkan QR Code / Barcode ID ini ke Pustakawan untuk transaksi pinjam buku cepat.</p>
         </div>
-        <button onclick="window.print()" class="px-4 py-2 bg-brand-700 text-white font-bold text-xs rounded-lg hover:bg-brand-800 transition shadow-2xs flex items-center gap-1.5 shrink-0">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-            <span>Cetak Kartu PDF</span>
+        <button onclick="window.print()" class="px-4 py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-xs rounded-xl transition shadow-md hover:shadow-lg transform active:scale-95 flex items-center gap-2 shrink-0">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+            <span>Cetak / Simpan PDF</span>
         </button>
     </div>
 
     <!-- DIGITAL LIBRARY CARD FRONT SIDE -->
     <div class="bg-white rounded-2xl border-2 border-gray-200 shadow-md overflow-hidden relative" id="printable-card">
         
-        <!-- Header Header Banner (Red Brand Primary #B91C1C) -->
+        <!-- Header Banner (Red Brand Primary #B91C1C) -->
         <div class="bg-brand-700 text-white p-4 sm:p-5 flex items-center justify-between border-b-2 border-brand-800">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-white text-brand-700 font-extrabold flex items-center justify-center text-xl shadow-xs shrink-0">
-                    P
+                <div class="w-11 h-11 rounded-xl bg-white p-1 shadow-md shrink-0 flex items-center justify-center">
+                    <img src="https://simpeg.smkpgripekanbaru.sch.id/images/logo.png" alt="Logo SMK PGRI" class="w-full h-full object-contain">
                 </div>
                 <div>
                     <h2 class="text-xs sm:text-sm font-black tracking-wider leading-tight uppercase">PERPUSTAKAAN SMK PGRI</h2>
@@ -33,7 +54,7 @@
                 </div>
             </div>
             <div class="text-right">
-                <span class="inline-block px-2.5 py-1 rounded bg-white text-brand-700 text-[10px] font-extrabold uppercase shadow-2xs">
+                <span class="inline-block px-3 py-1 rounded-lg bg-white text-brand-700 text-[10px] font-black uppercase shadow-xs">
                     {{ strtoupper($anggota->status ?? 'Aktif') }}
                 </span>
             </div>
