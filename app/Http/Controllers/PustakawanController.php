@@ -144,7 +144,7 @@ class PustakawanController extends Controller
             'denda_kerusakan' => 'nullable|numeric|min:0',
         ]);
 
-        $peminjaman = Peminjaman::with(['eksemplar', 'user'])->findOrFail($request->peminjaman_id);
+        $peminjaman = Peminjaman::with(['eksemplar', 'user.role'])->findOrFail($request->peminjaman_id);
         $today = Carbon::today();
         $dueDate = Carbon::parse($peminjaman->tanggal_jatuh_tempo);
         $hariTerlambat = 0;
@@ -158,6 +158,13 @@ class PustakawanController extends Controller
 
         $dendaKerusakan = (float) ($request->denda_kerusakan ?? 0);
         $totalDenda = $dendaTerlambat + $dendaKerusakan;
+
+        // Exempt Admin & Pustakawan roles from fines
+        if (in_array($peminjaman->user->role->name ?? '', ['admin', 'pustakawan'])) {
+            $dendaTerlambat = 0;
+            $dendaKerusakan = 0;
+            $totalDenda = 0;
+        }
 
         $peminjaman->status = 'dikembalikan';
         $peminjaman->save();
@@ -251,6 +258,11 @@ class PustakawanController extends Controller
             'alasan' => 'required|string|max:255',
             'status_pembayaran' => 'required|in:belum_lunas,lunas',
         ]);
+
+        $user = User::with('role')->findOrFail($request->user_id);
+        if (in_array($user->role->name ?? '', ['admin', 'pustakawan'])) {
+            return back()->with('error', 'Akun Pengelola (Admin & Pustakawan) dibebaskan dari denda perpustakaan.');
+        }
 
         $peminjaman = Peminjaman::where('user_id', $request->user_id)->latest()->first();
 

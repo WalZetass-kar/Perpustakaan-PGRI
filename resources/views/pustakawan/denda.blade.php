@@ -96,7 +96,9 @@
             </div>
 
             @php
-                $userList = \App\Models\User::orderBy('name', 'asc')->get();
+                $userList = \App\Models\User::whereHas('role', function($q) {
+                    $q->whereNotIn('name', ['admin', 'pustakawan']);
+                })->orderBy('name', 'asc')->get();
             @endphp
 
             <form action="{{ route('pustakawan.denda.store') }}" method="POST" class="space-y-4 text-xs">

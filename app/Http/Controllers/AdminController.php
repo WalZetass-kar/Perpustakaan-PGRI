@@ -447,6 +447,11 @@ class AdminController extends Controller
             'status_pembayaran' => 'required|in:belum_lunas,lunas',
         ]);
 
+        $user = User::with('role')->findOrFail($request->user_id);
+        if (in_array($user->role->name ?? '', ['admin', 'pustakawan'])) {
+            return back()->with('error', 'Akun Pengelola (Admin & Pustakawan) dibebaskan dari denda perpustakaan.');
+        }
+
         $peminjaman = Peminjaman::where('user_id', $request->user_id)->latest()->first();
 
         Denda::create([
