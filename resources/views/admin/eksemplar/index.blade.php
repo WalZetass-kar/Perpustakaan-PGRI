@@ -60,11 +60,11 @@
                             </td>
                             <td class="py-3.5 px-5 capitalize font-bold">
                                 @if($ex->kondisi === 'baik')
-                                    <span class="text-emerald-700 font-bold">✓ Baik</span>
+                                    <span class="text-emerald-700 font-bold">Baik</span>
                                 @elseif($ex->kondisi === 'rusak_ringan')
-                                    <span class="text-amber-600 font-bold">⚠ Rusak Ringan</span>
+                                    <span class="text-amber-600 font-bold">Rusak Ringan</span>
                                 @else
-                                    <span class="text-rose-600 font-bold">❌ Rusak Berat</span>
+                                    <span class="text-rose-600 font-bold">Rusak Berat</span>
                                 @endif
                             </td>
                             <td class="py-3.5 px-5">

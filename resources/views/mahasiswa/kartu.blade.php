@@ -161,8 +161,8 @@
         <div class="flex flex-wrap items-center gap-3 shrink-0">
             <!-- Mode Toggle Option -->
             <select x-model="printMode" class="px-3.5 py-2.5 bg-gray-50 border-2 border-gray-200 rounded-xl text-xs font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-700">
-                <option value="single">📄 Mode 1 Kartu CR80 (85.6 x 54 mm)</option>
-                <option value="sheet">📑 Mode Lembar A4 (Multi-Kartu Grid)</option>
+                <option value="single">Mode 1 Kartu CR80 (85.6 x 54 mm)</option>
+                <option value="sheet">Mode Lembar A4 (Multi-Kartu Grid)</option>
             </select>
 
             <!-- Custom Upload Photo Form (Permanent DB Storage) -->
