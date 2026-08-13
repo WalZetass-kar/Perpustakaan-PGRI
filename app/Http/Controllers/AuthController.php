@@ -17,6 +17,68 @@ class AuthController extends Controller
         return view('auth.login-siswa');
     }
 
+    // Siswa Registration Form
+    public function showRegisterForm()
+    {
+        if (Auth::check()) {
+            return redirect()->route('dashboard');
+        }
+        return view('auth.register-siswa');
+    }
+
+    // Siswa Registration Action
+    public function registerSiswa(Request $request)
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'nim' => ['required', 'string', 'max:50', 'unique:anggota,nim'],
+            'program_studi' => ['required', 'string', 'max:150'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+        ], [
+            'nim.unique' => 'NISN / Nomor Induk ini sudah terdaftar sebagai anggota.',
+            'email.unique' => 'Email sekolah ini sudah terdaftar. Silakan gunakan email lain atau login.',
+            'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
+            'password.min' => 'Kata sandi minimal 6 karakter.',
+        ]);
+
+        // Find or default to Siswa Role (role_id = 3)
+        $role = \App\Models\Role::where('name', 'mahasiswa')->first();
+        $roleId = $role ? $role->id : 3;
+
+        $user = \App\Models\User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'role_id' => $roleId,
+            'phone' => $request->phone,
+        ]);
+
+        // Auto Generate Nomor Anggota
+        $nomorAnggota = 'LIB-' . date('Y') . '-' . str_pad($user->id, 3, '0', STR_PAD_LEFT);
+
+        \App\Models\Anggota::create([
+            'user_id' => $user->id,
+            'nomor_anggota' => $nomorAnggota,
+            'nim' => $request->nim,
+            'program_studi' => $request->program_studi,
+            'status' => 'aktif',
+        ]);
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'aktivitas' => 'USER_REGISTER',
+            'deskripsi' => "Siswa baru mendaftar akun perpustakaan ({$user->email} - NISN: {$request->nim})",
+            'ip_address' => $request->ip(),
+        ]);
+
+        Auth::login($user);
+
+        return redirect()->route('mahasiswa.dashboard')->with('success', 'Selamat! Pendaftaran akun anggota siswa berhasil.');
+    }
+
     // Admin & Staff Dedicated Login Form
     public function showAdminLoginForm()
     {

@@ -16,6 +16,9 @@ Route::get('/buku/{id}', [PublicController::class, 'detailBuku'])->name('buku.de
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'loginSiswa']);
 
+Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+Route::post('/register', [AuthController::class, 'registerSiswa'])->name('register.submit');
+
 Route::get('/admin/login', [AuthController::class, 'showAdminLoginForm'])->name('admin.login.form');
 Route::post('/admin/login', [AuthController::class, 'loginAdmin'])->name('admin.login');
 
