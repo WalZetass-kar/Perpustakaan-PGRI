@@ -50,12 +50,18 @@ class PublicController extends Controller
         $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'eksemplar']);
 
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = trim($request->search);
             $query->where(function($q) use ($search) {
                 $q->where('judul', 'like', "%{$search}%")
                   ->orWhere('isbn', 'like', "%{$search}%")
                   ->orWhereHas('penulis', function($qp) use ($search) {
                       $qp->where('nama', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('kategori', function($qk) use ($search) {
+                      $qk->where('nama', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('penerbit', function($qpb) use ($search) {
+                      $qpb->where('nama', 'like', "%{$search}%");
                   });
             });
         }
@@ -88,26 +94,38 @@ class PublicController extends Controller
             }
         }
 
-        // Sorting
+        // Expanded Sorting
         $sort = $request->get('sort', 'terbaru');
-        if ($sort === 'terlama') {
-            $query->oldest();
-        } else if ($sort === 'populer') {
-            $query->orderBy('view_count', 'desc');
-        } else if ($sort === 'judul_asc') {
-            $query->orderBy('judul', 'asc');
-        } else {
-            $query->latest();
+        switch ($sort) {
+            case 'terlama':
+                $query->oldest();
+                break;
+            case 'judul_asc':
+                $query->orderBy('judul', 'asc');
+                break;
+            case 'judul_desc':
+                $query->orderBy('judul', 'desc');
+                break;
+            case 'populer':
+                $query->orderBy('view_count', 'desc');
+                break;
+            default:
+                $query->latest();
+                break;
         }
 
-        $buku = $query->paginate(8)->withQueryString();
+        $buku = $query->paginate(12)->withQueryString();
 
-        $kategori_list = Kategori::all();
-        $penulis_list = Penulis::all();
-        $rak_list = Rak::all();
-        $tahun_list = Buku::select('tahun_terbit')->distinct()->orderBy('tahun_terbit', 'desc')->pluck('tahun_terbit');
+        $total_buku_count = Buku::count();
+        $total_kategori_count = Kategori::count();
+        $total_rak_count = Rak::count();
 
-        return view('public.katalog', compact('buku', 'kategori_list', 'penulis_list', 'rak_list', 'tahun_list'));
+        $kategori_list = Kategori::orderBy('nama', 'asc')->get();
+        $penulis_list = Penulis::orderBy('nama', 'asc')->get();
+        $rak_list = Rak::orderBy('kode_rak', 'asc')->get();
+        $tahun_list = Buku::select('tahun_terbit')->whereNotNull('tahun_terbit')->distinct()->orderBy('tahun_terbit', 'desc')->pluck('tahun_terbit');
+
+        return view('public.katalog', compact('buku', 'kategori_list', 'penulis_list', 'rak_list', 'tahun_list', 'total_buku_count', 'total_kategori_count', 'total_rak_count'));
     }
 
     public function detailBuku($id)
