@@ -10,13 +10,13 @@
     modalData: {} 
 }">
 
-    <!-- 1. COMPACT HERO SECTION & GLOBAL SEARCH -->
-    <div class="bg-gradient-to-r from-brand-900 via-brand-700 to-red-800 text-white rounded-3xl p-5 sm:p-7 shadow-xl border-2 border-brand-700 relative overflow-hidden">
+    <!-- 1. COMPACT HERO SECTION & GLOBAL SEARCH (Centered) -->
+    <div class="bg-gradient-to-r from-brand-900 via-brand-700 to-red-800 text-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-brand-700 relative overflow-hidden text-center">
         <!-- Subtle Watermark Graphic -->
         <div class="absolute -right-8 -bottom-8 w-56 h-56 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
 
-        <div class="relative z-10 space-y-4 max-w-4xl">
-            <div class="space-y-1.5">
+        <div class="relative z-10 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
+            <div class="space-y-1.5 flex flex-col items-center">
                 <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-400/20 border border-amber-300/30 rounded-full text-amber-300 text-[10px] font-extrabold uppercase tracking-wider backdrop-blur-xs">
                     <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                     <span>LAYANAN OPAC PERPUSTAKAAN DIGITAL</span>
@@ -24,13 +24,13 @@
                 <h1 class="text-xl sm:text-3xl font-black tracking-tight text-white leading-tight">
                     Katalog Koleksi Buku &amp; Modul Kejuruan
                 </h1>
-                <p class="text-xs text-red-100 font-medium max-w-2xl leading-relaxed">
+                <p class="text-xs text-red-100 font-medium max-w-xl mx-auto leading-relaxed">
                     Cari literatur modul pembelajaran kejuruan, referensi ujian, dan koleksi umum SMK PGRI Pekanbaru secara instan.
                 </p>
             </div>
 
-            <!-- 2. GLOBAL SEARCH BAR -->
-            <form action="{{ route('katalog') }}" method="GET" class="relative max-w-2xl">
+            <!-- 2. GLOBAL SEARCH BAR (Centered) -->
+            <form action="{{ route('katalog') }}" method="GET" class="relative max-w-2xl w-full mx-auto">
                 <!-- Keep other active filter query params -->
                 @if(request('kategori_id')) <input type="hidden" name="kategori_id" value="{{ request('kategori_id') }}"> @endif
                 @if(request('penulis_id')) <input type="hidden" name="penulis_id" value="{{ request('penulis_id') }}"> @endif
@@ -44,7 +44,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul buku, penulis, kata kunci, atau ISBN..."
-                        class="w-full px-2 py-2 text-xs sm:text-sm font-bold text-gray-900 placeholder-gray-400 bg-transparent focus:outline-none">
+                        class="w-full px-2 py-2 text-xs sm:text-sm font-bold text-gray-900 placeholder-gray-400 bg-transparent focus:outline-none text-left">
                     
                     @if(request('search'))
                         <a href="{{ route('katalog', request()->except('search')) }}" class="px-2 text-gray-400 hover:text-gray-600 font-bold text-sm" title="Clear search">&times;</a>
@@ -56,8 +56,8 @@
                 </div>
             </form>
 
-            <!-- Real Database Statistics Bar -->
-            <div class="pt-1 flex flex-wrap items-center gap-3 text-xs font-bold text-red-100">
+            <!-- Real Database Statistics Bar (Centered) -->
+            <div class="pt-1 flex flex-wrap items-center justify-center gap-3 text-xs font-bold text-red-100">
                 <div class="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-xl border border-white/10 text-[11px]">
                     <span class="text-amber-300 font-black">{{ $total_buku_count }}</span> Judul Ditemukan
                 </div>
