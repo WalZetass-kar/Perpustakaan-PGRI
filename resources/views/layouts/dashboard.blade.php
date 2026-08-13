@@ -275,7 +275,7 @@
             <div class="flex items-center gap-3">
                 <!-- Live Notification Bell Drawer -->
                 @php
-                    $unreadNotifCount = \App\Models\Notifikasi::where('user_id', auth()->id())->where('status_baca', 'belum_dibaca')->count();
+                    $unreadNotifCount = \App\Models\Notifikasi::where('user_id', auth()->id())->where('dibaca', false)->count();
                     $recentNotifs = \App\Models\Notifikasi::where('user_id', auth()->id())->latest()->take(5)->get();
                 @endphp
                 <div class="relative" x-data="{ notifOpen: false }">
