@@ -81,10 +81,10 @@
                 Pusat Data dan Informasi
             </span>
             <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-gray-900">
-                Perpustakaan SMK PGRI
+                Perpustakaan SMK PGRI Pekanbaru
             </h2>
             <p class="text-xs sm:text-sm text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Kenali <strong class="text-brand-700">"Inlislite"</strong>, satu aplikasi dengan berbagai kemudahan dalam genggaman Anda. Mulai dari pencarian koleksi, peminjaman, keanggotaan hingga akses literatur digital kejuruan. Temukan inspirasi, referensi, dan wawasan baru dalam satu aplikasi ini. 
+                Kenali <strong class="text-brand-700">"Inlislite"</strong>, aplikasi perpustakaan digital terpadu untuk pencarian koleksi buku kejuruan, peminjaman, keanggotaan hingga pelayanan literasi sekolah.
                 <span class="text-emerald-600 font-bold block mt-1">#SalamLiterasi</span>
             </p>
         </div>
@@ -101,11 +101,11 @@
                 </div>
                 <div class="grid grid-cols-2 gap-3 text-xs font-bold text-white mb-3">
                     <div class="bg-brand-700 p-4 rounded-xl shadow-xs hover:bg-brand-800 transition transform hover:-translate-y-0.5">
-                        <span class="text-[10px] text-brand-100 font-normal block">Total Koleksi</span>
+                        <span class="text-[10px] text-brand-100 font-normal block">Total Judul Koleksi</span>
                         <span class="text-xl font-black">{{ number_format($stats['total_koleksi']) }} Judul</span>
                     </div>
                     <div class="bg-emerald-600 p-4 rounded-xl shadow-xs hover:bg-emerald-700 transition transform hover:-translate-y-0.5">
-                        <span class="text-[10px] text-emerald-100 font-normal block">Eksemplar Fisik</span>
+                        <span class="text-[10px] text-emerald-100 font-normal block">Eksemplar Fisik Tersedia</span>
                         <span class="text-xl font-black">{{ number_format($stats['buku_tersedia']) }} Buku</span>
                     </div>
                 </div>
@@ -120,22 +120,22 @@
 
             <!-- Right Content Text -->
             <div class="lg:col-span-6 space-y-4">
-                <h3 class="text-xl font-bold text-gray-900">Preview Aplikasi</h3>
+                <h3 class="text-xl font-bold text-gray-900">Sistem Informasi Perpustakaan</h3>
                 <p class="text-xs text-gray-600 leading-relaxed">
-                    Aplikasi ini dirancang langsung untuk memberikan pengalaman terbaik dalam mengelola perpustakaan berbasis digital demi mewujudkan modernisasi di lingkup sekolah kejuruan.
+                    Dirancang untuk memberikan pengalaman terbaik dalam mengelola perpustakaan berbasis digital demi mewujudkan modernisasi layanan di SMK PGRI Pekanbaru.
                 </p>
                 <ul class="space-y-3 text-xs text-gray-700 font-medium">
                     <li class="flex items-center gap-3 group">
                         <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition duration-300">✓</span>
-                        <span class="group-hover:text-gray-900 transition">Dashboard yang mudah dipahami dan informatif.</span>
+                        <span class="group-hover:text-gray-900 transition">Katalog digital OPAC dengan pencarian multi-kategori.</span>
                     </li>
                     <li class="flex items-center gap-3 group">
                         <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition duration-300">✓</span>
-                        <span class="group-hover:text-gray-900 transition">Manajemen data sirkulasi cepat dan efisien.</span>
+                        <span class="group-hover:text-gray-900 transition">Manajemen transaksi sirkulasi cepat dan teratur.</span>
                     </li>
                     <li class="flex items-center gap-3 group">
                         <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition duration-300">✓</span>
-                        <span class="group-hover:text-gray-900 transition">Integrasi Kartu Digital & Barcode Siswa.</span>
+                        <span class="group-hover:text-gray-900 transition">Kartu Digital Anggota Siswa terintegrasi QR Code scannable.</span>
                     </li>
                 </ul>
             </div>
@@ -144,126 +144,114 @@
     </div>
 </section>
 
-<!-- SECTION 3: KENAPA INLISLITE? (Hover & Scroll Animated Cards) -->
-<section class="bg-gray-50 py-16 lg:py-24 border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-12">
-        <h2 class="text-2xl sm:text-4xl font-extrabold text-gray-900 tracking-tight" data-aos="fade-up">
-            Kenapa Inlislite?
-        </h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- Card 1 -->
-            <div class="bg-white p-8 rounded-3xl border border-gray-200/80 shadow-sm hover:border-brand-300 hover:shadow-xl transition duration-500 text-center space-y-4 group transform hover:-translate-y-2" data-aos="fade-up" data-aos-delay="100">
-                <div class="w-16 h-16 rounded-2xl bg-brand-700 text-white flex items-center justify-center mx-auto shadow-md group-hover:scale-110 group-hover:rotate-3 transition duration-300">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                </div>
-                <h3 class="text-lg font-bold text-gray-900 group-hover:text-brand-700 transition">Otomasi & Digitalisasi Terpadu</h3>
-            </div>
-
-            <!-- Card 2 -->
-            <div class="bg-white p-8 rounded-3xl border border-gray-200/80 shadow-sm hover:border-emerald-300 hover:shadow-xl transition duration-500 text-center space-y-4 group transform hover:-translate-y-2" data-aos="fade-up" data-aos-delay="200">
-                <div class="w-16 h-16 rounded-2xl bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-md group-hover:scale-110 group-hover:-rotate-3 transition duration-300">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
-                </div>
-                <h3 class="text-lg font-bold text-gray-900 group-hover:text-emerald-700 transition">Open Source</h3>
-            </div>
-
-            <!-- Card 3 -->
-            <div class="bg-white p-8 rounded-3xl border border-gray-200/80 shadow-sm hover:border-brand-300 hover:shadow-xl transition duration-500 text-center space-y-4 group transform hover:-translate-y-2" data-aos="fade-up" data-aos-delay="300">
-                <div class="w-16 h-16 rounded-2xl bg-brand-700 text-white flex items-center justify-center mx-auto shadow-md group-hover:scale-110 group-hover:rotate-3 transition duration-300">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                </div>
-                <h3 class="text-lg font-bold text-gray-900 group-hover:text-brand-700 transition">Penggunaan & Modifikasi Etis</h3>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- SECTION 4: FITUR UTAMA KAMI (Interactive Dynamic Grid with Scroll Animation) -->
-<section id="fitur-section" class="bg-white text-gray-800 py-16 lg:py-24 border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-10">
-        <div data-aos="fade-up">
-            <span class="inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-brand-50 text-brand-700 shadow-xs mb-3 border border-brand-200">
-                Fitur & Modul Inlislite
+<!-- SECTION 3: KOLEKSI TERPOPULER & REKOMENDASI PERPUSTAKAAN (Full Dynamic Database Rendering) -->
+<section class="py-16 lg:py-24 bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+        
+        <div class="text-center space-y-2" data-aos="fade-up">
+            <span class="inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-brand-50 text-brand-700 shadow-xs border border-brand-200">
+                Katalog Pilihan Siswa
             </span>
-            <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-gray-900">
-                Fitur Utama Kami
-            </h2>
-            <p class="mt-2 text-xs sm:text-sm text-gray-600 max-w-2xl mx-auto">
-                Kenali beberapa fitur utama yang kami miliki untuk kelola seluruh administrasi perpustakaan mulai dari katalog digital canggih, pengelolaan anggota, buku tamu hingga pengaturan back-office secara real-time.
+            <h2 class="text-2xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">Koleksi Terpopuler Database</h2>
+            <p class="text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
+                Buku-buku kejuruan dan referensi yang paling banyak diakses di Perpustakaan SMK PGRI Pekanbaru.
             </p>
         </div>
 
-        <!-- 5 Red-White-Emerald Feature Cards Grid with Staggered Scroll Animation -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto text-left">
-            
-            <!-- Card 1 (Red Brand) -->
-            <div class="bg-brand-700 text-white rounded-3xl p-6 space-y-3 shadow-md hover:shadow-xl hover:bg-brand-800 transition duration-300 transform hover:-translate-y-1.5" data-aos="fade-up" data-aos-delay="100">
-                <div class="flex items-center gap-3">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                    <h3 class="text-sm font-bold text-white">Form Entri Katalog Sederhana</h3>
-                </div>
-                <p class="text-xs text-red-100 leading-relaxed">
-                    Katalog digital yang disimpan dalam pangkalan data Inlislite mengikuti standar metadata MARC & INDOMARC.
-                </p>
-            </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+            @forelse($buku_populer as $index => $buku)
+                @php
+                    $eksemplarTersedia = $buku->eksemplar ? $buku->eksemplar->where('status', 'tersedia')->count() : 0;
+                    $totalEksemplar = $buku->eksemplar ? $buku->eksemplar->count() : 0;
+                @endphp
+                <div class="bg-white rounded-3xl border-2 border-gray-200/80 p-5 shadow-xs hover:shadow-xl hover:border-brand-700 transition duration-500 transform hover:-translate-y-1 flex flex-col justify-between group" data-aos="fade-up" data-aos-delay="{{ 100 * (($index % 3) + 1) }}">
+                    
+                    <div>
+                        <!-- Header Badge Kategori & Rak -->
+                        <div class="flex items-center justify-between gap-2 mb-3">
+                            <span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-brand-50 text-brand-700 border border-brand-200 uppercase tracking-wider">
+                                {{ $buku->kategori->nama ?? 'Kejuruan' }}
+                            </span>
+                            @if($buku->rak)
+                                <span class="text-[10px] font-mono font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md border border-gray-200">
+                                    Rak: {{ $buku->rak->nama }}
+                                </span>
+                            @endif
+                        </div>
 
-            <!-- Card 2 (Emerald Accent) -->
-            <div class="bg-emerald-600 text-white rounded-3xl p-6 space-y-3 shadow-md hover:shadow-xl hover:bg-emerald-500 transition duration-300 transform hover:-translate-y-1.5" data-aos="fade-up" data-aos-delay="200">
-                <div class="flex items-center gap-3">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    <h3 class="text-sm font-bold text-white">Kardeks Terbitan Berkala</h3>
-                </div>
-                <p class="text-xs text-emerald-100 leading-relaxed">
-                    Inlislite telah dilengkapi dengan kardeks terbitan berkala untuk memudahkan pemantauan pengadaan majalah, buletin, dan surat kabar.
-                </p>
-            </div>
+                        <div class="flex gap-4 items-start">
+                            <!-- Cover Image or Initial Box -->
+                            <div class="w-20 h-28 bg-gradient-to-br from-brand-800 to-brand-900 text-white font-black text-2xl rounded-2xl flex items-center justify-center shrink-0 shadow-md group-hover:scale-105 transition duration-300 border border-brand-700 overflow-hidden relative">
+                                @if($buku->cover_image && file_exists(public_path('storage/' . $buku->cover_image)))
+                                    <img src="{{ asset('storage/' . $buku->cover_image) }}" alt="{{ $buku->judul }}" class="w-full h-full object-cover">
+                                @else
+                                    <span class="drop-shadow-md">{{ strtoupper(substr($buku->judul, 0, 1)) }}</span>
+                                @endif
+                            </div>
 
-            <!-- Card 3 (Dark Red Brand) -->
-            <div class="bg-brand-900 text-white rounded-3xl p-6 space-y-3 shadow-md hover:shadow-xl hover:bg-brand-800 transition duration-300 transform hover:-translate-y-1.5" data-aos="fade-up" data-aos-delay="300">
-                <div class="flex items-center gap-3">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                    <h3 class="text-sm font-bold text-white">Pilihan Model Kartu Anggota</h3>
-                </div>
-                <p class="text-xs text-red-100 leading-relaxed">
-                    Inlislite memungkinkan pengelola perpustakaan memilih bentuk model layout kartu anggota resmi terintegrasi barcode.
-                </p>
-            </div>
+                            <div class="flex-1 min-w-0 space-y-1.5">
+                                <h3 class="text-xs sm:text-sm font-black text-gray-900 line-clamp-2 leading-snug group-hover:text-brand-700 transition">
+                                    <a href="{{ route('buku.detail', $buku->id) }}">{{ $buku->judul }}</a>
+                                </h3>
+                                <p class="text-[11px] text-gray-600 font-medium">
+                                    Penulis: <span class="text-gray-900 font-semibold">{{ $buku->penulis->nama ?? 'Penerbit Sekolah' }}</span>
+                                </p>
+                                <p class="text-[10px] text-gray-400 font-mono">
+                                    Thn: {{ $buku->tahun_terbit ?? '-' }} | ISBN: {{ $buku->isbn ?? '-' }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
 
-            <!-- Card 4 (Red Row 2) -->
-            <div class="bg-brand-700 text-white md:col-span-2 rounded-3xl p-6 space-y-2 shadow-md hover:shadow-xl hover:bg-brand-800 transition duration-300 transform hover:-translate-y-1.5" data-aos="fade-up" data-aos-delay="100">
-                <div class="flex items-center gap-3">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    <h3 class="text-sm font-bold text-white">Facet Search pada Modul OPAC</h3>
-                </div>
-                <p class="text-xs text-red-100 leading-relaxed">
-                    Pencarian multi-kategori cerdas pada katalog digital online untuk mempermudah siswa menemukan buku kejuruan secara akurat.
-                </p>
-            </div>
+                    <!-- Footer Details & Availability Status -->
+                    <div class="pt-4 mt-4 border-t border-gray-100 flex items-center justify-between">
+                        <div>
+                            @if($eksemplarTersedia > 0)
+                                <span class="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <span>{{ $eksemplarTersedia }} / {{ $totalEksemplar }} Tersedia</span>
+                                </span>
+                            @else
+                                <span class="text-[10px] font-bold text-rose-500 flex items-center gap-1">
+                                    <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                                    <span>Sedang Dipinjam</span>
+                                </span>
+                            @endif
+                        </div>
 
-            <!-- Card 5 (Emerald Accent Row 2) -->
-            <div class="bg-emerald-600 text-white rounded-3xl p-6 space-y-2 shadow-md hover:shadow-xl hover:bg-emerald-500 transition duration-300 transform hover:-translate-y-1.5" data-aos="fade-up" data-aos-delay="200">
-                <div class="flex items-center gap-3">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                    <h3 class="text-sm font-bold text-white">Autoresponsive</h3>
-                </div>
-                <p class="text-xs text-emerald-100 leading-relaxed">
-                    Tampilan fleksibel dan lancar diakses via smartphone, tablet, maupun layar komputer desktop.
-                </p>
-            </div>
+                        <a href="{{ route('buku.detail', $buku->id) }}" class="inline-flex items-center gap-1 text-[11px] font-extrabold text-brand-700 hover:text-brand-800 transition">
+                            <span>Detail</span>
+                            <span class="transform group-hover:translate-x-1 transition duration-300">&rarr;</span>
+                        </a>
+                    </div>
 
+                </div>
+            @empty
+                <div class="col-span-full py-12 text-center bg-gray-50 rounded-3xl border border-gray-200 space-y-3">
+                    <svg class="w-12 h-12 text-gray-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                    <p class="text-xs font-bold text-gray-600">Belum ada koleksi buku di pangkalan data.</p>
+                </div>
+            @endforelse
         </div>
+
+        <div class="text-center pt-4">
+            <a href="{{ route('katalog') }}" class="inline-flex items-center gap-2 px-7 py-3 bg-brand-700 text-white font-extrabold text-xs rounded-xl hover:bg-brand-800 transition duration-300 shadow-md hover:shadow-lg transform active:scale-95">
+                <span>Lihat Seluruh Katalog Buku</span>
+                <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </a>
+        </div>
+
     </div>
 </section>
 
-<!-- SECTION 5: SIAP TRANSFORMASI DIGITAL? (CTA Section with Zoom Scroll Animation) -->
+<!-- SECTION 4: SIAP TRANSFORMASI DIGITAL? (CTA Section with Zoom Scroll Animation) -->
 <section class="bg-gray-100 py-16 lg:py-20 border-b border-gray-200 relative overflow-hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6" data-aos="zoom-in" data-aos-duration="800">
         <h2 class="text-2xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
-            Siap Transformasi Digital?
+            Kemudahan Layanan Perpustakaan Sekolah
         </h2>
         <p class="text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
-            Bergabunglah dengan ribuan perpustakaan yang telah mempercayai <strong class="text-gray-900">INLISlite</strong> sebagai sistem aplikasi terpadu mereka.
+            Akses sistem informasi terpadu <strong class="text-gray-900">Perpustakaan SMK PGRI Pekanbaru</strong> kapan saja dan di mana saja.
         </p>
 
         <div class="flex flex-wrap items-center justify-center gap-4 pt-2 text-xs">
@@ -279,36 +267,4 @@
     </div>
 </section>
 
-<!-- SECTION 6: KATALOG & BERITA REKOMENDASI PERPUSTAKAAN (Book Card Hover Animation & AOS) -->
-<section class="py-16 lg:py-24 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 text-center">
-        <div data-aos="fade-up">
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900">Koleksi Terpopuler & Berita Terbaru</h2>
-            <p class="text-xs text-gray-500 mt-1">Tetap terhubung dengan perkembangan dan koleksi modul kejuruan SMK PGRI</p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
-            @foreach($buku_populer as $index => $buku)
-                <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-2xs hover:shadow-xl transition duration-500 transform hover:-translate-y-1 flex gap-4 group" data-aos="fade-up" data-aos-delay="{{ 100 * ($index + 1) }}">
-                    <div class="w-20 h-28 bg-brand-700 text-white font-black text-2xl rounded-xl flex items-center justify-center shrink-0 shadow-md group-hover:scale-105 transition duration-300">
-                        {{ substr($buku->judul, 0, 1) }}
-                    </div>
-                    <div class="flex-1 min-w-0 space-y-1.5">
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-50 text-brand-700 border border-brand-100 inline-block">
-                            {{ $buku->kategori->nama ?? 'Kejuruan' }}
-                        </span>
-                        <h3 class="text-xs font-bold text-gray-900 line-clamp-2 leading-snug group-hover:text-brand-700 transition">
-                            <a href="{{ route('buku.detail', $buku->id) }}">{{ $buku->judul }}</a>
-                        </h3>
-                        <p class="text-[11px] text-gray-500">Penulis: {{ $buku->penulis->nama ?? '-' }}</p>
-                        <a href="{{ route('buku.detail', $buku->id) }}" class="inline-flex items-center gap-1 pt-1 text-[11px] font-bold text-emerald-600 hover:text-emerald-700 transition">
-                            <span>Lihat Detail Buku</span>
-                            <span class="transform group-hover:translate-x-1 transition duration-300">&rarr;</span>
-                        </a>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    </div>
-</section>
 @endsection

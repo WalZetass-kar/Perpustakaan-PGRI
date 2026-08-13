@@ -72,7 +72,6 @@
                 <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'text-brand-700 border-b-2 border-brand-700 py-6' : 'text-gray-700 hover:text-brand-700 transition' }}">Beranda</a>
                 <a href="{{ route('katalog') }}" class="{{ request()->routeIs('katalog') ? 'text-brand-700 border-b-2 border-brand-700 py-6' : 'text-gray-700 hover:text-brand-700 transition' }}">Katalog Buku</a>
                 <a href="{{ route('home') }}#pusat-data-section" class="text-gray-700 hover:text-brand-700 transition">Pusat Data</a>
-                <a href="{{ route('home') }}#fitur-section" class="text-gray-700 hover:text-brand-700 transition">Fitur Utama</a>
             </nav>
 
             <!-- Right Actions (Enlarged Buttons) -->
@@ -102,7 +101,6 @@
             <a href="{{ route('home') }}" class="block px-4 py-2.5 rounded-xl text-sm font-bold text-gray-800 hover:bg-brand-50 hover:text-brand-700">Beranda</a>
             <a href="{{ route('katalog') }}" class="block px-4 py-2.5 rounded-xl text-sm font-bold text-gray-800 hover:bg-brand-50 hover:text-brand-700">Katalog Buku</a>
             <a href="{{ route('home') }}#pusat-data-section" class="block px-4 py-2.5 rounded-xl text-sm font-bold text-gray-800 hover:bg-brand-50 hover:text-brand-700">Pusat Data</a>
-            <a href="{{ route('home') }}#fitur-section" class="block px-4 py-2.5 rounded-xl text-sm font-bold text-gray-800 hover:bg-brand-50 hover:text-brand-700">Fitur Utama</a>
             <div class="pt-3 border-t border-gray-100 flex items-center justify-between gap-3">
                 @auth
                     <a href="{{ route('dashboard') }}" class="w-full text-center px-5 py-2.5 text-sm font-extrabold text-white bg-brand-700 rounded-xl hover:bg-brand-800">Dashboard</a>
