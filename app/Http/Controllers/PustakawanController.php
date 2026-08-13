@@ -244,6 +244,47 @@ class PustakawanController extends Controller
         return view('pustakawan.reservasi', compact('reservasiList'));
     }
 
+    public function prosesReservasi(Request $request, $id)
+    {
+        $reservasi = Reservasi::with(['user', 'buku.eksemplar'])->findOrFail($id);
+        
+        $eksemplar = $reservasi->buku->eksemplar()->where('status', 'tersedia')->first();
+        if (!$eksemplar) {
+            return back()->with('error', 'Tidak ada eksemplar buku yang sedang tersedia untuk dipinjamkan saat ini.');
+        }
+
+        $durasiPinjam = (int) (Pengaturan::where('key', 'durasi_pinjam_hari')->value('value') ?? 7);
+        $kodePeminjaman = 'TRX-' . date('Ymd') . '-' . Str::random(5);
+
+        $peminjaman = Peminjaman::create([
+            'kode_peminjaman' => strtoupper($kodePeminjaman),
+            'user_id' => $reservasi->user_id,
+            'buku_id' => $reservasi->buku_id,
+            'eksemplar_id' => $eksemplar->id,
+            'tanggal_pinjam' => Carbon::now()->toDateString(),
+            'tanggal_jatuh_tempo' => Carbon::now()->addDays($durasiPinjam)->toDateString(),
+            'jumlah_perpanjangan' => 0,
+            'status' => 'dipinjam',
+            'petugas_id' => auth()->id(),
+        ]);
+
+        $eksemplar->status = 'dipinjam';
+        $eksemplar->save();
+
+        $reservasi->status = 'selesai';
+        $reservasi->save();
+
+        AuditLog::create([
+            'user_id' => auth()->id(),
+            'user_name' => auth()->user()->name,
+            'aktivitas' => 'PROSES_RESERVASI',
+            'deskripsi' => "Reservasi {$reservasi->kode_reservasi} disetujui & diubah ke Peminjaman {$peminjaman->kode_peminjaman}.",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', 'Reservasi berhasil disetujui & transaksi peminjaman fisik aktif!');
+    }
+
     public function dendaIndex()
     {
         $dendaList = Denda::with(['user', 'peminjaman.buku'])->latest()->paginate(10);

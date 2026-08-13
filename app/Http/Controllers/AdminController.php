@@ -284,6 +284,16 @@ class AdminController extends Controller
         return back()->with('success', 'Eksemplar berhasil dihapus.');
     }
 
+    public function cetakBarcodeEksemplar($id = null)
+    {
+        if ($id) {
+            $eksemplarList = Eksemplar::with(['buku', 'rak'])->where('id', $id)->get();
+        } else {
+            $eksemplarList = Eksemplar::with(['buku', 'rak'])->latest()->get();
+        }
+        return view('admin.eksemplar.cetak_barcode', compact('eksemplarList'));
+    }
+
     // --- ANGGOTA & USER MANAGEMENT --- //
     public function anggotaIndex(Request $request)
     {

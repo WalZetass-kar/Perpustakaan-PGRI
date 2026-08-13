@@ -61,6 +61,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/eksemplar', [PustakawanController::class, 'eksemplarIndex'])->name('eksemplar');
         Route::get('/rak', [PustakawanController::class, 'rakIndex'])->name('rak');
         Route::get('/reservasi', [PustakawanController::class, 'reservasiIndex'])->name('reservasi');
+        Route::post('/reservasi/proses/{id}', [PustakawanController::class, 'prosesReservasi'])->name('reservasi.proses');
         Route::get('/denda', [PustakawanController::class, 'dendaIndex'])->name('denda');
         Route::post('/denda', [PustakawanController::class, 'dendaStore'])->name('denda.store');
         Route::post('/denda/bayar/{id}', [PustakawanController::class, 'bayarDenda'])->name('denda.bayar');
@@ -90,6 +91,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Eksemplar CRUD
         Route::get('/eksemplar', [AdminController::class, 'eksemplarIndex'])->name('eksemplar');
+        Route::get('/eksemplar/cetak-barcode/{id?}', [AdminController::class, 'cetakBarcodeEksemplar'])->name('eksemplar.cetak_barcode');
         Route::post('/eksemplar', [AdminController::class, 'eksemplarStore'])->name('eksemplar.store');
         Route::post('/eksemplar/update/{id}', [AdminController::class, 'eksemplarUpdate'])->name('eksemplar.update');
         Route::post('/eksemplar/delete/{id}', [AdminController::class, 'eksemplarDestroy'])->name('eksemplar.delete');

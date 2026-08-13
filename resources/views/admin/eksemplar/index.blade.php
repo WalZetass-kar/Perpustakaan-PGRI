@@ -17,10 +17,16 @@
                 Setiap 1 Master Judul Buku dapat memiliki banyak fisik buku (Eksemplar). Setiap fisik buku ditempeli stiker **Barcode ID unik** untuk keperluan scanning cepat sirkulasi pinjam/kembali di meja pustakawan.
             </p>
         </div>
-        <button @click="openAddModal = true" class="px-4 py-2.5 bg-white text-brand-700 font-extrabold text-xs rounded-xl hover:bg-gray-100 transition shadow-md hover:shadow-lg transform active:scale-95 shrink-0 flex items-center gap-2">
-            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            <span>+ Registrasi Eksemplar Baru</span>
-        </button>
+        <div class="flex items-center gap-2 shrink-0">
+            <a href="{{ route('admin.eksemplar.cetak_barcode') }}" target="_blank" class="px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-brand-950 font-extrabold text-xs rounded-xl transition shadow-md flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                <span>Cetak Stiker Barcode (A4)</span>
+            </a>
+            <button @click="openAddModal = true" class="px-4 py-2.5 bg-white text-brand-700 font-extrabold text-xs rounded-xl hover:bg-gray-100 transition shadow-md hover:shadow-lg transform active:scale-95 shrink-0 flex items-center gap-2">
+                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span>+ Registrasi Eksemplar Baru</span>
+            </button>
+        </div>
     </div>
 
     <!-- Data Table Card -->
