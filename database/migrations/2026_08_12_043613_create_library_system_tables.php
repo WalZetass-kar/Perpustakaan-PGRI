@@ -160,7 +160,7 @@ return new class extends Migration
         // 14. Denda
         Schema::create('denda', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('peminjaman_id')->constrained('peminjaman')->onDelete('cascade');
+            $table->foreignId('peminjaman_id')->nullable()->constrained('peminjaman')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->decimal('jumlah_denda', 10, 2);
             $table->string('alasan');

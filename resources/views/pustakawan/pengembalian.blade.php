@@ -1,23 +1,36 @@
 @extends('layouts.dashboard')
 
 @section('title', 'Pengembalian Buku Cepat')
-@section('page_heading', 'Pengembalian Cepat (Otomasasi Denda)')
+@section('page_heading', 'Pengembalian Cepat (Scan & Otomatisasi Denda)')
 
 @section('content')
-<div class="max-w-4xl mx-auto space-y-6">
+<script src="https://unpkg.com/html5-qrcode"></script>
 
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
+<div class="max-w-4xl mx-auto space-y-6" x-data="{ openScanner: false, html5QrCode: null }">
+
+    <div class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm p-6 space-y-6">
         
-        <div class="border-b border-gray-100 pb-4">
-            <h2 class="text-base font-bold text-gray-900">Form Pengembalian Buku & Hitung Denda</h2>
-            <p class="text-xs text-gray-500">Scan Barcode → Cari Transaksi Active → Hitung Terlambat & Denda Otomatis → Konfirmasi</p>
+        <div class="border-b border-gray-100 pb-4 flex items-center justify-between gap-4">
+            <div>
+                <h2 class="text-base font-bold text-gray-900">Form Pengembalian Buku &amp; Hitung Denda</h2>
+                <p class="text-xs text-gray-500">Scan Barcode → Cari Transaksi Aktif → Hitung Terlambat &amp; Denda Otomatis → Konfirmasi</p>
+            </div>
+            <button @click="openScanner = true; setTimeout(() => initCameraScanner(), 300)" class="px-3.5 py-2 bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-xs rounded-xl transition shadow-2xs flex items-center gap-1.5 shrink-0">
+                <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span>Buka Kamera Scanner</span>
+            </button>
         </div>
 
         <!-- Scan Barcode Search -->
-        <form action="{{ route('pustakawan.pengembalian') }}" method="GET" class="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
-            <label class="block text-xs font-bold text-gray-900">Scan / Input Barcode Eksemplar Buku Yang Dikembalikan</label>
+        <form action="{{ route('pustakawan.pengembalian') }}" method="GET" id="formReturnScan" class="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
+            <div class="flex items-center justify-between">
+                <label class="block text-xs font-bold text-gray-900">Scan / Input Barcode Eksemplar Buku Yang Dikembalikan</label>
+                <button type="button" @click="openScanner = true; setTimeout(() => initCameraScanner(), 300)" class="text-[10px] font-extrabold text-brand-700 hover:underline flex items-center gap-1">
+                    <span>Scan Camera</span> &raquo;
+                </button>
+            </div>
             <div class="flex gap-2">
-                <input type="text" name="scan_barcode" value="{{ request('scan_barcode') }}" placeholder="Contoh: BC882001" required autofocus
+                <input type="text" name="scan_barcode" id="inputReturnBarcode" value="{{ request('scan_barcode') }}" placeholder="Contoh: BC882001" required autofocus
                     class="flex-1 px-3.5 py-2.5 bg-white border border-gray-300 rounded-lg text-xs font-mono focus:ring-2 focus:ring-brand-700 focus:outline-none">
                 <button type="submit" class="px-6 py-2.5 bg-gray-900 text-white font-medium text-xs rounded-lg hover:bg-gray-800 transition">Cari Transaksi</button>
             </div>
@@ -99,5 +112,56 @@
 
     </div>
 
+    <!-- HTML5 Live Camera QR Scanner Modal -->
+    <div x-show="openScanner" @click.self="stopCameraScanner(); openScanner = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/70 backdrop-blur-xs p-4" x-cloak>
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border-2 border-gray-200 text-center relative" @click.stop>
+            <button @click="stopCameraScanner(); openScanner = false" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 text-gray-600 font-bold">&times;</button>
+            <h3 class="text-sm font-black text-gray-900 uppercase tracking-wide">Kamera Web Scanner HP/Laptop</h3>
+            <p class="text-xs text-gray-500">Arahkan kamera ke Barcode / QR Code Stiker Buku Yang Dikembalikan.</p>
+
+            <div id="reader" class="w-full h-64 bg-gray-100 rounded-2xl overflow-hidden border-2 border-gray-300"></div>
+
+            <button @click="stopCameraScanner(); openScanner = false" class="w-full py-2.5 bg-gray-100 text-gray-700 font-extrabold text-xs rounded-xl hover:bg-gray-200 transition">
+                Tutup Scanner
+            </button>
+        </div>
+    </div>
+
 </div>
+
+<script>
+    let html5QrcodeScanner = null;
+
+    function initCameraScanner() {
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.clear();
+        }
+        html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+        html5QrcodeScanner.render(onScanSuccess);
+    }
+
+    function onScanSuccess(decodedText, decodedResult) {
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.clear();
+        }
+        
+        let scannedVal = decodedText;
+        if (scannedVal.includes("BARCODE:")) {
+            let match = scannedVal.match(/BARCODE:([^|]+)/);
+            if (match) scannedVal = match[1];
+        }
+
+        const inputBarcode = document.getElementById('inputReturnBarcode');
+        if (inputBarcode) {
+            inputBarcode.value = scannedVal;
+            document.getElementById('formReturnScan').submit();
+        }
+    }
+
+    function stopCameraScanner() {
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.clear();
+        }
+    }
+</script>
 @endsection

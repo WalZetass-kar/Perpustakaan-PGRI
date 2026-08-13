@@ -14,6 +14,7 @@ use App\Models\Anggota;
 use App\Models\Pengaturan;
 use App\Models\AuditLog;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class MahasiswaController extends Controller
 {

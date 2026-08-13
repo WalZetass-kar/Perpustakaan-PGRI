@@ -175,7 +175,8 @@
         </div>
     </footer>
 
-    <!-- Initialize AOS Animation On Scroll -->
+    <!-- SweetAlert2 Beautiful Popups -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             AOS.init({
@@ -184,6 +185,35 @@
                 offset: 100,
                 easing: 'ease-out-cubic',
             });
+
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: "{{ session('success') }}",
+                    confirmButtonColor: '#b91c1c',
+                    timer: 4000,
+                    timerProgressBar: true
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Perhatian!',
+                    text: "{{ session('error') }}",
+                    confirmButtonColor: '#b91c1c'
+                });
+            @endif
+
+            @if(session('warning'))
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan',
+                    text: "{{ session('warning') }}",
+                    confirmButtonColor: '#b91c1c'
+                });
+            @endif
         });
     </script>
 </body>

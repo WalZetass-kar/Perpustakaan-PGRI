@@ -109,6 +109,23 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                         <span>Data User & Anggota</span>
                     </a>
+
+                    <div class="px-3 pt-4 pb-1 text-[11px] font-extrabold text-gray-400 uppercase tracking-wider flex items-center justify-between border-t border-gray-100 my-1">
+                        <span>Sirkulasi &amp; Scanner</span>
+                        <span class="w-8 h-px bg-gray-200"></span>
+                    </div>
+                    <a href="{{ route('pustakawan.peminjaman') }}" class="flex items-center gap-3 px-3.5 py-2.5 text-xs font-bold rounded-xl transition-all duration-200 border {{ request()->routeIs('pustakawan.peminjaman*') ? 'bg-brand-700 text-white border-brand-800 shadow-md transform translate-x-1' : 'text-gray-700 border-transparent hover:bg-gray-100 hover:text-brand-700' }}">
+                        <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <span>Peminjaman &amp; Scanner</span>
+                    </a>
+                    <a href="{{ route('pustakawan.pengembalian') }}" class="flex items-center gap-3 px-3.5 py-2.5 text-xs font-bold rounded-xl transition-all duration-200 border {{ request()->routeIs('pustakawan.pengembalian*') ? 'bg-brand-700 text-white border-brand-800 shadow-md transform translate-x-1' : 'text-gray-700 border-transparent hover:bg-gray-100 hover:text-brand-700' }}">
+                        <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/></svg>
+                        <span>Pengembalian Cepat</span>
+                    </a>
+                    <a href="{{ route('pustakawan.reservasi') }}" class="flex items-center gap-3 px-3.5 py-2.5 text-xs font-bold rounded-xl transition-all duration-200 border {{ request()->routeIs('pustakawan.reservasi*') ? 'bg-brand-700 text-white border-brand-800 shadow-md transform translate-x-1' : 'text-gray-700 border-transparent hover:bg-gray-100 hover:text-brand-700' }}">
+                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span>Antrean Booking Siswa</span>
+                    </a>
                     
                     <div class="px-3 pt-5 pb-1 text-[11px] font-extrabold text-gray-400 uppercase tracking-wider flex items-center justify-between border-t border-gray-100 my-2">
                         <span>Manajemen & Laporan</span>
@@ -339,7 +356,43 @@
         </main>
     </div>
 
+    <!-- SweetAlert2 Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: "{{ session('success') }}",
+                    confirmButtonColor: '#B91C1C',
+                    timer: 4000,
+                    timerProgressBar: true,
+                    customClass: { popup: 'rounded-3xl border-2 border-emerald-200' }
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Perhatian!',
+                    text: "{{ session('error') }}",
+                    confirmButtonColor: '#B91C1C',
+                    customClass: { popup: 'rounded-3xl border-2 border-rose-200' }
+                });
+            @endif
+
+            @if(session('warning'))
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan',
+                    text: "{{ session('warning') }}",
+                    confirmButtonColor: '#B91C1C',
+                    customClass: { popup: 'rounded-3xl border-2 border-amber-200' }
+                });
+            @endif
+        });
+
         function confirmDelete(event, titleText = 'Apakah Anda yakin?', messageText = 'Data ini akan dihapus permanen!') {
             event.preventDefault();
             const form = event.target.closest('form');
@@ -351,7 +404,7 @@
                 showCancelButton: true,
                 confirmButtonColor: '#B91C1C',
                 cancelButtonColor: '#6B7280',
-                confirmButtonText: 'Ya, Hapus Data!',
+                confirmButtonText: 'Ya, Lanjutkan!',
                 cancelButtonText: 'Batal',
                 customClass: {
                     popup: 'rounded-3xl border-2 border-gray-200 shadow-2xl font-sans',
