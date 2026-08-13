@@ -46,19 +46,17 @@
             <p class="text-[11px] text-gray-500 mt-0.5">Unggah pas foto siswa dan tunjukkan QR Code / Barcode ini ke Pustakawan.</p>
         </div>
         <div class="flex items-center gap-3 shrink-0">
-            <!-- Custom Upload Photo Button -->
-            <label class="px-3.5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-xs rounded-xl transition cursor-pointer flex items-center gap-2 border border-gray-300">
-                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                <span>Ganti Pas Foto</span>
-                <input type="file" accept="image/*" class="hidden" @change="
-                    const file = $event.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => { photoUrl = e.target.result };
-                        reader.readAsDataURL(file);
-                    }
-                ">
-            </label>
+        <div class="flex items-center gap-3 shrink-0">
+            <!-- Custom Upload Photo Form (Permanent DB Storage) -->
+            <form id="fotoForm" action="{{ route('mahasiswa.profil.update') }}" method="POST" enctype="multipart/form-data" class="inline">
+                @csrf
+                <input type="hidden" name="name" value="{{ $user->name }}">
+                <label class="px-3.5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-xs rounded-xl transition cursor-pointer flex items-center gap-2 border border-gray-300 shadow-2xs">
+                    <svg class="w-4 h-4 text-brand-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <span>Ganti Pas Foto</span>
+                    <input type="file" name="foto" accept="image/*" class="hidden" onchange="document.getElementById('fotoForm').submit()">
+                </label>
+            </form>
 
             <!-- Print Card PDF Button -->
             <button onclick="window.print()" class="px-4 py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-xs rounded-xl transition shadow-md hover:shadow-lg transform active:scale-95 flex items-center gap-2">
@@ -96,15 +94,13 @@
         <div class="p-6 bg-white space-y-6">
             <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
                 
-                <!-- Student Photo Frame (With Live Preview Upload Support) -->
+                <!-- Student Photo Frame (With Permanent DB Photo Rendering) -->
                 <div class="relative shrink-0">
                     <div class="w-32 h-40 bg-gradient-to-b from-gray-50 to-gray-100 border-2 border-brand-700 rounded-2xl overflow-hidden flex flex-col items-center justify-center p-1 shadow-md relative group">
                         
-                        <!-- Uploaded Photo or Default Avatar -->
-                        <template x-if="photoUrl">
-                            <img :src="photoUrl" class="w-full h-full object-cover rounded-xl" alt="Pas Foto Siswa">
-                        </template>
-                        <template x-if="!photoUrl">
+                        @if($anggota && $anggota->foto)
+                            <img src="{{ asset('storage/' . $anggota->foto) }}" class="w-full h-full object-cover rounded-xl" alt="Pas Foto Siswa {{ $user->name }}">
+                        @else
                             <div class="w-full h-full flex flex-col items-center justify-center bg-brand-50/50 text-center p-2 rounded-xl">
                                 <div class="w-16 h-16 rounded-full bg-brand-700 text-white flex items-center justify-center font-black text-2xl shadow-md mb-2">
                                     {{ substr($user->name, 0, 1) }}
@@ -112,7 +108,7 @@
                                 <span class="text-[9px] font-black text-brand-700 uppercase tracking-wider block">PAS FOTO SISWA</span>
                                 <span class="text-[8px] text-gray-400 font-mono">3 x 4 CM</span>
                             </div>
-                        </template>
+                        @endif
                         
                         <!-- Overlay Hint -->
                         <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-[9px] font-bold text-center p-1">

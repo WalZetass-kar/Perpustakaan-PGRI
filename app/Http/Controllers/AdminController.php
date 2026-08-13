@@ -285,9 +285,41 @@ class AdminController extends Controller
     }
 
     // --- ANGGOTA & USER MANAGEMENT --- //
-    public function anggotaIndex()
+    public function anggotaIndex(Request $request)
     {
-        $anggotaList = Anggota::with('user.role')->latest()->paginate(10);
+        $query = User::with(['role', 'anggota']);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhereHas('anggota', function($qa) use ($search) {
+                      $qa->where('nomor_anggota', 'like', "%{$search}%")
+                         ->orWhere('nim', 'like', "%{$search}%")
+                         ->orWhere('program_studi', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $anggotaList = $query->latest()->paginate(10);
+
+        // Ensure every user has an Anggota record synced
+        foreach ($anggotaList as $user) {
+            if (!$user->anggota) {
+                $nomorAnggota = 'LIB-' . date('Y') . '-' . str_pad($user->id, 3, '0', STR_PAD_LEFT);
+                Anggota::create([
+                    'user_id' => $user->id,
+                    'nomor_anggota' => $nomorAnggota,
+                    'nim' => '1022' . date('Y') . str_pad($user->id, 3, '0', STR_PAD_LEFT),
+                    'program_studi' => 'Teknik Komputer & Jaringan',
+                    'status' => 'aktif',
+                ]);
+                $user->load('anggota');
+            }
+        }
+
         $roles = Role::all();
         return view('admin.anggota.index', compact('anggotaList', 'roles'));
     }
@@ -314,7 +346,7 @@ class AdminController extends Controller
         ]);
 
         // Auto-generate Nomor Anggota ID
-        $nomorAnggota = 'LIB-' . date('Y') . '-' . str_pad(Anggota::count() + 1, 3, '0', STR_PAD_LEFT);
+        $nomorAnggota = 'LIB-' . date('Y') . '-' . str_pad($user->id, 3, '0', STR_PAD_LEFT);
 
         Anggota::create([
             'user_id' => $user->id,
@@ -337,15 +369,17 @@ class AdminController extends Controller
 
     public function anggotaUpdate(Request $request, $id)
     {
-        $anggota = Anggota::findOrFail($id);
-        $user = $anggota->user;
+        $user = User::findOrFail($id);
+
+        $anggota = $user->anggota;
+        $anggotaId = $anggota ? $anggota->id : 0;
 
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'role_id' => 'required|exists:roles,id',
             'phone' => 'nullable|string',
-            'nim' => 'required|unique:anggota,nim,' . $id,
+            'nim' => 'required|unique:anggota,nim,' . $anggotaId,
             'program_studi' => 'required|string',
             'status' => 'required|in:aktif,nonaktif,dibekukan',
         ]);
@@ -361,10 +395,29 @@ class AdminController extends Controller
             $user->update(['password' => Hash::make($request->password)]);
         }
 
-        $anggota->update([
-            'nim' => $request->nim,
-            'program_studi' => $request->program_studi,
-            'status' => $request->status,
+        if (!$anggota) {
+            $nomorAnggota = 'LIB-' . date('Y') . '-' . str_pad($user->id, 3, '0', STR_PAD_LEFT);
+            $anggota = Anggota::create([
+                'user_id' => $user->id,
+                'nomor_anggota' => $nomorAnggota,
+                'nim' => $request->nim,
+                'program_studi' => $request->program_studi,
+                'status' => $request->status,
+            ]);
+        } else {
+            $anggota->update([
+                'nim' => $request->nim,
+                'program_studi' => $request->program_studi,
+                'status' => $request->status,
+            ]);
+        }
+
+        AuditLog::create([
+            'user_id' => auth()->id(),
+            'user_name' => auth()->user()->name,
+            'aktivitas' => 'EDIT_USER',
+            'deskripsi' => "Memperbarui data pengguna/anggota: {$user->name} ({$user->email})",
+            'ip_address' => $request->ip(),
         ]);
 
         return back()->with('success', 'Data anggota/pengguna berhasil diperbarui.');
@@ -372,15 +425,57 @@ class AdminController extends Controller
 
     public function anggotaDestroy($id)
     {
-        $anggota = Anggota::findOrFail($id);
-        $user = $anggota->user;
-
-        $anggota->delete();
-        if ($user) {
-            $user->delete();
+        $user = User::findOrFail($id);
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'Anda tidak dapat menghapus akun Anda sendiri yang sedang aktif.');
         }
 
+        if ($user->anggota) {
+            $user->anggota->delete();
+        }
+        $user->delete();
+
         return back()->with('success', 'Data anggota/pengguna berhasil dihapus.');
+    }
+
+    public function dendaStore(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'jumlah_denda' => 'required|numeric|min:500',
+            'alasan' => 'required|string|max:255',
+            'status_pembayaran' => 'required|in:belum_lunas,lunas',
+        ]);
+
+        $peminjaman = Peminjaman::where('user_id', $request->user_id)->latest()->first();
+
+        Denda::create([
+            'user_id' => $request->user_id,
+            'peminjaman_id' => $peminjaman ? $peminjaman->id : null,
+            'jumlah_denda' => $request->jumlah_denda,
+            'alasan' => $request->alasan,
+            'status_pembayaran' => $request->status_pembayaran,
+        ]);
+
+        $user = User::find($request->user_id);
+        AuditLog::create([
+            'user_id' => auth()->id(),
+            'user_name' => auth()->user()->name,
+            'aktivitas' => 'TAMBAH_DENDA',
+            'deskripsi' => "Menetapkan denda Rp " . number_format($request->jumlah_denda) . " kepada {$user->name} ({$request->alasan})",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', 'Denda berhasil ditetapkan untuk anggota/siswa.');
+    }
+
+    public function dendaBayar($id)
+    {
+        $denda = Denda::findOrFail($id);
+        $denda->status_pembayaran = 'lunas';
+        $denda->save();
+
+        return back()->with('success', 'Status denda berhasil diubah menjadi LUNAS.');
     }
 
     // --- LAPORAN & EXPORT --- //

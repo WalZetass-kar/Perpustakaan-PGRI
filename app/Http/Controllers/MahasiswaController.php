@@ -214,15 +214,65 @@ class MahasiswaController extends Controller
     public function updateProfil(Request $request)
     {
         $user = auth()->user();
+        $anggota = Anggota::where('user_id', $user->id)->first();
+        $anggotaId = $anggota ? $anggota->id : 0;
+
         $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
+            'nim' => 'nullable|string|max:50|unique:anggota,nim,' . $anggotaId,
+            'program_studi' => 'nullable|string|max:150',
+            'foto' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
+            'current_password' => 'nullable|string',
+            'password' => 'nullable|string|min:6|confirmed',
+        ], [
+            'nim.unique' => 'NISN/NIM ini sudah digunakan oleh siswa lain.',
+            'foto.max' => 'Ukuran pas foto maksimal 2 MB.',
+            'password.confirmed' => 'Konfirmasi kata sandi baru tidak cocok.',
         ]);
+
+        // Change password if provided
+        if ($request->filled('password')) {
+            if ($request->filled('current_password') && !\Illuminate\Support\Facades\Hash::check($request->current_password, $user->password)) {
+                return back()->with('error', 'Kata sandi saat ini tidak cocok.');
+            }
+            $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
+        }
 
         $user->name = $request->name;
         $user->phone = $request->phone;
         $user->save();
 
-        return back()->with('success', 'Profil berhasil diperbarui.');
+        if (!$anggota) {
+            $nomorAnggota = 'LIB-' . date('Y') . '-' . str_pad($user->id, 3, '0', STR_PAD_LEFT);
+            $anggota = Anggota::create([
+                'user_id' => $user->id,
+                'nomor_anggota' => $nomorAnggota,
+                'nim' => $request->nim ?? ('102201' . $user->id),
+                'program_studi' => $request->program_studi ?? 'Teknik Komputer & Jaringan',
+                'status' => 'aktif',
+            ]);
+        } else {
+            if ($request->filled('nim')) $anggota->nim = $request->nim;
+            if ($request->filled('program_studi')) $anggota->program_studi = $request->program_studi;
+        }
+
+        // Upload Pas Foto Permanen
+        if ($request->hasFile('foto')) {
+            $path = $request->file('foto')->store('foto_anggota', 'public');
+            $anggota->foto = $path;
+        }
+
+        $anggota->save();
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'aktivitas' => 'UPDATE_PROFIL',
+            'deskripsi' => "Siswa memperbarui data profil & pas foto resmi.",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', 'Profil dan pas foto siswa berhasil diperbarui secara permanen.');
     }
 }

@@ -243,6 +243,37 @@ class PustakawanController extends Controller
         return view('pustakawan.denda', compact('dendaList'));
     }
 
+    public function dendaStore(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'jumlah_denda' => 'required|numeric|min:500',
+            'alasan' => 'required|string|max:255',
+            'status_pembayaran' => 'required|in:belum_lunas,lunas',
+        ]);
+
+        $peminjaman = Peminjaman::where('user_id', $request->user_id)->latest()->first();
+
+        Denda::create([
+            'user_id' => $request->user_id,
+            'peminjaman_id' => $peminjaman ? $peminjaman->id : null,
+            'jumlah_denda' => $request->jumlah_denda,
+            'alasan' => $request->alasan,
+            'status_pembayaran' => $request->status_pembayaran,
+        ]);
+
+        $user = User::find($request->user_id);
+        AuditLog::create([
+            'user_id' => auth()->id(),
+            'user_name' => auth()->user()->name,
+            'aktivitas' => 'TAMBAH_DENDA',
+            'deskripsi' => "Pustakawan menetapkan denda Rp " . number_format($request->jumlah_denda) . " kepada {$user->name} ({$request->alasan})",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', 'Denda berhasil ditetapkan untuk anggota/siswa.');
+    }
+
     public function bayarDenda(Request $request, $id)
     {
         $denda = Denda::findOrFail($id);

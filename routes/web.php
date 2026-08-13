@@ -62,6 +62,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/rak', [PustakawanController::class, 'rakIndex'])->name('rak');
         Route::get('/reservasi', [PustakawanController::class, 'reservasiIndex'])->name('reservasi');
         Route::get('/denda', [PustakawanController::class, 'dendaIndex'])->name('denda');
+        Route::post('/denda', [PustakawanController::class, 'dendaStore'])->name('denda.store');
         Route::post('/denda/bayar/{id}', [PustakawanController::class, 'bayarDenda'])->name('denda.bayar');
     });
 
@@ -98,6 +99,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/anggota', [AdminController::class, 'anggotaStore'])->name('anggota.store');
         Route::post('/anggota/update/{id}', [AdminController::class, 'anggotaUpdate'])->name('anggota.update');
         Route::post('/anggota/delete/{id}', [AdminController::class, 'anggotaDestroy'])->name('anggota.delete');
+
+        // Denda Management
+        Route::post('/denda', [AdminController::class, 'dendaStore'])->name('denda.store');
+        Route::post('/denda/bayar/{id}', [AdminController::class, 'dendaBayar'])->name('denda.bayar');
 
         // Audit, Pengaturan & Laporan
         Route::get('/laporan', [AdminController::class, 'laporanIndex'])->name('laporan');
