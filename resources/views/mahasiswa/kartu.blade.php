@@ -73,7 +73,7 @@
     </div>
 
     <!-- OFFICIAL INSTITUTIONAL LIBRARY CARD FRONT SIDE -->
-    <div class="w-full max-w-[480px] mx-auto bg-white rounded-2xl border-2 border-red-700 shadow-xl overflow-hidden flex flex-col justify-between relative" id="printable-card">
+    <div class="w-full max-w-[540px] mx-auto bg-white rounded-2xl border-2 border-red-700 shadow-xl overflow-hidden flex flex-col justify-between relative" id="printable-card">
         
         <!-- 1. Institutional Header Banner -->
         <div class="bg-red-700 text-white px-4 py-3 flex items-center justify-between border-b-2 border-amber-400 shrink-0">
@@ -93,45 +93,45 @@
         </div>
 
         <!-- 2. Clean Institutional Body Content (Photo | Information | QR Code) -->
-        <div class="p-4 bg-white flex items-center justify-between gap-3.5 flex-1">
+        <div class="p-4 sm:p-5 bg-white flex items-center justify-between gap-4 flex-1">
             
-            <!-- Area 1: Student Photo (Pas Foto 4:5 Ratio) -->
+            <!-- Area 1: Student Photo (Enlarged Pas Foto 4:5 Ratio - w-32 h-40) -->
             <div class="shrink-0">
-                <div class="w-24 h-30 bg-gray-50 border-2 border-red-700 rounded-lg overflow-hidden flex flex-col items-center justify-center shadow-2xs relative group">
+                <div class="w-32 h-40 sm:w-34 sm:h-42 bg-gray-50 border-2 border-red-700 rounded-xl overflow-hidden flex flex-col items-center justify-center shadow-xs relative group">
                     @if($anggota && $anggota->foto)
-                        <img src="{{ asset('storage/' . $anggota->foto) }}" class="w-full h-full object-cover rounded-md" alt="Pas Foto {{ $user->name }}">
+                        <img src="{{ asset('storage/' . $anggota->foto) }}" class="w-full h-full object-cover rounded-lg" alt="Pas Foto {{ $user->name }}">
                     @else
-                        <div class="w-full h-full flex flex-col items-center justify-center bg-red-50/50 text-center p-1 rounded-md">
-                            <div class="w-10 h-10 rounded-full bg-red-700 text-white flex items-center justify-center font-black text-lg shadow-2xs mb-1">
+                        <div class="w-full h-full flex flex-col items-center justify-center bg-red-50/50 text-center p-2 rounded-lg">
+                            <div class="w-14 h-14 rounded-full bg-red-700 text-white flex items-center justify-center font-black text-2xl shadow-xs mb-1.5">
                                 {{ substr($user->name, 0, 1) }}
                             </div>
-                            <span class="text-[7.5px] font-black text-red-700 uppercase tracking-wider block">FOTO 3x4</span>
+                            <span class="text-[9px] font-black text-red-700 uppercase tracking-wider block">FOTO SISWA 3x4</span>
                         </div>
                     @endif
                 </div>
             </div>
 
             <!-- Area 2: Student Information Details (Focal Point) -->
-            <div class="flex-1 min-w-0 space-y-2 text-[10px]">
+            <div class="flex-1 min-w-0 space-y-2.5 text-[10.5px]">
                 <div>
-                    <span class="text-[8px] font-extrabold text-gray-500 uppercase tracking-wider block leading-none">NAMA LENGKAP SISWA</span>
+                    <span class="text-[8.5px] font-extrabold text-gray-500 uppercase tracking-wider block leading-none">NAMA LENGKAP SISWA</span>
                     <span class="text-xs sm:text-sm font-extrabold text-gray-900 block truncate leading-tight mt-0.5">{{ $user->name }}</span>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2 border-t border-b border-gray-100 py-1.5">
+                <div class="grid grid-cols-2 gap-2 border-t border-b border-gray-100 py-2">
                     <div>
-                        <span class="text-[8px] font-extrabold text-gray-500 uppercase tracking-wider block leading-none">NISN / NIS</span>
-                        <span class="font-mono text-gray-800 font-extrabold text-[10px] block truncate mt-0.5">{{ $anggota->nim ?? '0877667687' }}</span>
+                        <span class="text-[8.5px] font-extrabold text-gray-500 uppercase tracking-wider block leading-none">NISN / NIS</span>
+                        <span class="font-mono text-gray-800 font-extrabold text-[10.5px] block truncate mt-0.5">{{ $anggota->nim ?? '0877667687' }}</span>
                     </div>
                     <div>
-                        <span class="text-[8px] font-extrabold text-gray-500 uppercase tracking-wider block leading-none">ID ANGGOTA</span>
-                        <span class="font-mono text-red-700 font-extrabold text-[10px] block truncate mt-0.5">{{ $anggota->nomor_anggota ?? 'LIB-2026-005' }}</span>
+                        <span class="text-[8.5px] font-extrabold text-gray-500 uppercase tracking-wider block leading-none">ID ANGGOTA</span>
+                        <span class="font-mono text-red-700 font-extrabold text-[10.5px] block truncate mt-0.5">{{ $anggota->nomor_anggota ?? 'LIB-2026-005' }}</span>
                     </div>
                 </div>
 
                 <div>
-                    <span class="text-[8px] font-extrabold text-gray-500 uppercase tracking-wider block leading-none">PROGRAM / JURUSAN</span>
-                    <span class="text-gray-900 font-bold text-[10px] block truncate leading-tight mt-0.5">{{ $anggota->program_studi ?? 'Teknik Komputer & Jaringan (TKJ)' }}</span>
+                    <span class="text-[8.5px] font-extrabold text-gray-500 uppercase tracking-wider block leading-none">PROGRAM / JURUSAN</span>
+                    <span class="text-gray-900 font-bold text-[10.5px] block truncate leading-tight mt-0.5">{{ $anggota->program_studi ?? 'Teknik Komputer & Jaringan (TKJ)' }}</span>
                 </div>
             </div>
 
@@ -140,12 +140,12 @@
                 $qrContent = urlencode("PERPUS-SMK-PGRI|NISN:" . ($anggota->nim ?? '0877667687') . "|MEMBER:" . ($anggota->nomor_anggota ?? 'LIB-2026-005') . "|NAME:" . $user->name);
                 $qrApiUrl = "https://quickchart.io/qr?text={$qrContent}&size=150&margin=1";
             @endphp
-            <div class="shrink-0 flex flex-col items-center justify-center p-2 bg-white rounded-xl border border-gray-200 shadow-2xs text-center space-y-1">
-                <div class="w-16 h-16 bg-white p-0.5 rounded-lg border border-gray-200 flex items-center justify-center">
+            <div class="shrink-0 flex flex-col items-center justify-center p-2.5 bg-white rounded-xl border border-gray-200 shadow-2xs text-center space-y-1">
+                <div class="w-18 h-18 bg-white p-0.5 rounded-lg border border-gray-200 flex items-center justify-center">
                     <img src="{{ $qrApiUrl }}" alt="QR Code Verifikasi" class="w-full h-full object-contain">
                 </div>
-                <span class="text-[8px] font-black text-emerald-600 block uppercase tracking-wider">VALID QR</span>
-                <span class="text-[7px] font-bold text-gray-400 block max-w-[80px] leading-tight">Scan untuk verifikasi anggota</span>
+                <span class="text-[8.5px] font-black text-emerald-600 block uppercase tracking-wider">VALID QR</span>
+                <span class="text-[7.5px] font-bold text-gray-400 block max-w-[85px] leading-tight">Scan untuk verifikasi anggota</span>
             </div>
 
         </div>
