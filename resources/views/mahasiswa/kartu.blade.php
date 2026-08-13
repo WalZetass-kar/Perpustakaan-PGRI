@@ -4,23 +4,35 @@
 @section('page_heading', 'Kartu Tanda Anggota Digital')
 
 @section('content')
-<!-- Print Specific CSS Styling for perfect ID Card Dimension -->
+<!-- Print Specific CSS Styling - Preserves Exact Web Design & Colors -->
 <style>
     @media print {
+        @page {
+            size: auto;
+            margin: 10mm;
+        }
+        body {
+            background-color: #ffffff !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
         body * {
-            visibility: hidden;
+            visibility: hidden !important;
         }
         #printable-card, #printable-card * {
-            visibility: visible;
+            visibility: visible !important;
         }
         #printable-card {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: 480px !important;
-            border: 2px solid #b91c1c !important;
+            position: absolute !important;
+            left: 50% !important;
+            top: 20px !important;
+            transform: translateX(-50%) !important;
+            width: 100% !important;
+            max-width: 600px !important;
+            margin: 0 auto !important;
             box-shadow: none !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
     }
 </style>
