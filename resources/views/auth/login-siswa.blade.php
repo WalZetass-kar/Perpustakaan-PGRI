@@ -123,15 +123,11 @@
                 </button>
             </form>
 
-            <div class="border-t border-gray-100 pt-4 text-center space-y-3">
+            <div class="border-t border-gray-100 pt-4 text-center">
                 <p class="text-[11px] text-gray-600 font-medium">
                     Belum memiliki akun siswa terdaftar? 
                     <a href="{{ route('register') }}" class="font-extrabold text-brand-700 hover:underline">Daftar Akun Baru</a>
                 </p>
-                <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 text-[11px] text-gray-600">
-                    <span class="font-bold text-gray-900 block mb-0.5">Demo Login Akun Siswa:</span>
-                    <span>Email: <strong>siswa@smkpgri.sch.id</strong> | Password: <strong>password</strong></span>
-                </div>
             </div>
         </div>
 

@@ -97,7 +97,7 @@
                 <div>
                     <label for="email" class="block font-bold text-gray-700 mb-1.5">Email Pengelola <span class="text-rose-500">*</span></label>
                     <div class="relative">
-                        <input type="email" name="email" id="email" value="{{ old('email', 'admin@smkpgri.sch.id') }}" required autofocus placeholder="contoh: admin@smkpgri.sch.id"
+                        <input type="email" name="email" id="email" value="{{ old('email') }}" required autofocus placeholder="contoh: admin@smkpgri.sch.id"
                             class="w-full pl-10 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:border-brand-700 focus:bg-white focus:outline-none font-medium text-gray-900 transition">
                         <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                     </div>
@@ -106,7 +106,7 @@
                 <div>
                     <label for="password" class="block font-bold text-gray-700 mb-1.5">Kata Sandi Akses <span class="text-rose-500">*</span></label>
                     <div class="relative">
-                        <input type="password" name="password" id="password" value="password" required placeholder="••••••••"
+                        <input type="password" name="password" id="password" required placeholder="••••••••"
                             class="w-full pl-10 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:border-brand-700 focus:bg-white focus:outline-none font-medium text-gray-900 transition">
                         <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                     </div>
@@ -127,11 +127,10 @@
             </form>
 
             <div class="border-t-2 border-gray-100 pt-4 text-center">
-                <div class="bg-gray-50 p-3.5 rounded-xl border-2 border-gray-200 text-[11px] text-gray-600 space-y-1">
-                    <p class="font-bold text-gray-900 mb-0.5">Demo Login Pengelola:</p>
-                    <p>Admin: <strong>admin@smkpgri.sch.id</strong> | pass: <strong>password</strong></p>
-                    <p>Pustakawan: <strong>pustakawan@smkpgri.sch.id</strong> | pass: <strong>password</strong></p>
-                </div>
+                <p class="text-[11px] text-gray-500 font-medium flex items-center justify-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    <span>Autentikasi Terenkripsi Pengelola Perpustakaan SMK PGRI</span>
+                </p>
             </div>
         </div>
 
