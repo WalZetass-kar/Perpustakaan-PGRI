@@ -46,7 +46,6 @@
             <p class="text-[11px] text-gray-500 mt-0.5">Unggah pas foto siswa dan tunjukkan QR Code / Barcode ini ke Pustakawan.</p>
         </div>
         <div class="flex items-center gap-3 shrink-0">
-        <div class="flex items-center gap-3 shrink-0">
             <!-- Custom Upload Photo Form (Permanent DB Storage) -->
             <form id="fotoForm" action="{{ route('mahasiswa.profil.update') }}" method="POST" enctype="multipart/form-data" class="inline">
                 @csrf
