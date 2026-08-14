@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Administrator & Pustakawan - Perpustakaan SMK PGRI Pekanbaru</title>
-    <!-- Favicon Logo SMK PGRI -->
-    <link rel="icon" type="image/png" href="https://simpeg.smkpgripekanbaru.sch.id/images/logo.png">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -57,7 +57,7 @@
                     <span>Kembali ke Beranda</span>
                 </a>
                 <div class="pt-4">
-                    <img src="https://simpeg.smkpgripekanbaru.sch.id/images/logo.png" alt="Logo SMK PGRI" class="w-14 h-14 object-contain drop-shadow-md">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI" class="w-14 h-14 object-contain drop-shadow-md">
                     <span class="inline-block px-3 py-1 mt-4 rounded-full text-[10px] font-black bg-white/10 text-emerald-300 border border-white/20 uppercase tracking-wider">
                         Back-Office Portal
                     </span>

@@ -45,7 +45,7 @@
             <div class="lg:col-span-5 flex justify-center" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
                 <div class="w-full max-w-md bg-white/95 backdrop-blur-md rounded-3xl p-6 text-gray-800 shadow-2xl border border-white/40 transform hover:scale-[1.03] hover:-rotate-1 transition duration-500">
                     <div class="flex items-center gap-3 border-b border-gray-100 pb-4 mb-4">
-                        <img src="https://simpeg.smkpgripekanbaru.sch.id/images/logo.png" alt="Logo Official" class="w-11 h-11 object-contain transform hover:rotate-6 transition duration-300 drop-shadow-xs">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI Official" class="w-11 h-11 object-contain transform hover:rotate-6 transition duration-300 drop-shadow-xs">
                         <div>
                             <span class="text-xs font-bold text-gray-900 block leading-tight">INLISLITE SMK PGRI</span>
                             <span class="text-[10px] text-gray-500 font-medium">Official School Library Portal</span>

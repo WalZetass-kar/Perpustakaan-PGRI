@@ -46,7 +46,7 @@
         
         <!-- Official Kop Surat Header -->
         <div class="flex items-center justify-between border-b-4 border-double border-gray-900 pb-4">
-            <img src="https://simpeg.smkpgripekanbaru.sch.id/images/logo.png" alt="Logo SMK PGRI" class="w-20 h-20 object-contain shrink-0">
+            <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI" class="w-20 h-20 object-contain shrink-0">
             <div class="text-center flex-1 px-4 space-y-0.5">
                 <h2 class="text-sm font-bold uppercase tracking-wider text-gray-700">YAYASAN PERGURUAN PGRI PEKANBARU</h2>
                 <h1 class="text-xl font-black uppercase text-gray-900 tracking-tight">SMK PGRI PEKANBARU</h1>

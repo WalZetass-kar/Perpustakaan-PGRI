@@ -6,7 +6,7 @@
     <title>@yield('title', 'Perpustakaan SMK PGRI')</title>
     
     <!-- Favicon Logo SMK PGRI -->
-    <link rel="icon" type="image/png" href="https://simpeg.smkpgripekanbaru.sch.id/images/logo.png">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -60,7 +60,7 @@
             
             <!-- Official SMK PGRI Logo & Brand Name (Enlarged) -->
             <a href="{{ route('home') }}" class="flex items-center gap-3.5 shrink-0 group">
-                <img src="https://simpeg.smkpgripekanbaru.sch.id/images/logo.png" alt="Logo SMK PGRI" class="w-12 h-12 object-contain transform group-hover:scale-110 transition duration-300 drop-shadow-sm">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI" class="w-12 h-12 object-contain transform group-hover:scale-110 transition duration-300 drop-shadow-sm">
                 <div>
                     <span class="text-base sm:text-lg font-black text-gray-900 leading-tight block group-hover:text-brand-700 transition">Perpustakaan PGRI</span>
                     <span class="text-xs text-gray-500 font-bold tracking-wider uppercase block">SMK PGRI Pekanbaru</span>
@@ -125,7 +125,7 @@
                 <!-- Col 1: Brand & Official Logo -->
                 <div class="md:col-span-1 space-y-3">
                     <div class="flex items-center gap-3">
-                        <img src="https://simpeg.smkpgripekanbaru.sch.id/images/logo.png" alt="Logo SMK PGRI" class="w-10 h-10 object-contain">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI" class="w-10 h-10 object-contain">
                         <div>
                             <span class="font-black text-gray-900 block leading-tight text-sm">Perpustakaan PGRI</span>
                             <span class="text-[11px] text-gray-500 font-bold tracking-wider uppercase">SMK PGRI Pekanbaru</span>

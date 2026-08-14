@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Masuk - Perpustakaan SMK PGRI Pekanbaru</title>
-    <!-- Favicon Logo SMK PGRI -->
-    <link rel="icon" type="image/png" href="https://simpeg.smkpgripekanbaru.sch.id/images/logo.png">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -65,7 +65,7 @@
 
                 <!-- Dynamic Title & Description with Animated Transition -->
                 <div class="pt-2">
-                    <img src="https://simpeg.smkpgripekanbaru.sch.id/images/logo.png" alt="Logo SMK PGRI" class="w-14 h-14 object-contain drop-shadow-md">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI" class="w-14 h-14 object-contain drop-shadow-md">
                     
                     <!-- Siswa Banner View -->
                     <template x-if="roleTab === 'siswa'">

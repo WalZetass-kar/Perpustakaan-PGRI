@@ -198,7 +198,7 @@
         <div class="bg-red-700 text-white px-4 py-3 flex items-center justify-between border-b-2 border-amber-400 shrink-0">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-lg bg-white p-1 shadow-xs shrink-0 flex items-center justify-center border border-amber-300">
-                    <img src="https://simpeg.smkpgripekanbaru.sch.id/images/logo.png" alt="Logo SMK PGRI" class="w-full h-full object-contain">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI" class="w-full h-full object-contain">
                 </div>
                 <div>
                     <h2 class="text-xs sm:text-sm font-black tracking-wide leading-tight uppercase text-white">PERPUSTAKAAN SMK PGRI</h2>

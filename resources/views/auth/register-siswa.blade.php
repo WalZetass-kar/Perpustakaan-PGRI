@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pendaftaran Akun Siswa - Perpustakaan SMK PGRI Pekanbaru</title>
-    <!-- Favicon Logo SMK PGRI -->
-    <link rel="icon" type="image/png" href="https://simpeg.smkpgripekanbaru.sch.id/images/logo.png">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -57,7 +57,7 @@
                     <span>Kembali ke Beranda</span>
                 </a>
                 <div class="pt-4">
-                    <img src="https://simpeg.smkpgripekanbaru.sch.id/images/logo.png" alt="Logo SMK PGRI" class="w-14 h-14 object-contain drop-shadow-md">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI" class="w-14 h-14 object-contain drop-shadow-md">
                     <h2 class="mt-4 text-2xl font-black leading-snug">Registrasi Anggota Siswa Baru</h2>
                     <p class="mt-2 text-xs text-red-100 leading-relaxed font-normal">
                         Daftarkan NISN dan identitas siswa Anda untuk mulai meminjam modul buku kejuruan &amp; mencetak kartu anggota resmi.

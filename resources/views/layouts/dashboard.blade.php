@@ -6,6 +6,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Sistem Informasi Perpustakaan') | Perpustakaan SMK PGRI Pekanbaru</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -85,9 +88,7 @@
             <!-- Sidebar Header & School Branding -->
             <div class="h-20 flex items-center justify-between px-5 border-b-2 border-gray-100 bg-gradient-to-r from-gray-50 to-white">
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-2xl bg-brand-700 text-white flex items-center justify-center font-black text-lg shadow-md ring-2 ring-brand-100">
-                        P
-                    </div>
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI Pekanbaru" class="w-10 h-10 object-contain drop-shadow-xs">
                     <div class="leading-tight">
                         <span class="text-sm font-black text-gray-900 tracking-tight block">SMK PGRI</span>
                         <span class="text-[10px] font-extrabold text-brand-700 tracking-wider uppercase block">Perpustakaan</span>
