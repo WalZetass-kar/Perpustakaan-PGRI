@@ -50,9 +50,50 @@
         [x-cloak] { display: none !important; }
         html { scroll-behavior: smooth; }
         body { font-family: 'Poppins', sans-serif; overflow-x: hidden; }
+        
+        @keyframes skeleton-shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .skeleton-shimmer {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 1.5s infinite ease-in-out;
+        }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen font-sans">
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen font-sans relative">
+
+    <!-- Global Loading Skeleton Overlay -->
+    <div id="global-page-skeleton" class="fixed inset-0 z-[9999] bg-gray-50 flex flex-col transition-opacity duration-300 pointer-events-auto">
+        <div class="h-1 bg-brand-700 w-full animate-pulse"></div>
+        <!-- Skeleton Navbar -->
+        <div class="h-20 bg-white border-b border-gray-200 px-6 sm:px-8 flex items-center justify-between">
+            <div class="flex items-center gap-3.5">
+                <div class="w-12 h-12 rounded-xl skeleton-shimmer"></div>
+                <div class="space-y-1.5">
+                    <div class="w-36 h-4 rounded-md skeleton-shimmer"></div>
+                    <div class="w-24 h-3 rounded-md skeleton-shimmer"></div>
+                </div>
+            </div>
+            <div class="hidden md:flex gap-8">
+                <div class="w-20 h-4 rounded-md skeleton-shimmer"></div>
+                <div class="w-24 h-4 rounded-md skeleton-shimmer"></div>
+                <div class="w-20 h-4 rounded-md skeleton-shimmer"></div>
+            </div>
+            <div class="w-32 h-10 rounded-xl skeleton-shimmer"></div>
+        </div>
+        <!-- Skeleton Main Content -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-6 flex-1 overflow-hidden">
+            <div class="w-full h-64 rounded-3xl skeleton-shimmer"></div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 pt-2">
+                <div class="h-44 rounded-2xl skeleton-shimmer"></div>
+                <div class="h-44 rounded-2xl skeleton-shimmer"></div>
+                <div class="h-44 rounded-2xl skeleton-shimmer"></div>
+                <div class="h-44 rounded-2xl skeleton-shimmer"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- Header Navigation (Enlarged Top Bar Height & Poppins Font) -->
     <header class="bg-white/95 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 transition duration-300 shadow-xs">
@@ -213,14 +254,14 @@
                 });
             @endif
 
-            @if(session('warning'))
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Peringatan',
-                    text: "{{ session('warning') }}",
-                    confirmButtonColor: '#b91c1c'
-                });
-            @endif
+            // Dismiss Global Loading Skeleton
+            const skeleton = document.getElementById('global-page-skeleton');
+            if (skeleton) {
+                setTimeout(() => {
+                    skeleton.classList.add('opacity-0', 'pointer-events-none');
+                    setTimeout(() => skeleton.remove(), 350);
+                }, 120);
+            }
         });
 
         function confirmAction(event, titleText = 'Apakah Anda yakin?', messageText = 'Konfirmasi tindakan Anda.', confirmBtnText = 'Ya, Lanjutkan!') {

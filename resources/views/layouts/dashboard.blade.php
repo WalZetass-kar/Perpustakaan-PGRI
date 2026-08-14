@@ -60,15 +60,70 @@
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        @keyframes skeleton-shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .skeleton-shimmer {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 1.5s infinite ease-in-out;
+        }
     </style>
 </head>
-<body class="h-full font-sans antialiased text-gray-900 bg-gray-50 flex overflow-hidden" 
+<body class="h-full font-sans antialiased text-gray-900 bg-gray-50 flex overflow-hidden relative" 
       x-data="{ 
           sidebarOpen: false,
           openManageBuku: {{ request()->routeIs('admin.buku*', 'admin.kategori*', 'admin.penulis*', 'admin.penerbit*', 'admin.rak*') ? 'true' : 'false' }},
           openSirkulasi: {{ request()->routeIs('admin.peminjaman*', 'admin.riwayat*') ? 'true' : 'false' }},
           openSetting: {{ request()->routeIs('admin.pengaturan*', 'admin.anggota*', 'admin.audit-log*') ? 'true' : 'false' }}
       }">
+
+    <!-- Global Dashboard Skeleton Screen Preloader -->
+    <div id="global-dashboard-skeleton" class="fixed inset-0 z-[9999] bg-gray-50 flex overflow-hidden transition-opacity duration-300 pointer-events-auto">
+        <!-- Sidebar Skeleton -->
+        <div class="w-72 bg-white border-r-2 border-gray-200 hidden lg:flex flex-col p-5 space-y-6 shrink-0">
+            <div class="flex items-center gap-3 pb-4 border-b border-gray-100">
+                <div class="w-12 h-12 rounded-xl skeleton-shimmer shrink-0"></div>
+                <div class="space-y-2 flex-1">
+                    <div class="h-4 w-32 rounded-md skeleton-shimmer"></div>
+                    <div class="h-3 w-20 rounded-md skeleton-shimmer"></div>
+                </div>
+            </div>
+            <div class="space-y-3 flex-1">
+                <div class="h-10 w-full rounded-xl skeleton-shimmer"></div>
+                <div class="h-10 w-full rounded-xl skeleton-shimmer"></div>
+                <div class="h-10 w-full rounded-xl skeleton-shimmer"></div>
+                <div class="h-10 w-full rounded-xl skeleton-shimmer"></div>
+                <div class="h-10 w-full rounded-xl skeleton-shimmer"></div>
+            </div>
+            <div class="h-14 w-full rounded-xl skeleton-shimmer"></div>
+        </div>
+
+        <!-- Main Content Skeleton Area -->
+        <div class="flex-1 flex flex-col min-w-0">
+            <!-- Header Skeleton -->
+            <div class="h-20 bg-white border-b-2 border-gray-200 px-6 flex items-center justify-between">
+                <div class="h-6 w-48 rounded-md skeleton-shimmer"></div>
+                <div class="flex items-center gap-3">
+                    <div class="h-9 w-36 rounded-xl skeleton-shimmer"></div>
+                    <div class="h-10 w-10 rounded-full skeleton-shimmer"></div>
+                </div>
+            </div>
+
+            <!-- Page Body Skeleton -->
+            <div class="p-6 sm:p-8 space-y-6 flex-1 overflow-hidden">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="h-28 rounded-2xl bg-white border-2 border-gray-100 skeleton-shimmer"></div>
+                    <div class="h-28 rounded-2xl bg-white border-2 border-gray-100 skeleton-shimmer"></div>
+                    <div class="h-28 rounded-2xl bg-white border-2 border-gray-100 skeleton-shimmer"></div>
+                    <div class="h-28 rounded-2xl bg-white border-2 border-gray-100 skeleton-shimmer"></div>
+                </div>
+                <div class="h-80 rounded-2xl bg-white border-2 border-gray-100 skeleton-shimmer"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- Mobile Sidebar Backdrop Overlay -->
     <div x-show="sidebarOpen" @click="sidebarOpen = false" 
@@ -325,6 +380,17 @@
             });
             return false;
         }
+
+        // Dismiss Global Dashboard Loading Skeleton
+        document.addEventListener('DOMContentLoaded', () => {
+            const skeleton = document.getElementById('global-dashboard-skeleton');
+            if (skeleton) {
+                setTimeout(() => {
+                    skeleton.classList.add('opacity-0', 'pointer-events-none');
+                    setTimeout(() => skeleton.remove(), 350);
+                }, 120);
+            }
+        });
     </script>
 </body>
 </html>
