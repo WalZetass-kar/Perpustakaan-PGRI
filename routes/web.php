@@ -10,19 +10,24 @@ Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/katalog', [PublicController::class, 'katalog'])->name('katalog');
 Route::get('/buku/{id}', [PublicController::class, 'detailBuku'])->name('buku.detail');
 
-// Authentication Routes (with brute-force rate limiting)
+// Authentication Routes (Unified Admin Login with Rate Limiting)
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'loginSiswa'])->middleware('throttle:5,1');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
-Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
-Route::post('/register', [AuthController::class, 'registerSiswa'])->name('register.submit')->middleware('throttle:5,1');
+// Redirects for legacy endpoints
+Route::get('/admin/login', function () {
+    return redirect()->route('login');
+})->name('admin.login.form');
 
-Route::get('/admin/login', [AuthController::class, 'showAdminLoginForm'])->name('admin.login.form');
-Route::post('/admin/login', [AuthController::class, 'loginAdmin'])->name('admin.login')->middleware('throttle:5,1');
+Route::post('/admin/login', [AuthController::class, 'login'])->name('admin.login')->middleware('throttle:5,1');
+
+Route::get('/register', function () {
+    return redirect()->route('login');
+})->name('register');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Authenticated Main Routes (Semua pengguna login diperlakukan sebagai Admin / Pengelola Perpustakaan)
+// Authenticated Admin Routes (Seluruh pengguna login adalah Admin Perpustakaan)
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         return redirect()->route('admin.dashboard');

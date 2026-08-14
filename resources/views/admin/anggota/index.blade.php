@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Manajemen User & Anggota')
-@section('page_heading', 'Manajemen Data Pengguna & Anggota')
+@section('title', 'Manajemen Pengguna & Anggota')
+@section('page_heading', 'Manajemen Data Pengguna & Anggota Perpustakaan')
 
 @section('content')
 <div class="space-y-5" x-data="{ openAddModal: false, openEditModal: false, editData: {} }" x-init="openAddModal = false; openEditModal = false; editData = {}">
@@ -10,7 +10,7 @@
     <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
         <div>
             <h2 class="text-sm font-black text-gray-900">Daftar Pengguna & Anggota Terdaftar</h2>
-            <p class="text-[11px] text-gray-500 mt-0.5">Kelola seluruh akun pengelola dan anggota perpustakaan SMK PGRI Pekanbaru</p>
+            <p class="text-[11px] text-gray-500 mt-0.5">Kelola data seluruh pengelola dan anggota peminjam perpustakaan SMK PGRI Pekanbaru</p>
         </div>
         <div class="flex items-center gap-2 w-full sm:w-auto">
             <form action="{{ route('admin.anggota') }}" method="GET" class="relative flex-1 sm:w-72">
@@ -20,7 +20,7 @@
             </form>
             <button @click="openAddModal = true" class="px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0">
                 <svg class="w-3.5 h-3.5 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                <span>+ Tambah Anggota</span>
+                <span>+ Tambah Pengguna</span>
             </button>
         </div>
     </div>
@@ -34,7 +34,7 @@
                         <th class="py-3 px-4 font-bold">Identitas Pengguna</th>
                         <th class="py-3 px-4 font-bold">No. Anggota / NIS</th>
                         <th class="py-3 px-4 font-bold">Jurusan / Program Studi</th>
-                        <th class="py-3 px-4 font-bold">Peran (Role)</th>
+                        <th class="py-3 px-4 font-bold">Peran Akses</th>
                         <th class="py-3 px-4 font-bold">Status Akun</th>
                         <th class="py-3 px-4 font-bold text-right">Aksi</th>
                     </tr>
@@ -68,8 +68,8 @@
                                 {{ $anggota->program_studi ?? '-' }}
                             </td>
                             <td class="py-3 px-4">
-                                <span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-gray-100 text-gray-800 border border-gray-200 capitalize">
-                                    {{ $user->role->display_name ?? $user->role->name }}
+                                <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-brand-50 text-brand-700 border border-brand-200">
+                                    Admin Perpustakaan
                                 </span>
                             </td>
                             <td class="py-3 px-4">
@@ -85,7 +85,6 @@
                                     'name' => $user->name,
                                     'email' => $user->email,
                                     'phone' => $user->phone ?? '',
-                                    'role_id' => $user->role_id,
                                     'nim' => $anggota->nim ?? '',
                                     'program_studi' => $anggota->program_studi ?? '',
                                     'status' => $anggota->status ?? 'aktif'
@@ -122,8 +121,8 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-black text-gray-900">Registrasi Anggota Baru</h3>
-                        <p class="text-[10px] text-gray-500">Daftarkan akun anggota perpustakaan SMK PGRI</p>
+                        <h3 class="text-sm font-black text-gray-900">Tambah Akun Pengguna</h3>
+                        <p class="text-[10px] text-gray-500">Daftarkan akun Admin/Pengelola Perpustakaan</p>
                     </div>
                 </div>
                 <button @click="openAddModal = false" class="w-7 h-7 rounded-full bg-gray-200/70 hover:bg-gray-300 text-gray-600 flex items-center justify-center font-bold text-sm">&times;</button>
@@ -149,12 +148,8 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-bold text-gray-700 mb-1">Peran Akun <span class="text-rose-500">*</span></label>
-                        <select name="role_id" required class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                            @foreach($roles as $role)
-                                <option value="{{ $role->id }}">{{ $role->display_name ?? $role->name }}</option>
-                            @endforeach
-                        </select>
+                        <label class="block font-bold text-gray-700 mb-1">NIS / NIM / NIP <span class="text-rose-500">*</span></label>
+                        <input type="text" name="nim" required placeholder="Contoh: 20260012" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Nomor Telepon / WA</label>
@@ -164,26 +159,21 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-bold text-gray-700 mb-1">NIS / NIM / NIP <span class="text-rose-500">*</span></label>
-                        <input type="text" name="nim" required placeholder="Contoh: 20260012" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                    </div>
-                    <div>
                         <label class="block font-bold text-gray-700 mb-1">Jurusan / Program Studi <span class="text-rose-500">*</span></label>
                         <input type="text" name="program_studi" required placeholder="Contoh: Rekayasa Perangkat Lunak (RPL)" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                     </div>
-                </div>
-
-                <div>
-                    <label class="block font-bold text-gray-700 mb-1">Status Keanggotaan <span class="text-rose-500">*</span></label>
-                    <select name="status" required class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                        <option value="aktif">Aktif</option>
-                        <option value="nonaktif">Nonaktif</option>
-                    </select>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Status Keanggotaan <span class="text-rose-500">*</span></label>
+                        <select name="status" required class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                            <option value="aktif">Aktif</option>
+                            <option value="nonaktif">Nonaktif</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="pt-3 border-t border-gray-100 flex justify-end gap-2 shrink-0">
                     <button type="button" @click="openAddModal = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-xs">Batal</button>
-                    <button type="submit" class="px-5 py-2 bg-brand-700 text-white font-extrabold rounded-xl hover:bg-brand-800 text-xs">Simpan Anggota</button>
+                    <button type="submit" class="px-5 py-2 bg-brand-700 text-white font-extrabold rounded-xl hover:bg-brand-800 text-xs">Simpan Pengguna</button>
                 </div>
             </form>
         </div>
@@ -217,12 +207,8 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-bold text-gray-700 mb-1">Peran Akun <span class="text-rose-500">*</span></label>
-                        <select name="role_id" x-model="editData.role_id" required class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                            @foreach($roles as $role)
-                                <option value="{{ $role->id }}">{{ $role->display_name ?? $role->name }}</option>
-                            @endforeach
-                        </select>
+                        <label class="block font-bold text-gray-700 mb-1">NIS / NIM / NIP <span class="text-rose-500">*</span></label>
+                        <input type="text" name="nim" x-model="editData.nim" required class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Nomor Telepon</label>
@@ -232,21 +218,16 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-bold text-gray-700 mb-1">NIS / NIM / NIP <span class="text-rose-500">*</span></label>
-                        <input type="text" name="nim" x-model="editData.nim" required class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                    </div>
-                    <div>
                         <label class="block font-bold text-gray-700 mb-1">Jurusan / Program Studi <span class="text-rose-500">*</span></label>
                         <input type="text" name="program_studi" x-model="editData.program_studi" required class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                     </div>
-                </div>
-
-                <div>
-                    <label class="block font-bold text-gray-700 mb-1">Status Keanggotaan <span class="text-rose-500">*</span></label>
-                    <select name="status" x-model="editData.status" required class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                        <option value="aktif">Aktif</option>
-                        <option value="nonaktif">Nonaktif</option>
-                    </select>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Status Keanggotaan <span class="text-rose-500">*</span></label>
+                        <select name="status" x-model="editData.status" required class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                            <option value="aktif">Aktif</option>
+                            <option value="nonaktif">Nonaktif</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="pt-3 border-t border-gray-100 flex justify-end gap-2 shrink-0">

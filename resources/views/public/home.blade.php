@@ -26,16 +26,16 @@
                 </p>
                 <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
                     <a href="{{ route('katalog') }}" class="px-7 py-3.5 bg-white text-brand-700 font-extrabold text-xs rounded-xl hover:bg-gray-100 transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center gap-2 group">
-                        <span>Coba Sekarang</span>
+                        <span>Buka Katalog OPAC</span>
                         <svg class="w-4 h-4 text-emerald-600 transform group-hover:translate-x-1 transition duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </a>
                     @auth
                         <a href="{{ route('dashboard') }}" class="px-7 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-                            Dashboard Sistem
+                            Dashboard Pengelola
                         </a>
                     @else
-                        <a href="{{ route('login') }}" class="px-7 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-                            Masuk Akun
+                        <a href="#pusat-data-section" class="px-7 py-3.5 bg-white/10 hover:bg-white/20 border border-white/30 text-white font-extrabold text-xs rounded-xl transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                            Pusat Informasi
                         </a>
                     @endauth
                 </div>
@@ -261,13 +261,13 @@
         </p>
 
         <div class="flex flex-wrap items-center justify-center gap-4 pt-2 text-xs">
-            <a href="{{ route('katalog') }}" class="px-6 py-3 bg-white border border-gray-300 rounded-xl text-gray-800 font-bold hover:bg-gray-50 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1 flex items-center gap-2">
-                <svg class="w-4 h-4 text-brand-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                <span>Lihat Katalog</span>
+            <a href="{{ route('katalog') }}" class="px-6 py-3 bg-brand-700 text-white font-extrabold rounded-xl hover:bg-brand-800 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1 flex items-center gap-2">
+                <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                <span>Buka Katalog Koleksi Lengkap</span>
             </a>
-            <a href="{{ route('login') }}" class="px-6 py-3 bg-brand-700 text-white font-bold rounded-xl hover:bg-brand-800 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1 flex items-center gap-2">
-                <svg class="w-4 h-4 text-emerald-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                <span>Akses Portal Sistem</span>
+            <a href="#pusat-data-section" class="px-6 py-3 bg-white border border-gray-300 rounded-xl text-gray-800 font-bold hover:bg-gray-50 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1 flex items-center gap-2">
+                <svg class="w-4 h-4 text-brand-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>Informasi Layanan Perpustakaan</span>
             </a>
         </div>
     </div>

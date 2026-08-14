@@ -633,7 +633,6 @@ class AdminController extends Controller
             'name'          => 'required|string|max:255',
             'email'         => 'required|string|email|max:255|unique:users,email',
             'password'      => 'required|string|min:8',
-            'role_id'       => 'required|exists:roles,id',
             'phone'         => 'nullable|string|max:20',
             'nim'           => 'required|string|max:50|unique:anggota,nim',
             'program_studi' => 'required|string|max:150',
@@ -644,7 +643,7 @@ class AdminController extends Controller
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
-            'role_id'  => $request->role_id,
+            'role_id'  => 1, // Admin Perpustakaan
             'phone'    => $request->phone,
             'status'   => 'active',
         ]);
@@ -659,45 +658,42 @@ class AdminController extends Controller
             'status'        => $request->status,
         ]);
 
-        AuditLog::create([
-            'user_id'    => auth()->id(),
-            'user_name'  => auth()->user()->name,
-            'aktivitas'  => 'TAMBAH_USER',
-            'deskripsi'  => "Registrasi anggota/pengguna baru: {$user->name} ({$nomorAnggota})",
-            'ip_address' => $request->ip(),
-        ]);
-
-        return back()->with('success', 'Pengguna/anggota baru berhasil didaftarkan.');
+        return back()->with('success', 'Anggota/Pengguna baru berhasil didaftarkan.');
     }
 
     public function anggotaUpdate(Request $request, $id)
     {
         $user = User::findOrFail($id);
-        $anggota = $user->anggota;
-        $anggotaId = $anggota ? $anggota->id : 0;
-
         $request->validate([
             'name'          => 'required|string|max:255',
-            'email'         => 'required|email|unique:users,email,' . $user->id,
-            'role_id'       => 'required|exists:roles,id',
-            'phone'         => 'nullable|string',
-            'nim'           => 'required|unique:anggota,nim,' . $anggotaId,
-            'program_studi' => 'required|string',
+            'email'         => 'required|string|email|max:255|unique:users,email,' . $id,
+            'password'      => 'nullable|string|min:8',
+            'phone'         => 'nullable|string|max:20',
+            'nim'           => 'required|string|max:50|unique:anggota,nim,' . ($user->anggota->id ?? 0),
+            'program_studi' => 'required|string|max:150',
             'status'        => 'required|in:aktif,nonaktif,dibekukan',
         ]);
 
-        $user->update([
-            'name'    => $request->name,
-            'email'   => $request->email,
-            'role_id' => $request->role_id,
-            'phone'   => $request->phone,
-        ]);
+        $userData = [
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'phone'    => $request->phone,
+            'role_id'  => 1,
+        ];
 
         if ($request->filled('password')) {
-            $user->update(['password' => Hash::make($request->password)]);
+            $userData['password'] = Hash::make($request->password);
         }
 
-        if (!$anggota) {
+        $user->update($userData);
+
+        if ($user->anggota) {
+            $user->anggota->update([
+                'nim'           => $request->nim,
+                'program_studi' => $request->program_studi,
+                'status'        => $request->status,
+            ]);
+        } else {
             $nomorAnggota = 'LIB-' . date('Y') . '-' . str_pad($user->id, 3, '0', STR_PAD_LEFT);
             Anggota::create([
                 'user_id'       => $user->id,

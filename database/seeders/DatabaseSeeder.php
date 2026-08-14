@@ -27,10 +27,8 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Seed System Roles
-        $roleAdmin = Role::create(['name' => 'admin', 'display_name' => 'Administrator Utama']);
-        $rolePustakawan = Role::create(['name' => 'pustakawan', 'display_name' => 'Petugas Pustakawan']);
-        $roleSiswa = Role::create(['name' => 'mahasiswa', 'display_name' => 'Siswa / Anggota']);
+        // 1. Seed System Roles (Admin Perpustakaan Only)
+        $roleAdmin = Role::create(['name' => 'admin', 'display_name' => 'Admin Perpustakaan']);
 
         // 2. Seed System Permissions
         $permissions = [
