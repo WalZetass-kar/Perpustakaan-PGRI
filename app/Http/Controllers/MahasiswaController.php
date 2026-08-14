@@ -18,7 +18,7 @@ use Illuminate\Support\Str;
 
 class MahasiswaController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $user = auth()->user();
         
@@ -43,17 +43,34 @@ class MahasiswaController extends Controller
             ->whereIn('status', ['menunggu', 'tersedia'])
             ->get();
 
-        $recommendations = Buku::with(['penulis', 'kategori'])
-            ->orderBy('view_count', 'desc')
-            ->take(4)
-            ->get();
+        $search = $request->get('search');
+        $kategoriId = $request->get('kategori_id');
+
+        $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak']);
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                  ->orWhere('isbn', 'like', "%{$search}%")
+                  ->orWhereHas('penulis', function($p) use ($search) {
+                      $p->where('nama', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        if ($kategoriId) {
+            $query->where('kategori_id', $kategoriId);
+        }
+
+        $koleksiBuku = $query->latest()->paginate(8)->withQueryString();
+        $kategoriList = Kategori::orderBy('nama', 'asc')->get();
 
         $recentActivities = AuditLog::where('user_id', $user->id)
             ->latest()
             ->take(5)
             ->get();
 
-        return view('mahasiswa.dashboard', compact('activeLoans', 'nearingDueLoans', 'totalFines', 'activeReservations', 'recommendations', 'recentActivities'));
+        return view('mahasiswa.dashboard', compact('activeLoans', 'nearingDueLoans', 'totalFines', 'activeReservations', 'koleksiBuku', 'kategoriList', 'recentActivities'));
     }
 
     public function peminjamanSaya()
