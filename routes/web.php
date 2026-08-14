@@ -10,19 +10,22 @@ Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/katalog', [PublicController::class, 'katalog'])->name('katalog');
 Route::get('/buku/{id}', [PublicController::class, 'detailBuku'])->name('buku.detail');
 
-// Authentication Routes (Unified Admin Login with Rate Limiting)
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+// Authentication Routes (Custom Admin Secret URL: /aksesperpuspgri)
+Route::get('/aksesperpuspgri', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/aksesperpuspgri', [AuthController::class, 'login'])->name('login.post')->middleware('throttle:5,1');
 
-// Redirects for legacy endpoints
+// Redirect common exposed endpoints to home for stealth security
+Route::get('/login', function () {
+    return redirect()->route('home');
+});
+Route::post('/login', function () {
+    return redirect()->route('home');
+});
 Route::get('/admin/login', function () {
-    return redirect()->route('login');
+    return redirect()->route('home');
 })->name('admin.login.form');
-
-Route::post('/admin/login', [AuthController::class, 'login'])->name('admin.login')->middleware('throttle:5,1');
-
 Route::get('/register', function () {
-    return redirect()->route('login');
+    return redirect()->route('home');
 })->name('register');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
