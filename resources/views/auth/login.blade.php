@@ -48,15 +48,18 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 relative overflow-hidden font-sans">
+<body class="bg-gradient-to-br from-brand-950 via-brand-900 to-red-950 min-h-screen flex items-center justify-center p-4 sm:p-6 relative overflow-hidden font-sans text-gray-900">
 
-    <!-- Ambient Glowing Background Orbs -->
-    <div class="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-15 pointer-events-none" style="background-image: url('https://smkpgripekanbaru.sch.id/images/pgri.webp');"></div>
-    <div class="absolute -top-32 -right-32 w-96 h-96 bg-brand-700/15 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
-    <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-red-600/10 rounded-full blur-3xl pointer-events-none animate-bounce" style="animation-duration: 8s;"></div>
+    <!-- SMK PGRI Background Image with Red Overlay (Identical to Hero Section) -->
+    <div class="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-35 pointer-events-none transform scale-105 transition duration-1000" style="background-image: url('https://smkpgripekanbaru.sch.id/images/pgri.webp');"></div>
 
-    <!-- Main Container Card -->
-    <div class="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-gray-200 grid grid-cols-1 md:grid-cols-12 transition-all duration-300">
+    <!-- Floating Glowing Orbs -->
+    <div class="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none animate-bounce" style="animation-duration: 8s;"></div>
+    <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-red-500/20 rounded-full blur-3xl pointer-events-none animate-pulse" style="animation-duration: 6s;"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-700/15 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- Main Container Card with Glassmorphism Border -->
+    <div class="relative w-full max-w-4xl bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20 grid grid-cols-1 md:grid-cols-12 z-10 transition-all duration-300">
         
         <!-- Left Side: Brand Banner -->
         <div class="md:col-span-5 bg-gradient-to-br from-brand-800 via-brand-700 to-red-900 text-white p-8 sm:p-10 flex flex-col justify-between relative">
@@ -88,7 +91,7 @@
         </div>
 
         <!-- Right Side: Login Form -->
-        <div class="md:col-span-7 p-8 sm:p-10 flex flex-col justify-center space-y-6 bg-white">
+        <div class="md:col-span-7 p-8 sm:p-10 flex flex-col justify-center space-y-6 bg-white/95">
             <div>
                 <h3 class="text-xl font-extrabold text-gray-900">Autentikasi Pengelola</h3>
                 <p class="text-xs text-gray-500 mt-1">Masukkan kredensial akun Admin Perpustakaan Anda.</p>
