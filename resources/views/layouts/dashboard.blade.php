@@ -262,13 +262,13 @@
         
         <!-- Top App Bar with Strong Border Divider & Shadow -->
         <header class="h-20 bg-white border-b-2 border-gray-200/90 flex items-center justify-between px-4 sm:px-6 lg:px-8 z-10 shrink-0 shadow-2xs">
-            <div class="flex items-center gap-3.5">
-                <button @click="sidebarOpen = true" class="lg:hidden p-2 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            <div class="flex items-center gap-2.5 min-w-0 pr-2">
+                <button @click="sidebarOpen = true" class="lg:hidden p-2 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
-                <div>
-                    <h1 class="text-base sm:text-lg font-black text-gray-900 truncate tracking-tight">@yield('page_heading', 'Overview')</h1>
-                    <p class="text-[11px] text-gray-500 font-medium hidden sm:block">Perpustakaan SMK PGRI Pekanbaru</p>
+                <div class="min-w-0">
+                    <h1 class="text-xs sm:text-base font-black text-gray-900 truncate tracking-tight leading-tight">@yield('page_heading', 'Overview')</h1>
+                    <p class="text-[10px] sm:text-[11px] text-gray-500 font-medium truncate hidden sm:block">Perpustakaan SMK PGRI Pekanbaru</p>
                 </div>
             </div>
 
