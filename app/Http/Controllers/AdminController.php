@@ -702,12 +702,6 @@ class AdminController extends Controller
                 'program_studi' => $request->program_studi,
                 'status'        => $request->status,
             ]);
-        } else {
-            $anggota->update([
-                'nim'           => $request->nim,
-                'program_studi' => $request->program_studi,
-                'status'        => $request->status,
-            ]);
         }
 
         return back()->with('success', 'Data anggota/pengguna berhasil diperbarui.');
