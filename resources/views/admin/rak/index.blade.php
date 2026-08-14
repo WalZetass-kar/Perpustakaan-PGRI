@@ -10,10 +10,10 @@
     <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
         <div>
             <h2 class="text-sm font-black text-gray-900">Daftar Rak Lokasi Fisik Terdaftar</h2>
-            <p class="text-[11px] text-gray-500 mt-0.5">Kelola posisi rak buku di dalam Ruang Utama Perpustakaan SMK PGRI Pekanbaru</p>
+            <p class="text-[11px] text-gray-500 mt-0.5">Kelola posisi rak buku di dalam Ruang Perpustakaan SMK PGRI Pekanbaru</p>
         </div>
-        <button @click="openAddModal = true" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-300 shadow-md hover:shadow-lg transform active:scale-95 flex items-center gap-2">
-            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        <button @click="openAddModal = true" class="px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             <span>+ Tambah Rak Baru</span>
         </button>
     </div>
@@ -41,7 +41,7 @@
                                 </span>
                             </td>
                             <td class="py-3 px-4 font-bold text-gray-900">{{ $rak->nama_rak }}</td>
-                            <td class="py-3 px-4 text-gray-700 font-bold max-w-xs truncate">{{ $rak->lokasi }}</td>
+                            <td class="py-3 px-4 text-gray-700 font-medium max-w-xs truncate">{{ $rak->lokasi ?? '-' }}</td>
                             <td class="py-3 px-4">
                                 <span class="px-2 py-0.5 rounded-lg text-[10px] font-extrabold bg-brand-50 text-brand-700 border border-brand-200">
                                     {{ $rak->kategori->nama ?? 'Semua Kategori' }}
@@ -57,7 +57,7 @@
                                     'id' => $rak->id,
                                     'kode_rak' => $rak->kode_rak,
                                     'nama_rak' => $rak->nama_rak,
-                                    'lokasi' => $rak->lokasi,
+                                    'lokasi' => $rak->lokasi ?? '',
                                     'kategori_id' => $rak->kategori_id
                                 ]) }}; openEditModal = true" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs">
                                     Edit
@@ -80,115 +80,79 @@
         </div>
     </div>
 
-    <!-- Modal Form Tambah Rak (Compact & Fully Visible) -->
-    <div x-show="openAddModal" @click.self="openAddModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 scale-95"
-         x-transition:enter-end="opacity-100 scale-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100 scale-100"
-         x-transition:leave-end="opacity-0 scale-95"
-         x-cloak>
+    <!-- Modal Form Tambah Rak -->
+    <div x-show="openAddModal" @click.self="openAddModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto" x-cloak>
         <div @click.stop class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl border-2 border-gray-200 overflow-hidden transform transition-all my-auto">
-            <!-- Modal Header -->
             <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-gray-50/70">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-brand-50 border border-brand-200 text-brand-700 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-black text-gray-900">Tambah Rak Lokasi Baru</h3>
-                        <p class="text-[10px] text-gray-500">Masukkan identitas kode dan posisi rak</p>
-                    </div>
-                </div>
-                <button @click="openAddModal = false" class="w-7 h-7 rounded-full bg-gray-200/70 hover:bg-gray-300 text-gray-600 hover:text-gray-900 flex items-center justify-center transition font-bold text-sm">&times;</button>
+                <h3 class="text-sm font-black text-gray-900">Tambah Rak Lokasi Baru</h3>
+                <button @click="openAddModal = false" class="w-7 h-7 rounded-full bg-gray-200/70 hover:bg-gray-300 text-gray-600 flex items-center justify-center font-bold text-sm">&times;</button>
             </div>
 
-            <!-- Modal Body (Scrollable Form) -->
             <form action="{{ route('admin.rak.store') }}" method="POST" class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 text-xs">
                 @csrf
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">Kode Rak <span class="text-rose-500">*</span></label>
-                    <input type="text" name="kode_rak" required placeholder="Contoh: RAK-RPL-01" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:border-brand-700 focus:bg-white focus:outline-none font-medium">
+                    <input type="text" name="kode_rak" required placeholder="Contoh: RAK-RPL-01" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                 </div>
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">Nama Rak <span class="text-rose-500">*</span></label>
-                    <input type="text" name="nama_rak" required placeholder="Contoh: Rak Pemrograman & Web" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:border-brand-700 focus:bg-white focus:outline-none font-medium">
+                    <input type="text" name="nama_rak" required placeholder="Contoh: Rak Pemrograman & Web" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                 </div>
                 <div>
-                    <label class="block font-bold text-gray-700 mb-1">Posisi Ruang Perpustakaan <span class="text-rose-500">*</span></label>
-                    <input type="text" name="lokasi" required placeholder="Contoh: Baris Depan - Samping Meja Pustakawan" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:border-brand-700 focus:bg-white focus:outline-none font-medium">
+                    <label class="block font-bold text-gray-700 mb-1">Posisi Ruang Perpustakaan (Opsional)</label>
+                    <input type="text" name="lokasi" placeholder="Contoh: Baris Depan - Samping Meja Pustakawan" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                 </div>
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">Kategori Spesifik (Opsional)</label>
-                    <select name="kategori_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:border-brand-700 focus:bg-white focus:outline-none font-medium">
+                    <select name="kategori_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                         <option value="">Semua Kategori</option>
                         @foreach($kategoriList as $kat)
                             <option value="{{ $kat->id }}">{{ $kat->nama }}</option>
                         @endforeach
                     </select>
                 </div>
-                <!-- Modal Footer (Sticky) -->
                 <div class="pt-3 border-t border-gray-100 flex justify-end gap-2 shrink-0">
-                    <button type="button" @click="openAddModal = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition text-xs">Batal</button>
-                    <button type="submit" class="px-5 py-2 bg-brand-700 text-white font-extrabold rounded-xl hover:bg-brand-800 transition shadow-md hover:shadow-lg transform active:scale-95 text-xs">Simpan Rak</button>
+                    <button type="button" @click="openAddModal = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-xs">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-brand-700 text-white font-extrabold rounded-xl hover:bg-brand-800 text-xs">Simpan Rak</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal Form Edit Rak (Compact & Fully Visible) -->
-    <div x-show="openEditModal" @click.self="openEditModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 scale-95"
-         x-transition:enter-end="opacity-100 scale-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100 scale-100"
-         x-transition:leave-end="opacity-0 scale-95"
-         x-cloak>
+    <!-- Modal Form Edit Rak -->
+    <div x-show="openEditModal" @click.self="openEditModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto" x-cloak>
         <div @click.stop class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl border-2 border-gray-200 overflow-hidden transform transition-all my-auto">
-            <!-- Modal Header -->
             <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-amber-50/50">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-black text-gray-900">Edit Data Rak</h3>
-                        <p class="text-[10px] text-gray-500">Perbarui rincian lokasi rak</p>
-                    </div>
-                </div>
-                <button @click="openEditModal = false" class="w-7 h-7 rounded-full bg-gray-200/70 hover:bg-gray-300 text-gray-600 hover:text-gray-900 flex items-center justify-center transition font-bold text-sm">&times;</button>
+                <h3 class="text-sm font-black text-gray-900">Edit Data Rak</h3>
+                <button @click="openEditModal = false" class="w-7 h-7 rounded-full bg-gray-200/70 hover:bg-gray-300 text-gray-600 flex items-center justify-center font-bold text-sm">&times;</button>
             </div>
 
-            <!-- Modal Body (Scrollable Form) -->
             <form :action="'{{ url('/admin/rak/update') }}/' + editData.id" method="POST" class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 text-xs">
                 @csrf
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">Kode Rak <span class="text-rose-500">*</span></label>
-                    <input type="text" name="kode_rak" x-model="editData.kode_rak" required class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:border-brand-700 focus:bg-white focus:outline-none font-medium">
+                    <input type="text" name="kode_rak" x-model="editData.kode_rak" required class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                 </div>
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">Nama Rak <span class="text-rose-500">*</span></label>
-                    <input type="text" name="nama_rak" x-model="editData.nama_rak" required class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:border-brand-700 focus:bg-white focus:outline-none font-medium">
+                    <input type="text" name="nama_rak" x-model="editData.nama_rak" required class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                 </div>
                 <div>
-                    <label class="block font-bold text-gray-700 mb-1">Posisi Ruang Perpustakaan <span class="text-rose-500">*</span></label>
-                    <input type="text" name="lokasi" x-model="editData.lokasi" required class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:border-brand-700 focus:bg-white focus:outline-none font-medium">
+                    <label class="block font-bold text-gray-700 mb-1">Posisi Ruang Perpustakaan (Opsional)</label>
+                    <input type="text" name="lokasi" x-model="editData.lokasi" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                 </div>
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">Kategori Spesifik (Opsional)</label>
-                    <select name="kategori_id" x-model="editData.kategori_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:border-brand-700 focus:bg-white focus:outline-none font-medium">
+                    <select name="kategori_id" x-model="editData.kategori_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                         <option value="">Semua Kategori</option>
                         @foreach($kategoriList as $kat)
                             <option value="{{ $kat->id }}">{{ $kat->nama }}</option>
                         @endforeach
                     </select>
                 </div>
-                <!-- Modal Footer (Sticky) -->
                 <div class="pt-3 border-t border-gray-100 flex justify-end gap-2 shrink-0">
-                    <button type="button" @click="openEditModal = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition text-xs">Batal</button>
-                    <button type="submit" class="px-5 py-2 bg-brand-700 text-white font-extrabold rounded-xl hover:bg-brand-800 transition shadow-md hover:shadow-lg transform active:scale-95 text-xs">Simpan Perubahan</button>
+                    <button type="button" @click="openEditModal = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-xs">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-brand-700 text-white font-extrabold rounded-xl hover:bg-brand-800 text-xs">Simpan Perubahan</button>
                 </div>
             </form>
         </div>

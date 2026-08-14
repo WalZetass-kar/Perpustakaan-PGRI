@@ -298,9 +298,9 @@
             <div x-show="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 @forelse($buku as $item)
                     @php
-                        $available = $item->jumlah_tersedia;
-                        $totalEx = $item->jumlah_eksemplar;
-                        $coverUrl = $item->cover ? asset('storage/' . $item->cover) : null;
+                        $available = $item->available_quantity;
+                        $totalEx = $item->total_quantity;
+                        $coverUrl = $item->cover_url;
                     @endphp
 
                     <div class="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden shadow-2xs hover:shadow-lg hover:border-brand-700 transition duration-300 flex flex-col justify-between group">
@@ -353,12 +353,12 @@
                                         'penulis' => $item->penulis->nama ?? '-',
                                         'penerbit' => $item->penerbit->nama ?? '-',
                                         'tahun' => (string) $item->tahun_terbit,
-                                        'isbn' => (string) $item->isbn,
+                                        'isbn' => (string) ($item->isbn ?? 'Tanpa ISBN'),
                                         'kategori' => $item->kategori->nama ?? 'Umum',
                                         'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
-                                        'sinopsis' => $item->sinopsis ?? 'Modul pembelajaran resmi SMK PGRI Pekanbaru.',
-                                        'tersedia' => $item->jumlah_tersedia,
-                                        'total' => $item->jumlah_eksemplar,
+                                        'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi SMK PGRI Pekanbaru.',
+                                        'tersedia' => $item->available_quantity,
+                                        'total' => $item->total_quantity,
                                         'cover' => $coverUrl ?? ''
                                     ]) }}; openDetailModal = true" class="text-left hover:underline">
                                         {{ $item->judul }}
@@ -387,12 +387,12 @@
                                 'penulis' => $item->penulis->nama ?? '-',
                                 'penerbit' => $item->penerbit->nama ?? '-',
                                 'tahun' => (string) $item->tahun_terbit,
-                                'isbn' => (string) $item->isbn,
+                                'isbn' => (string) ($item->isbn ?? 'Tanpa ISBN'),
                                 'kategori' => $item->kategori->nama ?? 'Umum',
                                 'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
-                                'sinopsis' => $item->sinopsis ?? 'Modul pembelajaran resmi SMK PGRI Pekanbaru.',
-                                'tersedia' => $item->jumlah_tersedia,
-                                'total' => $item->jumlah_eksemplar,
+                                'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi SMK PGRI Pekanbaru.',
+                                'tersedia' => $item->available_quantity,
+                                'total' => $item->total_quantity,
                                 'cover' => $coverUrl ?? ''
                             ]) }}; openDetailModal = true" class="px-3 py-1.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-[11px] rounded-lg transition shadow-2xs">
                                 Lihat Detail
@@ -428,9 +428,9 @@
             <div x-show="viewMode === 'list'" class="space-y-4">
                 @forelse($buku as $item)
                     @php
-                        $available = $item->jumlah_tersedia;
-                        $totalEx = $item->jumlah_eksemplar;
-                        $coverUrl = $item->cover ? asset('storage/' . $item->cover) : null;
+                        $available = $item->available_quantity;
+                        $totalEx = $item->total_quantity;
+                        $coverUrl = $item->cover_url;
                     @endphp
 
                     <div class="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden p-4 shadow-2xs hover:border-brand-700 transition duration-300 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -455,12 +455,12 @@
                                         'penulis' => $item->penulis->nama ?? '-',
                                         'penerbit' => $item->penerbit->nama ?? '-',
                                         'tahun' => (string) $item->tahun_terbit,
-                                        'isbn' => (string) $item->isbn,
+                                        'isbn' => (string) ($item->isbn ?? 'Tanpa ISBN'),
                                         'kategori' => $item->kategori->nama ?? 'Umum',
                                         'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
-                                        'sinopsis' => $item->sinopsis ?? 'Modul pembelajaran resmi SMK PGRI Pekanbaru.',
-                                        'tersedia' => $item->jumlah_tersedia,
-                                        'total' => $item->jumlah_eksemplar,
+                                        'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi SMK PGRI Pekanbaru.',
+                                        'tersedia' => $item->available_quantity,
+                                        'total' => $item->total_quantity,
                                         'cover' => $coverUrl ?? ''
                                     ]) }}; openDetailModal = true" class="text-left hover:text-brand-700 hover:underline">
                                         {{ $item->judul }}
@@ -482,12 +482,12 @@
                                 'penulis' => $item->penulis->nama ?? '-',
                                 'penerbit' => $item->penerbit->nama ?? '-',
                                 'tahun' => (string) $item->tahun_terbit,
-                                'isbn' => (string) $item->isbn,
+                                'isbn' => (string) ($item->isbn ?? 'Tanpa ISBN'),
                                 'kategori' => $item->kategori->nama ?? 'Umum',
                                 'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
-                                'sinopsis' => $item->sinopsis ?? 'Modul pembelajaran resmi SMK PGRI Pekanbaru.',
-                                'tersedia' => $item->jumlah_tersedia,
-                                'total' => $item->jumlah_eksemplar,
+                                'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi SMK PGRI Pekanbaru.',
+                                'tersedia' => $item->available_quantity,
+                                'total' => $item->total_quantity,
                                 'cover' => $coverUrl ?? ''
                             ]) }}; openDetailModal = true" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-xs rounded-xl transition shadow-2xs">
                                 Lihat Detail

@@ -1,164 +1,191 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Dashboard Administrator')
-@section('page_heading', 'Dashboard Administrator Utama')
+@section('title', 'Dashboard Perpustakaan')
+@section('page_heading', 'Dashboard Overview Perpustakaan')
 
 @section('content')
 <div class="space-y-6">
 
-    <!-- Primary Stats Grid (Prominent 2px Border Cards with Hover Shadows) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        
-        <!-- Card 1: Total Judul Buku -->
-        <div class="bg-white p-5 rounded-2xl border-2 border-gray-200 shadow-sm hover:border-brand-300 hover:shadow-md transition duration-300 flex items-center justify-between group">
-            <div class="space-y-1">
-                <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">Total Judul Buku</span>
-                <span class="text-2xl sm:text-3xl font-black text-gray-900 group-hover:text-brand-700 transition">{{ number_format($stats['total_buku']) }}</span>
-                <span class="text-[10px] text-gray-400 font-medium block">Koleksi Terdaftar</span>
-            </div>
-            <div class="w-12 h-12 rounded-2xl bg-brand-50 border border-brand-100 text-brand-700 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-110 transition duration-300">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-            </div>
+    <!-- Quick Action Bar -->
+    <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div>
+            <h2 class="text-sm font-black text-gray-900">Aksi Cepat Perpustakaan</h2>
+            <p class="text-[11px] text-gray-500 mt-0.5">Pintasan transaksi dan penambahan data master utama</p>
         </div>
-
-        <!-- Card 2: Total Eksemplar -->
-        <div class="bg-white p-5 rounded-2xl border-2 border-gray-200 shadow-sm hover:border-blue-300 hover:shadow-md transition duration-300 flex items-center justify-between group">
-            <div class="space-y-1">
-                <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">Total Eksemplar</span>
-                <span class="text-2xl sm:text-3xl font-black text-gray-900 group-hover:text-blue-700 transition">{{ number_format($stats['total_eksemplar']) }}</span>
-                <span class="text-[10px] text-gray-400 font-medium block">Fisik Buku Unik</span>
-            </div>
-            <div class="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 text-blue-700 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-110 transition duration-300">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-            </div>
-        </div>
-
-        <!-- Card 3: Anggota Terdaftar -->
-        <div class="bg-white p-5 rounded-2xl border-2 border-gray-200 shadow-sm hover:border-emerald-300 hover:shadow-md transition duration-300 flex items-center justify-between group">
-            <div class="space-y-1">
-                <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">Anggota Terdaftar</span>
-                <span class="text-2xl sm:text-3xl font-black text-gray-900 group-hover:text-emerald-700 transition">{{ number_format($stats['total_anggota']) }}</span>
-                <span class="text-[10px] text-gray-400 font-medium block">Siswa &amp; Anggota Active</span>
-            </div>
-            <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-110 transition duration-300">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-            </div>
-        </div>
-
-        <!-- Card 4: Total Kas Denda -->
-        <div class="bg-white p-5 rounded-2xl border-2 border-gray-200 shadow-sm hover:border-rose-300 hover:shadow-md transition duration-300 flex items-center justify-between group">
-            <div class="space-y-1">
-                <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">Total Kas Denda</span>
-                <span class="text-xl sm:text-2xl font-black text-brand-700 block">Rp {{ number_format($stats['total_denda'], 0, ',', '.') }}</span>
-                <span class="text-[10px] text-gray-400 font-medium block">Akumulasi Penerimaan</span>
-            </div>
-            <div class="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-100 text-rose-700 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-110 transition duration-300">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="{{ route('admin.peminjaman') }}" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs rounded-xl transition shadow-sm flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span>+ Peminjaman Baru</span>
+            </a>
+            <a href="{{ route('admin.buku') }}" class="px-3.5 py-2 bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-xs rounded-xl transition shadow-sm flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                <span>+ Tambah Buku</span>
+            </a>
+            <a href="{{ route('admin.kategori') }}" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl transition">
+                Kelola Kategori
+            </a>
+            <a href="{{ route('admin.rak') }}" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl transition">
+                Kelola Rak
+            </a>
         </div>
     </div>
 
-    <!-- Analytics & Most Borrowed Books Grid (2px Border Containers) -->
+    <!-- 1. SIRKULASI HARI INI (Statistik Live Hari Ini) -->
+    <div>
+        <h3 class="text-xs font-black text-gray-500 uppercase tracking-wider mb-3">Sirkulasi Hari Ini ({{ date('d M Y') }})</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            
+            <div class="p-4 sm:p-5 rounded-2xl bg-white border-2 border-gray-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <span class="text-[11px] font-bold text-gray-500 block">Peminjaman Hari Ini</span>
+                    <span class="text-2xl font-black text-amber-600 mt-1 block">{{ $stats['peminjaman_hari_ini'] }} Transaksi</span>
+                    <span class="text-[10px] text-gray-400 font-medium">Buku dipinjam hari ini</span>
+                </div>
+                <div class="w-11 h-11 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center font-bold">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                </div>
+            </div>
+
+            <div class="p-4 sm:p-5 rounded-2xl bg-white border-2 border-gray-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <span class="text-[11px] font-bold text-gray-500 block">Buku Sedang Dipinjam</span>
+                    <span class="text-2xl font-black text-brand-700 mt-1 block">{{ $stats['buku_sedang_dipinjam'] }} Buku</span>
+                    <span class="text-[10px] text-gray-400 font-medium">Belum dikembalikan</span>
+                </div>
+                <div class="w-11 h-11 rounded-2xl bg-brand-50 border border-brand-200 text-brand-700 flex items-center justify-center font-bold">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+            </div>
+
+            <div class="p-4 sm:p-5 rounded-2xl bg-white border-2 border-gray-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <span class="text-[11px] font-bold text-gray-500 block">Pengembalian Hari Ini</span>
+                    <span class="text-2xl font-black text-emerald-600 mt-1 block">{{ $stats['pengembalian_hari_ini'] }} Transaksi</span>
+                    <span class="text-[10px] text-gray-400 font-medium">Sudah kembali ke rak</span>
+                </div>
+                <div class="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center font-bold">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 2. MASTER DATA OVERVIEW (Grid 6 Cards) -->
+    <div>
+        <h3 class="text-xs font-black text-gray-500 uppercase tracking-wider mb-3">Master Koleksi & Inventaris Fisik</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            
+            <a href="{{ route('admin.buku') }}" class="p-4 rounded-2xl bg-white border-2 border-gray-200 shadow-sm hover:border-brand-300 transition block">
+                <span class="text-[10.5px] font-bold text-gray-500 block">Total Judul</span>
+                <span class="text-xl font-black text-gray-900 mt-1 block">{{ $stats['total_judul'] }}</span>
+                <span class="text-[9.5px] text-brand-700 font-bold block mt-0.5">Judul Buku &rarr;</span>
+            </a>
+
+            <a href="{{ route('admin.buku') }}" class="p-4 rounded-2xl bg-white border-2 border-gray-200 shadow-sm hover:border-brand-300 transition block">
+                <span class="text-[10.5px] font-bold text-gray-500 block">Total Fisik Buku</span>
+                <span class="text-xl font-black text-gray-900 mt-1 block">{{ $stats['total_buku'] }}</span>
+                <span class="text-[9.5px] text-emerald-600 font-bold block mt-0.5">{{ $stats['buku_tersedia'] }} Tersedia</span>
+            </a>
+
+            <a href="{{ route('admin.kategori') }}" class="p-4 rounded-2xl bg-white border-2 border-gray-200 shadow-sm hover:border-brand-300 transition block">
+                <span class="text-[10.5px] font-bold text-gray-500 block">Kategori</span>
+                <span class="text-xl font-black text-gray-900 mt-1 block">{{ $stats['total_kategori'] }}</span>
+                <span class="text-[9.5px] text-gray-400 font-bold block mt-0.5">Klasifikasi &rarr;</span>
+            </a>
+
+            <a href="{{ route('admin.penulis') }}" class="p-4 rounded-2xl bg-white border-2 border-gray-200 shadow-sm hover:border-brand-300 transition block">
+                <span class="text-[10.5px] font-bold text-gray-500 block">Penulis</span>
+                <span class="text-xl font-black text-gray-900 mt-1 block">{{ $stats['total_penulis'] }}</span>
+                <span class="text-[9.5px] text-gray-400 font-bold block mt-0.5">Pengarang &rarr;</span>
+            </a>
+
+            <a href="{{ route('admin.penerbit') }}" class="p-4 rounded-2xl bg-white border-2 border-gray-200 shadow-sm hover:border-brand-300 transition block">
+                <span class="text-[10.5px] font-bold text-gray-500 block">Penerbit</span>
+                <span class="text-xl font-black text-gray-900 mt-1 block">{{ $stats['total_penerbit'] }}</span>
+                <span class="text-[9.5px] text-gray-400 font-bold block mt-0.5">Percetakan &rarr;</span>
+            </a>
+
+            <a href="{{ route('admin.rak') }}" class="p-4 rounded-2xl bg-white border-2 border-gray-200 shadow-sm hover:border-brand-300 transition block">
+                <span class="text-[10.5px] font-bold text-gray-500 block">Rak Lokasi</span>
+                <span class="text-xl font-black text-gray-900 mt-1 block">{{ $stats['total_rak'] }}</span>
+                <span class="text-[9.5px] text-gray-400 font-bold block mt-0.5">Posisi Ruang &rarr;</span>
+            </a>
+
+        </div>
+    </div>
+
+    <!-- 3. PEMINJAMAN TERBARU & AUDIT AKTIVITAS -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        <!-- Clean Bar Graph Simulation (Statistik Tren 7 Hari) -->
-        <div class="lg:col-span-2 bg-white rounded-2xl border-2 border-gray-200 p-6 shadow-sm space-y-4">
-            <div class="flex items-center justify-between border-b-2 border-gray-100 pb-4">
+        <!-- Peminjaman Terbaru (2 Kolom) -->
+        <div class="lg:col-span-2 bg-white rounded-2xl border-2 border-gray-200 shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
                 <div>
-                    <h3 class="text-sm font-black text-gray-900">Statistik Sirkulasi 7 Hari Terakhir</h3>
-                    <p class="text-[11px] text-gray-500 mt-0.5">Grafik perbandingan transaksi peminjaman dan pengembalian</p>
+                    <h3 class="text-xs font-black text-gray-900 uppercase">Peminjaman Terbaru</h3>
+                    <p class="text-[10.5px] text-gray-500">Daftar transaksi sirkulasi buku terkini</p>
                 </div>
-                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-brand-50 text-brand-700 border border-brand-100 uppercase tracking-wider">
-                    Realtime Metrics
-                </span>
+                <a href="{{ route('admin.peminjaman') }}" class="text-[11px] font-extrabold text-brand-700 hover:underline">Lihat Semua &rarr;</a>
             </div>
-
-            <div class="h-52 flex items-end justify-between gap-3 pt-6 px-2 border-b-2 border-gray-200">
-                @foreach($chartDates as $index => $dateStr)
-                    @php
-                        $lCount = $chartLoans[$index] ?? 0;
-                        $rCount = $chartReturns[$index] ?? 0;
-                        $lHeight = min($lCount * 30 + 12, 150);
-                        $rHeight = min($rCount * 30 + 12, 150);
-                    @endphp
-                    <div class="flex-1 flex flex-col items-center gap-1 group">
-                        <div class="w-full flex items-end justify-center gap-1.5">
-                            <div style="height: {{ $lHeight }}px" class="w-1/2 bg-brand-700 rounded-t-md transition-all duration-300 group-hover:bg-brand-800 shadow-2xs" title="Pinjam: {{ $lCount }}"></div>
-                            <div style="height: {{ $rHeight }}px" class="w-1/2 bg-emerald-600 rounded-t-md transition-all duration-300 group-hover:bg-emerald-700 shadow-2xs" title="Kembali: {{ $rCount }}"></div>
-                        </div>
-                        <span class="text-[10px] font-bold text-gray-600 mt-2">{{ $dateStr }}</span>
-                    </div>
-                @endforeach
-            </div>
-
-            <div class="flex items-center justify-center gap-6 text-xs font-bold text-gray-700 pt-1">
-                <div class="flex items-center gap-2">
-                    <span class="w-3.5 h-3.5 rounded-md bg-brand-700 inline-block shadow-2xs"></span>
-                    <span>Peminjaman</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="w-3.5 h-3.5 rounded-md bg-emerald-600 inline-block shadow-2xs"></span>
-                    <span>Pengembalian</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Most Borrowed Books Container -->
-        <div class="bg-white rounded-2xl border-2 border-gray-200 p-6 shadow-sm space-y-4">
-            <div class="border-b-2 border-gray-100 pb-4">
-                <h3 class="text-sm font-black text-gray-900">Buku Paling Sering Dipinjam</h3>
-                <p class="text-[11px] text-gray-500 mt-0.5">Top 5 modul populer kejuruan</p>
-            </div>
-            <div class="space-y-3">
-                @foreach($mostBorrowedBooks as $mBook)
-                    <div class="p-3.5 bg-gray-50/90 rounded-xl border border-gray-200 hover:border-brand-300 transition duration-300 flex items-center justify-between text-xs group">
-                        <div class="min-w-0 pr-2 space-y-0.5">
-                            <h4 class="font-bold text-gray-900 group-hover:text-brand-700 transition truncate">{{ $mBook->judul }}</h4>
-                            <p class="text-[10px] text-gray-500 font-mono">ISBN: {{ $mBook->isbn }}</p>
-                        </div>
-                        <span class="px-2.5 py-1 bg-white border border-gray-300 text-gray-900 font-extrabold text-[10px] rounded-lg shrink-0 shadow-2xs">
-                            {{ $mBook->peminjaman_count }}x Pinjam
-                        </span>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Recent System Audit Log (Prominent 2px Border Card Table) -->
-    <div class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm overflow-hidden">
-        <div class="p-5 border-b-2 border-gray-100 flex items-center justify-between">
-            <div>
-                <h3 class="text-sm font-black text-gray-900">Aktivitas Audit Log Sistem Terbaru</h3>
-                <p class="text-[11px] text-gray-500">Catatan transaksi dan perubahan data back-office</p>
-            </div>
-            <a href="{{ route('admin.audit-log') }}" class="text-xs font-bold text-brand-700 hover:text-brand-800 transition">Lihat Audit Log &rarr;</a>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-xs">
-                <thead>
-                    <tr class="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase tracking-wider font-extrabold">
-                        <th class="py-3.5 px-5 font-bold">Waktu</th>
-                        <th class="py-3.5 px-5 font-bold">User Pelaku</th>
-                        <th class="py-3.5 px-5 font-bold">Aktivitas</th>
-                        <th class="py-3.5 px-5 font-bold">Deskripsi</th>
-                        <th class="py-3.5 px-5 font-bold">IP Address</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100 text-gray-700 font-medium">
-                    @foreach($recentAuditLogs as $log)
-                        <tr class="hover:bg-gray-50/70 transition">
-                            <td class="py-3.5 px-5 text-gray-500">{{ $log->created_at->format('d M Y H:i') }}</td>
-                            <td class="py-3.5 px-5 font-bold text-gray-900">{{ $log->user_name ?? 'System' }}</td>
-                            <td class="py-3.5 px-5 font-mono text-[11px] font-bold text-brand-700">{{ $log->aktivitas }}</td>
-                            <td class="py-3.5 px-5 text-gray-600">{{ $log->deskripsi }}</td>
-                            <td class="py-3.5 px-5 font-mono text-gray-400">{{ $log->ip_address ?? '127.0.0.1' }}</td>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-200 text-gray-500 font-bold">
+                            <th class="py-2.5 px-4">Peminjam</th>
+                            <th class="py-2.5 px-4">Judul Buku</th>
+                            <th class="py-2.5 px-4 text-center">Jumlah</th>
+                            <th class="py-2.5 px-4">Waktu</th>
+                            <th class="py-2.5 px-4 text-center">Status</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 font-medium text-gray-700">
+                        @forelse($recentLoans as $loan)
+                            <tr class="hover:bg-gray-50/70 transition">
+                                <td class="py-2.5 px-4 font-bold text-gray-900">{{ $loan->user->name ?? '-' }}</td>
+                                <td class="py-2.5 px-4 max-w-xs truncate">{{ $loan->buku->judul ?? '-' }}</td>
+                                <td class="py-2.5 px-4 text-center font-bold">{{ $loan->jumlah }}</td>
+                                <td class="py-2.5 px-4 text-gray-500 font-mono text-[10.5px]">{{ $loan->created_at->format('d M H:i') }}</td>
+                                <td class="py-2.5 px-4 text-center">
+                                    @if($loan->status === 'dikembalikan')
+                                        <span class="px-2 py-0.5 rounded text-[9.5px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">KEMBALI</span>
+                                    @else
+                                        <span class="px-2 py-0.5 rounded text-[9.5px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200">DIPINJAM</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="py-6 text-center text-gray-400 font-medium">Belum ada transaksi peminjaman.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
+
+        <!-- Log Aktivitas Admin (1 Kolom) -->
+        <div class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm p-4 flex flex-col justify-between">
+            <div>
+                <div class="pb-3 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="text-xs font-black text-gray-900 uppercase">Log Aktivitas Sistem</h3>
+                    <a href="{{ route('admin.audit-log') }}" class="text-[10px] font-extrabold text-brand-700 hover:underline">Semua</a>
+                </div>
+                <div class="divide-y divide-gray-100 mt-2 space-y-2">
+                    @forelse($recentAuditLogs as $log)
+                        <div class="pt-2 text-xs">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-gray-900 text-[11px]">{{ $log->user_name ?? 'Sistem' }}</span>
+                                <span class="text-[9.5px] text-gray-400 font-mono">{{ $log->created_at->diffForHumans() }}</span>
+                            </div>
+                            <p class="text-[10.5px] text-gray-600 mt-0.5 line-clamp-1">{{ $log->deskripsi ?? $log->aktivitas }}</p>
+                        </div>
+                    @empty
+                        <p class="text-xs text-gray-400 text-center py-6">Belum ada aktivitas tercatat.</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+
     </div>
 
 </div>

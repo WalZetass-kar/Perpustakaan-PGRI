@@ -9,7 +9,7 @@ class Penulis extends Model
 {
     use HasFactory;
     protected $table = 'penulis';
-    protected $fillable = ['nama', 'bio'];
+    protected $fillable = ['nama', 'biografi'];
 
     public function buku()
     {

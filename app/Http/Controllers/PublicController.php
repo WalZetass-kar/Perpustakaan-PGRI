@@ -6,31 +6,29 @@ use Illuminate\Http\Request;
 use App\Models\Buku;
 use App\Models\Kategori;
 use App\Models\Rak;
-use App\Models\Eksemplar;
-use App\Models\Anggota;
 use App\Models\Penulis;
-use App\Models\User;
+use App\Models\Penerbit;
+use App\Models\Anggota;
 use App\Models\Pengaturan;
 use App\Models\Peminjaman;
-use App\Models\Reservasi;
 
 class PublicController extends Controller
 {
     public function home()
     {
         $stats = [
-            'total_koleksi' => Buku::count(),
-            'buku_tersedia' => Eksemplar::where('status', 'tersedia')->count(),
-            'sedang_dipinjam' => Eksemplar::where('status', 'dipinjam')->count(),
-            'anggota_aktif' => Anggota::where('status', 'aktif')->count(),
+            'total_koleksi'   => Buku::count(),
+            'buku_tersedia'   => (int) Buku::sum('available_quantity'),
+            'sedang_dipinjam' => (int) Peminjaman::where('status', 'dipinjam')->sum('jumlah'),
+            'anggota_aktif'   => Anggota::where('status', 'aktif')->count(),
         ];
 
-        $buku_terbaru = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'eksemplar'])
+        $buku_terbaru = Buku::with(['penulis', 'penerbit', 'kategori', 'rak'])
             ->latest()
             ->take(6)
             ->get();
 
-        $buku_populer = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'eksemplar'])
+        $buku_populer = Buku::with(['penulis', 'penerbit', 'kategori', 'rak'])
             ->orderBy('view_count', 'desc')
             ->take(6)
             ->get();
@@ -39,7 +37,7 @@ class PublicController extends Controller
         $penulis_list = Penulis::all();
         $tahun_list = Buku::select('tahun_terbit')->distinct()->orderBy('tahun_terbit', 'desc')->pluck('tahun_terbit');
 
-        $jam_operasional = Pengaturan::where('key', 'jam_operasional')->value('value') ?? 'Senin - Jumat: 07.00 - 15.30 WIB | Sabtu: 07.00 - 12.00 WIB';
+        $jam_operasional = Pengaturan::where('key', 'jam_operasional')->value('value') ?? 'Senin - Jumat: 07.00 - 15.30 WIB';
         $nama_perpustakaan = Pengaturan::where('key', 'nama_perpustakaan')->value('value') ?? 'Perpustakaan SMK PGRI';
 
         return view('public.home', compact('stats', 'buku_terbaru', 'buku_populer', 'kategori_list', 'penulis_list', 'tahun_list', 'jam_operasional', 'nama_perpustakaan'));
@@ -47,7 +45,7 @@ class PublicController extends Controller
 
     public function katalog(Request $request)
     {
-        $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'eksemplar']);
+        $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak']);
 
         if ($request->filled('search')) {
             $search = trim($request->search);
@@ -84,17 +82,12 @@ class PublicController extends Controller
 
         if ($request->filled('status')) {
             if ($request->status === 'tersedia') {
-                $query->whereHas('eksemplar', function($q) {
-                    $q->where('status', 'tersedia');
-                });
+                $query->where('available_quantity', '>', 0);
             } else if ($request->status === 'dipinjam') {
-                $query->whereDoesntHave('eksemplar', function($q) {
-                    $q->where('status', 'tersedia');
-                });
+                $query->where('available_quantity', '<=', 0);
             }
         }
 
-        // Expanded Sorting
         $sort = $request->get('sort', 'terbaru');
         switch ($sort) {
             case 'terlama':
@@ -130,25 +123,17 @@ class PublicController extends Controller
 
     public function detailBuku($id)
     {
-        $buku = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'eksemplar.rak'])->findOrFail($id);
+        $buku = Buku::with(['penulis', 'penerbit', 'kategori', 'rak'])->findOrFail($id);
         $buku->increment('view_count');
 
         $userLoan = null;
-        $userReservation = null;
-
         if (auth()->check()) {
-            $userId = auth()->id();
-            $userLoan = Peminjaman::where('user_id', $userId)
+            $userLoan = Peminjaman::where('user_id', auth()->id())
                 ->where('buku_id', $buku->id)
                 ->where('status', 'dipinjam')
                 ->first();
-
-            $userReservation = Reservasi::where('user_id', $userId)
-                ->where('buku_id', $buku->id)
-                ->whereIn('status', ['menunggu', 'tersedia'])
-                ->first();
         }
 
-        return view('public.detail-buku', compact('buku', 'userLoan', 'userReservation'));
+        return view('public.detail-buku', compact('buku', 'userLoan'));
     }
 }

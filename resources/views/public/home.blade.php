@@ -167,8 +167,8 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
             @forelse($buku_populer as $index => $buku)
                 @php
-                    $eksemplarTersedia = $buku->eksemplar ? $buku->eksemplar->where('status', 'tersedia')->count() : 0;
-                    $totalEksemplar = $buku->eksemplar ? $buku->eksemplar->count() : 0;
+                    $eksemplarTersedia = $buku->available_quantity;
+                    $totalEksemplar = $buku->total_quantity;
                 @endphp
                 <div class="bg-white rounded-3xl border-2 border-gray-200/80 p-5 shadow-xs hover:shadow-xl hover:border-brand-700 transition duration-500 transform hover:-translate-y-1 flex flex-col justify-between group" data-aos="fade-up" data-aos-delay="{{ 100 * (($index % 3) + 1) }}">
                     
@@ -180,7 +180,7 @@
                             </span>
                             @if($buku->rak)
                                 <span class="text-[10px] font-mono font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md border border-gray-200">
-                                    Rak: {{ $buku->rak->nama }}
+                                    Rak: {{ $buku->rak->nama_rak ?? $buku->rak->kode_rak }}
                                 </span>
                             @endif
                         </div>
@@ -188,8 +188,8 @@
                         <div class="flex gap-4 items-start">
                             <!-- Cover Image or Initial Box -->
                             <div class="w-20 h-28 bg-gradient-to-br from-brand-800 to-brand-900 text-white font-black text-2xl rounded-2xl flex items-center justify-center shrink-0 shadow-md group-hover:scale-105 transition duration-300 border border-brand-700 overflow-hidden relative">
-                                @if($buku->cover_image && file_exists(public_path('storage/' . $buku->cover_image)))
-                                    <img src="{{ asset('storage/' . $buku->cover_image) }}" alt="{{ $buku->judul }}" class="w-full h-full object-cover">
+                                @if($buku->cover_url)
+                                    <img src="{{ $buku->cover_url }}" alt="{{ $buku->judul }}" class="w-full h-full object-cover">
                                 @else
                                     <span class="drop-shadow-md">{{ strtoupper(substr($buku->judul, 0, 1)) }}</span>
                                 @endif
@@ -200,10 +200,10 @@
                                     <a href="{{ route('buku.detail', $buku->id) }}">{{ $buku->judul }}</a>
                                 </h3>
                                 <p class="text-[11px] text-gray-600 font-medium">
-                                    Penulis: <span class="text-gray-900 font-semibold">{{ $buku->penulis->nama ?? 'Penerbit Sekolah' }}</span>
+                                    Penulis: <span class="text-gray-900 font-semibold">{{ $buku->penulis->nama ?? '-' }}</span>
                                 </p>
                                 <p class="text-[10px] text-gray-400 font-mono">
-                                    Thn: {{ $buku->tahun_terbit ?? '-' }} | ISBN: {{ $buku->isbn ?? '-' }}
+                                    Thn: {{ $buku->tahun_terbit ?? '-' }} | ISBN: {{ $buku->isbn ?? 'Tanpa ISBN' }}
                                 </p>
                             </div>
                         </div>

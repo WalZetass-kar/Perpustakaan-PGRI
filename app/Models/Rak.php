@@ -9,7 +9,7 @@ class Rak extends Model
 {
     use HasFactory;
     protected $table = 'rak';
-    protected $fillable = ['kode_rak', 'nama_rak', 'lokasi', 'kategori_id'];
+    protected $fillable = ['kode_rak', 'nama_rak', 'lokasi', 'kategori_id', 'deskripsi', 'status'];
 
     public function kategori()
     {
@@ -19,10 +19,5 @@ class Rak extends Model
     public function buku()
     {
         return $this->hasMany(Buku::class);
-    }
-
-    public function eksemplar()
-    {
-        return $this->hasMany(Eksemplar::class);
     }
 }

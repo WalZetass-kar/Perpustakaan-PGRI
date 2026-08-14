@@ -5,44 +5,44 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Role;
-use App\Models\Permission;
 use App\Models\Buku;
 use App\Models\Kategori;
 use App\Models\Rak;
-use App\Models\Eksemplar;
-use App\Models\Anggota;
-use App\Models\Peminjaman;
-use App\Models\Pengembalian;
-use App\Models\Denda;
-use App\Models\Reservasi;
-use App\Models\Notifikasi;
-use App\Models\AuditLog;
-use App\Models\Pengaturan;
 use App\Models\Penulis;
 use App\Models\Penerbit;
+use App\Models\Anggota;
+use App\Models\Peminjaman;
+use App\Models\AuditLog;
+use App\Models\Pengaturan;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
+    // ==========================================
+    // 1. DASHBOARD
+    // ==========================================
     public function dashboard()
     {
         $today = Carbon::today()->toDateString();
 
         $stats = [
-            'total_buku' => Buku::count(),
-            'total_eksemplar' => Eksemplar::count(),
-            'buku_tersedia' => Eksemplar::where('status', 'tersedia')->count(),
-            'buku_dipinjam' => Eksemplar::where('status', 'dipinjam')->count(),
-            'total_anggota' => Anggota::count(),
-            'peminjaman_hari_ini' => Peminjaman::whereDate('tanggal_pinjam', $today)->count(),
-            'pengembalian_hari_ini' => Pengembalian::whereDate('tanggal_kembali', $today)->count(),
-            'buku_terlambat' => Peminjaman::where('status', 'dipinjam')->where('tanggal_jatuh_tempo', '<', $today)->count(),
-            'total_denda' => Denda::sum('jumlah_denda'),
+            'total_judul'            => Buku::count(),
+            'total_buku'             => (int) Buku::sum('total_quantity'),
+            'buku_tersedia'          => (int) Buku::sum('available_quantity'),
+            'buku_sedang_dipinjam'   => Peminjaman::where('status', 'dipinjam')->sum('jumlah'),
+            'total_kategori'         => Kategori::count(),
+            'total_penulis'          => Penulis::count(),
+            'total_penerbit'         => Penerbit::count(),
+            'total_rak'              => Rak::count(),
+            'total_anggota'          => Anggota::count(),
+            'peminjaman_hari_ini'    => Peminjaman::whereDate('tanggal_pinjam', $today)->count(),
+            'pengembalian_hari_ini'  => Peminjaman::where('status', 'dikembalikan')->whereDate('waktu_kembali', $today)->count(),
         ];
 
-        // Chart Data (7 hari terakhir)
+        // Sirkulasi 7 Hari Terakhir
         $chartDates = [];
         $chartLoans = [];
         $chartReturns = [];
@@ -51,116 +51,149 @@ class AdminController extends Controller
             $date = Carbon::today()->subDays($i)->format('Y-m-d');
             $chartDates[] = Carbon::today()->subDays($i)->format('d M');
             $chartLoans[] = Peminjaman::whereDate('tanggal_pinjam', $date)->count();
-            $chartReturns[] = Pengembalian::whereDate('tanggal_kembali', $date)->count();
+            $chartReturns[] = Peminjaman::where('status', 'dikembalikan')->whereDate('waktu_kembali', $date)->count();
         }
 
-        $mostBorrowedBooks = Buku::withCount('peminjaman')->orderBy('peminjaman_count', 'desc')->take(5)->get();
-        $recentAuditLogs = AuditLog::latest()->take(8)->get();
+        // Peminjaman Terbaru (Aktif)
+        $recentLoans = Peminjaman::with(['user', 'buku'])
+            ->latest()
+            ->take(6)
+            ->get();
 
-        return view('admin.dashboard', compact('stats', 'chartDates', 'chartLoans', 'chartReturns', 'mostBorrowedBooks', 'recentAuditLogs'));
+        $mostBorrowedBooks = Buku::withCount('peminjaman')
+            ->orderBy('peminjaman_count', 'desc')
+            ->take(5)
+            ->get();
+
+        $recentAuditLogs = AuditLog::latest()->take(6)->get();
+
+        return view('admin.dashboard', compact('stats', 'chartDates', 'chartLoans', 'chartReturns', 'recentLoans', 'mostBorrowedBooks', 'recentAuditLogs'));
     }
 
-    // --- KOLEKSI BUKU --- //
-    public function bukuIndex()
+    // ==========================================
+    // 2. MANAGE BUKU (Master Koleksi Buku)
+    // ==========================================
+    public function bukuIndex(Request $request)
     {
-        $bukuList = Buku::with(['penulis', 'penerbit', 'kategori', 'rak'])->latest()->paginate(10);
-        $kategoriList = Kategori::all();
-        $rakList = Rak::all();
-        $penulisList = Penulis::all();
-        $penerbitList = Penerbit::all();
+        $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak']);
 
-        return view('admin.buku.index', compact('bukuList', 'kategoriList', 'rakList', 'penulisList', 'penerbitList'));
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                  ->orWhere('isbn', 'like', "%{$search}%")
+                  ->orWhereHas('penulis', function($qp) use ($search) {
+                      $qp->where('nama', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $bukuList = $query->latest()->paginate(10)->withQueryString();
+        $penulisList = Penulis::orderBy('nama', 'asc')->get();
+        $penerbitList = Penerbit::orderBy('nama', 'asc')->get();
+        $kategoriList = Kategori::orderBy('nama', 'asc')->get();
+        $rakList = Rak::orderBy('kode_rak', 'asc')->get();
+
+        return view('admin.buku.index', compact('bukuList', 'penulisList', 'penerbitList', 'kategoriList', 'rakList'));
     }
 
     public function bukuStore(Request $request)
     {
         $request->validate([
-            'isbn' => 'required|unique:buku,isbn',
-            'judul' => 'required|string|max:255',
-            'penulis_id' => 'required|exists:penulis,id',
-            'penerbit_id' => 'required|exists:penerbit,id',
-            'kategori_id' => 'required|exists:kategori,id',
-            'rak_id' => 'required|exists:rak,id',
-            'tahun_terbit' => 'required|integer',
-            'sinopsis' => 'nullable|string',
-            'cover' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'file_pdf' => 'nullable|mimes:pdf|max:10240',
+            'isbn'           => 'nullable|string|max:50',
+            'judul'          => 'required|string|max:255',
+            'tahun_terbit'   => 'required|integer|min:1900|max:' . (date('Y') + 1),
+            'total_quantity' => 'required|integer|min:1|max:10000',
+            'penulis_id'     => 'nullable|exists:penulis,id',
+            'penerbit_id'    => 'nullable|exists:penerbit,id',
+            'kategori_id'    => 'nullable|exists:kategori,id',
+            'rak_id'         => 'nullable|exists:rak,id',
+            'sinopsis'       => 'nullable|string',
+            'cover'          => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
         ]);
 
-        $data = [
-            'isbn'        => $request->isbn,
-            'judul'       => $request->judul,
-            'penulis_id'  => $request->penulis_id,
-            'penerbit_id' => $request->penerbit_id,
-            'kategori_id' => $request->kategori_id,
-            'rak_id'      => $request->rak_id,
-            'tahun_terbit'=> $request->tahun_terbit,
-            'sinopsis'    => $request->sinopsis,
-        ];
-
+        $coverPath = null;
         if ($request->hasFile('cover')) {
-            $data['cover'] = $request->file('cover')->store('covers', 'public');
+            $coverPath = $request->file('cover')->store('covers', 'public');
         }
 
-        if ($request->hasFile('file_pdf')) {
-            $data['file_pdf'] = $request->file('file_pdf')->store('ebooks', 'public');
-        }
-
-        $buku = Buku::create($data);
+        $buku = Buku::create([
+            'isbn'               => $request->isbn,
+            'judul'              => $request->judul,
+            'tahun_terbit'       => $request->tahun_terbit,
+            'total_quantity'     => $request->total_quantity,
+            'available_quantity' => $request->total_quantity,
+            'penulis_id'         => $request->penulis_id,
+            'penerbit_id'        => $request->penerbit_id,
+            'kategori_id'        => $request->kategori_id,
+            'rak_id'             => $request->rak_id,
+            'sinopsis'           => $request->sinopsis,
+            'cover'              => $coverPath,
+            'status'             => 'tersedia',
+        ]);
 
         AuditLog::create([
-            'user_id' => auth()->id(),
-            'user_name' => auth()->user()->name,
-            'aktivitas' => 'TAMBAH_BUKU',
-            'deskripsi' => "Menambahkan buku baru: {$buku->judul} (ISBN: {$buku->isbn})",
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'TAMBAH_BUKU',
+            'deskripsi'  => "Menambahkan buku baru: '{$buku->judul}' (Stok: {$buku->total_quantity})",
             'ip_address' => $request->ip(),
         ]);
 
-        return back()->with('success', 'Buku baru berhasil ditambahkan.');
+        return back()->with('success', 'Buku baru berhasil ditambahkan ke katalog.');
     }
 
     public function bukuUpdate(Request $request, $id)
     {
         $buku = Buku::findOrFail($id);
+
         $request->validate([
-            'isbn' => 'required|unique:buku,isbn,' . $id,
-            'judul' => 'required|string|max:255',
-            'penulis_id' => 'required|exists:penulis,id',
-            'penerbit_id' => 'required|exists:penerbit,id',
-            'kategori_id' => 'required|exists:kategori,id',
-            'rak_id' => 'required|exists:rak,id',
-            'tahun_terbit' => 'required|integer',
-            'sinopsis' => 'nullable|string',
-            'cover' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'file_pdf' => 'nullable|mimes:pdf|max:10240',
+            'isbn'           => 'nullable|string|max:50',
+            'judul'          => 'required|string|max:255',
+            'tahun_terbit'   => 'required|integer|min:1900|max:' . (date('Y') + 1),
+            'total_quantity' => 'required|integer|min:1|max:10000',
+            'penulis_id'     => 'nullable|exists:penulis,id',
+            'penerbit_id'    => 'nullable|exists:penerbit,id',
+            'kategori_id'    => 'nullable|exists:kategori,id',
+            'rak_id'         => 'nullable|exists:rak,id',
+            'sinopsis'       => 'nullable|string',
+            'cover'          => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
         ]);
 
+        // Hitung selisih stok jika total_quantity berubah
+        $borrowedNow = Peminjaman::where('buku_id', $buku->id)->where('status', 'dipinjam')->sum('jumlah');
+        $newTotal = (int) $request->total_quantity;
+        
+        if ($newTotal < $borrowedNow) {
+            return back()->with('error', "Total stok tidak boleh kurang dari jumlah buku yang sedang dipinjam ({$borrowedNow} buku).");
+        }
+
+        $newAvailable = max(0, $newTotal - $borrowedNow);
+
         $data = [
-            'isbn'        => $request->isbn,
-            'judul'       => $request->judul,
-            'penulis_id'  => $request->penulis_id,
-            'penerbit_id' => $request->penerbit_id,
-            'kategori_id' => $request->kategori_id,
-            'rak_id'      => $request->rak_id,
-            'tahun_terbit'=> $request->tahun_terbit,
-            'sinopsis'    => $request->sinopsis,
+            'isbn'               => $request->isbn,
+            'judul'              => $request->judul,
+            'tahun_terbit'       => $request->tahun_terbit,
+            'total_quantity'     => $newTotal,
+            'available_quantity' => $newAvailable,
+            'penulis_id'         => $request->penulis_id,
+            'penerbit_id'        => $request->penerbit_id,
+            'kategori_id'        => $request->kategori_id,
+            'rak_id'             => $request->rak_id,
+            'sinopsis'           => $request->sinopsis,
         ];
 
         if ($request->hasFile('cover')) {
             $data['cover'] = $request->file('cover')->store('covers', 'public');
         }
 
-        if ($request->hasFile('file_pdf')) {
-            $data['file_pdf'] = $request->file('file_pdf')->store('ebooks', 'public');
-        }
-
         $buku->update($data);
 
         AuditLog::create([
-            'user_id' => auth()->id(),
-            'user_name' => auth()->user()->name,
-            'aktivitas' => 'EDIT_BUKU',
-            'deskripsi' => "Memperbarui data buku: {$buku->judul}",
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'EDIT_BUKU',
+            'deskripsi'  => "Memperbarui data buku: '{$buku->judul}'",
             'ip_address' => $request->ip(),
         ]);
 
@@ -174,40 +207,161 @@ class AdminController extends Controller
         }])->findOrFail($id);
 
         if ($buku->peminjaman_count > 0) {
-            return back()->with('error', 'Buku tidak dapat dihapus karena masih ada eksemplar yang sedang dipinjam oleh anggota.');
+            return back()->with('error', 'Buku tidak dapat dihapus karena masih ada yang sedang dalam status dipinjam.');
         }
 
         $judul = $buku->judul;
         $buku->delete();
 
         AuditLog::create([
-            'user_id' => auth()->id(),
-            'user_name' => auth()->user()->name,
-            'aktivitas' => 'HAPUS_BUKU',
-            'deskripsi' => "Menghapus buku: {$judul}",
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'HAPUS_BUKU',
+            'deskripsi'  => "Menghapus buku: {$judul}",
             'ip_address' => $request->ip(),
         ]);
 
-        return back()->with('success', 'Buku berhasil dihapus.');
+        return back()->with('success', 'Buku berhasil dihapus dari katalog.');
     }
 
-    // --- KATEGORI BUKU --- //
-    public function kategoriIndex()
+    // ==========================================
+    // 3. MASTER DATA: PENULIS
+    // ==========================================
+    public function penulisIndex(Request $request)
     {
-        $kategoriList = Kategori::withCount('buku')->get();
+        $query = Penulis::withCount('buku');
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where('nama', 'like', "%{$search}%");
+        }
+        $penulisList = $query->latest()->paginate(10)->withQueryString();
+        return view('admin.penulis.index', compact('penulisList'));
+    }
+
+    public function penulisStore(Request $request)
+    {
+        $request->validate([
+            'nama'     => 'required|string|max:255|unique:penulis,nama',
+            'biografi' => 'nullable|string',
+        ], [
+            'nama.unique' => 'Nama penulis ini sudah terdaftar.',
+        ]);
+
+        Penulis::create([
+            'nama'     => $request->nama,
+            'biografi' => $request->biografi,
+        ]);
+
+        return back()->with('success', 'Penulis baru berhasil ditambahkan.');
+    }
+
+    public function penulisUpdate(Request $request, $id)
+    {
+        $penulis = Penulis::findOrFail($id);
+        $request->validate([
+            'nama'     => 'required|string|max:255|unique:penulis,nama,' . $id,
+            'biografi' => 'nullable|string',
+        ]);
+
+        $penulis->update([
+            'nama'     => $request->nama,
+            'biografi' => $request->biografi,
+        ]);
+
+        return back()->with('success', 'Data penulis berhasil diperbarui.');
+    }
+
+    public function penulisDestroy($id)
+    {
+        $penulis = Penulis::withCount('buku')->findOrFail($id);
+        if ($penulis->buku_count > 0) {
+            return back()->with('error', "Penulis tidak dapat dihapus karena masih digunakan oleh {$penulis->buku_count} buku.");
+        }
+        $penulis->delete();
+        return back()->with('success', 'Penulis berhasil dihapus.');
+    }
+
+    // ==========================================
+    // 4. MASTER DATA: PENERBIT
+    // ==========================================
+    public function penerbitIndex(Request $request)
+    {
+        $query = Penerbit::withCount('buku');
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where('nama', 'like', "%{$search}%")->orWhere('kota', 'like', "%{$search}%");
+        }
+        $penerbitList = $query->latest()->paginate(10)->withQueryString();
+        return view('admin.penerbit.index', compact('penerbitList'));
+    }
+
+    public function penerbitStore(Request $request)
+    {
+        $request->validate([
+            'nama' => 'required|string|max:255|unique:penerbit,nama',
+            'kota' => 'nullable|string|max:100',
+        ], [
+            'nama.unique' => 'Nama penerbit ini sudah terdaftar.',
+        ]);
+
+        Penerbit::create([
+            'nama' => $request->nama,
+            'kota' => $request->kota,
+        ]);
+
+        return back()->with('success', 'Penerbit baru berhasil ditambahkan.');
+    }
+
+    public function penerbitUpdate(Request $request, $id)
+    {
+        $penerbit = Penerbit::findOrFail($id);
+        $request->validate([
+            'nama' => 'required|string|max:255|unique:penerbit,nama,' . $id,
+            'kota' => 'nullable|string|max:100',
+        ]);
+
+        $penerbit->update([
+            'nama' => $request->nama,
+            'kota' => $request->kota,
+        ]);
+
+        return back()->with('success', 'Data penerbit berhasil diperbarui.');
+    }
+
+    public function penerbitDestroy($id)
+    {
+        $penerbit = Penerbit::withCount('buku')->findOrFail($id);
+        if ($penerbit->buku_count > 0) {
+            return back()->with('error', "Penerbit tidak dapat dihapus karena masih digunakan oleh {$penerbit->buku_count} buku.");
+        }
+        $penerbit->delete();
+        return back()->with('success', 'Penerbit berhasil dihapus.');
+    }
+
+    // ==========================================
+    // 5. MASTER DATA: KATEGORI
+    // ==========================================
+    public function kategoriIndex(Request $request)
+    {
+        $query = Kategori::withCount('buku');
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where('nama', 'like', "%{$search}%");
+        }
+        $kategoriList = $query->latest()->paginate(10)->withQueryString();
         return view('admin.kategori.index', compact('kategoriList'));
     }
 
     public function kategoriStore(Request $request)
     {
         $request->validate([
-            'nama' => 'required|unique:kategori,nama|max:255',
+            'nama'      => 'required|unique:kategori,nama|max:255',
             'deskripsi' => 'nullable|string',
         ]);
 
         Kategori::create([
-            'nama' => $request->nama,
-            'slug' => Str::slug($request->nama),
+            'nama'      => $request->nama,
+            'slug'      => Str::slug($request->nama),
             'deskripsi' => $request->deskripsi,
         ]);
 
@@ -218,13 +372,13 @@ class AdminController extends Controller
     {
         $kategori = Kategori::findOrFail($id);
         $request->validate([
-            'nama' => 'required|max:255|unique:kategori,nama,' . $id,
+            'nama'      => 'required|max:255|unique:kategori,nama,' . $id,
             'deskripsi' => 'nullable|string',
         ]);
 
         $kategori->update([
-            'nama' => $request->nama,
-            'slug' => Str::slug($request->nama),
+            'nama'      => $request->nama,
+            'slug'      => Str::slug($request->nama),
             'deskripsi' => $request->deskripsi,
         ]);
 
@@ -241,10 +395,17 @@ class AdminController extends Controller
         return back()->with('success', 'Kategori berhasil dihapus.');
     }
 
-    // --- RAK PERPUSTAKAAN --- //
-    public function rakIndex()
+    // ==========================================
+    // 6. MASTER DATA: RAK PERPUSTAKAAN
+    // ==========================================
+    public function rakIndex(Request $request)
     {
-        $rakList = Rak::with(['kategori', 'eksemplar'])->get();
+        $query = Rak::with(['kategori'])->withCount('buku');
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where('nama_rak', 'like', "%{$search}%")->orWhere('kode_rak', 'like', "%{$search}%");
+        }
+        $rakList = $query->latest()->paginate(10)->withQueryString();
         $kategoriList = Kategori::all();
         return view('admin.rak.index', compact('rakList', 'kategoriList'));
     }
@@ -252,9 +413,9 @@ class AdminController extends Controller
     public function rakStore(Request $request)
     {
         $request->validate([
-            'kode_rak' => 'required|unique:rak,kode_rak',
-            'nama_rak' => 'required|string',
-            'lokasi' => 'required|string',
+            'kode_rak'    => 'required|unique:rak,kode_rak|max:50',
+            'nama_rak'    => 'required|string|max:255',
+            'lokasi'      => 'nullable|string|max:255',
             'kategori_id' => 'nullable|exists:kategori,id',
         ]);
 
@@ -264,6 +425,7 @@ class AdminController extends Controller
             'lokasi'      => $request->lokasi,
             'kategori_id' => $request->kategori_id,
         ]);
+
         return back()->with('success', 'Rak baru berhasil ditambahkan.');
     }
 
@@ -271,9 +433,9 @@ class AdminController extends Controller
     {
         $rak = Rak::findOrFail($id);
         $request->validate([
-            'kode_rak' => 'required|unique:rak,kode_rak,' . $id,
-            'nama_rak' => 'required|string',
-            'lokasi' => 'required|string',
+            'kode_rak'    => 'required|max:50|unique:rak,kode_rak,' . $id,
+            'nama_rak'    => 'required|string|max:255',
+            'lokasi'      => 'nullable|string|max:255',
             'kategori_id' => 'nullable|exists:kategori,id',
         ]);
 
@@ -283,127 +445,184 @@ class AdminController extends Controller
             'lokasi'      => $request->lokasi,
             'kategori_id' => $request->kategori_id,
         ]);
+
         return back()->with('success', 'Data rak berhasil diperbarui.');
     }
 
     public function rakDestroy($id)
     {
-        $rak = Rak::withCount('eksemplar')->findOrFail($id);
-        if ($rak->eksemplar_count > 0) {
-            return back()->with('error', 'Rak tidak dapat dihapus karena masih menampung ' . $rak->eksemplar_count . ' eksemplar buku.');
+        $rak = Rak::withCount('buku')->findOrFail($id);
+        if ($rak->buku_count > 0) {
+            return back()->with('error', 'Rak tidak dapat dihapus karena masih menampung ' . $rak->buku_count . ' buku.');
         }
         $rak->delete();
         return back()->with('success', 'Rak berhasil dihapus.');
     }
 
-    // --- EKSEMPLAR BUKU --- //
-    public function eksemplarIndex()
+    // ==========================================
+    // 7. SIRKULASI PEMINJAMAN (Same-Day Loan)
+    // ==========================================
+    public function peminjamanIndex(Request $request)
     {
-        $eksemplarList = Eksemplar::with(['buku', 'rak'])->latest()->paginate(10);
-        $bukuList = Buku::all();
-        $rakList = Rak::all();
-        return view('admin.eksemplar.index', compact('eksemplarList', 'bukuList', 'rakList'));
+        $query = Peminjaman::with(['user', 'buku', 'petugas'])
+            ->where('status', 'dipinjam');
+
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function($q) use ($search) {
+                $q->where('kode_peminjaman', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($qu) use ($search) {
+                      $qu->where('name', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('buku', function($qb) use ($search) {
+                      $qb->where('judul', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $activeLoans = $query->latest('tanggal_pinjam')->paginate(10)->withQueryString();
+        $usersList = User::where('status', 'active')->orderBy('name', 'asc')->get();
+        $booksList = Buku::where('available_quantity', '>', 0)->orderBy('judul', 'asc')->get();
+
+        return view('admin.peminjaman.index', compact('activeLoans', 'usersList', 'booksList'));
     }
 
-    public function eksemplarStore(Request $request)
+    public function peminjamanStore(Request $request)
     {
         $request->validate([
+            'user_id' => 'required|exists:users,id',
             'buku_id' => 'required|exists:buku,id',
-            'kode_eksemplar' => 'required|unique:eksemplar,kode_eksemplar',
-            'barcode' => 'required|unique:eksemplar,barcode',
-            'kondisi' => 'required|in:baik,rusak_ringan,rusak_berat',
-            'rak_id' => 'required|exists:rak,id',
+            'jumlah'  => 'required|integer|min:1|max:10',
         ]);
 
-        Eksemplar::create([
-            'buku_id' => $request->buku_id,
-            'kode_eksemplar' => $request->kode_eksemplar,
-            'barcode' => $request->barcode,
-            'kondisi' => $request->kondisi,
-            'rak_id' => $request->rak_id,
-            'status' => 'tersedia',
-        ]);
+        try {
+            $loan = DB::transaction(function () use ($request) {
+                $buku = Buku::where('id', $request->buku_id)->lockForUpdate()->first();
+                $jumlahPinjam = (int) $request->jumlah;
 
-        return back()->with('success', 'Eksemplar baru berhasil didaftarkan.');
-    }
+                if (!$buku || $buku->available_quantity < $jumlahPinjam) {
+                    throw new \Exception('STOCK_INSUFFICIENT');
+                }
 
-    public function eksemplarUpdate(Request $request, $id)
-    {
-        $eksemplar = Eksemplar::findOrFail($id);
-        $request->validate([
-            'kode_eksemplar' => 'required|unique:eksemplar,kode_eksemplar,' . $id,
-            'barcode' => 'required|unique:eksemplar,barcode,' . $id,
-            'kondisi' => 'required|in:baik,rusak_ringan,rusak_berat',
-            'rak_id' => 'required|exists:rak,id',
-            'status' => 'required|in:tersedia,dipinjam,hilang,rusak',
-        ]);
+                $buku->available_quantity -= $jumlahPinjam;
+                $buku->save();
 
-        $eksemplar->update([
-            'kode_eksemplar' => $request->kode_eksemplar,
-            'barcode'        => $request->barcode,
-            'kondisi'        => $request->kondisi,
-            'rak_id'         => $request->rak_id,
-            'status'         => $request->status,
-        ]);
-        return back()->with('success', 'Data eksemplar berhasil diperbarui.');
-    }
+                $kodePinjam = 'TRX-' . date('Ymd') . '-' . strtoupper(Str::random(4));
+                $today = Carbon::today()->toDateString();
 
-    public function eksemplarDestroy($id)
-    {
-        $eksemplar = Eksemplar::findOrFail($id);
-        if ($eksemplar->status === 'dipinjam') {
-            return back()->with('error', 'Eksemplar tidak dapat dihapus karena sedang dalam status dipinjam.');
+                return Peminjaman::create([
+                    'kode_peminjaman'     => $kodePinjam,
+                    'user_id'             => $request->user_id,
+                    'buku_id'             => $buku->id,
+                    'jumlah'              => $jumlahPinjam,
+                    'tanggal_pinjam'      => $today,
+                    'tanggal_jatuh_tempo' => $today, // Pinjam & kembali di hari yang sama
+                    'status'              => 'dipinjam',
+                    'petugas_id'          => auth()->id(),
+                ]);
+            });
+        } catch (\Exception $e) {
+            if ($e->getMessage() === 'STOCK_INSUFFICIENT') {
+                return back()->with('error', 'Stok buku tidak mencukupi untuk jumlah peminjaman yang diminta.');
+            }
+            return back()->with('error', 'Terjadi kesalahan sistem saat mencatat peminjaman.');
         }
-        $eksemplar->delete();
-        return back()->with('success', 'Eksemplar berhasil dihapus.');
+
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'TRANSAKSI_PINJAM',
+            'deskripsi'  => "Mencatat peminjaman {$loan->kode_peminjaman} ({$loan->jumlah} buku)",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', "Peminjaman berhasil dicatat! Kode: {$loan->kode_peminjaman}");
     }
 
-    public function cetakBarcodeEksemplar($id = null)
+    public function peminjamanKembali(Request $request, $id)
     {
-        if ($id) {
-            $eksemplarList = Eksemplar::with(['buku', 'rak'])->where('id', $id)->get();
-        } else {
-            $eksemplarList = Eksemplar::with(['buku', 'rak'])->latest()->get();
+        $loan = Peminjaman::with('buku')->findOrFail($id);
+
+        if ($loan->status === 'dikembalikan') {
+            return back()->with('error', 'Transaksi peminjaman ini sudah berstatus dikembalikan sebelumnya.');
         }
-        return view('admin.eksemplar.cetak_barcode', compact('eksemplarList'));
+
+        try {
+            DB::transaction(function () use ($loan) {
+                $buku = Buku::where('id', $loan->buku_id)->lockForUpdate()->first();
+                if ($buku) {
+                    $buku->available_quantity = min($buku->total_quantity, $buku->available_quantity + $loan->jumlah);
+                    $buku->save();
+                }
+
+                $loan->status = 'dikembalikan';
+                $loan->waktu_kembali = Carbon::now();
+                $loan->save();
+            });
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan saat memproses pengembalian buku.');
+        }
+
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'TRANSAKSI_KEMBALI',
+            'deskripsi'  => "Buku transaksi {$loan->kode_peminjaman} telah berhasil dikembalikan.",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', "Pengembalian buku berhasil diproses.");
     }
 
-    // --- ANGGOTA & USER MANAGEMENT --- //
+    public function riwayatIndex(Request $request)
+    {
+        $query = Peminjaman::with(['user', 'buku', 'petugas']);
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('tanggal')) {
+            $query->whereDate('tanggal_pinjam', $request->tanggal);
+        }
+
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function($q) use ($search) {
+                $q->where('kode_peminjaman', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($qu) use ($search) {
+                      $qu->where('name', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('buku', function($qb) use ($search) {
+                      $qb->where('judul', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $riwayatList = $query->latest('tanggal_pinjam')->paginate(15)->withQueryString();
+
+        return view('admin.peminjaman.riwayat', compact('riwayatList'));
+    }
+
+    // ==========================================
+    // 8. DATA PENGGUNA & ANGGOTA
+    // ==========================================
     public function anggotaIndex(Request $request)
     {
         $query = User::with(['role', 'anggota']);
-
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = trim($request->search);
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
                   ->orWhere('phone', 'like', "%{$search}%")
                   ->orWhereHas('anggota', function($qa) use ($search) {
                       $qa->where('nomor_anggota', 'like', "%{$search}%")
-                         ->orWhere('nim', 'like', "%{$search}%")
-                         ->orWhere('program_studi', 'like', "%{$search}%");
+                         ->orWhere('nim', 'like', "%{$search}%");
                   });
             });
         }
-
-        $anggotaList = $query->latest()->paginate(10);
-
-        // Ensure every user has an Anggota record synced
-        foreach ($anggotaList as $user) {
-            if (!$user->anggota) {
-                $nomorAnggota = 'LIB-' . date('Y') . '-' . str_pad($user->id, 3, '0', STR_PAD_LEFT);
-                Anggota::create([
-                    'user_id' => $user->id,
-                    'nomor_anggota' => $nomorAnggota,
-                    'nim' => '1022' . date('Y') . str_pad($user->id, 3, '0', STR_PAD_LEFT),
-                    'program_studi' => 'Teknik Komputer & Jaringan',
-                    'status' => 'aktif',
-                ]);
-                $user->load('anggota');
-            }
-        }
-
+        $anggotaList = $query->latest()->paginate(10)->withQueryString();
         $roles = Role::all();
         return view('admin.anggota.index', compact('anggotaList', 'roles'));
     }
@@ -411,68 +630,67 @@ class AdminController extends Controller
     public function anggotaStore(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
-            'role_id' => 'required|exists:roles,id',
-            'phone' => 'nullable|string',
-            'nim' => 'required|unique:anggota,nim',
-            'program_studi' => 'required|string',
+            'name'          => 'required|string|max:255',
+            'email'         => 'required|string|email|max:255|unique:users,email',
+            'password'      => 'required|string|min:8',
+            'role_id'       => 'required|exists:roles,id',
+            'phone'         => 'nullable|string|max:20',
+            'nim'           => 'required|string|max:50|unique:anggota,nim',
+            'program_studi' => 'required|string|max:150',
+            'status'        => 'required|in:aktif,nonaktif,dibekukan',
         ]);
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
+            'name'     => $request->name,
+            'email'    => $request->email,
             'password' => Hash::make($request->password),
-            'role_id' => $request->role_id,
-            'phone' => $request->phone,
-            'status' => 'active',
+            'role_id'  => $request->role_id,
+            'phone'    => $request->phone,
+            'status'   => 'active',
         ]);
 
-        // Auto-generate Nomor Anggota ID
         $nomorAnggota = 'LIB-' . date('Y') . '-' . str_pad($user->id, 3, '0', STR_PAD_LEFT);
 
         Anggota::create([
-            'user_id' => $user->id,
+            'user_id'       => $user->id,
             'nomor_anggota' => $nomorAnggota,
-            'nim' => $request->nim,
+            'nim'           => $request->nim,
             'program_studi' => $request->program_studi,
-            'status' => 'aktif',
+            'status'        => $request->status,
         ]);
 
         AuditLog::create([
-            'user_id' => auth()->id(),
-            'user_name' => auth()->user()->name,
-            'aktivitas' => 'TAMBAH_USER',
-            'deskripsi' => "Mendaftarkan pengguna/anggota baru: {$user->name} ({$user->email})",
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'TAMBAH_USER',
+            'deskripsi'  => "Registrasi anggota/pengguna baru: {$user->name} ({$nomorAnggota})",
             'ip_address' => $request->ip(),
         ]);
 
-        return back()->with('success', 'Anggota/Pengguna baru berhasil didaftarkan.');
+        return back()->with('success', 'Pengguna/anggota baru berhasil didaftarkan.');
     }
 
     public function anggotaUpdate(Request $request, $id)
     {
         $user = User::findOrFail($id);
-
         $anggota = $user->anggota;
         $anggotaId = $anggota ? $anggota->id : 0;
 
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'role_id' => 'required|exists:roles,id',
-            'phone' => 'nullable|string',
-            'nim' => 'required|unique:anggota,nim,' . $anggotaId,
+            'name'          => 'required|string|max:255',
+            'email'         => 'required|email|unique:users,email,' . $user->id,
+            'role_id'       => 'required|exists:roles,id',
+            'phone'         => 'nullable|string',
+            'nim'           => 'required|unique:anggota,nim,' . $anggotaId,
             'program_studi' => 'required|string',
-            'status' => 'required|in:aktif,nonaktif,dibekukan',
+            'status'        => 'required|in:aktif,nonaktif,dibekukan',
         ]);
 
         $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
+            'name'    => $request->name,
+            'email'   => $request->email,
             'role_id' => $request->role_id,
-            'phone' => $request->phone,
+            'phone'   => $request->phone,
         ]);
 
         if ($request->filled('password')) {
@@ -481,28 +699,20 @@ class AdminController extends Controller
 
         if (!$anggota) {
             $nomorAnggota = 'LIB-' . date('Y') . '-' . str_pad($user->id, 3, '0', STR_PAD_LEFT);
-            $anggota = Anggota::create([
-                'user_id' => $user->id,
+            Anggota::create([
+                'user_id'       => $user->id,
                 'nomor_anggota' => $nomorAnggota,
-                'nim' => $request->nim,
+                'nim'           => $request->nim,
                 'program_studi' => $request->program_studi,
-                'status' => $request->status,
+                'status'        => $request->status,
             ]);
         } else {
             $anggota->update([
-                'nim' => $request->nim,
+                'nim'           => $request->nim,
                 'program_studi' => $request->program_studi,
-                'status' => $request->status,
+                'status'        => $request->status,
             ]);
         }
-
-        AuditLog::create([
-            'user_id' => auth()->id(),
-            'user_name' => auth()->user()->name,
-            'aktivitas' => 'EDIT_USER',
-            'deskripsi' => "Memperbarui data pengguna/anggota: {$user->name} ({$user->email})",
-            'ip_address' => $request->ip(),
-        ]);
 
         return back()->with('success', 'Data anggota/pengguna berhasil diperbarui.');
     }
@@ -516,12 +726,7 @@ class AdminController extends Controller
 
         $activeLoans = Peminjaman::where('user_id', $user->id)->where('status', 'dipinjam')->count();
         if ($activeLoans > 0) {
-            return back()->with('error', 'Pengguna tidak dapat dihapus karena masih memiliki ' . $activeLoans . ' buku yang sedang dipinjam.');
-        }
-
-        $unpaidFines = Denda::where('user_id', $user->id)->where('status_pembayaran', 'belum_lunas')->sum('jumlah_denda');
-        if ($unpaidFines > 0) {
-            return back()->with('error', 'Pengguna tidak dapat dihapus karena masih memiliki tanggungan denda sebesar Rp ' . number_format($unpaidFines) . '.');
+            return back()->with('error', "Pengguna tidak dapat dihapus karena masih memiliki {$activeLoans} buku yang sedang dipinjam.");
         }
 
         if ($user->anggota) {
@@ -529,168 +734,46 @@ class AdminController extends Controller
         }
         $user->delete();
 
-        return back()->with('success', 'Data anggota/pengguna berhasil dihapus.');
+        return back()->with('success', 'Pengguna berhasil dihapus.');
     }
 
-    public function dendaStore(Request $request)
-    {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'jumlah_denda' => 'required|numeric|min:500',
-            'alasan' => 'required|string|max:255',
-            'status_pembayaran' => 'required|in:belum_lunas,lunas',
-        ]);
-
-        $user = User::with('role')->findOrFail($request->user_id);
-        if (in_array($user->role->name ?? '', ['admin', 'pustakawan'])) {
-            return back()->with('error', 'Akun Pengelola (Admin & Pustakawan) dibebaskan dari denda perpustakaan.');
-        }
-
-        $peminjaman = Peminjaman::where('user_id', $request->user_id)->latest()->first();
-
-        Denda::create([
-            'user_id' => $request->user_id,
-            'peminjaman_id' => $peminjaman ? $peminjaman->id : null,
-            'jumlah_denda' => $request->jumlah_denda,
-            'alasan' => $request->alasan,
-            'status_pembayaran' => $request->status_pembayaran,
-        ]);
-
-        $user = User::find($request->user_id);
-        AuditLog::create([
-            'user_id' => auth()->id(),
-            'user_name' => auth()->user()->name,
-            'aktivitas' => 'TAMBAH_DENDA',
-            'deskripsi' => "Menetapkan denda Rp " . number_format($request->jumlah_denda) . " kepada {$user->name} ({$request->alasan})",
-            'ip_address' => $request->ip(),
-        ]);
-
-        return back()->with('success', 'Denda berhasil ditetapkan untuk anggota/siswa.');
-    }
-
-    public function dendaBayar($id)
-    {
-        $denda = Denda::findOrFail($id);
-
-        // VULN-006 FIX: Prevent re-confirming already paid fines
-        if ($denda->status_pembayaran === 'lunas') {
-            return back()->with('error', 'Denda ini sudah berstatus lunas sebelumnya.');
-        }
-
-        $denda->status_pembayaran = 'lunas';
-        $denda->save();
-
-        AuditLog::create([
-            'user_id'    => auth()->id(),
-            'user_name'  => auth()->user()->name,
-            'aktivitas'  => 'BAYAR_DENDA',
-            'deskripsi'  => "Admin konfirmasi pembayaran denda ID#{$denda->id} sebesar Rp " . number_format($denda->jumlah_denda),
-            'ip_address' => request()->ip(),
-        ]);
-
-        return back()->with('success', 'Status denda berhasil diubah menjadi LUNAS.');
-    }
-
-    // --- LAPORAN & EXPORT --- //
-    public function laporanIndex(Request $request)
-    {
-        $type = $request->get('type', 'peminjaman');
-        $startDate = $request->get('start_date', Carbon::today()->startOfMonth()->toDateString());
-        $endDate = $request->get('end_date', Carbon::today()->toDateString());
-
-        $reportData = [];
-
-        if ($type === 'peminjaman') {
-            $reportData = Peminjaman::with(['user', 'buku', 'eksemplar'])
-                ->whereBetween('tanggal_pinjam', [$startDate, $endDate])
-                ->get();
-        } else if ($type === 'pengembalian') {
-            $reportData = Pengembalian::with(['peminjaman.user', 'peminjaman.buku'])
-                ->whereBetween('tanggal_kembali', [$startDate, $endDate])
-                ->get();
-        } else if ($type === 'denda') {
-            $reportData = Denda::with(['user', 'peminjaman.buku'])
-                ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
-                ->get();
-        }
-
-        return view('admin.laporan.index', compact('type', 'startDate', 'endDate', 'reportData'));
-    }
-
-    public function laporanCetak(Request $request)
-    {
-        $type = $request->get('type', 'peminjaman');
-        $startDate = $request->get('start_date', Carbon::today()->startOfMonth()->toDateString());
-        $endDate = $request->get('end_date', Carbon::today()->toDateString());
-
-        $reportData = [];
-
-        if ($type === 'peminjaman') {
-            $reportData = Peminjaman::with(['user', 'buku', 'eksemplar'])
-                ->whereBetween('tanggal_pinjam', [$startDate, $endDate])
-                ->get();
-        } else if ($type === 'pengembalian') {
-            $reportData = Pengembalian::with(['peminjaman.user', 'peminjaman.buku'])
-                ->whereBetween('tanggal_kembali', [$startDate, $endDate])
-                ->get();
-        } else if ($type === 'denda') {
-            $reportData = Denda::with(['user', 'peminjaman.buku'])
-                ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
-                ->get();
-        }
-
-        return view('admin.laporan.cetak', compact('type', 'startDate', 'endDate', 'reportData'));
-    }
-
-    // --- AUDIT LOGS --- //
+    // ==========================================
+    // 9. PENGATURAN & AUDIT LOG
+    // ==========================================
     public function auditLogIndex()
     {
-        $logs = AuditLog::latest()->paginate(15);
+        $logs = AuditLog::latest()->paginate(20);
         return view('admin.audit-log.index', compact('logs'));
     }
 
-    // --- PENGATURAN --- //
     public function pengaturanIndex()
     {
-        $settings = Pengaturan::all();
-        return view('admin.pengaturan.index', compact('settings'));
+        $pengaturan = Pengaturan::all()->pluck('value', 'key');
+        return view('admin.pengaturan.index', compact('pengaturan'));
     }
 
     public function pengaturanUpdate(Request $request)
     {
-        // VULN-010 FIX: Whitelist of allowed keys to prevent arbitrary key injection
         $allowedKeys = [
             'nama_perpustakaan', 'jam_operasional', 'alamat',
-            'denda_per_hari', 'durasi_pinjam_hari', 'max_buku_pinjam', 'max_perpanjangan',
+            'durasi_pinjam_hari', 'max_buku_pinjam',
         ];
 
-        // Numeric keys that require positive integer validation
-        $numericKeys = ['denda_per_hari', 'durasi_pinjam_hari', 'max_buku_pinjam', 'max_perpanjangan'];
-
         foreach ($request->except('_token') as $key => $value) {
-            // Skip keys not in whitelist
             if (!in_array($key, $allowedKeys)) {
                 continue;
             }
-
-            // Validate numeric keys
-            if (in_array($key, $numericKeys)) {
-                if (!is_numeric($value) || (float)$value < 0 || (float)$value > 999999) {
-                    continue;
-                }
-            }
-
             Pengaturan::where('key', $key)->update(['value' => strip_tags($value)]);
         }
 
         AuditLog::create([
-            'user_id' => auth()->id(),
-            'user_name' => auth()->user()->name,
-            'aktivitas' => 'UPDATE_PENGATURAN',
-            'deskripsi' => "Memperbarui konfigurasi sistem perpustakaan.",
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'UPDATE_PENGATURAN',
+            'deskripsi'  => 'Memperbarui konfigurasi sistem perpustakaan',
             'ip_address' => $request->ip(),
         ]);
 
-        return back()->with('success', 'Konfigurasi perpustakaan berhasil diperbarui.');
+        return back()->with('success', 'Pengaturan sistem perpustakaan berhasil diperbarui.');
     }
 }
