@@ -94,7 +94,7 @@ class MahasiswaController extends Controller
         $loan = Peminjaman::where('user_id', $user->id)->where('id', $id)->firstOrFail();
 
         $maxPerpanjangan = (int) (Pengaturan::where('key', 'max_perpanjangan')->value('value') ?? 2);
-        $durasiPinjam = (int) (Pengaturan::where('key', 'durasi_pinjam_hari')->value('value') ?? 7);
+        $durasiPinjam    = (int) (Pengaturan::where('key', 'durasi_pinjam_hari')->value('value') ?? 7);
 
         if ($loan->jumlah_perpanjangan >= $maxPerpanjangan) {
             return back()->with('error', "Buku ini sudah mencapai batas maksimal perpanjangan ({$maxPerpanjangan}x).");
@@ -104,15 +104,21 @@ class MahasiswaController extends Controller
             return back()->with('error', 'Buku yang sudah melewati tanggal jatuh tempo tidak dapat diperpanjang secara online.');
         }
 
+        // BIZ-003 FIX: Block extension if user has unpaid fines
+        $unpaidFines = Denda::where('user_id', $user->id)->where('status_pembayaran', 'belum_lunas')->sum('jumlah_denda');
+        if ($unpaidFines > 0) {
+            return back()->with('error', 'Perpanjangan tidak dapat dilakukan karena Anda masih memiliki denda yang belum lunas sebesar Rp ' . number_format($unpaidFines) . '. Silakan lunasi denda terlebih dahulu.');
+        }
+
         $loan->tanggal_jatuh_tempo = Carbon::parse($loan->tanggal_jatuh_tempo)->addDays($durasiPinjam);
         $loan->jumlah_perpanjangan += 1;
         $loan->save();
 
         AuditLog::create([
-            'user_id' => $user->id,
-            'user_name' => $user->name,
-            'aktivitas' => 'PERPANJANG_PEMINJAMAN',
-            'deskripsi' => "Perpanjangan peminjaman {$loan->kode_peminjaman} hingga {$loan->tanggal_jatuh_tempo}",
+            'user_id'    => $user->id,
+            'user_name'  => $user->name,
+            'aktivitas'  => 'PERPANJANG_PEMINJAMAN',
+            'deskripsi'  => "Perpanjangan peminjaman {$loan->kode_peminjaman} hingga {$loan->tanggal_jatuh_tempo}",
             'ip_address' => $request->ip(),
         ]);
 
@@ -185,8 +191,21 @@ class MahasiswaController extends Controller
     {
         $user = auth()->user();
         $reservation = Reservasi::where('user_id', $user->id)->where('id', $id)->firstOrFail();
+
+        if (!in_array($reservation->status, ['menunggu', 'tersedia'])) {
+            return back()->with('error', 'Reservasi ini tidak dapat dibatalkan karena sudah diproses atau sudah dibatalkan sebelumnya.');
+        }
+
         $reservation->status = 'dibatalkan';
         $reservation->save();
+
+        AuditLog::create([
+            'user_id'    => $user->id,
+            'user_name'  => $user->name,
+            'aktivitas'  => 'BATAL_RESERVASI',
+            'deskripsi'  => "Membatalkan reservasi kode {$reservation->kode_reservasi}",
+            'ip_address' => $request->ip(),
+        ]);
 
         return back()->with('success', 'Reservasi berhasil dibatalkan.');
     }
@@ -237,23 +256,25 @@ class MahasiswaController extends Controller
         $anggotaId = $anggota ? $anggota->id : 0;
 
         $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
-            'nim' => 'nullable|string|max:50|unique:anggota,nim,' . $anggotaId,
-            'program_studi' => 'nullable|string|max:150',
-            'foto' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
-            'current_password' => 'nullable|string',
-            'password' => 'nullable|string|min:6|confirmed',
+            'name'         => 'required|string|max:255',
+            'phone'        => 'nullable|string|max:20',
+            'nim'          => 'nullable|string|max:50|unique:anggota,nim,' . $anggotaId,
+            'program_studi'=> 'nullable|string|max:150',
+            'foto'         => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
+            'current_password' => $request->filled('password') ? 'required|string' : 'nullable|string',
+            'password'     => 'nullable|string|min:8|confirmed',
         ], [
-            'nim.unique' => 'NISN/NIM ini sudah digunakan oleh siswa lain.',
-            'foto.max' => 'Ukuran pas foto maksimal 2 MB.',
-            'password.confirmed' => 'Konfirmasi kata sandi baru tidak cocok.',
+            'nim.unique'           => 'NISN/NIM ini sudah digunakan oleh siswa lain.',
+            'foto.max'             => 'Ukuran pas foto maksimal 2 MB.',
+            'password.confirmed'   => 'Konfirmasi kata sandi baru tidak cocok.',
+            'password.min'         => 'Kata sandi baru minimal 8 karakter.',
+            'current_password.required' => 'Kata sandi saat ini wajib diisi untuk mengubah kata sandi.',
         ]);
 
-        // Change password if provided
+        // VULN-005 FIX: current_password is now required when changing password (validated above)
         if ($request->filled('password')) {
-            if ($request->filled('current_password') && !\Illuminate\Support\Facades\Hash::check($request->current_password, $user->password)) {
-                return back()->with('error', 'Kata sandi saat ini tidak cocok.');
+            if (!\Illuminate\Support\Facades\Hash::check($request->current_password, $user->password)) {
+                return back()->with('error', 'Kata sandi saat ini tidak cocok. Perubahan kata sandi dibatalkan.');
             }
             $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
         }

@@ -9,7 +9,7 @@ class Rak extends Model
 {
     use HasFactory;
     protected $table = 'rak';
-    protected $guarded = ['id'];
+    protected $fillable = ['kode_rak', 'nama_rak', 'lokasi', 'kategori_id'];
 
     public function kategori()
     {

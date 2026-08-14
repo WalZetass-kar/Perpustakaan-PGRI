@@ -35,12 +35,12 @@ class AuthController extends Controller
             'program_studi' => ['required', 'string', 'max:150'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'phone' => ['nullable', 'string', 'max:20'],
-            'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ], [
             'nim.unique' => 'NISN / Nomor Induk ini sudah terdaftar sebagai anggota.',
             'email.unique' => 'Email sekolah ini sudah terdaftar. Silakan gunakan email lain atau login.',
             'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
-            'password.min' => 'Kata sandi minimal 6 karakter.',
+            'password.min' => 'Kata sandi minimal 8 karakter.',
         ]);
 
         // Find or default to Siswa Role (role_id = 3)

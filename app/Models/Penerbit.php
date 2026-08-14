@@ -9,7 +9,7 @@ class Penerbit extends Model
 {
     use HasFactory;
     protected $table = 'penerbit';
-    protected $guarded = ['id'];
+    protected $fillable = ['nama', 'kota', 'website'];
 
     public function buku()
     {

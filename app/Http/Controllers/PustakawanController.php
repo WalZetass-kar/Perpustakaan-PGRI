@@ -63,48 +63,73 @@ class PustakawanController extends Controller
     public function prosesPeminjaman(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'barcode' => 'required|string',
-            'tanggal_jatuh_tempo' => 'required|date',
+            'user_id'            => 'required|exists:users,id',
+            'barcode'            => 'required|string',
+            'tanggal_jatuh_tempo'=> 'required|date|after:today',
         ]);
 
-        $exemplar = Eksemplar::with('buku')->where('barcode', $request->barcode)->orWhere('kode_eksemplar', $request->barcode)->first();
-        if (!$exemplar || $exemplar->status !== 'tersedia') {
-            return back()->with('error', 'Eksemplar buku tidak ditemukan atau sedang tidak tersedia!');
+        try {
+            $result = \DB::transaction(function () use ($request) {
+                // VULN-008 FIX: lockForUpdate() prevents race condition (double-borrowing)
+                $exemplar = Eksemplar::with('buku')
+                    ->where(function($q) use ($request) {
+                        $q->where('barcode', $request->barcode)
+                          ->orWhere('kode_eksemplar', $request->barcode);
+                    })
+                    ->where('status', 'tersedia')
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$exemplar) {
+                    throw new \Exception('EXEMPLAR_NOT_AVAILABLE');
+                }
+
+                $maxBuku = (int) (Pengaturan::where('key', 'max_buku_pinjam')->value('value') ?? 3);
+                $activeLoansCount = Peminjaman::where('user_id', $request->user_id)->where('status', 'dipinjam')->count();
+
+                if ($activeLoansCount >= $maxBuku) {
+                    throw new \Exception('MAX_LOANS_REACHED:' . $maxBuku);
+                }
+
+                $kodePeminjaman = 'TRX-' . date('Ymd') . '-' . Str::upper(Str::random(4));
+
+                $peminjaman = Peminjaman::create([
+                    'kode_peminjaman'     => $kodePeminjaman,
+                    'user_id'             => $request->user_id,
+                    'buku_id'             => $exemplar->buku_id,
+                    'eksemplar_id'        => $exemplar->id,
+                    'tanggal_pinjam'      => Carbon::today()->toDateString(),
+                    'tanggal_jatuh_tempo' => $request->tanggal_jatuh_tempo,
+                    'status'              => 'dipinjam',
+                    'petugas_id'          => auth()->id(),
+                ]);
+
+                $exemplar->status = 'dipinjam';
+                $exemplar->save();
+
+                return $peminjaman;
+            });
+        } catch (\Exception $e) {
+            $msg = $e->getMessage();
+            if ($msg === 'EXEMPLAR_NOT_AVAILABLE') {
+                return back()->with('error', 'Eksemplar buku tidak ditemukan atau sedang tidak tersedia!');
+            }
+            if (str_starts_with($msg, 'MAX_LOANS_REACHED:')) {
+                $max = explode(':', $msg)[1];
+                return back()->with('error', "Anggota telah mencapai batas maksimal peminjaman ({$max} buku).");
+            }
+            return back()->with('error', 'Terjadi kesalahan saat memproses peminjaman. Silakan coba lagi.');
         }
-
-        $maxBuku = (int) (Pengaturan::where('key', 'max_buku_pinjam')->value('value') ?? 3);
-        $activeLoansCount = Peminjaman::where('user_id', $request->user_id)->where('status', 'dipinjam')->count();
-
-        if ($activeLoansCount >= $maxBuku) {
-            return back()->with('error', "Anggota telah mencapai batas maksimal peminjaman ({$maxBuku} buku).");
-        }
-
-        $kodePeminjaman = 'TRX-' . date('Ymd') . '-' . Str::upper(Str::random(4));
-
-        $peminjaman = Peminjaman::create([
-            'kode_peminjaman' => $kodePeminjaman,
-            'user_id' => $request->user_id,
-            'buku_id' => $exemplar->buku_id,
-            'eksemplar_id' => $exemplar->id,
-            'tanggal_pinjam' => Carbon::today()->toDateString(),
-            'tanggal_jatuh_tempo' => $request->tanggal_jatuh_tempo,
-            'status' => 'dipinjam',
-            'petugas_id' => auth()->id(),
-        ]);
-
-        $exemplar->status = 'dipinjam';
-        $exemplar->save();
 
         AuditLog::create([
-            'user_id' => auth()->id(),
-            'user_name' => auth()->user()->name,
-            'aktivitas' => 'TRANSAKSI_PEMINJAMAN',
-            'deskripsi' => "Peminjaman kode {$kodePeminjaman} berhasil dikonfirmasi.",
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'TRANSAKSI_PEMINJAMAN',
+            'deskripsi'  => "Peminjaman kode {$result->kode_peminjaman} berhasil dikonfirmasi.",
             'ip_address' => $request->ip(),
         ]);
 
-        return redirect()->route('pustakawan.peminjaman')->with('success', "Peminjaman berhasil dicatat! Kode TRX: {$kodePeminjaman}");
+        return redirect()->route('pustakawan.peminjaman')->with('success', "Peminjaman berhasil dicatat! Kode TRX: {$result->kode_peminjaman}");
     }
 
     public function pengembalianForm(Request $request)
@@ -145,6 +170,11 @@ class PustakawanController extends Controller
         ]);
 
         $peminjaman = Peminjaman::with(['eksemplar', 'user.role'])->findOrFail($request->peminjaman_id);
+
+        if ($peminjaman->status !== 'dipinjam') {
+            return back()->with('error', 'Transaksi peminjaman ini sudah berstatus dikembalikan sebelumnya.');
+        }
+
         $today = Carbon::today();
         $dueDate = Carbon::parse($peminjaman->tanggal_jatuh_tempo);
         $hariTerlambat = 0;
@@ -166,42 +196,46 @@ class PustakawanController extends Controller
             $totalDenda = 0;
         }
 
-        $peminjaman->status = 'dikembalikan';
-        $peminjaman->save();
+        \DB::transaction(function () use ($peminjaman, $request, $today, $hariTerlambat, $dendaTerlambat, $dendaKerusakan, $totalDenda) {
+            $peminjaman->status = 'dikembalikan';
+            $peminjaman->save();
 
-        // Update eksemplar
-        $eksemplar = $peminjaman->eksemplar;
-        if ($request->kondisi_buku === 'rusak') {
-            $eksemplar->status = 'rusak';
-            $eksemplar->kondisi = 'rusak_berat';
-        } else if ($request->kondisi_buku === 'hilang') {
-            $eksemplar->status = 'hilang';
-        } else {
-            $eksemplar->status = 'tersedia';
-            $eksemplar->kondisi = 'baik';
-        }
-        $eksemplar->save();
+            // Update eksemplar
+            $eksemplar = $peminjaman->eksemplar;
+            if ($eksemplar) {
+                if ($request->kondisi_buku === 'rusak') {
+                    $eksemplar->status = 'rusak';
+                    $eksemplar->kondisi = 'rusak_berat';
+                } else if ($request->kondisi_buku === 'hilang') {
+                    $eksemplar->status = 'hilang';
+                } else {
+                    $eksemplar->status = 'tersedia';
+                    $eksemplar->kondisi = 'baik';
+                }
+                $eksemplar->save();
+            }
 
-        // Catat pengembalian
-        Pengembalian::create([
-            'peminjaman_id' => $peminjaman->id,
-            'tanggal_kembali' => $today->toDateString(),
-            'hari_keterlambatan' => $hariTerlambat,
-            'denda_keterlambatan' => $dendaTerlambat,
-            'denda_kerusakan_kehilangan' => $dendaKerusakan,
-            'total_denda' => $totalDenda,
-            'petugas_id' => auth()->id(),
-        ]);
-
-        if ($totalDenda > 0) {
-            Denda::create([
+            // Catat pengembalian
+            Pengembalian::create([
                 'peminjaman_id' => $peminjaman->id,
-                'user_id' => $peminjaman->user_id,
-                'jumlah_denda' => $totalDenda,
-                'alasan' => $hariTerlambat > 0 ? "Terlambat {$hariTerlambat} hari" . ($dendaKerusakan > 0 ? " + denda kondisi {$request->kondisi_buku}" : "") : "Denda kondisi {$request->kondisi_buku}",
-                'status_pembayaran' => 'belum_lunas',
+                'tanggal_kembali' => $today->toDateString(),
+                'hari_keterlambatan' => $hariTerlambat,
+                'denda_keterlambatan' => $dendaTerlambat,
+                'denda_kerusakan_kehilangan' => $dendaKerusakan,
+                'total_denda' => $totalDenda,
+                'petugas_id' => auth()->id(),
             ]);
-        }
+
+            if ($totalDenda > 0) {
+                Denda::create([
+                    'peminjaman_id' => $peminjaman->id,
+                    'user_id' => $peminjaman->user_id,
+                    'jumlah_denda' => $totalDenda,
+                    'alasan' => $hariTerlambat > 0 ? "Terlambat {$hariTerlambat} hari" . ($dendaKerusakan > 0 ? " + denda kondisi {$request->kondisi_buku}" : "") : "Denda kondisi {$request->kondisi_buku}",
+                    'status_pembayaran' => 'belum_lunas',
+                ]);
+            }
+        });
 
         AuditLog::create([
             'user_id' => auth()->id(),
@@ -247,38 +281,59 @@ class PustakawanController extends Controller
     public function prosesReservasi(Request $request, $id)
     {
         $reservasi = Reservasi::with(['user', 'buku.eksemplar'])->findOrFail($id);
-        
-        $eksemplar = $reservasi->buku->eksemplar()->where('status', 'tersedia')->first();
-        if (!$eksemplar) {
-            return back()->with('error', 'Tidak ada eksemplar buku yang sedang tersedia untuk dipinjamkan saat ini.');
+
+        // VULN-007 FIX: Prevent re-processing of already completed/cancelled reservations
+        if (!in_array($reservasi->status, ['menunggu', 'tersedia'])) {
+            return back()->with('error', 'Reservasi ini sudah diproses atau dibatalkan sebelumnya. Tidak dapat diproses ulang.');
         }
 
-        $durasiPinjam = (int) (Pengaturan::where('key', 'durasi_pinjam_hari')->value('value') ?? 7);
-        $kodePeminjaman = 'TRX-' . date('Ymd') . '-' . Str::random(5);
+        try {
+            $result = \DB::transaction(function () use ($reservasi, $request) {
+                // VULN-008 FIX: lockForUpdate on eksemplar to prevent race condition
+                $eksemplar = $reservasi->buku->eksemplar()
+                    ->where('status', 'tersedia')
+                    ->lockForUpdate()
+                    ->first();
 
-        $peminjaman = Peminjaman::create([
-            'kode_peminjaman' => strtoupper($kodePeminjaman),
-            'user_id' => $reservasi->user_id,
-            'buku_id' => $reservasi->buku_id,
-            'eksemplar_id' => $eksemplar->id,
-            'tanggal_pinjam' => Carbon::now()->toDateString(),
-            'tanggal_jatuh_tempo' => Carbon::now()->addDays($durasiPinjam)->toDateString(),
-            'jumlah_perpanjangan' => 0,
-            'status' => 'dipinjam',
-            'petugas_id' => auth()->id(),
-        ]);
+                if (!$eksemplar) {
+                    throw new \Exception('NO_AVAILABLE_COPY');
+                }
 
-        $eksemplar->status = 'dipinjam';
-        $eksemplar->save();
+                $durasiPinjam   = (int) (Pengaturan::where('key', 'durasi_pinjam_hari')->value('value') ?? 7);
+                $kodePeminjaman = 'TRX-' . date('Ymd') . '-' . Str::random(5);
 
-        $reservasi->status = 'selesai';
-        $reservasi->save();
+                $peminjaman = Peminjaman::create([
+                    'kode_peminjaman'     => strtoupper($kodePeminjaman),
+                    'user_id'             => $reservasi->user_id,
+                    'buku_id'             => $reservasi->buku_id,
+                    'eksemplar_id'        => $eksemplar->id,
+                    'tanggal_pinjam'      => Carbon::now()->toDateString(),
+                    'tanggal_jatuh_tempo' => Carbon::now()->addDays($durasiPinjam)->toDateString(),
+                    'jumlah_perpanjangan' => 0,
+                    'status'              => 'dipinjam',
+                    'petugas_id'          => auth()->id(),
+                ]);
+
+                $eksemplar->status = 'dipinjam';
+                $eksemplar->save();
+
+                $reservasi->status = 'selesai';
+                $reservasi->save();
+
+                return $peminjaman;
+            });
+        } catch (\Exception $e) {
+            if ($e->getMessage() === 'NO_AVAILABLE_COPY') {
+                return back()->with('error', 'Tidak ada eksemplar buku yang sedang tersedia untuk dipinjamkan saat ini.');
+            }
+            return back()->with('error', 'Terjadi kesalahan saat memproses reservasi. Silakan coba lagi.');
+        }
 
         AuditLog::create([
-            'user_id' => auth()->id(),
-            'user_name' => auth()->user()->name,
-            'aktivitas' => 'PROSES_RESERVASI',
-            'deskripsi' => "Reservasi {$reservasi->kode_reservasi} disetujui & diubah ke Peminjaman {$peminjaman->kode_peminjaman}.",
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'PROSES_RESERVASI',
+            'deskripsi'  => "Reservasi {$reservasi->kode_reservasi} disetujui & diubah ke Peminjaman {$result->kode_peminjaman}.",
             'ip_address' => $request->ip(),
         ]);
 
@@ -330,8 +385,22 @@ class PustakawanController extends Controller
     public function bayarDenda(Request $request, $id)
     {
         $denda = Denda::findOrFail($id);
+
+        // VULN-006 FIX: Prevent re-confirming already paid fines
+        if ($denda->status_pembayaran === 'lunas') {
+            return back()->with('error', 'Denda ini sudah berstatus lunas sebelumnya.');
+        }
+
         $denda->status_pembayaran = 'lunas';
         $denda->save();
+
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'BAYAR_DENDA',
+            'deskripsi'  => "Konfirmasi pembayaran denda ID#{$denda->id} sebesar Rp " . number_format($denda->jumlah_denda),
+            'ip_address' => $request->ip(),
+        ]);
 
         return back()->with('success', 'Pembayaran denda berhasil dikonfirmasi lunas.');
     }

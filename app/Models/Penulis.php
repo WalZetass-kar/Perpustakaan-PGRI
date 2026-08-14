@@ -9,7 +9,7 @@ class Penulis extends Model
 {
     use HasFactory;
     protected $table = 'penulis';
-    protected $guarded = ['id'];
+    protected $fillable = ['nama', 'bio'];
 
     public function buku()
     {

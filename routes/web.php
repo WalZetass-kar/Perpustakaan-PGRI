@@ -12,15 +12,15 @@ Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/katalog', [PublicController::class, 'katalog'])->name('katalog');
 Route::get('/buku/{id}', [PublicController::class, 'detailBuku'])->name('buku.detail');
 
-// Auth Routes (Strict Separated Siswa & Admin Authentication)
+// Auth Routes — dengan Rate Limiting (VULN-002: brute force protection)
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'loginSiswa']);
+Route::post('/login', [AuthController::class, 'loginSiswa'])->middleware('throttle:5,1');
 
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
-Route::post('/register', [AuthController::class, 'registerSiswa'])->name('register.submit');
+Route::post('/register', [AuthController::class, 'registerSiswa'])->name('register.submit')->middleware('throttle:5,1');
 
 Route::get('/admin/login', [AuthController::class, 'showAdminLoginForm'])->name('admin.login.form');
-Route::post('/admin/login', [AuthController::class, 'loginAdmin'])->name('admin.login');
+Route::post('/admin/login', [AuthController::class, 'loginAdmin'])->name('admin.login')->middleware('throttle:3,1');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -34,7 +34,8 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard');
 
     // --- MAHASISWA / SISWA ROUTES --- //
-    Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
+    // VULN-001 FIX: role:mahasiswa middleware prevents admin/pustakawan from accessing student routes
+    Route::prefix('mahasiswa')->name('mahasiswa.')->middleware(['role:mahasiswa'])->group(function () {
         Route::get('/dashboard', [MahasiswaController::class, 'dashboard'])->name('dashboard');
         Route::get('/peminjaman', [MahasiswaController::class, 'peminjamanSaya'])->name('peminjaman');
         Route::post('/peminjaman/perpanjang/{id}', [MahasiswaController::class, 'perpanjangPeminjaman'])->name('peminjaman.perpanjang');
@@ -50,7 +51,8 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // --- PUSTAKAWAN ROUTES --- //
-    Route::prefix('pustakawan')->name('pustakawan.')->group(function () {
+    // VULN-001 FIX: role:admin,pustakawan — siswa tidak bisa akses
+    Route::prefix('pustakawan')->name('pustakawan.')->middleware(['role:admin,pustakawan'])->group(function () {
         Route::get('/dashboard', [PustakawanController::class, 'dashboard'])->name('dashboard');
         Route::get('/peminjaman', [PustakawanController::class, 'peminjamanForm'])->name('peminjaman');
         Route::post('/peminjaman', [PustakawanController::class, 'prosesPeminjaman']);
@@ -68,15 +70,16 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // --- ADMIN ROUTES (FULL CRUD) --- //
-    Route::prefix('admin')->name('admin.')->group(function () {
+    // VULN-001 FIX: role:admin — hanya admin yang bisa akses
+    Route::prefix('admin')->name('admin.')->middleware(['role:admin'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-        
+
         // Buku CRUD
         Route::get('/buku', [AdminController::class, 'bukuIndex'])->name('buku');
         Route::post('/buku', [AdminController::class, 'bukuStore'])->name('buku.store');
         Route::post('/buku/update/{id}', [AdminController::class, 'bukuUpdate'])->name('buku.update');
         Route::post('/buku/delete/{id}', [AdminController::class, 'bukuDestroy'])->name('buku.delete');
-        
+
         // Kategori CRUD
         Route::get('/kategori', [AdminController::class, 'kategoriIndex'])->name('kategori');
         Route::post('/kategori', [AdminController::class, 'kategoriStore'])->name('kategori.store');

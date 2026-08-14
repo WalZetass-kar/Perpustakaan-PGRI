@@ -87,7 +87,16 @@ class AdminController extends Controller
             'file_pdf' => 'nullable|mimes:pdf|max:10240',
         ]);
 
-        $data = $request->except(['cover', 'file_pdf']);
+        $data = [
+            'isbn'        => $request->isbn,
+            'judul'       => $request->judul,
+            'penulis_id'  => $request->penulis_id,
+            'penerbit_id' => $request->penerbit_id,
+            'kategori_id' => $request->kategori_id,
+            'rak_id'      => $request->rak_id,
+            'tahun_terbit'=> $request->tahun_terbit,
+            'sinopsis'    => $request->sinopsis,
+        ];
 
         if ($request->hasFile('cover')) {
             $data['cover'] = $request->file('cover')->store('covers', 'public');
@@ -126,7 +135,16 @@ class AdminController extends Controller
             'file_pdf' => 'nullable|mimes:pdf|max:10240',
         ]);
 
-        $data = $request->except(['cover', 'file_pdf']);
+        $data = [
+            'isbn'        => $request->isbn,
+            'judul'       => $request->judul,
+            'penulis_id'  => $request->penulis_id,
+            'penerbit_id' => $request->penerbit_id,
+            'kategori_id' => $request->kategori_id,
+            'rak_id'      => $request->rak_id,
+            'tahun_terbit'=> $request->tahun_terbit,
+            'sinopsis'    => $request->sinopsis,
+        ];
 
         if ($request->hasFile('cover')) {
             $data['cover'] = $request->file('cover')->store('covers', 'public');
@@ -151,7 +169,14 @@ class AdminController extends Controller
 
     public function bukuDestroy(Request $request, $id)
     {
-        $buku = Buku::findOrFail($id);
+        $buku = Buku::withCount(['peminjaman' => function($q) {
+            $q->where('status', 'dipinjam');
+        }])->findOrFail($id);
+
+        if ($buku->peminjaman_count > 0) {
+            return back()->with('error', 'Buku tidak dapat dihapus karena masih ada eksemplar yang sedang dipinjam oleh anggota.');
+        }
+
         $judul = $buku->judul;
         $buku->delete();
 
@@ -208,7 +233,10 @@ class AdminController extends Controller
 
     public function kategoriDestroy($id)
     {
-        $kategori = Kategori::findOrFail($id);
+        $kategori = Kategori::withCount('buku')->findOrFail($id);
+        if ($kategori->buku_count > 0) {
+            return back()->with('error', 'Kategori tidak dapat dihapus karena masih digunakan oleh ' . $kategori->buku_count . ' buku.');
+        }
         $kategori->delete();
         return back()->with('success', 'Kategori berhasil dihapus.');
     }
@@ -230,7 +258,12 @@ class AdminController extends Controller
             'kategori_id' => 'nullable|exists:kategori,id',
         ]);
 
-        Rak::create($request->all());
+        Rak::create([
+            'kode_rak'    => $request->kode_rak,
+            'nama_rak'    => $request->nama_rak,
+            'lokasi'      => $request->lokasi,
+            'kategori_id' => $request->kategori_id,
+        ]);
         return back()->with('success', 'Rak baru berhasil ditambahkan.');
     }
 
@@ -244,13 +277,21 @@ class AdminController extends Controller
             'kategori_id' => 'nullable|exists:kategori,id',
         ]);
 
-        $rak->update($request->all());
+        $rak->update([
+            'kode_rak'    => $request->kode_rak,
+            'nama_rak'    => $request->nama_rak,
+            'lokasi'      => $request->lokasi,
+            'kategori_id' => $request->kategori_id,
+        ]);
         return back()->with('success', 'Data rak berhasil diperbarui.');
     }
 
     public function rakDestroy($id)
     {
-        $rak = Rak::findOrFail($id);
+        $rak = Rak::withCount('eksemplar')->findOrFail($id);
+        if ($rak->eksemplar_count > 0) {
+            return back()->with('error', 'Rak tidak dapat dihapus karena masih menampung ' . $rak->eksemplar_count . ' eksemplar buku.');
+        }
         $rak->delete();
         return back()->with('success', 'Rak berhasil dihapus.');
     }
@@ -297,13 +338,22 @@ class AdminController extends Controller
             'status' => 'required|in:tersedia,dipinjam,hilang,rusak',
         ]);
 
-        $eksemplar->update($request->all());
+        $eksemplar->update([
+            'kode_eksemplar' => $request->kode_eksemplar,
+            'barcode'        => $request->barcode,
+            'kondisi'        => $request->kondisi,
+            'rak_id'         => $request->rak_id,
+            'status'         => $request->status,
+        ]);
         return back()->with('success', 'Data eksemplar berhasil diperbarui.');
     }
 
     public function eksemplarDestroy($id)
     {
         $eksemplar = Eksemplar::findOrFail($id);
+        if ($eksemplar->status === 'dipinjam') {
+            return back()->with('error', 'Eksemplar tidak dapat dihapus karena sedang dalam status dipinjam.');
+        }
         $eksemplar->delete();
         return back()->with('success', 'Eksemplar berhasil dihapus.');
     }
@@ -464,6 +514,16 @@ class AdminController extends Controller
             return back()->with('error', 'Anda tidak dapat menghapus akun Anda sendiri yang sedang aktif.');
         }
 
+        $activeLoans = Peminjaman::where('user_id', $user->id)->where('status', 'dipinjam')->count();
+        if ($activeLoans > 0) {
+            return back()->with('error', 'Pengguna tidak dapat dihapus karena masih memiliki ' . $activeLoans . ' buku yang sedang dipinjam.');
+        }
+
+        $unpaidFines = Denda::where('user_id', $user->id)->where('status_pembayaran', 'belum_lunas')->sum('jumlah_denda');
+        if ($unpaidFines > 0) {
+            return back()->with('error', 'Pengguna tidak dapat dihapus karena masih memiliki tanggungan denda sebesar Rp ' . number_format($unpaidFines) . '.');
+        }
+
         if ($user->anggota) {
             $user->anggota->delete();
         }
@@ -511,8 +571,22 @@ class AdminController extends Controller
     public function dendaBayar($id)
     {
         $denda = Denda::findOrFail($id);
+
+        // VULN-006 FIX: Prevent re-confirming already paid fines
+        if ($denda->status_pembayaran === 'lunas') {
+            return back()->with('error', 'Denda ini sudah berstatus lunas sebelumnya.');
+        }
+
         $denda->status_pembayaran = 'lunas';
         $denda->save();
+
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'BAYAR_DENDA',
+            'deskripsi'  => "Admin konfirmasi pembayaran denda ID#{$denda->id} sebesar Rp " . number_format($denda->jumlah_denda),
+            'ip_address' => request()->ip(),
+        ]);
 
         return back()->with('success', 'Status denda berhasil diubah menjadi LUNAS.');
     }
@@ -584,8 +658,29 @@ class AdminController extends Controller
 
     public function pengaturanUpdate(Request $request)
     {
+        // VULN-010 FIX: Whitelist of allowed keys to prevent arbitrary key injection
+        $allowedKeys = [
+            'nama_perpustakaan', 'jam_operasional', 'alamat',
+            'denda_per_hari', 'durasi_pinjam_hari', 'max_buku_pinjam', 'max_perpanjangan',
+        ];
+
+        // Numeric keys that require positive integer validation
+        $numericKeys = ['denda_per_hari', 'durasi_pinjam_hari', 'max_buku_pinjam', 'max_perpanjangan'];
+
         foreach ($request->except('_token') as $key => $value) {
-            Pengaturan::where('key', $key)->update(['value' => $value]);
+            // Skip keys not in whitelist
+            if (!in_array($key, $allowedKeys)) {
+                continue;
+            }
+
+            // Validate numeric keys
+            if (in_array($key, $numericKeys)) {
+                if (!is_numeric($value) || (float)$value < 0 || (float)$value > 999999) {
+                    continue;
+                }
+            }
+
+            Pengaturan::where('key', $key)->update(['value' => strip_tags($value)]);
         }
 
         AuditLog::create([

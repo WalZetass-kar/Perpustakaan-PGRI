@@ -9,7 +9,7 @@ class Denda extends Model
 {
     use HasFactory;
     protected $table = 'denda';
-    protected $guarded = ['id'];
+    protected $fillable = ['peminjaman_id', 'user_id', 'jumlah_denda', 'alasan', 'status_pembayaran'];
 
     public function peminjaman()
     {

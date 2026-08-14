@@ -192,7 +192,7 @@
                         <a href="{{ route('buku.detail', $buku->id) }}" class="text-[11px] font-bold text-gray-600 hover:text-gray-900 underline">
                             Detail
                         </a>
-                        <form action="{{ route('mahasiswa.reservasi.buat', $buku->id) }}" method="POST" onsubmit="return confirmAction(event, 'Booking Buku Ini?', 'Konfirmasi booking online untuk buku: {{ addslashes($buku->judul) }}', 'Ya, Booking Sekarang!')">
+                        <form action="{{ route('mahasiswa.reservasi.buat', $buku->id) }}" method="POST" onsubmit="return confirmAction(event, 'Booking Buku Ini?', 'Konfirmasi booking buku ini.', 'Ya, Booking Sekarang!')">
                             @csrf
                             <button type="submit" class="px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-[11px] rounded-xl transition shadow-2xs flex items-center gap-1">
                                 <svg class="w-3.5 h-3.5 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>

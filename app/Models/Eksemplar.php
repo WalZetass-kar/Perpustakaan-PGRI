@@ -9,7 +9,7 @@ class Eksemplar extends Model
 {
     use HasFactory;
     protected $table = 'eksemplar';
-    protected $guarded = ['id'];
+    protected $fillable = ['buku_id', 'kode_eksemplar', 'barcode', 'kondisi', 'rak_id', 'status'];
 
     public function buku()
     {

@@ -9,7 +9,7 @@ class Pengembalian extends Model
 {
     use HasFactory;
     protected $table = 'pengembalian';
-    protected $guarded = ['id'];
+    protected $fillable = ['peminjaman_id', 'tanggal_kembali', 'hari_keterlambatan', 'denda_keterlambatan', 'denda_kerusakan_kehilangan', 'total_denda', 'petugas_id'];
 
     public function peminjaman()
     {

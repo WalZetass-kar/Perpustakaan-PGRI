@@ -9,7 +9,7 @@ class AuditLog extends Model
 {
     use HasFactory;
     protected $table = 'audit_logs';
-    protected $guarded = ['id'];
+    protected $fillable = ['user_id', 'user_name', 'aktivitas', 'deskripsi', 'ip_address'];
 
     public function user()
     {

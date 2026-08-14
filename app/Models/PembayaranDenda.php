@@ -9,7 +9,7 @@ class PembayaranDenda extends Model
 {
     use HasFactory;
     protected $table = 'pembayaran_denda';
-    protected $guarded = ['id'];
+    protected $fillable = ['denda_id', 'jumlah_bayar', 'tanggal_bayar', 'keterangan', 'petugas_id'];
 
     public function denda()
     {

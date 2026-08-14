@@ -9,7 +9,7 @@ class Reservasi extends Model
 {
     use HasFactory;
     protected $table = 'reservasi';
-    protected $guarded = ['id'];
+    protected $fillable = ['kode_reservasi', 'user_id', 'buku_id', 'posisi_antrean', 'status', 'tanggal_reservasi'];
 
     public function user()
     {

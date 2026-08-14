@@ -347,20 +347,20 @@
                                 </span>
 
                                 <h3 class="text-xs font-bold text-gray-900 line-clamp-2 leading-snug group-hover:text-brand-700 transition">
-                                    <button @click="modalData = {
-                                        id: {{ $item->id }},
-                                        judul: '{{ addslashes($item->judul) }}',
-                                        penulis: '{{ addslashes($item->penulis->nama ?? '-') }}',
-                                        penerbit: '{{ addslashes($item->penerbit->nama ?? '-') }}',
-                                        tahun: '{{ $item->tahun_terbit }}',
-                                        isbn: '{{ $item->isbn }}',
-                                        kategori: '{{ addslashes($item->kategori->nama ?? 'Umum') }}',
-                                        rak: '{{ addslashes(($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? '')) }}',
-                                        sinopsis: '{{ addslashes($item->sinopsis ?? 'Modul pembelajaran resmi SMK PGRI Pekanbaru.') }}',
-                                        tersedia: {{ $item->jumlah_tersedia }},
-                                        total: {{ $item->jumlah_eksemplar }},
-                                        cover: '{{ $coverUrl ?? '' }}'
-                                    }; openDetailModal = true" class="text-left hover:underline">
+                                    <button type="button" @click="modalData = {{ json_encode([
+                                        'id' => $item->id,
+                                        'judul' => $item->judul,
+                                        'penulis' => $item->penulis->nama ?? '-',
+                                        'penerbit' => $item->penerbit->nama ?? '-',
+                                        'tahun' => (string) $item->tahun_terbit,
+                                        'isbn' => (string) $item->isbn,
+                                        'kategori' => $item->kategori->nama ?? 'Umum',
+                                        'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
+                                        'sinopsis' => $item->sinopsis ?? 'Modul pembelajaran resmi SMK PGRI Pekanbaru.',
+                                        'tersedia' => $item->jumlah_tersedia,
+                                        'total' => $item->jumlah_eksemplar,
+                                        'cover' => $coverUrl ?? ''
+                                    ]) }}; openDetailModal = true" class="text-left hover:underline">
                                         {{ $item->judul }}
                                     </button>
                                 </h3>
@@ -381,20 +381,20 @@
                         <!-- Card Bottom Bar -->
                         <div class="px-4 py-2.5 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-xs">
                             <span class="text-[10px] text-gray-500 font-medium">{{ $available }} / {{ $totalEx }} eksemplar</span>
-                            <button @click="modalData = {
-                                id: {{ $item->id }},
-                                judul: '{{ addslashes($item->judul) }}',
-                                penulis: '{{ addslashes($item->penulis->nama ?? '-') }}',
-                                penerbit: '{{ addslashes($item->penerbit->nama ?? '-') }}',
-                                tahun: '{{ $item->tahun_terbit }}',
-                                isbn: '{{ $item->isbn }}',
-                                kategori: '{{ addslashes($item->kategori->nama ?? 'Umum') }}',
-                                rak: '{{ addslashes(($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? '')) }}',
-                                sinopsis: '{{ addslashes($item->sinopsis ?? 'Modul pembelajaran resmi SMK PGRI Pekanbaru.') }}',
-                                tersedia: {{ $item->jumlah_tersedia }},
-                                total: {{ $item->jumlah_eksemplar }},
-                                cover: '{{ $coverUrl ?? '' }}'
-                            }; openDetailModal = true" class="px-3 py-1.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-[11px] rounded-lg transition shadow-2xs">
+                            <button type="button" @click="modalData = {{ json_encode([
+                                'id' => $item->id,
+                                'judul' => $item->judul,
+                                'penulis' => $item->penulis->nama ?? '-',
+                                'penerbit' => $item->penerbit->nama ?? '-',
+                                'tahun' => (string) $item->tahun_terbit,
+                                'isbn' => (string) $item->isbn,
+                                'kategori' => $item->kategori->nama ?? 'Umum',
+                                'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
+                                'sinopsis' => $item->sinopsis ?? 'Modul pembelajaran resmi SMK PGRI Pekanbaru.',
+                                'tersedia' => $item->jumlah_tersedia,
+                                'total' => $item->jumlah_eksemplar,
+                                'cover' => $coverUrl ?? ''
+                            ]) }}; openDetailModal = true" class="px-3 py-1.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-[11px] rounded-lg transition shadow-2xs">
                                 Lihat Detail
                             </button>
                         </div>
@@ -449,20 +449,20 @@
                                     {{ $item->kategori->nama ?? 'Umum' }}
                                 </span>
                                 <h3 class="text-sm font-bold text-gray-900 leading-snug">
-                                    <button @click="modalData = {
-                                        id: {{ $item->id }},
-                                        judul: '{{ addslashes($item->judul) }}',
-                                        penulis: '{{ addslashes($item->penulis->nama ?? '-') }}',
-                                        penerbit: '{{ addslashes($item->penerbit->nama ?? '-') }}',
-                                        tahun: '{{ $item->tahun_terbit }}',
-                                        isbn: '{{ $item->isbn }}',
-                                        kategori: '{{ addslashes($item->kategori->nama ?? 'Umum') }}',
-                                        rak: '{{ addslashes(($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? '')) }}',
-                                        sinopsis: '{{ addslashes($item->sinopsis ?? 'Modul pembelajaran resmi SMK PGRI Pekanbaru.') }}',
-                                        tersedia: {{ $item->jumlah_tersedia }},
-                                        total: {{ $item->jumlah_eksemplar }},
-                                        cover: '{{ $coverUrl ?? '' }}'
-                                    }; openDetailModal = true" class="text-left hover:text-brand-700 hover:underline">
+                                    <button type="button" @click="modalData = {{ json_encode([
+                                        'id' => $item->id,
+                                        'judul' => $item->judul,
+                                        'penulis' => $item->penulis->nama ?? '-',
+                                        'penerbit' => $item->penerbit->nama ?? '-',
+                                        'tahun' => (string) $item->tahun_terbit,
+                                        'isbn' => (string) $item->isbn,
+                                        'kategori' => $item->kategori->nama ?? 'Umum',
+                                        'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
+                                        'sinopsis' => $item->sinopsis ?? 'Modul pembelajaran resmi SMK PGRI Pekanbaru.',
+                                        'tersedia' => $item->jumlah_tersedia,
+                                        'total' => $item->jumlah_eksemplar,
+                                        'cover' => $coverUrl ?? ''
+                                    ]) }}; openDetailModal = true" class="text-left hover:text-brand-700 hover:underline">
                                         {{ $item->judul }}
                                     </button>
                                 </h3>
@@ -476,20 +476,20 @@
                                 <span class="text-[10px] font-bold text-gray-400 block">Stok Eksemplar:</span>
                                 <span class="text-xs font-black text-emerald-600">{{ $available }} tersedia / {{ $totalEx }} total</span>
                             </div>
-                            <button @click="modalData = {
-                                id: {{ $item->id }},
-                                judul: '{{ addslashes($item->judul) }}',
-                                penulis: '{{ addslashes($item->penulis->nama ?? '-') }}',
-                                penerbit: '{{ addslashes($item->penerbit->nama ?? '-') }}',
-                                tahun: '{{ $item->tahun_terbit }}',
-                                isbn: '{{ $item->isbn }}',
-                                kategori: '{{ addslashes($item->kategori->nama ?? 'Umum') }}',
-                                rak: '{{ addslashes(($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? '')) }}',
-                                sinopsis: '{{ addslashes($item->sinopsis ?? 'Modul pembelajaran resmi SMK PGRI Pekanbaru.') }}',
-                                tersedia: {{ $item->jumlah_tersedia }},
-                                total: {{ $item->jumlah_eksemplar }},
-                                cover: '{{ $coverUrl ?? '' }}'
-                            }; openDetailModal = true" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-xs rounded-xl transition shadow-2xs">
+                            <button type="button" @click="modalData = {{ json_encode([
+                                'id' => $item->id,
+                                'judul' => $item->judul,
+                                'penulis' => $item->penulis->nama ?? '-',
+                                'penerbit' => $item->penerbit->nama ?? '-',
+                                'tahun' => (string) $item->tahun_terbit,
+                                'isbn' => (string) $item->isbn,
+                                'kategori' => $item->kategori->nama ?? 'Umum',
+                                'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
+                                'sinopsis' => $item->sinopsis ?? 'Modul pembelajaran resmi SMK PGRI Pekanbaru.',
+                                'tersedia' => $item->jumlah_tersedia,
+                                'total' => $item->jumlah_eksemplar,
+                                'cover' => $coverUrl ?? ''
+                            ]) }}; openDetailModal = true" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-xs rounded-xl transition shadow-2xs">
                                 Lihat Detail
                             </button>
                         </div>
