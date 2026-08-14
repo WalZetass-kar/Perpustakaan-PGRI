@@ -18,6 +18,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
@@ -32,7 +33,7 @@ class AdminController extends Controller
             'total_judul'            => Buku::count(),
             'total_buku'             => (int) Buku::sum('total_quantity'),
             'buku_tersedia'          => (int) Buku::sum('available_quantity'),
-            'buku_sedang_dipinjam'   => Peminjaman::where('status', 'dipinjam')->sum('jumlah'),
+            'buku_sedang_dipinjam'   => (int) Peminjaman::where('status', 'dipinjam')->sum('jumlah'),
             'total_kategori'         => Kategori::count(),
             'total_penulis'          => Penulis::count(),
             'total_penerbit'         => Penerbit::count(),
@@ -183,7 +184,11 @@ class AdminController extends Controller
             'sinopsis'           => $request->sinopsis,
         ];
 
+        // Safe cover replacement: delete previous cover if exists
         if ($request->hasFile('cover')) {
+            if ($buku->cover && Storage::disk('public')->exists($buku->cover)) {
+                Storage::disk('public')->delete($buku->cover);
+            }
             $data['cover'] = $request->file('cover')->store('covers', 'public');
         }
 
@@ -208,6 +213,11 @@ class AdminController extends Controller
 
         if ($buku->peminjaman_count > 0) {
             return back()->with('error', 'Buku tidak dapat dihapus karena masih ada yang sedang dalam status dipinjam.');
+        }
+
+        // Safe cover cleanup from storage
+        if ($buku->cover && Storage::disk('public')->exists($buku->cover)) {
+            Storage::disk('public')->delete($buku->cover);
         }
 
         $judul = $buku->judul;
@@ -541,25 +551,32 @@ class AdminController extends Controller
 
     public function peminjamanKembali(Request $request, $id)
     {
-        $loan = Peminjaman::with('buku')->findOrFail($id);
-
-        if ($loan->status === 'dikembalikan') {
-            return back()->with('error', 'Transaksi peminjaman ini sudah berstatus dikembalikan sebelumnya.');
-        }
-
         try {
-            DB::transaction(function () use ($loan) {
-                $buku = Buku::where('id', $loan->buku_id)->lockForUpdate()->first();
+            $loan = DB::transaction(function () use ($id) {
+                // Strict Row-level Locking on Loan Record to prevent race conditions (SEC-001)
+                $lockedLoan = Peminjaman::where('id', $id)->lockForUpdate()->firstOrFail();
+
+                if ($lockedLoan->status === 'dikembalikan') {
+                    throw new \Exception('ALREADY_RETURNED');
+                }
+
+                // Strict Row-level Locking on Book Record
+                $buku = Buku::where('id', $lockedLoan->buku_id)->lockForUpdate()->first();
                 if ($buku) {
-                    $buku->available_quantity = min($buku->total_quantity, $buku->available_quantity + $loan->jumlah);
+                    $buku->available_quantity = min($buku->total_quantity, $buku->available_quantity + $lockedLoan->jumlah);
                     $buku->save();
                 }
 
-                $loan->status = 'dikembalikan';
-                $loan->waktu_kembali = Carbon::now();
-                $loan->save();
+                $lockedLoan->status = 'dikembalikan';
+                $lockedLoan->waktu_kembali = Carbon::now();
+                $lockedLoan->save();
+
+                return $lockedLoan;
             });
         } catch (\Exception $e) {
+            if ($e->getMessage() === 'ALREADY_RETURNED') {
+                return back()->with('error', 'Transaksi peminjaman ini sudah berstatus dikembalikan sebelumnya.');
+            }
             return back()->with('error', 'Terjadi kesalahan saat memproses pengembalian buku.');
         }
 
@@ -744,16 +761,33 @@ class AdminController extends Controller
 
     public function pengaturanUpdate(Request $request)
     {
-        $allowedKeys = [
-            'nama_perpustakaan', 'jam_operasional', 'alamat',
-            'durasi_pinjam_hari', 'max_buku_pinjam',
+        // Explicit strict validation (SEC-002)
+        $validated = $request->validate([
+            'nama_perpustakaan'  => 'required|string|max:255',
+            'jam_operasional'    => 'required|string|max:255',
+            'alamat'             => 'nullable|string|max:500',
+            'durasi_pinjam_hari' => 'required|integer|min:1|max:365',
+            'max_buku_pinjam'    => 'required|integer|min:1|max:50',
+        ]);
+
+        $settingDefinitions = [
+            'nama_perpustakaan'  => ['label' => 'Nama Resmi Perpustakaan', 'tipe' => 'text'],
+            'jam_operasional'    => ['label' => 'Informasi Jam Operasional Perpustakaan', 'tipe' => 'text'],
+            'alamat'             => ['label' => 'Alamat & Lokasi Gedung', 'tipe' => 'text'],
+            'durasi_pinjam_hari' => ['label' => 'Durasi Peminjaman Standar (Hari)', 'tipe' => 'number'],
+            'max_buku_pinjam'    => ['label' => 'Maksimal Buku Dipinjam Per Siswa', 'tipe' => 'number'],
         ];
 
-        foreach ($request->except('_token') as $key => $value) {
-            if (!in_array($key, $allowedKeys)) {
-                continue;
-            }
-            Pengaturan::where('key', $key)->update(['value' => strip_tags($value)]);
+        foreach ($validated as $key => $value) {
+            $def = $settingDefinitions[$key] ?? ['label' => ucwords(str_replace('_', ' ', $key)), 'tipe' => 'text'];
+            Pengaturan::updateOrCreate(
+                ['key' => $key],
+                [
+                    'value' => strip_tags((string) $value),
+                    'label' => $def['label'],
+                    'tipe'  => $def['tipe'],
+                ]
+            );
         }
 
         AuditLog::create([
