@@ -165,17 +165,20 @@
 
                     <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 space-y-1.5 text-xs">
                         <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Panduan Lokasi Rak & Laci</span>
-                        <div class="flex flex-wrap items-center gap-1 text-[11px] font-medium text-gray-800">
-                            <span class="px-2 py-0.5 bg-white rounded-md border border-gray-200 font-bold text-gray-700">
-                                📍 {{ $buku->rak->lokasi ?? 'Lantai 1 Perpustakaan' }}
+                        <div class="flex flex-wrap items-center gap-1.5 text-[11px] font-medium text-gray-800">
+                            <span class="px-2 py-0.5 bg-white rounded-md border border-gray-200 font-bold text-gray-700 inline-flex items-center gap-1">
+                                <svg class="w-3 h-3 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <span>{{ $buku->rak->lokasi ?? 'Lantai 1 Perpustakaan' }}</span>
                             </span>
                             <span class="text-gray-400">&rarr;</span>
-                            <span class="px-2 py-0.5 bg-brand-50 text-brand-800 rounded-md border border-brand-200 font-bold">
-                                🗄️ {{ $buku->rak->nama_rak ?? 'Rak Umum' }} ({{ $buku->rak->kode_rak ?? '-' }})
+                            <span class="px-2 py-0.5 bg-brand-50 text-brand-800 rounded-md border border-brand-200 font-bold inline-flex items-center gap-1">
+                                <svg class="w-3 h-3 text-brand-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                <span>{{ $buku->rak->nama_rak ?? 'Rak Umum' }} ({{ $buku->rak->kode_rak ?? '-' }})</span>
                             </span>
                             <span class="text-gray-400">&rarr;</span>
-                            <span class="px-2 py-0.5 bg-emerald-50 text-emerald-800 rounded-md border border-emerald-200 font-bold">
-                                📥 {{ $buku->laci->nama_laci ?? ($buku->rak ? 'Laci 1' : 'Tingkat Standar') }}
+                            <span class="px-2 py-0.5 bg-emerald-50 text-emerald-800 rounded-md border border-emerald-200 font-bold inline-flex items-center gap-1">
+                                <svg class="w-3 h-3 text-emerald-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                                <span>{{ $buku->laci->nama_laci ?? ($buku->rak ? 'Laci 1' : 'Tingkat Standar') }}</span>
                             </span>
                         </div>
                         @if($buku->laci && $buku->laci->keterangan)

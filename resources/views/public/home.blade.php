@@ -98,7 +98,7 @@
                                             <p class="font-bold text-gray-900 text-xs truncate group-hover:text-brand-700 transition" x-text="item.judul"></p>
                                             <p class="text-[10px] text-gray-500 truncate" x-text="item.penulis + ' • ' + item.kategori"></p>
                                             <div class="flex items-center gap-1.5 mt-1 text-[9.5px]">
-                                                <span class="px-1.5 py-0.5 rounded bg-gray-100 font-semibold text-gray-700 border border-gray-200" x-text="'📍 ' + item.rak + ' (' + item.laci + ')'"></span>
+                                                <span class="px-1.5 py-0.5 rounded bg-gray-100 font-semibold text-gray-700 border border-gray-200" x-text="item.rak + ' (' + item.laci + ')'"></span>
                                                 <span class="px-1.5 py-0.5 rounded font-black" :class="item.available_quantity > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'" x-text="'Stok: ' + item.available_quantity + ' Eks'"></span>
                                             </div>
                                         </div>
@@ -168,11 +168,15 @@
                 </p>
                 <ul class="space-y-2.5 text-xs text-gray-700 font-medium">
                     <li class="flex items-center gap-3">
-                        <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs shrink-0">✓</span>
+                        <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs shrink-0">
+                            <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        </span>
                         <span>Pencarian buku cepat OPAC dengan penunjuk lokasi nomor rak & laci.</span>
                     </li>
                     <li class="flex items-center gap-3">
-                        <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs shrink-0">✓</span>
+                        <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs shrink-0">
+                            <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        </span>
                         <span>Sirkulasi peminjaman siswa cepat dan pencatatan instan.</span>
                     </li>
                 </ul>
@@ -209,8 +213,9 @@
                                 {{ $buku->kategori->nama ?? 'Kejuruan' }}
                             </span>
                             @if($buku->rak)
-                                <span class="text-[10px] font-mono font-bold text-gray-700 bg-gray-100 px-2 py-0.5 rounded-md border border-gray-200">
-                                    📍 {{ $buku->rak->kode_rak }} • {{ $buku->laci->nama_laci ?? 'Laci 1' }}
+                                <span class="text-[10px] font-mono font-bold text-gray-700 bg-gray-100 px-2 py-0.5 rounded-md border border-gray-200 inline-flex items-center gap-1">
+                                    <svg class="w-3 h-3 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    <span>{{ $buku->rak->kode_rak }} • {{ $buku->laci->nama_laci ?? 'Laci 1' }}</span>
                                 </span>
                             @endif
                         </div>

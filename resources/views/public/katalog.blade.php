@@ -97,7 +97,7 @@
                                 <p class="font-bold text-gray-900 truncate group-hover:text-brand-700" x-text="item.judul"></p>
                                 <p class="text-[10px] text-gray-500 truncate" x-text="item.penulis + ' • ' + item.kategori"></p>
                                 <div class="flex items-center gap-1.5 mt-1 text-[9.5px]">
-                                    <span class="px-1.5 py-0.5 rounded bg-gray-100 font-bold text-gray-700 border border-gray-200" x-text="'📍 ' + item.rak + ' (' + item.laci + ')'"></span>
+                                    <span class="px-1.5 py-0.5 rounded bg-gray-100 font-bold text-gray-700 border border-gray-200" x-text="item.rak + ' (' + item.laci + ')'"></span>
                                     <span class="px-1.5 py-0.5 rounded font-black" :class="item.available_quantity > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'" x-text="'Stok: ' + item.available_quantity + ' Eks'"></span>
                                 </div>
                             </div>
