@@ -259,7 +259,7 @@
                 </div>
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
-                    <button type="submit" title="Keluar Akun" class="p-2 text-gray-400 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition border border-transparent hover:border-rose-200">
+                    <button type="button" onclick="confirmLogout(event)" title="Keluar dari Dashboard" class="p-2 text-gray-400 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition border border-transparent hover:border-rose-200 cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                     </button>
                 </form>
@@ -293,6 +293,13 @@
                         <span>Sistem Aktif</span>
                     </span>
                 </div>
+                <form action="{{ route('logout') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="button" onclick="confirmLogout(event)" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-extrabold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-200 transition cursor-pointer">
+                        <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        <span class="hidden sm:inline">Keluar</span>
+                    </button>
+                </form>
             </div>
         </header>
 
@@ -348,6 +355,33 @@
                 cancelButtonColor: '#6B7280',
                 confirmButtonText: 'Ya, Lanjutkan!',
                 cancelButtonText: 'Batal',
+                customClass: {
+                    popup: 'rounded-3xl border-2 border-gray-200 shadow-2xl font-sans',
+                    confirmButton: 'px-5 py-2.5 rounded-xl font-bold text-xs',
+                    cancelButton: 'px-5 py-2.5 rounded-xl font-bold text-xs'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+            return false;
+        }
+
+        function confirmLogout(event) {
+            event.preventDefault();
+            const form = event.target.closest('form');
+
+            Swal.fire({
+                title: 'Konfirmasi Keluar?',
+                text: 'Apakah Anda yakin ingin keluar dari dashboard admin perpustakaan?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#B91C1C',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Ya, Keluar!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
                 customClass: {
                     popup: 'rounded-3xl border-2 border-gray-200 shadow-2xl font-sans',
                     confirmButton: 'px-5 py-2.5 rounded-xl font-bold text-xs',
