@@ -4,14 +4,14 @@
 
 @section('content')
 
-<section class="relative bg-gradient-to-r from-brand-900/95 via-brand-800/90 to-red-950/95 text-white py-16 lg:py-24 overflow-hidden shadow-lg">
+<section class="relative bg-gradient-to-r from-brand-900/95 via-brand-800/90 to-red-950/95 text-white min-h-[calc(100vh-5rem)] flex items-center py-16 lg:py-24 overflow-hidden shadow-lg">
 
     <div class="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-30 pointer-events-none transform scale-105 transition duration-1000 animate-pulse" style="background-image: url('https://smkpgripekanbaru.sch.id/images/pgri.webp');"></div>
 
     <div class="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none animate-bounce" style="animation-duration: 8s;"></div>
     <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-red-500/10 rounded-full blur-3xl pointer-events-none animate-pulse" style="animation-duration: 6s;"></div>
 
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
 
             <div class="lg:col-span-7 space-y-6 text-center lg:text-left" data-aos="fade-right" data-aos-duration="1000">
