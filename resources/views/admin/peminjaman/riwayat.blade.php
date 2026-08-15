@@ -5,13 +5,12 @@
 
 @section('content')
 <div class="space-y-5">
-    
-    <!-- Filter & Search Card -->
+
     <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm">
         <form action="{{ route('admin.riwayat') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
             <div>
                 <label class="block font-bold text-gray-700 mb-1">Cari Transaksi</label>
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Kode, nama siswa, jurusan, judul..." 
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Kode, nama siswa, jurusan, judul..."
                        class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:outline-none font-medium">
             </div>
             <div>
@@ -24,7 +23,7 @@
             </div>
             <div>
                 <label class="block font-bold text-gray-700 mb-1">Tanggal Pinjam</label>
-                <input type="date" name="tanggal" value="{{ request('tanggal') }}" 
+                <input type="date" name="tanggal" value="{{ request('tanggal') }}"
                        class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:outline-none font-medium">
             </div>
             <div class="flex items-end gap-2">
@@ -40,7 +39,6 @@
         </form>
     </div>
 
-    <!-- Data Table Card -->
     <div class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs">

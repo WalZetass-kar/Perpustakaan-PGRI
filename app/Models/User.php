@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -48,30 +47,8 @@ class User extends Authenticatable
         return $this->hasMany(Peminjaman::class);
     }
 
-    public function reservasi()
-    {
-        return $this->hasMany(Reservasi::class);
-    }
-
-    public function denda()
-    {
-        return $this->hasMany(Denda::class);
-    }
-
-    public function notifikasi()
-    {
-        return $this->hasMany(Notifikasi::class);
-    }
-
     public function hasRole($roleName)
     {
         return $this->role && $this->role->name === $roleName;
-    }
-
-    public function hasPermission($permissionName)
-    {
-        if (!$this->role) return false;
-        if ($this->role->name === 'admin') return true;
-        return $this->role->permissions->contains('name', $permissionName);
     }
 }

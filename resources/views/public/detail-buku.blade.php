@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-    
+
     <a href="{{ route('katalog') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-brand-700 transition">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
         <span>Kembali ke Katalog OPAC</span>
@@ -12,8 +12,7 @@
 
     <div class="bg-white border-2 border-gray-200 rounded-3xl overflow-hidden shadow-sm p-6 lg:p-8">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <!-- Book Cover Showcase -->
+
             <div class="lg:col-span-1 bg-gray-50 border-2 border-gray-100 rounded-2xl p-6 flex flex-col items-center justify-center text-center space-y-4">
                 <div class="w-44 h-64 bg-gray-200 border-2 border-gray-300 rounded-2xl overflow-hidden shadow-lg relative group">
                     @if($buku->cover_url)
@@ -33,7 +32,6 @@
                 </div>
             </div>
 
-            <!-- Detailed Information & Action Buttons -->
             <div class="lg:col-span-2 space-y-6">
                 <div>
                     <div class="flex items-center gap-2 mb-2 flex-wrap">
@@ -50,7 +48,6 @@
                     <p class="text-xs text-gray-600 mt-1">Penulis: <strong class="text-gray-900 font-bold">{{ $buku->penulis->nama ?? '-' }}</strong></p>
                 </div>
 
-                <!-- Attributes Grid -->
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 p-5 bg-gray-50 border-2 border-gray-100 rounded-2xl text-xs">
                     <div>
                         <span class="text-gray-400 block font-bold text-[10px] uppercase">Penerbit</span>
@@ -78,13 +75,11 @@
                     </div>
                 </div>
 
-                <!-- Synopsis -->
                 <div>
                     <h3 class="text-xs font-black text-gray-900 uppercase tracking-wider mb-2">Sinopsis / Ringkasan Buku</h3>
                     <p class="text-xs text-gray-600 leading-relaxed bg-gray-50/50 p-4 rounded-xl border border-gray-200">{{ $buku->sinopsis ?? 'Buku perpustakaan resmi dan modul pembelajaran SMK PGRI Pekanbaru.' }}</p>
                 </div>
 
-                <!-- Circulation Notice -->
                 <div class="p-4 rounded-2xl bg-brand-50 border-2 border-brand-100 text-brand-900 text-xs">
                     <p class="font-extrabold flex items-center gap-1.5">
                         <svg class="w-4 h-4 text-brand-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>

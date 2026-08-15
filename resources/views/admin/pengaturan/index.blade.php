@@ -7,8 +7,7 @@
 <div class="max-w-3xl mx-auto space-y-6">
 
     <div class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm p-6 sm:p-8 space-y-6">
-        
-        <!-- Header Info -->
+
         <div class="border-b border-gray-100 pb-4">
             <h2 class="text-base font-bold text-gray-900">Konfigurasi Sistem Perpustakaan SMK PGRI Pekanbaru</h2>
             <p class="text-xs text-gray-500 mt-1">Kelola identitas resmi perpustakaan dan aturan sirkulasi</p>
@@ -17,7 +16,6 @@
         <form action="{{ route('admin.pengaturan.update') }}" method="POST" class="space-y-6 text-xs">
             @csrf
 
-            <!-- Kelompok 1: Profil Sekolah & Jam Layanan -->
             <div class="space-y-4">
                 <h3 class="text-xs font-extrabold text-brand-700 uppercase tracking-wider border-b border-gray-100 pb-2 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
@@ -39,7 +37,6 @@
                 </div>
             </div>
 
-            <!-- Kelompok 2: Aturan Sirkulasi & Batas Maksimal Pinjam -->
             <div class="space-y-4 pt-2">
                 <h3 class="text-xs font-extrabold text-brand-700 uppercase tracking-wider border-b border-gray-100 pb-2 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -57,7 +54,6 @@
                 </div>
             </div>
 
-            <!-- Submit Action -->
             <div class="pt-4 border-t border-gray-100 flex justify-end">
                 <button type="submit" class="px-6 py-2.5 bg-brand-700 text-white font-extrabold text-xs rounded-xl hover:bg-brand-800 transition shadow-sm flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>

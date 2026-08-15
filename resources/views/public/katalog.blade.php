@@ -3,16 +3,15 @@
 @section('title', 'Katalog Buku Digital OPAC')
 
 @section('content')
-<div class="space-y-6 pb-12" x-data="{ 
+<div class="space-y-6 pb-12" x-data="{
     showFilterBar: false,
-    openDetailModal: false, 
+    openDetailModal: false,
     viewMode: 'grid',
-    modalData: {} 
+    modalData: {}
 }">
 
-    <!-- 1. COMPACT HERO SECTION & GLOBAL SEARCH (Centered) -->
     <div class="bg-gradient-to-r from-brand-900 via-brand-700 to-red-800 text-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-brand-700 relative overflow-hidden text-center">
-        <!-- Subtle Watermark Graphic -->
+
         <div class="absolute -right-8 -bottom-8 w-56 h-56 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
 
         <div class="relative z-10 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
@@ -29,9 +28,8 @@
                 </p>
             </div>
 
-            <!-- 2. GLOBAL SEARCH BAR (Centered) -->
             <form action="{{ route('katalog') }}" method="GET" class="relative max-w-2xl w-full mx-auto">
-                <!-- Keep other active filter query params -->
+
                 @if(request('kategori_id')) <input type="hidden" name="kategori_id" value="{{ request('kategori_id') }}"> @endif
                 @if(request('penulis_id')) <input type="hidden" name="penulis_id" value="{{ request('penulis_id') }}"> @endif
                 @if(request('rak_id')) <input type="hidden" name="rak_id" value="{{ request('rak_id') }}"> @endif
@@ -45,7 +43,7 @@
                     </div>
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul buku, penulis, kata kunci, atau ISBN..."
                         class="w-full px-2 py-2 text-xs sm:text-sm font-bold text-gray-900 placeholder-gray-400 bg-transparent focus:outline-none text-left">
-                    
+
                     @if(request('search'))
                         <a href="{{ route('katalog', request()->except('search')) }}" class="px-2 text-gray-400 hover:text-gray-600 font-bold text-sm" title="Clear search">&times;</a>
                     @endif
@@ -56,7 +54,6 @@
                 </div>
             </form>
 
-            <!-- Real Database Statistics Bar (Centered) -->
             <div class="pt-1 flex flex-wrap items-center justify-center gap-3 text-xs font-bold text-red-100">
                 <div class="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-xl border border-white/10 text-[11px]">
                     <span class="text-amber-300 font-black">{{ $total_buku_count }}</span> Judul Ditemukan
@@ -71,10 +68,8 @@
         </div>
     </div>
 
-    <!-- UPPER TOOLBAR (FILTER TOGGLE, ACTIVE COUNT, RESULT COUNT, VIEW SWITCHER & SORTING BAR) -->
     <div class="bg-white p-4 rounded-2xl border-2 border-gray-200 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
-        
-        <!-- Left Side: Collapsible Filter Button & Result Count -->
+
         <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
             @php
                 $activeFilterCount = 0;
@@ -85,8 +80,7 @@
                 if(request('status')) $activeFilterCount++;
             @endphp
 
-            <!-- Collapsible Dropdown Filter Toggle Button -->
-            <button @click="showFilterBar = !showFilterBar" 
+            <button @click="showFilterBar = !showFilterBar"
                     :class="showFilterBar || {{ $activeFilterCount }} > 0 ? 'bg-brand-700 text-white border-brand-700 shadow-sm' : 'bg-gray-50 text-gray-800 border-gray-200 hover:bg-gray-100'"
                     class="px-4 py-2 rounded-xl font-extrabold text-xs border-2 transition flex items-center gap-2 shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
@@ -97,7 +91,6 @@
                 <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="showFilterBar ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
 
-            <!-- Result Count Text -->
             <div>
                 @if(request('search'))
                     <h3 class="font-extrabold text-gray-900 text-xs">Pencarian "<span class="text-brand-700">{{ request('search') }}</span>" — {{ $buku->total() }} buku</h3>
@@ -107,9 +100,8 @@
             </div>
         </div>
 
-        <!-- Right Side: Grid/List View Switcher & Sorting Dropdown -->
         <div class="flex items-center gap-3 w-full md:w-auto justify-end">
-            <!-- Grid / List Switcher -->
+
             <div class="flex items-center bg-gray-100 p-1 rounded-xl border border-gray-200 shrink-0">
                 <button @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'bg-white text-brand-700 shadow-2xs font-extrabold' : 'text-gray-500 font-medium'" class="px-2.5 py-1 rounded-lg transition text-[11px] flex items-center gap-1">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
@@ -121,7 +113,6 @@
                 </button>
             </div>
 
-            <!-- Sorting Dropdown -->
             <form action="{{ route('katalog') }}" method="GET" class="inline flex items-center gap-1.5">
                 @if(request('search')) <input type="hidden" name="search" value="{{ request('search') }}"> @endif
                 @if(request('kategori_id')) <input type="hidden" name="kategori_id" value="{{ request('kategori_id') }}"> @endif
@@ -142,8 +133,7 @@
         </div>
     </div>
 
-    <!-- COLLAPSIBLE HORIZONTAL DROPDOWN FILTER PANEL -->
-    <div x-show="showFilterBar" 
+    <div x-show="showFilterBar"
          x-transition:enter="transition ease-out duration-250"
          x-transition:enter-start="opacity-0 -translate-y-2"
          x-transition:enter-end="opacity-100 translate-y-0"
@@ -218,7 +208,6 @@
         </form>
     </div>
 
-    <!-- ACTIVE FILTERS CHIPS -->
     @if(request()->anyFilled(['search', 'kategori_id', 'penulis_id', 'rak_id', 'tahun', 'status']))
         <div class="bg-gray-50 p-3 rounded-2xl border border-gray-200 flex flex-wrap items-center gap-2 text-xs">
             <span class="text-[11px] font-extrabold text-gray-500 uppercase tracking-wider">Filter Aktif:</span>
@@ -274,10 +263,8 @@
         </div>
     @endif
 
-    <!-- FULL WIDTH CATALOG SHOWCASE AREA -->
     <div class="space-y-5" x-data="{ isLoading: true }" x-init="setTimeout(() => isLoading = false, 200)">
-        
-        <!-- LOADING SKELETON STATE -->
+
         <div x-show="isLoading" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-pulse" x-cloak>
             @for($i=0; $i<8; $i++)
                 <div class="bg-white rounded-2xl border-2 border-gray-200 p-4 space-y-4">
@@ -291,10 +278,8 @@
             @endfor
         </div>
 
-        <!-- BOOK SHOWCASE GRID & LIST VIEWS (Full 4-Column Layout) -->
         <div x-show="!isLoading" x-transition.opacity.duration.300ms>
-            
-            <!-- GRID VIEW MODE (4 Columns on Desktop for Maximum Space!) -->
+
             <div x-show="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 @forelse($buku as $item)
                     @php
@@ -304,9 +289,9 @@
                     @endphp
 
                     <div class="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden shadow-2xs hover:shadow-lg hover:border-brand-700 transition duration-300 flex flex-col justify-between group">
-                        
+
                         <div>
-                            <!-- Aspect 2:3 Cover Box -->
+
                             <div class="relative w-full h-60 bg-gray-100 overflow-hidden flex items-center justify-center border-b-2 border-gray-100">
                                 @if($coverUrl)
                                     <img src="{{ $coverUrl }}" alt="Cover {{ $item->judul }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
@@ -319,7 +304,6 @@
                                     </div>
                                 @endif
 
-                                <!-- Status Availability Badge Overlay -->
                                 <div class="absolute top-2.5 right-2.5 z-10">
                                     @if($available > 0)
                                         <span class="px-2.5 py-1 rounded-lg text-[10px] font-black bg-emerald-600 text-white shadow-xs uppercase tracking-wide flex items-center gap-1">
@@ -340,7 +324,6 @@
                                 </div>
                             </div>
 
-                            <!-- Card Metadata Info -->
                             <div class="p-4 space-y-2.5">
                                 <span class="px-2 py-0.5 rounded text-[9.5px] font-extrabold bg-gray-100 text-gray-700 border border-gray-200 uppercase inline-block">
                                     {{ $item->kategori->nama ?? 'Umum' }}
@@ -378,7 +361,6 @@
                             </div>
                         </div>
 
-                        <!-- Card Bottom Bar -->
                         <div class="px-4 py-2.5 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-xs">
                             <span class="text-[10px] text-gray-500 font-medium">{{ $available }} / {{ $totalEx }} eksemplar</span>
                             <button type="button" @click="modalData = {{ json_encode([
@@ -401,7 +383,7 @@
 
                     </div>
                 @empty
-                    <!-- EMPTY STATE -->
+
                     <div class="col-span-full py-16 px-6 text-center bg-white rounded-2xl border-2 border-gray-200 space-y-4">
                         <div class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-400 flex items-center justify-center mx-auto border border-gray-200 font-bold text-lg">
                             ?
@@ -424,7 +406,6 @@
                 @endforelse
             </div>
 
-            <!-- LIST VIEW MODE -->
             <div x-show="viewMode === 'list'" class="space-y-4">
                 @forelse($buku as $item)
                     @php
@@ -503,7 +484,6 @@
 
         </div>
 
-        <!-- SERVER-SIDE PAGINATION -->
         @if($buku->hasPages())
             <div class="mt-8 pt-4 border-t border-gray-100">
                 {{ $buku->links() }}
@@ -512,7 +492,6 @@
 
     </div>
 
-    <!-- QUICK BOOK DETAIL MODAL -->
     <div x-show="openDetailModal" @click.self="openDetailModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 backdrop-blur-xs p-4 overflow-y-auto"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 scale-95"
@@ -525,7 +504,7 @@
             <button @click="openDetailModal = false" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 flex items-center justify-center transition font-bold">&times;</button>
 
             <div class="flex flex-col sm:flex-row gap-6">
-                <!-- Cover Image Frame -->
+
                 <div class="w-full sm:w-48 h-64 bg-gray-900 rounded-2xl overflow-hidden shrink-0 border-2 border-gray-200 shadow-md relative">
                     <template x-if="modalData.cover">
                         <img :src="modalData.cover" class="w-full h-full object-cover">
@@ -541,7 +520,6 @@
                     </template>
                 </div>
 
-                <!-- Info Details Column -->
                 <div class="flex-1 space-y-4 text-xs">
                     <div class="space-y-1">
                         <span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-brand-50 text-brand-700 border border-brand-200 uppercase inline-block" x-text="modalData.kategori"></span>

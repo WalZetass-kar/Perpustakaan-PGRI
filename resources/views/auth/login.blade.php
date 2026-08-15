@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Pengelola - Perpustakaan SMK PGRI Pekanbaru</title>
-    <!-- Favicon -->
+
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
-    
-    <!-- Tailwind CSS CDN -->
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -35,12 +34,11 @@
             }
         }
     </script>
-    <!-- Google Fonts -->
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    
-    <!-- Alpine.js -->
+
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
@@ -60,7 +58,6 @@
 </head>
 <body class="bg-gradient-to-br from-brand-950 via-brand-900 to-red-950 min-h-screen flex items-center justify-center p-4 sm:p-6 relative overflow-hidden font-sans text-gray-900">
 
-    <!-- Login Page Skeleton Preloader -->
     <div id="global-login-skeleton" class="fixed inset-0 z-[9999] bg-gradient-to-br from-brand-950 via-brand-900 to-red-950 flex items-center justify-center p-4 sm:p-6 transition-opacity duration-300 pointer-events-auto">
         <div class="w-full max-w-4xl h-[480px] bg-white/95 rounded-3xl grid grid-cols-1 md:grid-cols-12 overflow-hidden shadow-2xl">
             <div class="md:col-span-5 bg-brand-900 p-8 space-y-4">
@@ -77,21 +74,17 @@
         </div>
     </div>
 
-    <!-- SMK PGRI Background Image with Red Overlay (Identical to Hero Section) -->
     <div class="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-35 pointer-events-none transform scale-105 transition duration-1000" style="background-image: url('https://smkpgripekanbaru.sch.id/images/pgri.webp');"></div>
 
-    <!-- Floating Glowing Orbs -->
     <div class="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none animate-bounce" style="animation-duration: 8s;"></div>
     <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-red-500/20 rounded-full blur-3xl pointer-events-none animate-pulse" style="animation-duration: 6s;"></div>
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-700/15 rounded-full blur-3xl pointer-events-none"></div>
 
-    <!-- Main Container Card with Glassmorphism Border -->
     <div class="relative w-full max-w-4xl bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20 grid grid-cols-1 md:grid-cols-12 z-10 transition-all duration-300">
-        
-        <!-- Left Side: Brand Banner -->
+
         <div class="md:col-span-5 bg-gradient-to-br from-brand-800 via-brand-700 to-red-900 text-white p-8 sm:p-10 flex flex-col justify-between relative">
             <div class="space-y-6">
-                <!-- Back Home Button -->
+
                 <a href="{{ route('home') }}" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-white/10 text-white border border-white/20 hover:bg-white/20 transition shadow-xs">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                     <span>Kembali ke Beranda</span>
@@ -99,7 +92,7 @@
 
                 <div class="pt-2">
                     <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI Pekanbaru" class="w-16 h-16 object-contain drop-shadow-md">
-                    
+
                     <span class="inline-block px-3 py-1 mt-4 rounded-full text-[10px] font-extrabold bg-white/10 text-emerald-300 border border-white/20 uppercase tracking-wider">
                         Portal Back-Office
                     </span>
@@ -110,14 +103,12 @@
                 </div>
             </div>
 
-            <!-- Bottom Badge -->
             <div class="pt-6 border-t border-white/10 flex items-center gap-2 text-[11px] text-red-100">
                 <svg class="w-4 h-4 text-emerald-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                 <span>Sistem Informasi Terenkripsi &amp; Terproteksi</span>
             </div>
         </div>
 
-        <!-- Right Side: Login Form -->
         <div class="md:col-span-7 p-8 sm:p-10 flex flex-col justify-center space-y-6 bg-white/95">
             <div>
                 <h3 class="text-xl font-extrabold text-gray-900">Autentikasi Pengelola</h3>

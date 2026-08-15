@@ -22,9 +22,6 @@ use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
-    // ==========================================
-    // 1. DASHBOARD
-    // ==========================================
     public function dashboard()
     {
         $today = Carbon::today()->toDateString();
@@ -43,7 +40,6 @@ class AdminController extends Controller
             'pengembalian_hari_ini'  => Peminjaman::where('status', 'dikembalikan')->whereDate('waktu_kembali', $today)->count(),
         ];
 
-        // Sirkulasi 7 Hari Terakhir
         $chartDates = [];
         $chartLoans = [];
         $chartReturns = [];
@@ -55,7 +51,6 @@ class AdminController extends Controller
             $chartReturns[] = Peminjaman::where('status', 'dikembalikan')->whereDate('waktu_kembali', $date)->count();
         }
 
-        // Peminjaman Terbaru (Aktif)
         $recentLoans = Peminjaman::with(['user', 'buku'])
             ->latest()
             ->take(6)
@@ -71,9 +66,6 @@ class AdminController extends Controller
         return view('admin.dashboard', compact('stats', 'chartDates', 'chartLoans', 'chartReturns', 'recentLoans', 'mostBorrowedBooks', 'recentAuditLogs'));
     }
 
-    // ==========================================
-    // 2. MANAGE BUKU (Master Koleksi Buku)
-    // ==========================================
     public function bukuIndex(Request $request)
     {
         $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak']);
@@ -161,7 +153,6 @@ class AdminController extends Controller
             'cover'          => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
         ]);
 
-        // Hitung selisih stok jika total_quantity berubah
         $borrowedNow = Peminjaman::where('buku_id', $buku->id)->where('status', 'dipinjam')->sum('jumlah');
         $newTotal = (int) $request->total_quantity;
         
@@ -184,7 +175,6 @@ class AdminController extends Controller
             'sinopsis'           => $request->sinopsis,
         ];
 
-        // Safe cover replacement: delete previous cover if exists
         if ($request->hasFile('cover')) {
             if ($buku->cover && Storage::disk('public')->exists($buku->cover)) {
                 Storage::disk('public')->delete($buku->cover);
@@ -215,7 +205,6 @@ class AdminController extends Controller
             return back()->with('error', 'Buku tidak dapat dihapus karena masih ada yang sedang dalam status dipinjam.');
         }
 
-        // Safe cover cleanup from storage
         if ($buku->cover && Storage::disk('public')->exists($buku->cover)) {
             Storage::disk('public')->delete($buku->cover);
         }
@@ -234,9 +223,6 @@ class AdminController extends Controller
         return back()->with('success', 'Buku berhasil dihapus dari katalog.');
     }
 
-    // ==========================================
-    // 3. MASTER DATA: PENULIS
-    // ==========================================
     public function penulisIndex(Request $request)
     {
         $query = Penulis::withCount('buku');
@@ -291,9 +277,6 @@ class AdminController extends Controller
         return back()->with('success', 'Penulis berhasil dihapus.');
     }
 
-    // ==========================================
-    // 4. MASTER DATA: PENERBIT
-    // ==========================================
     public function penerbitIndex(Request $request)
     {
         $query = Penerbit::withCount('buku');
@@ -348,9 +331,6 @@ class AdminController extends Controller
         return back()->with('success', 'Penerbit berhasil dihapus.');
     }
 
-    // ==========================================
-    // 5. MASTER DATA: KATEGORI
-    // ==========================================
     public function kategoriIndex(Request $request)
     {
         $query = Kategori::withCount('buku');
@@ -405,9 +385,6 @@ class AdminController extends Controller
         return back()->with('success', 'Kategori berhasil dihapus.');
     }
 
-    // ==========================================
-    // 6. MASTER DATA: RAK PERPUSTAKAAN
-    // ==========================================
     public function rakIndex(Request $request)
     {
         $query = Rak::with(['kategori'])->withCount('buku');
@@ -469,9 +446,6 @@ class AdminController extends Controller
         return back()->with('success', 'Rak berhasil dihapus.');
     }
 
-    // ==========================================
-    // 7. SIRKULASI PEMINJAMAN (Same-Day Loan)
-    // ==========================================
     public function peminjamanIndex(Request $request)
     {
         $query = Peminjaman::with(['user', 'buku', 'petugas'])
@@ -533,7 +507,7 @@ class AdminController extends Controller
                     'buku_id'             => $buku->id,
                     'jumlah'              => $jumlahPinjam,
                     'tanggal_pinjam'      => $today,
-                    'tanggal_jatuh_tempo' => $today, // Pinjam & kembali di hari yang sama
+                    'tanggal_jatuh_tempo' => $today,
                     'status'              => 'dipinjam',
                     'petugas_id'          => auth()->id(),
                 ]);
@@ -560,14 +534,12 @@ class AdminController extends Controller
     {
         try {
             $loan = DB::transaction(function () use ($id) {
-                // Strict Row-level Locking on Loan Record to prevent race conditions (SEC-001)
                 $lockedLoan = Peminjaman::where('id', $id)->lockForUpdate()->firstOrFail();
 
                 if ($lockedLoan->status === 'dikembalikan') {
                     throw new \Exception('ALREADY_RETURNED');
                 }
 
-                // Strict Row-level Locking on Book Record
                 $buku = Buku::where('id', $lockedLoan->buku_id)->lockForUpdate()->first();
                 if ($buku) {
                     $buku->available_quantity = min($buku->total_quantity, $buku->available_quantity + $lockedLoan->jumlah);
@@ -631,9 +603,6 @@ class AdminController extends Controller
         return view('admin.peminjaman.riwayat', compact('riwayatList'));
     }
 
-    // ==========================================
-    // 8. DATA PENGGUNA & ANGGOTA
-    // ==========================================
     public function anggotaIndex(Request $request)
     {
         $query = User::with(['role', 'anggota']);
@@ -670,7 +639,7 @@ class AdminController extends Controller
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
-            'role_id'  => 1, // Admin Perpustakaan
+            'role_id'  => 1,
             'phone'    => $request->phone,
             'status'   => 'active',
         ]);
@@ -754,9 +723,6 @@ class AdminController extends Controller
         return back()->with('success', 'Pengguna berhasil dihapus.');
     }
 
-    // ==========================================
-    // 9. PENGATURAN & AUDIT LOG
-    // ==========================================
     public function auditLogIndex()
     {
         $logs = AuditLog::latest()->paginate(20);
@@ -771,7 +737,6 @@ class AdminController extends Controller
 
     public function pengaturanUpdate(Request $request)
     {
-        // Explicit strict validation (SEC-002)
         $validated = $request->validate([
             'nama_perpustakaan'  => 'required|string|max:255',
             'jam_operasional'    => 'required|string|max:255',

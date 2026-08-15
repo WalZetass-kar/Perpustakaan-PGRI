@@ -6,7 +6,6 @@
 @section('content')
 <div class="space-y-6">
 
-    <!-- Quick Action Bar -->
     <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
         <div>
             <h2 class="text-sm font-black text-gray-900">Aksi Cepat Perpustakaan</h2>
@@ -30,11 +29,10 @@
         </div>
     </div>
 
-    <!-- 1. SIRKULASI HARI INI (Statistik Live Hari Ini) -->
     <div>
         <h3 class="text-xs font-black text-gray-500 uppercase tracking-wider mb-3">Sirkulasi Hari Ini ({{ date('d M Y') }})</h3>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            
+
             <div class="p-4 sm:p-5 rounded-2xl bg-white border-2 border-gray-200 shadow-sm flex items-center justify-between">
                 <div>
                     <span class="text-[11px] font-bold text-gray-500 block">Peminjaman Hari Ini</span>
@@ -71,11 +69,10 @@
         </div>
     </div>
 
-    <!-- 2. MASTER DATA OVERVIEW (Grid 6 Cards) -->
     <div>
         <h3 class="text-xs font-black text-gray-500 uppercase tracking-wider mb-3">Master Koleksi & Inventaris Fisik</h3>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            
+
             <a href="{{ route('admin.buku') }}" class="p-4 rounded-2xl bg-white border-2 border-gray-200 shadow-sm hover:border-brand-300 transition block">
                 <span class="text-[10.5px] font-bold text-gray-500 block">Total Judul</span>
                 <span class="text-xl font-black text-gray-900 mt-1 block">{{ $stats['total_judul'] }}</span>
@@ -115,10 +112,8 @@
         </div>
     </div>
 
-    <!-- 3. PEMINJAMAN TERBARU & AUDIT AKTIVITAS -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        <!-- Peminjaman Terbaru (2 Kolom) -->
+
         <div class="lg:col-span-2 bg-white rounded-2xl border-2 border-gray-200 shadow-sm overflow-hidden">
             <div class="p-4 border-b border-gray-100 flex items-center justify-between">
                 <div>
@@ -168,7 +163,6 @@
             </div>
         </div>
 
-        <!-- Log Aktivitas Admin (1 Kolom) -->
         <div class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm p-4 flex flex-col justify-between">
             <div>
                 <div class="pb-3 border-b border-gray-100 flex items-center justify-between">

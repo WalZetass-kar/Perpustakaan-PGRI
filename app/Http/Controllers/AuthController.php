@@ -8,7 +8,6 @@ use App\Models\AuditLog;
 
 class AuthController extends Controller
 {
-    // Halaman Login Admin / Pengelola Perpustakaan
     public function showLoginForm()
     {
         if (Auth::check()) {
@@ -17,7 +16,6 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    // Proses Login Pengelola
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -45,7 +43,6 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    // Proses Logout
     public function logout(Request $request)
     {
         if (Auth::check()) {

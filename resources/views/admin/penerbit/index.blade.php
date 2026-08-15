@@ -5,8 +5,7 @@
 
 @section('content')
 <div class="space-y-5" x-data="{ openAddModal: false, openEditModal: false, editData: {} }" x-init="openAddModal = false; openEditModal = false; editData = {}">
-    
-    <!-- Top Action Toolbar -->
+
     <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
         <div>
             <h2 class="text-sm font-black text-gray-900">Daftar Master Penerbit Buku</h2>
@@ -14,7 +13,7 @@
         </div>
         <div class="flex items-center gap-2 w-full sm:w-auto">
             <form action="{{ route('admin.penerbit') }}" method="GET" class="relative flex-1 sm:w-64">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama penerbit atau kota..." 
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama penerbit atau kota..."
                        class="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:outline-none">
                 <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </form>
@@ -25,7 +24,6 @@
         </div>
     </div>
 
-    <!-- Data Table Card -->
     <div class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs">
@@ -76,7 +74,6 @@
         </div>
     </div>
 
-    <!-- Modal Form Tambah Penerbit -->
     <div x-show="openAddModal" @click.self="openAddModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto" x-cloak>
         <div @click.stop class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl border-2 border-gray-200 overflow-hidden transform transition-all my-auto">
             <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-gray-50/70">
@@ -101,7 +98,6 @@
         </div>
     </div>
 
-    <!-- Modal Form Edit Penerbit -->
     <div x-show="openEditModal" @click.self="openEditModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto" x-cloak>
         <div @click.stop class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl border-2 border-gray-200 overflow-hidden transform transition-all my-auto">
             <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-amber-50/50">

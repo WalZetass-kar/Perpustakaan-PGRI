@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Perpustakaan SMK PGRI')</title>
-    
-    <!-- Favicon Logo SMK PGRI -->
+
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -24,7 +22,7 @@
                             100: '#fee2e2',
                             500: '#ef4444',
                             600: '#dc2626',
-                            700: '#b91c1c', // Primary Red #B91C1C
+                            700: '#b91c1c',
                             800: '#991b1b',
                             900: '#7f1d1d',
                         }
@@ -34,23 +32,20 @@
         }
     </script>
 
-    <!-- AOS (Animate On Scroll) Library -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
-    <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-    <!-- Official Google Fonts: Poppins (Official SMK PGRI Font) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
-    
+
     <style>
         [x-cloak] { display: none !important; }
         html { scroll-behavior: smooth; }
         body { font-family: 'Poppins', sans-serif; overflow-x: hidden; }
-        
+
         @keyframes skeleton-shimmer {
             0% { background-position: -200% 0; }
             100% { background-position: 200% 0; }
@@ -64,10 +59,9 @@
 </head>
 <body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen font-sans relative">
 
-    <!-- Global Loading Skeleton Overlay -->
     <div id="global-page-skeleton" class="fixed inset-0 z-[9999] bg-gray-50 flex flex-col transition-opacity duration-300 pointer-events-auto">
         <div class="h-1 bg-brand-700 w-full animate-pulse"></div>
-        <!-- Skeleton Navbar -->
+
         <div class="h-20 bg-white border-b border-gray-200 px-6 sm:px-8 flex items-center justify-between">
             <div class="flex items-center gap-3.5">
                 <div class="w-12 h-12 rounded-xl skeleton-shimmer"></div>
@@ -83,7 +77,7 @@
             </div>
             <div class="w-32 h-10 rounded-xl skeleton-shimmer"></div>
         </div>
-        <!-- Skeleton Main Content -->
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-6 flex-1 overflow-hidden">
             <div class="w-full h-64 rounded-3xl skeleton-shimmer"></div>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 pt-2">
@@ -95,11 +89,9 @@
         </div>
     </div>
 
-    <!-- Header Navigation (Enlarged Top Bar Height & Poppins Font) -->
     <header class="bg-white/95 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 transition duration-300 shadow-xs">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            
-            <!-- Official SMK PGRI Logo & Brand Name (Enlarged) -->
+
             <a href="{{ route('home') }}" class="flex items-center gap-3.5 shrink-0 group">
                 <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI" class="w-12 h-12 object-contain transform group-hover:scale-110 transition duration-300 drop-shadow-sm">
                 <div>
@@ -108,14 +100,12 @@
                 </div>
             </a>
 
-            <!-- Desktop Navigation Links (Enlarged Poppins Font & Spacing) -->
             <nav class="hidden md:flex items-center gap-10 text-sm font-bold">
                 <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'text-brand-700 border-b-2 border-brand-700 py-6' : 'text-gray-700 hover:text-brand-700 transition' }}">Beranda</a>
                 <a href="{{ route('katalog') }}" class="{{ request()->routeIs('katalog') ? 'text-brand-700 border-b-2 border-brand-700 py-6' : 'text-gray-700 hover:text-brand-700 transition' }}">Katalog Buku</a>
                 <a href="{{ route('home') }}#pusat-data-section" class="text-gray-700 hover:text-brand-700 transition">Pusat Data</a>
             </nav>
 
-            <!-- Right Actions -->
             <div class="hidden md:flex items-center gap-4">
                 @auth
                     <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-extrabold text-white bg-brand-700 rounded-xl hover:bg-brand-800 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
@@ -130,7 +120,6 @@
                 @endauth
             </div>
 
-            <!-- Mobile Hamburger Button -->
             <div class="flex md:hidden items-center gap-2">
                 <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2.5 rounded-xl text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-show="!mobileMenuOpen"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -139,7 +128,6 @@
             </div>
         </div>
 
-        <!-- Mobile Drawer Menu -->
         <div x-show="mobileMenuOpen" x-cloak class="md:hidden border-t border-gray-100 bg-white px-5 pt-3 pb-5 space-y-3 shadow-lg">
             <a href="{{ route('home') }}" class="block px-4 py-2.5 rounded-xl text-sm font-bold text-gray-800 hover:bg-brand-50 hover:text-brand-700">Beranda</a>
             <a href="{{ route('katalog') }}" class="block px-4 py-2.5 rounded-xl text-sm font-bold text-gray-800 hover:bg-brand-50 hover:text-brand-700">Katalog Buku</a>
@@ -154,17 +142,14 @@
         </div>
     </header>
 
-    <!-- Main Content Body -->
     <main class="flex-grow">
         @yield('content')
     </main>
 
-    <!-- Footer -->
     <footer class="bg-white border-t border-gray-200 mt-16 py-10 font-sans">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 pb-8 border-b border-gray-100 text-xs">
-                
-                <!-- Col 1: Brand & Official Logo -->
+
                 <div class="md:col-span-1 space-y-3">
                     <div class="flex items-center gap-3">
                         <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI" class="w-10 h-10 object-contain">
@@ -178,7 +163,6 @@
                     </p>
                 </div>
 
-                <!-- Col 2: Navigasi Cepat -->
                 <div class="space-y-2">
                     <h4 class="font-bold text-gray-900 uppercase tracking-wider text-[11px]">Navigasi Katalog</h4>
                     <ul class="space-y-1.5 text-gray-600">
@@ -188,7 +172,6 @@
                     </ul>
                 </div>
 
-                <!-- Col 3: Layanan & Aturan -->
                 <div class="space-y-2">
                     <h4 class="font-bold text-gray-900 uppercase tracking-wider text-[11px]">Informasi & Layanan</h4>
                     <ul class="space-y-1.5 text-gray-600">
@@ -198,7 +181,6 @@
                     </ul>
                 </div>
 
-                <!-- Col 4: Kontak & Alamat -->
                 <div class="space-y-2">
                     <h4 class="font-bold text-gray-900 uppercase tracking-wider text-[11px]">Alamat & Kontak</h4>
                     <p class="text-gray-600 leading-relaxed text-[11px]">
@@ -223,7 +205,6 @@
         </div>
     </footer>
 
-    <!-- SweetAlert2 Beautiful Popups -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -254,7 +235,6 @@
                 });
             @endif
 
-            // Dismiss Global Loading Skeleton
             const skeleton = document.getElementById('global-page-skeleton');
             if (skeleton) {
                 setTimeout(() => {
@@ -267,7 +247,7 @@
         function confirmAction(event, titleText = 'Apakah Anda yakin?', messageText = 'Konfirmasi tindakan Anda.', confirmBtnText = 'Ya, Lanjutkan!') {
             event.preventDefault();
             const form = event.target.closest('form');
-            
+
             Swal.fire({
                 title: titleText,
                 text: messageText,

@@ -5,8 +5,7 @@
 
 @section('content')
 <div class="space-y-5" x-data="{ openAddModal: false, openEditModal: false, editData: {} }" x-init="openAddModal = false; openEditModal = false; editData = {}">
-    
-    <!-- Top Action Toolbar -->
+
     <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
         <div>
             <h2 class="text-sm font-black text-gray-900">Daftar Kategori Kejuruan Terdaftar</h2>
@@ -18,7 +17,6 @@
         </button>
     </div>
 
-    <!-- Data Table Card -->
     <div class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs">
@@ -68,7 +66,6 @@
         </div>
     </div>
 
-    <!-- Modal Form Tambah Kategori (Compact & Fully Visible) -->
     <div x-show="openAddModal" @click.self="openAddModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 scale-95"
@@ -78,7 +75,7 @@
          x-transition:leave-end="opacity-0 scale-95"
          x-cloak>
         <div @click.stop class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl border-2 border-gray-200 overflow-hidden transform transition-all my-auto">
-            <!-- Modal Header -->
+
             <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-gray-50/70">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-xl bg-brand-50 border border-brand-200 text-brand-700 flex items-center justify-center font-bold">
@@ -92,7 +89,6 @@
                 <button @click="openAddModal = false" class="w-7 h-7 rounded-full bg-gray-200/70 hover:bg-gray-300 text-gray-600 hover:text-gray-900 flex items-center justify-center transition font-bold text-sm">&times;</button>
             </div>
 
-            <!-- Modal Body (Scrollable Form) -->
             <form action="{{ route('admin.kategori.store') }}" method="POST" class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 text-xs">
                 @csrf
                 <div>
@@ -103,7 +99,7 @@
                     <label class="block font-bold text-gray-700 mb-1">Deskripsi Ringkas</label>
                     <textarea name="deskripsi" rows="2" placeholder="Deskripsi rincian bidang keahlian..." class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:border-brand-700 focus:bg-white focus:outline-none font-medium"></textarea>
                 </div>
-                <!-- Modal Footer (Sticky) -->
+
                 <div class="pt-3 border-t border-gray-100 flex justify-end gap-2 shrink-0">
                     <button type="button" @click="openAddModal = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition text-xs">Batal</button>
                     <button type="submit" class="px-5 py-2 bg-brand-700 text-white font-extrabold rounded-xl hover:bg-brand-800 transition shadow-md hover:shadow-lg transform active:scale-95 text-xs">Simpan Kategori</button>
@@ -112,7 +108,6 @@
         </div>
     </div>
 
-    <!-- Modal Form Edit Kategori (Compact & Fully Visible) -->
     <div x-show="openEditModal" @click.self="openEditModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 scale-95"
@@ -122,7 +117,7 @@
          x-transition:leave-end="opacity-0 scale-95"
          x-cloak>
         <div @click.stop class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl border-2 border-gray-200 overflow-hidden transform transition-all my-auto">
-            <!-- Modal Header -->
+
             <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-amber-50/50">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
@@ -136,7 +131,6 @@
                 <button @click="openEditModal = false" class="w-7 h-7 rounded-full bg-gray-200/70 hover:bg-gray-300 text-gray-600 hover:text-gray-900 flex items-center justify-center transition font-bold text-sm">&times;</button>
             </div>
 
-            <!-- Modal Body (Scrollable Form) -->
             <form :action="'{{ url('/admin/kategori/update') }}/' + editData.id" method="POST" class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 text-xs">
                 @csrf
                 <div>
@@ -147,7 +141,7 @@
                     <label class="block font-bold text-gray-700 mb-1">Deskripsi Ringkas</label>
                     <textarea name="deskripsi" x-model="editData.deskripsi" rows="2" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:border-brand-700 focus:bg-white focus:outline-none font-medium"></textarea>
                 </div>
-                <!-- Modal Footer (Sticky) -->
+
                 <div class="pt-3 border-t border-gray-100 flex justify-end gap-2 shrink-0">
                     <button type="button" @click="openEditModal = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition text-xs">Batal</button>
                     <button type="submit" class="px-5 py-2 bg-brand-700 text-white font-extrabold rounded-xl hover:bg-brand-800 transition shadow-md hover:shadow-lg transform active:scale-95 text-xs">Simpan Perubahan</button>
