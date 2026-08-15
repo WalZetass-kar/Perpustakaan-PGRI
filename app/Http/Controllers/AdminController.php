@@ -350,14 +350,61 @@ class AdminController extends Controller
 
     public function rakIndex(Request $request)
     {
-        $query = Rak::with(['kategori', 'laci.buku.kategori'])->withCount('buku');
+        $query = Rak::with([
+            'kategori',
+            'buku.kategori',
+            'laci.buku.kategori',
+            'laci.buku.penulis'
+        ])->withCount(['buku', 'laci']);
+
         if ($request->filled('search')) {
             $search = trim($request->search);
-            $query->where('nama_rak', 'like', "%{$search}%")->orWhere('kode_rak', 'like', "%{$search}%");
+            $query->where(function($q) use ($search) {
+                $q->where('nama_rak', 'like', "%{$search}%")
+                  ->orWhere('kode_rak', 'like', "%{$search}%")
+                  ->orWhere('lokasi', 'like', "%{$search}%")
+                  ->orWhereHas('kategori', function($qk) use ($search) {
+                      $qk->where('nama', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('buku', function($qb) use ($search) {
+                      $qb->where('judul', 'like', "%{$search}%")
+                         ->orWhere('isbn', 'like', "%{$search}%")
+                         ->orWhereHas('kategori', function($qbk) use ($search) {
+                             $qbk->where('nama', 'like', "%{$search}%");
+                         });
+                  })
+                  ->orWhereHas('laci', function($ql) use ($search) {
+                      $ql->where('nama_laci', 'like', "%{$search}%")
+                         ->orWhere('keterangan', 'like', "%{$search}%");
+                  });
+            });
         }
-        $rakList = $query->latest()->paginate(10)->withQueryString();
-        $kategoriList = Kategori::all();
-        return view('admin.rak.index', compact('rakList', 'kategoriList'));
+
+        if ($request->filled('status')) {
+            if ($request->status === 'berisi') {
+                $query->has('buku');
+            } elseif ($request->status === 'kosong') {
+                $query->doesntHave('buku');
+            }
+        }
+
+        if ($request->filled('lokasi')) {
+            $query->where('lokasi', $request->lokasi);
+        }
+
+        $rakList = $query->orderBy('kode_rak', 'asc')->paginate(12)->withQueryString();
+        $kategoriList = Kategori::orderBy('nama', 'asc')->get();
+
+        $statsSummary = [
+            'total_rak'       => Rak::count(),
+            'total_laci'      => RakLaci::count(),
+            'total_judul'     => Buku::whereNotNull('rak_id')->count(),
+            'total_eksemplar' => (int) Buku::whereNotNull('rak_id')->sum('total_quantity'),
+        ];
+
+        $lokasiList = Rak::whereNotNull('lokasi')->where('lokasi', '!=', '')->distinct()->pluck('lokasi');
+
+        return view('admin.rak.index', compact('rakList', 'kategoriList', 'statsSummary', 'lokasiList'));
     }
 
     public function rakStore(Request $request)
@@ -371,13 +418,13 @@ class AdminController extends Controller
         ]);
 
         $rak = Rak::create([
-            'kode_rak'    => $request->kode_rak,
-            'nama_rak'    => $request->nama_rak,
-            'lokasi'      => $request->lokasi,
+            'kode_rak'    => strtoupper(trim($request->kode_rak)),
+            'nama_rak'    => trim($request->nama_rak),
+            'lokasi'      => $request->filled('lokasi') ? trim($request->lokasi) : null,
             'kategori_id' => $request->kategori_id,
         ]);
 
-        $jumlahLaci = $request->input('jumlah_laci', 3);
+        $jumlahLaci = (int) $request->input('jumlah_laci', 3);
         for ($i = 1; $i <= $jumlahLaci; $i++) {
             RakLaci::create([
                 'rak_id'     => $rak->id,
@@ -391,16 +438,17 @@ class AdminController extends Controller
             'user_id'    => auth()->id(),
             'user_name'  => auth()->user()->name,
             'aktivitas'  => 'TAMBAH_RAK',
-            'deskripsi'  => "Menambahkan rak '{$rak->nama_rak}' dengan {$jumlahLaci} laci/baris",
+            'deskripsi'  => "Menambahkan rak '{$rak->nama_rak}' ({$rak->kode_rak}) dengan {$jumlahLaci} laci awal",
             'ip_address' => $request->ip(),
         ]);
 
-        return back()->with('success', 'Rak baru dan laci-lacinya berhasil ditambahkan.');
+        return back()->with('success', "Rak '{$rak->nama_rak}' ({$rak->kode_rak}) beserta {$jumlahLaci} laci berhasil ditambahkan.");
     }
 
     public function rakUpdate(Request $request, $id)
     {
         $rak = Rak::findOrFail($id);
+
         $request->validate([
             'kode_rak'    => 'required|max:50|unique:rak,kode_rak,' . $id,
             'nama_rak'    => 'required|string|max:255',
@@ -409,23 +457,45 @@ class AdminController extends Controller
         ]);
 
         $rak->update([
-            'kode_rak'    => $request->kode_rak,
-            'nama_rak'    => $request->nama_rak,
-            'lokasi'      => $request->lokasi,
+            'kode_rak'    => strtoupper(trim($request->kode_rak)),
+            'nama_rak'    => trim($request->nama_rak),
+            'lokasi'      => $request->filled('lokasi') ? trim($request->lokasi) : null,
             'kategori_id' => $request->kategori_id,
         ]);
 
-        return back()->with('success', 'Data rak berhasil diperbarui.');
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'UPDATE_RAK',
+            'deskripsi'  => "Memperbarui rak '{$rak->nama_rak}' ({$rak->kode_rak})",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', "Data rak '{$rak->nama_rak}' berhasil diperbarui.");
     }
 
     public function rakDestroy($id)
     {
         $rak = Rak::withCount('buku')->findOrFail($id);
+
         if ($rak->buku_count > 0) {
-            return back()->with('error', 'Rak tidak dapat dihapus karena masih menampung ' . $rak->buku_count . ' buku.');
+            return back()->with('error', "Rak '{$rak->nama_rak}' tidak dapat dihapus karena masih menampung {$rak->buku_count} judul buku. Pindahkan atau ubah lokasi rak buku terlebih dahulu.");
         }
+
+        RakLaci::where('rak_id', $rak->id)->delete();
+        $rakName = $rak->nama_rak;
+        $rakCode = $rak->kode_rak;
         $rak->delete();
-        return back()->with('success', 'Rak dan seluruh lacinya berhasil dihapus.');
+
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'HAPUS_RAK',
+            'deskripsi'  => "Menghapus rak '{$rakName}' ({$rakCode})",
+            'ip_address' => request()->ip(),
+        ]);
+
+        return back()->with('success', "Rak '{$rakName}' ({$rakCode}) dan seluruh lacinya berhasil dihapus.");
     }
 
     public function laciStore(Request $request, $rakId)
@@ -440,19 +510,27 @@ class AdminController extends Controller
 
         $nomorLaci = $request->nomor_laci ?? (RakLaci::where('rak_id', $rakId)->max('nomor_laci') + 1);
 
-        RakLaci::create([
+        $laci = RakLaci::create([
             'rak_id'     => $rak->id,
             'nomor_laci' => $nomorLaci,
-            'nama_laci'  => $request->nama_laci,
-            'keterangan' => $request->keterangan,
+            'nama_laci'  => trim($request->nama_laci),
+            'keterangan' => $request->filled('keterangan') ? trim($request->keterangan) : null,
         ]);
 
-        return back()->with('success', "Laci baru '{$request->nama_laci}' berhasil ditambahkan ke rak {$rak->nama_rak}.");
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'TAMBAH_LACI',
+            'deskripsi'  => "Menambahkan laci '{$laci->nama_laci}' pada rak '{$rak->nama_rak}'",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', "Laci '{$laci->nama_laci}' berhasil ditambahkan ke rak {$rak->nama_rak}.");
     }
 
     public function laciUpdate(Request $request, $id)
     {
-        $laci = RakLaci::findOrFail($id);
+        $laci = RakLaci::with('rak')->findOrFail($id);
 
         $request->validate([
             'nama_laci'  => 'required|string|max:100',
@@ -461,22 +539,43 @@ class AdminController extends Controller
         ]);
 
         $laci->update([
-            'nama_laci'  => $request->nama_laci,
-            'nomor_laci' => $request->nomor_laci,
-            'keterangan' => $request->keterangan,
+            'nama_laci'  => trim($request->nama_laci),
+            'nomor_laci' => (int) $request->nomor_laci,
+            'keterangan' => $request->filled('keterangan') ? trim($request->keterangan) : null,
         ]);
 
-        return back()->with('success', 'Data laci rak berhasil diperbarui.');
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'UPDATE_LACI',
+            'deskripsi'  => "Memperbarui laci '{$laci->nama_laci}' pada rak '{$laci->rak->nama_rak}'",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', "Data laci '{$laci->nama_laci}' berhasil diperbarui.");
     }
 
     public function laciDestroy($id)
     {
-        $laci = RakLaci::withCount('buku')->findOrFail($id);
+        $laci = RakLaci::with('rak')->withCount('buku')->findOrFail($id);
 
-        Buku::where('rak_laci_id', $laci->id)->update(['rak_laci_id' => null]);
+        if ($laci->buku_count > 0) {
+            Buku::where('rak_laci_id', $laci->id)->update(['rak_laci_id' => null]);
+        }
+
+        $laciName = $laci->nama_laci;
+        $rakName = $laci->rak->nama_rak ?? 'Rak';
         $laci->delete();
 
-        return back()->with('success', 'Laci rak berhasil dihapus.');
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'HAPUS_LACI',
+            'deskripsi'  => "Menghapus laci '{$laciName}' dari '{$rakName}'",
+            'ip_address' => request()->ip(),
+        ]);
+
+        return back()->with('success', "Laci '{$laciName}' berhasil dihapus.");
     }
 
     public function getLacisByRak($rakId)
