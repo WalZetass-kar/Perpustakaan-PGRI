@@ -481,6 +481,9 @@ class AdminController extends Controller
             $search = trim($request->search);
             $query->where(function($q) use ($search) {
                 $q->where('kode_peminjaman', 'like', "%{$search}%")
+                  ->orWhere('nama_peminjam', 'like', "%{$search}%")
+                  ->orWhere('jurusan', 'like', "%{$search}%")
+                  ->orWhere('nomor_induk', 'like', "%{$search}%")
                   ->orWhereHas('user', function($qu) use ($search) {
                       $qu->where('name', 'like', "%{$search}%");
                   })
@@ -491,18 +494,19 @@ class AdminController extends Controller
         }
 
         $activeLoans = $query->latest('tanggal_pinjam')->paginate(10)->withQueryString();
-        $usersList = User::where('status', 'active')->orderBy('name', 'asc')->get();
         $booksList = Buku::where('available_quantity', '>', 0)->orderBy('judul', 'asc')->get();
 
-        return view('admin.peminjaman.index', compact('activeLoans', 'usersList', 'booksList'));
+        return view('admin.peminjaman.index', compact('activeLoans', 'booksList'));
     }
 
     public function peminjamanStore(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'buku_id' => 'required|exists:buku,id',
-            'jumlah'  => 'required|integer|min:1|max:10',
+            'nama_peminjam' => 'required|string|max:255',
+            'jurusan'       => 'required|string|max:150',
+            'nomor_induk'   => 'nullable|string|max:50',
+            'buku_id'       => 'required|exists:buku,id',
+            'jumlah'        => 'required|integer|min:1|max:10',
         ]);
 
         try {
@@ -522,7 +526,10 @@ class AdminController extends Controller
 
                 return Peminjaman::create([
                     'kode_peminjaman'     => $kodePinjam,
-                    'user_id'             => $request->user_id,
+                    'nama_peminjam'       => trim($request->nama_peminjam),
+                    'jurusan'             => trim($request->jurusan),
+                    'nomor_induk'         => $request->filled('nomor_induk') ? trim($request->nomor_induk) : null,
+                    'user_id'             => auth()->id(),
                     'buku_id'             => $buku->id,
                     'jumlah'              => $jumlahPinjam,
                     'tanggal_pinjam'      => $today,
@@ -542,11 +549,11 @@ class AdminController extends Controller
             'user_id'    => auth()->id(),
             'user_name'  => auth()->user()->name,
             'aktivitas'  => 'TRANSAKSI_PINJAM',
-            'deskripsi'  => "Mencatat peminjaman {$loan->kode_peminjaman} ({$loan->jumlah} buku)",
+            'deskripsi'  => "Mencatat peminjaman {$loan->kode_peminjaman} untuk {$loan->nama_peminjam} ({$loan->jumlah} buku)",
             'ip_address' => $request->ip(),
         ]);
 
-        return back()->with('success', "Peminjaman berhasil dicatat! Kode: {$loan->kode_peminjaman}");
+        return back()->with('success', "Peminjaman berhasil dicatat untuk {$loan->nama_peminjam}! Kode: {$loan->kode_peminjaman}");
     }
 
     public function peminjamanKembali(Request $request, $id)
@@ -607,6 +614,9 @@ class AdminController extends Controller
             $search = trim($request->search);
             $query->where(function($q) use ($search) {
                 $q->where('kode_peminjaman', 'like', "%{$search}%")
+                  ->orWhere('nama_peminjam', 'like', "%{$search}%")
+                  ->orWhere('jurusan', 'like', "%{$search}%")
+                  ->orWhere('nomor_induk', 'like', "%{$search}%")
                   ->orWhereHas('user', function($qu) use ($search) {
                       $qu->where('name', 'like', "%{$search}%");
                   })

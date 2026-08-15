@@ -141,7 +141,12 @@
                     <tbody class="divide-y divide-gray-100 font-medium text-gray-700">
                         @forelse($recentLoans as $loan)
                             <tr class="hover:bg-gray-50/70 transition">
-                                <td class="py-2.5 px-4 font-bold text-gray-900">{{ $loan->user->name ?? '-' }}</td>
+                                <td class="py-2.5 px-4">
+                                    <p class="font-bold text-gray-900">{{ $loan->nama_peminjam ?: ($loan->user->name ?? '-') }}</p>
+                                    @if($loan->jurusan)
+                                        <p class="text-[10px] text-gray-400 font-medium">{{ $loan->jurusan }}</p>
+                                    @endif
+                                </td>
                                 <td class="py-2.5 px-4 max-w-xs truncate">{{ $loan->buku->judul ?? '-' }}</td>
                                 <td class="py-2.5 px-4 text-center font-bold">{{ $loan->jumlah }}</td>
                                 <td class="py-2.5 px-4 text-gray-500 font-mono text-[10.5px]">{{ $loan->created_at->format('d M H:i') }}</td>

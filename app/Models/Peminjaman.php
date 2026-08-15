@@ -12,6 +12,9 @@ class Peminjaman extends Model
     
     protected $fillable = [
         'kode_peminjaman',
+        'nama_peminjam',
+        'jurusan',
+        'nomor_induk',
         'user_id',
         'buku_id',
         'jumlah',
@@ -36,5 +39,10 @@ class Peminjaman extends Model
     public function petugas()
     {
         return $this->belongsTo(User::class, 'petugas_id');
+    }
+
+    public function getBorrowerDisplayNameAttribute()
+    {
+        return $this->nama_peminjam ?: ($this->user->name ?? 'Siswa / Anggota');
     }
 }

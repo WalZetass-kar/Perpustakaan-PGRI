@@ -11,12 +11,12 @@
         <form action="{{ route('admin.riwayat') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
             <div>
                 <label class="block font-bold text-gray-700 mb-1">Cari Transaksi</label>
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Kode, nama, judul..." 
-                       class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:outline-none">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Kode, nama siswa, jurusan, judul..." 
+                       class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:outline-none font-medium">
             </div>
             <div>
                 <label class="block font-bold text-gray-700 mb-1">Status Transaksi</label>
-                <select name="status" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:outline-none">
+                <select name="status" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:outline-none font-medium">
                     <option value="">Semua Status</option>
                     <option value="dipinjam" {{ request('status') == 'dipinjam' ? 'selected' : '' }}>Dipinjam (Aktif)</option>
                     <option value="dikembalikan" {{ request('status') == 'dikembalikan' ? 'selected' : '' }}>Sudah Dikembalikan</option>
@@ -25,7 +25,7 @@
             <div>
                 <label class="block font-bold text-gray-700 mb-1">Tanggal Pinjam</label>
                 <input type="date" name="tanggal" value="{{ request('tanggal') }}" 
-                       class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:outline-none">
+                       class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:outline-none font-medium">
             </div>
             <div class="flex items-end gap-2">
                 <button type="submit" class="w-full py-1.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold rounded-xl transition text-xs">
@@ -47,7 +47,8 @@
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase tracking-wider font-extrabold">
                         <th class="py-3 px-4 font-bold">Kode Pinjam</th>
-                        <th class="py-3 px-4 font-bold">Peminjam</th>
+                        <th class="py-3 px-4 font-bold">Nama Peminjam</th>
+                        <th class="py-3 px-4 font-bold">Jurusan / Kelas</th>
                         <th class="py-3 px-4 font-bold">Judul Buku</th>
                         <th class="py-3 px-4 font-bold text-center">Jumlah</th>
                         <th class="py-3 px-4 font-bold">Waktu Pinjam</th>
@@ -63,7 +64,17 @@
                                     {{ $trx->kode_peminjaman }}
                                 </span>
                             </td>
-                            <td class="py-3 px-4 font-bold text-gray-900">{{ $trx->user->name ?? '-' }}</td>
+                            <td class="py-3 px-4">
+                                <p class="font-bold text-gray-900">{{ $trx->nama_peminjam ?: ($trx->user->name ?? '-') }}</p>
+                                @if($trx->nomor_induk)
+                                    <p class="text-[10px] text-gray-500 font-mono">NIS/NIP: {{ $trx->nomor_induk }}</p>
+                                @endif
+                            </td>
+                            <td class="py-3 px-4">
+                                <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-gray-100 text-gray-800 border border-gray-200">
+                                    {{ $trx->jurusan ?: '-' }}
+                                </span>
+                            </td>
                             <td class="py-3 px-4 font-bold text-gray-900 max-w-xs truncate">{{ $trx->buku->judul ?? '-' }}</td>
                             <td class="py-3 px-4 text-center font-bold">{{ $trx->jumlah }} Buku</td>
                             <td class="py-3 px-4 text-gray-700">
@@ -92,7 +103,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="py-8 text-center text-gray-400 font-medium">Tidak ada data riwayat peminjaman yang cocok.</td>
+                            <td colspan="8" class="py-8 text-center text-gray-400 font-medium">Tidak ada data riwayat peminjaman yang cocok.</td>
                         </tr>
                     @endforelse
                 </tbody>
