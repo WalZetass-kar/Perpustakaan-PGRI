@@ -123,7 +123,7 @@ class PublicController extends Controller
 
     public function detailBuku($id)
     {
-        $buku = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci'])->findOrFail($id);
+        $buku = Buku::with(['penulis', 'penerbit', 'kategori', 'rak.laci', 'laci'])->findOrFail($id);
         $buku->increment('view_count');
 
         $userLoan = null;
@@ -134,7 +134,28 @@ class PublicController extends Controller
                 ->first();
         }
 
-        return view('public.detail-buku', compact('buku', 'userLoan'));
+        $relatedBooks = Buku::with(['penulis', 'kategori', 'rak', 'laci'])
+            ->where('id', '!=', $buku->id)
+            ->where(function($query) use ($buku) {
+                if ($buku->kategori_id) {
+                    $query->where('kategori_id', $buku->kategori_id);
+                }
+                if ($buku->penulis_id) {
+                    $query->orWhere('penulis_id', $buku->penulis_id);
+                }
+            })
+            ->take(4)
+            ->get();
+
+        if ($relatedBooks->isEmpty()) {
+            $relatedBooks = Buku::with(['penulis', 'kategori', 'rak', 'laci'])
+                ->where('id', '!=', $buku->id)
+                ->latest()
+                ->take(4)
+                ->get();
+        }
+
+        return view('public.detail-buku', compact('buku', 'userLoan', 'relatedBooks'));
     }
 
     public function searchSuggestions(Request $request)

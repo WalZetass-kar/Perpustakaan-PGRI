@@ -612,10 +612,11 @@ class AdminController extends Controller
             });
         }
 
-        $peminjamanList = $query->latest()->paginate(10)->withQueryString();
+        $activeLoans = $query->latest()->paginate(10)->withQueryString();
+        $peminjamanList = $activeLoans;
         $bukuList = Buku::where('status', 'tersedia')->where('available_quantity', '>', 0)->orderBy('judul', 'asc')->get();
 
-        return view('admin.peminjaman.index', compact('peminjamanList', 'bukuList'));
+        return view('admin.peminjaman.index', compact('activeLoans', 'peminjamanList', 'bukuList'));
     }
 
     public function peminjamanStore(Request $request)
