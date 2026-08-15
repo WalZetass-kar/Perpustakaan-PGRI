@@ -106,16 +106,20 @@
                 <a href="{{ route('home') }}#pusat-data-section" class="text-gray-700 hover:text-brand-700 transition">Pusat Data</a>
             </nav>
 
-            <div class="hidden md:flex items-center gap-4">
+            <div class="hidden md:flex items-center gap-3">
+                <a href="{{ route('katalog') }}" class="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-gray-700 hover:text-brand-700 hover:bg-gray-50 rounded-xl transition border border-gray-200">
+                    <svg class="w-4 h-4 text-brand-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <span>Cari Buku</span>
+                </a>
                 @auth
                     <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-extrabold text-white bg-brand-700 rounded-xl hover:bg-brand-800 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
                         <span>Dashboard Pengelola</span>
                         <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </a>
                 @else
-                    <a href="{{ route('katalog') }}" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-extrabold text-white bg-brand-700 rounded-xl hover:bg-brand-800 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                        <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        <span>Cari Koleksi Buku</span>
+                    <a href="{{ route('login') }}" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-extrabold text-white bg-brand-700 rounded-xl hover:bg-brand-800 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                        <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                        <span>Login Admin</span>
                     </a>
                 @endauth
             </div>
@@ -132,11 +136,12 @@
             <a href="{{ route('home') }}" class="block px-4 py-2.5 rounded-xl text-sm font-bold text-gray-800 hover:bg-brand-50 hover:text-brand-700">Beranda</a>
             <a href="{{ route('katalog') }}" class="block px-4 py-2.5 rounded-xl text-sm font-bold text-gray-800 hover:bg-brand-50 hover:text-brand-700">Katalog Buku</a>
             <a href="{{ route('home') }}#pusat-data-section" class="block px-4 py-2.5 rounded-xl text-sm font-bold text-gray-800 hover:bg-brand-50 hover:text-brand-700">Pusat Data</a>
-            <div class="pt-3 border-t border-gray-100">
+            <div class="pt-3 border-t border-gray-100 space-y-2">
                 @auth
                     <a href="{{ route('dashboard') }}" class="block w-full text-center px-5 py-2.5 text-sm font-extrabold text-white bg-brand-700 rounded-xl hover:bg-brand-800">Dashboard Pengelola</a>
                 @else
-                    <a href="{{ route('katalog') }}" class="block w-full text-center px-4 py-2.5 text-sm font-extrabold text-white bg-brand-700 rounded-xl hover:bg-brand-800">Cari Koleksi Buku</a>
+                    <a href="{{ route('katalog') }}" class="block w-full text-center px-4 py-2.5 text-sm font-bold text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200">Cari Koleksi Buku</a>
+                    <a href="{{ route('login') }}" class="block w-full text-center px-5 py-2.5 text-sm font-extrabold text-white bg-brand-700 rounded-xl hover:bg-brand-800">Login Admin</a>
                 @endauth
             </div>
         </div>
