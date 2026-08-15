@@ -18,8 +18,11 @@ class AppServiceProvider extends ServiceProvider
         try {
             if (Schema::hasTable('pengaturan')) {
                 View::composer('*', function ($view) {
-                    $pengaturan = Pengaturan::all()->pluck('value', 'key');
-                    $view->with('pengaturan', $pengaturan);
+                    static $cachedSettings = null;
+                    if ($cachedSettings === null) {
+                        $cachedSettings = Pengaturan::all()->pluck('value', 'key');
+                    }
+                    $view->with('pengaturan', $cachedSettings);
                 });
             }
         } catch (\Exception $e) {

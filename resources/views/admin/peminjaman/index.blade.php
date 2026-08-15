@@ -148,7 +148,7 @@
                     <label class="block font-bold text-gray-700 mb-1">Pilih Buku <span class="text-rose-500">*</span></label>
                     <select name="buku_id" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                         <option value="">-- Pilih Judul Buku --</option>
-                        @foreach($booksList as $bk)
+                        @foreach(($booksList ?? $bukuList ?? []) as $bk)
                             <option value="{{ $bk->id }}">
                                 {{ $bk->judul }} (Tersedia: {{ $bk->available_quantity }} Eks)
                             </option>
