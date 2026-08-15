@@ -4,12 +4,29 @@
 @section('page_heading', 'Koleksi Buku Perpustakaan')
 
 @section('content')
-<div class="space-y-5" x-data="{ openAddModal: false, openEditModal: false, editData: {} }" x-init="openAddModal = false; openEditModal = false; editData = {}">
+<div class="space-y-5" x-data="{ 
+    openAddModal: false, 
+    openEditModal: false, 
+    editData: {}, 
+    allRaks: {{ json_encode($rakList) }},
+    addRakId: '',
+    addLaciId: '',
+    editRakId: '',
+    editLaciId: '',
+    get addAvailableLacis() {
+        const found = this.allRaks.find(r => r.id == this.addRakId);
+        return found ? found.laci : [];
+    },
+    get editAvailableLacis() {
+        const found = this.allRaks.find(r => r.id == this.editRakId);
+        return found ? found.laci : [];
+    }
+}" x-init="openAddModal = false; openEditModal = false; editData = {}">
 
     <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
         <div>
             <h2 class="text-sm font-black text-gray-900">Katalog Judul Buku & Stok Fisik</h2>
-            <p class="text-[11px] text-gray-500 mt-0.5">Kelola data buku, jumlah stok fisik, dan lokasi rak</p>
+            <p class="text-[11px] text-gray-500 mt-0.5">Kelola data buku, jumlah stok fisik, serta nomor rak dan laci penyimpanan</p>
         </div>
         <div class="flex items-center gap-2 w-full sm:w-auto">
             <form action="{{ route('admin.buku') }}" method="GET" class="relative flex-1 sm:w-72">
@@ -17,7 +34,7 @@
                        class="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:outline-none">
                 <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </form>
-            <button @click="openAddModal = true" class="px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0">
+            <button @click="addRakId = ''; addLaciId = ''; openAddModal = true" class="px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0">
                 <svg class="w-3.5 h-3.5 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 <span>+ Tambah Buku</span>
             </button>
@@ -31,7 +48,7 @@
                     <tr class="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase tracking-wider font-extrabold">
                         <th class="py-3 px-4 font-bold">Buku & Cover</th>
                         <th class="py-3 px-4 font-bold">Penulis / Penerbit</th>
-                        <th class="py-3 px-4 font-bold">Kategori & Rak</th>
+                        <th class="py-3 px-4 font-bold">Kategori & Lokasi Rak/Laci</th>
                         <th class="py-3 px-4 font-bold text-center">Stok Fisik</th>
                         <th class="py-3 px-4 font-bold text-right">Aksi</th>
                     </tr>
@@ -72,9 +89,11 @@
                                     <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-brand-50 text-brand-700 border border-brand-200 inline-block">
                                         {{ $buku->kategori->nama ?? 'Umum' }}
                                     </span>
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-gray-100 text-gray-700 border border-gray-200 inline-block">
-                                        {{ $buku->rak->kode_rak ?? '-' }}
-                                    </span>
+                                    <div class="flex items-center gap-1 text-[10px] font-bold text-gray-700">
+                                        <span class="px-1.5 py-0.5 rounded bg-gray-100 border border-gray-200 font-mono text-gray-800">{{ $buku->rak->kode_rak ?? '-' }}</span>
+                                        <span>•</span>
+                                        <span class="text-amber-700">{{ $buku->laci->nama_laci ?? ($buku->rak ? 'Laci 1' : 'Tanpa Laci') }}</span>
+                                    </div>
                                 </div>
                             </td>
                             <td class="py-3 px-4 text-center">
@@ -98,9 +117,10 @@
                                     'penerbit_id' => $buku->penerbit_id,
                                     'kategori_id' => $buku->kategori_id,
                                     'rak_id' => $buku->rak_id,
+                                    'rak_laci_id' => $buku->rak_laci_id,
                                     'sinopsis' => $buku->sinopsis ?? '',
                                     'cover_url' => $coverUrl
-                                ]) }}; openEditModal = true" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs">
+                                ]) }}; editRakId = '{{ $buku->rak_id }}'; editLaciId = '{{ $buku->rak_laci_id }}'; openEditModal = true" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs">
                                     Edit
                                 </button>
                                 <form action="{{ route('admin.buku.delete', $buku->id) }}" method="POST" class="inline" onsubmit="return confirmDelete(event, 'Hapus Judul Buku?', 'Master buku ini akan dihapus dari katalog.')">
@@ -133,7 +153,7 @@
                     </div>
                     <div>
                         <h3 class="text-sm font-black text-gray-900">Tambah Koleksi Buku Baru</h3>
-                        <p class="text-[10px] text-gray-500">Masukkan detail buku dan jumlah stok fisik</p>
+                        <p class="text-[10px] text-gray-500">Masukkan detail buku, lokasi rak & laci, serta jumlah stok fisik</p>
                     </div>
                 </div>
                 <button @click="openAddModal = false" class="w-7 h-7 rounded-full bg-gray-200/70 hover:bg-gray-300 text-gray-600 flex items-center justify-center font-bold text-sm">&times;</button>
@@ -143,7 +163,7 @@
                 @csrf
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">Judul Buku <span class="text-rose-500">*</span></label>
-                    <input type="text" name="judul" required placeholder="Contoh: Pemrograman Web Kelas XI" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                    <input type="text" name="judul" required placeholder="Contoh: Pemrograman Web Dasar" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                 </div>
 
                 <div class="grid grid-cols-3 gap-2.5">
@@ -182,7 +202,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2.5">
+                <div class="grid grid-cols-3 gap-2.5">
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Kategori Buku</label>
                         <select name="kategori_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
@@ -194,11 +214,20 @@
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Lokasi Rak</label>
-                        <select name="rak_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                        <select name="rak_id" x-model="addRakId" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                             <option value="">-- Pilih Rak ▼ --</option>
                             @foreach($rakList as $rk)
                                 <option value="{{ $rk->id }}">{{ $rk->kode_rak }} - {{ $rk->nama_rak }}</option>
                             @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Tingkat / Laci</label>
+                        <select name="rak_laci_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                            <option value="">-- Pilih Laci ▼ --</option>
+                            <template x-for="laci in addAvailableLacis" :key="laci.id">
+                                <option :value="laci.id" x-text="laci.nama_laci"></option>
+                            </template>
                         </select>
                     </div>
                 </div>
@@ -230,7 +259,7 @@
                     </div>
                     <div>
                         <h3 class="text-sm font-black text-gray-900">Edit Data Buku</h3>
-                        <p class="text-[10px] text-gray-500">Perbarui rincian dan stok buku</p>
+                        <p class="text-[10px] text-gray-500">Perbarui rincian, lokasi rak & laci, serta stok buku</p>
                     </div>
                 </div>
                 <button @click="openEditModal = false" class="w-7 h-7 rounded-full bg-gray-200/70 hover:bg-gray-300 text-gray-600 flex items-center justify-center font-bold text-sm">&times;</button>
@@ -279,7 +308,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2.5">
+                <div class="grid grid-cols-3 gap-2.5">
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Kategori Buku</label>
                         <select name="kategori_id" x-model="editData.kategori_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
@@ -291,11 +320,20 @@
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Lokasi Rak</label>
-                        <select name="rak_id" x-model="editData.rak_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                        <select name="rak_id" x-model="editRakId" @change="editData.rak_id = editRakId" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                             <option value="">-- Pilih Rak ▼ --</option>
                             @foreach($rakList as $rk)
                                 <option value="{{ $rk->id }}">{{ $rk->kode_rak }} - {{ $rk->nama_rak }}</option>
                             @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Tingkat / Laci</label>
+                        <select name="rak_laci_id" x-model="editData.rak_laci_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                            <option value="">-- Pilih Laci ▼ --</option>
+                            <template x-for="laci in editAvailableLacis" :key="laci.id">
+                                <option :value="laci.id" x-text="laci.nama_laci" :selected="laci.id == editData.rak_laci_id"></option>
+                            </template>
                         </select>
                     </div>
                 </div>

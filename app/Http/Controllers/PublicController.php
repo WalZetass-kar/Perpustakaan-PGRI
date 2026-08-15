@@ -23,12 +23,12 @@ class PublicController extends Controller
             'anggota_aktif'   => Anggota::where('status', 'aktif')->count(),
         ];
 
-        $buku_terbaru = Buku::with(['penulis', 'penerbit', 'kategori', 'rak'])
+        $buku_terbaru = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci'])
             ->latest()
             ->take(6)
             ->get();
 
-        $buku_populer = Buku::with(['penulis', 'penerbit', 'kategori', 'rak'])
+        $buku_populer = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci'])
             ->orderBy('view_count', 'desc')
             ->take(6)
             ->get();
@@ -45,7 +45,7 @@ class PublicController extends Controller
 
     public function katalog(Request $request)
     {
-        $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak']);
+        $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci']);
 
         if ($request->filled('search')) {
             $search = trim($request->search);
@@ -115,7 +115,7 @@ class PublicController extends Controller
 
         $kategori_list = Kategori::orderBy('nama', 'asc')->get();
         $penulis_list = Penulis::orderBy('nama', 'asc')->get();
-        $rak_list = Rak::orderBy('kode_rak', 'asc')->get();
+        $rak_list = Rak::with('laci')->orderBy('kode_rak', 'asc')->get();
         $tahun_list = Buku::select('tahun_terbit')->whereNotNull('tahun_terbit')->distinct()->orderBy('tahun_terbit', 'desc')->pluck('tahun_terbit');
 
         return view('public.katalog', compact('buku', 'kategori_list', 'penulis_list', 'rak_list', 'tahun_list', 'total_buku_count', 'total_kategori_count', 'total_rak_count'));
@@ -123,7 +123,7 @@ class PublicController extends Controller
 
     public function detailBuku($id)
     {
-        $buku = Buku::with(['penulis', 'penerbit', 'kategori', 'rak'])->findOrFail($id);
+        $buku = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci'])->findOrFail($id);
         $buku->increment('view_count');
 
         $userLoan = null;
@@ -135,5 +135,46 @@ class PublicController extends Controller
         }
 
         return view('public.detail-buku', compact('buku', 'userLoan'));
+    }
+
+    public function searchSuggestions(Request $request)
+    {
+        $q = trim($request->get('q', ''));
+        if (strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $bukuList = Buku::with(['penulis', 'kategori', 'rak', 'laci'])
+            ->where(function($query) use ($q) {
+                $query->where('judul', 'like', "%{$q}%")
+                      ->orWhere('isbn', 'like', "%{$q}%")
+                      ->orWhereHas('penulis', function($qp) use ($q) {
+                          $qp->where('nama', 'like', "%{$q}%");
+                      })
+                      ->orWhereHas('kategori', function($qk) use ($q) {
+                          $qk->where('nama', 'like', "%{$q}%");
+                      });
+            })
+            ->take(8)
+            ->get()
+            ->map(function($buku) {
+                return [
+                    'id'                 => $buku->id,
+                    'judul'              => $buku->judul,
+                    'penulis'            => $buku->penulis ? $buku->penulis->nama : 'Penulis Tidak Diketahui',
+                    'kategori'           => $buku->kategori ? $buku->kategori->nama : 'Umum',
+                    'rak'                => $buku->rak ? $buku->rak->nama_rak : 'Belum Ditentukan',
+                    'kode_rak'           => $buku->rak ? $buku->rak->kode_rak : '-',
+                    'laci'               => $buku->laci ? $buku->laci->nama_laci : ($buku->rak ? 'Laci 1' : '-'),
+                    'lokasi_lengkap'     => $buku->lokasi_lengkap,
+                    'total_quantity'     => $buku->total_quantity,
+                    'available_quantity' => $buku->available_quantity,
+                    'status'             => $buku->available_quantity > 0 ? 'Tersedia' : 'Dipinjam',
+                    'cover_url'          => $buku->cover_url,
+                    'detail_url'         => route('buku.detail', $buku->id),
+                ];
+            });
+
+        return response()->json($bukuList);
     }
 }

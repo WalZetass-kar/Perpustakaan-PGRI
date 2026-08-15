@@ -58,8 +58,12 @@
                         <span class="text-gray-900 font-bold mt-0.5 block">{{ $buku->tahun_terbit }}</span>
                     </div>
                     <div>
-                        <span class="text-gray-400 block font-bold text-[10px] uppercase">Lokasi Rak</span>
+                        <span class="text-gray-400 block font-bold text-[10px] uppercase">Lokasi Lemari Rak</span>
                         <span class="text-brand-700 font-mono font-black mt-0.5 block">{{ $buku->rak->kode_rak ?? '-' }} ({{ $buku->rak->nama_rak ?? '' }})</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-400 block font-bold text-[10px] uppercase">Laci / Tingkat</span>
+                        <span class="text-amber-800 font-extrabold mt-0.5 block">{{ $buku->laci->nama_laci ?? ($buku->rak ? 'Laci 1' : 'Tanpa Laci') }}</span>
                     </div>
                     <div>
                         <span class="text-gray-400 block font-bold text-[10px] uppercase">Total Stok Fisik</span>
@@ -68,10 +72,6 @@
                     <div>
                         <span class="text-gray-400 block font-bold text-[10px] uppercase">Status Ketersediaan</span>
                         <span class="text-emerald-700 font-black mt-0.5 block">{{ $buku->available_quantity }} Siap Dipinjam</span>
-                    </div>
-                    <div>
-                        <span class="text-gray-400 block font-bold text-[10px] uppercase">Posisi Ruangan</span>
-                        <span class="text-gray-900 font-bold mt-0.5 block">{{ $buku->rak->lokasi ?? 'Ruang Perpustakaan Utama' }}</span>
                     </div>
                 </div>
 

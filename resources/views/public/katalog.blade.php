@@ -1,22 +1,44 @@
 @extends('layouts.app')
 
-@section('title', 'Katalog Buku Digital OPAC')
+@section('title', 'Katalog OPAC - Perpustakaan SMK PGRI Pekanbaru')
 
 @section('content')
-<div class="space-y-6 pb-12" x-data="{
-    showFilterBar: false,
-    openDetailModal: false,
-    viewMode: 'grid',
-    modalData: {}
-}">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6"
+     x-data="{
+        viewMode: 'grid',
+        showFilterBar: false,
+        openDetailModal: false,
+        modalData: {},
+        searchQuery: '{{ request('search') }}',
+        suggestions: [],
+        loadingSuggest: false,
+        showSuggest: false,
+        fetchSuggestions() {
+            if (this.searchQuery.trim().length < 2) {
+                this.suggestions = [];
+                this.showSuggest = false;
+                return;
+            }
+            this.loadingSuggest = true;
+            fetch('/api/buku/search-suggestions?q=' + encodeURIComponent(this.searchQuery))
+                .then(res => res.json())
+                .then(data => {
+                    this.suggestions = data;
+                    this.showSuggest = data.length > 0;
+                    this.loadingSuggest = false;
+                })
+                .catch(() => { this.loadingSuggest = false; });
+        }
+     }"
+     x-init="openDetailModal = false; modalData = {}">
 
-    <div class="bg-gradient-to-r from-brand-900 via-brand-700 to-red-800 text-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-brand-700 relative overflow-hidden text-center">
+    <div class="relative bg-gradient-to-r from-brand-900 via-brand-800 to-red-950 text-white rounded-3xl p-6 sm:p-10 shadow-xl overflow-hidden border-2 border-brand-700">
+        <div class="absolute -top-24 -right-24 w-80 h-80 bg-amber-400/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-        <div class="absolute -right-8 -bottom-8 w-56 h-56 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
-
-        <div class="relative z-10 space-y-4 max-w-3xl mx-auto flex flex-col items-center">
-            <div class="space-y-1.5 flex flex-col items-center">
-                <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-400/20 border border-amber-300/30 rounded-full text-amber-300 text-[10px] font-extrabold uppercase tracking-wider backdrop-blur-xs">
+        <div class="relative z-10 text-center space-y-4 max-w-3xl mx-auto">
+            <div class="space-y-2">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-amber-300 text-[10px] font-black tracking-widest border border-white/10 uppercase">
                     <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                     <span>LAYANAN OPAC PERPUSTAKAAN DIGITAL</span>
                 </div>
@@ -24,12 +46,11 @@
                     Katalog Koleksi Buku &amp; Modul Kejuruan
                 </h1>
                 <p class="text-xs text-red-100 font-medium max-w-xl mx-auto leading-relaxed">
-                    Cari literatur modul pembelajaran kejuruan, referensi ujian, dan koleksi umum SMK PGRI Pekanbaru secara instan.
+                    Cari literatur modul pembelajaran kejuruan, referensi ujian, dan lokasi rak/laci buku secara instan.
                 </p>
             </div>
 
-            <form action="{{ route('katalog') }}" method="GET" class="relative max-w-2xl w-full mx-auto">
-
+            <form action="{{ route('katalog') }}" method="GET" class="relative max-w-2xl w-full mx-auto" @click.outside="showSuggest = false">
                 @if(request('kategori_id')) <input type="hidden" name="kategori_id" value="{{ request('kategori_id') }}"> @endif
                 @if(request('penulis_id')) <input type="hidden" name="penulis_id" value="{{ request('penulis_id') }}"> @endif
                 @if(request('rak_id')) <input type="hidden" name="rak_id" value="{{ request('rak_id') }}"> @endif
@@ -37,12 +58,16 @@
                 @if(request('status')) <input type="hidden" name="status" value="{{ request('status') }}"> @endif
                 @if(request('sort')) <input type="hidden" name="sort" value="{{ request('sort') }}"> @endif
 
-                <div class="flex items-center bg-white rounded-2xl p-1.5 shadow-lg border-2 border-amber-300">
+                <div class="flex items-center bg-white rounded-2xl p-1.5 shadow-lg border-2 border-amber-300 relative">
                     <div class="pl-3 pr-2 text-gray-400 shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul buku, penulis, kata kunci, atau ISBN..."
+                    <input type="text" name="search" x-model="searchQuery" @input.debounce.200ms="fetchSuggestions()" @focus="if(suggestions.length > 0) showSuggest = true" autocomplete="off" placeholder="Cari judul buku, penulis, kata kunci, atau ISBN..."
                         class="w-full px-2 py-2 text-xs sm:text-sm font-bold text-gray-900 placeholder-gray-400 bg-transparent focus:outline-none text-left">
+
+                    <div x-show="loadingSuggest" class="pr-2" x-cloak>
+                        <svg class="animate-spin w-4 h-4 text-brand-700" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    </div>
 
                     @if(request('search'))
                         <a href="{{ route('katalog', request()->except('search')) }}" class="px-2 text-gray-400 hover:text-gray-600 font-bold text-sm" title="Clear search">&times;</a>
@@ -51,6 +76,33 @@
                     <button type="submit" class="px-5 py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-xs rounded-xl transition shadow-md hover:shadow-lg shrink-0">
                         Cari Buku
                     </button>
+                </div>
+
+                <div x-show="showSuggest && suggestions.length > 0" x-cloak class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl border-2 border-gray-200 shadow-2xl z-50 max-h-80 overflow-y-auto p-2 space-y-1.5 text-left text-gray-900">
+                    <div class="px-2.5 py-1 text-[10px] font-black text-gray-400 uppercase tracking-wider flex items-center justify-between border-b border-gray-100">
+                        <span>Rekomendasi Pencarian</span>
+                        <span class="text-emerald-600 font-bold" x-text="suggestions.length + ' Ditemukan'"></span>
+                    </div>
+                    <template x-for="item in suggestions" :key="item.id">
+                        <a :href="item.detail_url" class="p-2 rounded-xl hover:bg-brand-50 transition flex items-center gap-3 group border border-transparent hover:border-brand-200">
+                            <div class="w-9 h-12 bg-gray-100 rounded-md overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center">
+                                <template x-if="item.cover_url">
+                                    <img :src="item.cover_url" class="w-full h-full object-cover">
+                                </template>
+                                <template x-if="!item.cover_url">
+                                    <div class="w-full h-full bg-brand-700 text-white font-black text-[11px] flex items-center justify-center" x-text="item.judul.substr(0, 1)"></div>
+                                </template>
+                            </div>
+                            <div class="min-w-0 flex-1 text-xs">
+                                <p class="font-bold text-gray-900 truncate group-hover:text-brand-700" x-text="item.judul"></p>
+                                <p class="text-[10px] text-gray-500 truncate" x-text="item.penulis + ' • ' + item.kategori"></p>
+                                <div class="flex items-center gap-1.5 mt-1 text-[9.5px]">
+                                    <span class="px-1.5 py-0.5 rounded bg-gray-100 font-bold text-gray-700 border border-gray-200" x-text="'📍 ' + item.rak + ' (' + item.laci + ')'"></span>
+                                    <span class="px-1.5 py-0.5 rounded font-black" :class="item.available_quantity > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'" x-text="'Stok: ' + item.available_quantity + ' Eks'"></span>
+                                </div>
+                            </div>
+                        </a>
+                    </template>
                 </div>
             </form>
 
@@ -69,7 +121,6 @@
     </div>
 
     <div class="bg-white p-4 rounded-2xl border-2 border-gray-200 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
-
         <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
             @php
                 $activeFilterCount = 0;
@@ -101,7 +152,6 @@
         </div>
 
         <div class="flex items-center gap-3 w-full md:w-auto justify-end">
-
             <div class="flex items-center bg-gray-100 p-1 rounded-xl border border-gray-200 shrink-0">
                 <button @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'bg-white text-brand-700 shadow-2xs font-extrabold' : 'text-gray-500 font-medium'" class="px-2.5 py-1 rounded-lg transition text-[11px] flex items-center gap-1">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
@@ -121,35 +171,27 @@
                 @if(request('tahun')) <input type="hidden" name="tahun" value="{{ request('tahun') }}"> @endif
                 @if(request('status')) <input type="hidden" name="status" value="{{ request('status') }}"> @endif
 
-                <label class="text-[11px] font-bold text-gray-500 shrink-0">Urutkan:</label>
-                <select name="sort" onchange="this.form.submit()" class="px-3 py-1.5 bg-gray-50 border-2 border-gray-200 rounded-xl text-xs font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-700">
-                    <option value="terbaru" {{ request('sort', 'terbaru') == 'terbaru' ? 'selected' : '' }}>Buku Terbaru</option>
-                    <option value="terlama" {{ request('sort') == 'terlama' ? 'selected' : '' }}>Buku Terlama</option>
-                    <option value="judul_asc" {{ request('sort') == 'judul_asc' ? 'selected' : '' }}>Judul A–Z</option>
-                    <option value="judul_desc" {{ request('sort') == 'judul_desc' ? 'selected' : '' }}>Judul Z–A</option>
-                    <option value="populer" {{ request('sort') == 'populer' ? 'selected' : '' }}>Paling Populer</option>
+                <span class="text-gray-400 font-medium text-[11px]">Urutkan:</span>
+                <select name="sort" onchange="this.form.submit()" class="bg-gray-50 border border-gray-200 text-gray-800 text-[11px] font-bold rounded-xl px-2.5 py-1.5 focus:ring-1 focus:ring-brand-700 focus:outline-none">
+                    <option value="terbaru" {{ request('sort') === 'terbaru' ? 'selected' : '' }}>Terbaru</option>
+                    <option value="populer" {{ request('sort') === 'populer' ? 'selected' : '' }}>Paling Populer</option>
+                    <option value="judul_asc" {{ request('sort') === 'judul_asc' ? 'selected' : '' }}>Judul A-Z</option>
+                    <option value="judul_desc" {{ request('sort') === 'judul_desc' ? 'selected' : '' }}>Judul Z-A</option>
+                    <option value="terlama" {{ request('sort') === 'terlama' ? 'selected' : '' }}>Terlama</option>
                 </select>
             </form>
         </div>
     </div>
 
-    <div x-show="showFilterBar"
-         x-transition:enter="transition ease-out duration-250"
-         x-transition:enter-start="opacity-0 -translate-y-2"
-         x-transition:enter-end="opacity-100 translate-y-0"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 translate-y-0"
-         x-transition:leave-end="opacity-0 -translate-y-2"
-         class="bg-white p-5 rounded-2xl border-2 border-gray-200 shadow-md text-xs space-y-4"
-         x-cloak>
-        <form action="{{ route('katalog') }}" method="GET">
+    <div x-show="showFilterBar" x-cloak class="bg-white rounded-2xl border-2 border-gray-200 p-5 shadow-sm space-y-4">
+        <form action="{{ route('katalog') }}" method="GET" class="space-y-4 text-xs">
             @if(request('search')) <input type="hidden" name="search" value="{{ request('search') }}"> @endif
             @if(request('sort')) <input type="hidden" name="sort" value="{{ request('sort') }}"> @endif
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
                 <div>
-                    <label class="block font-extrabold text-gray-700 mb-1">Kategori</label>
-                    <select name="kategori_id" class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-200 rounded-xl font-bold text-gray-800 focus:ring-2 focus:ring-brand-700">
+                    <label class="block font-bold text-gray-700 mb-1 text-[11px]">Kategori</label>
+                    <select name="kategori_id" class="w-full px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1 focus:ring-brand-700 focus:outline-none text-xs">
                         <option value="">Semua Kategori</option>
                         @foreach($kategori_list as $kat)
                             <option value="{{ $kat->id }}" {{ request('kategori_id') == $kat->id ? 'selected' : '' }}>{{ $kat->nama }}</option>
@@ -158,8 +200,8 @@
                 </div>
 
                 <div>
-                    <label class="block font-extrabold text-gray-700 mb-1">Penulis</label>
-                    <select name="penulis_id" class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-200 rounded-xl font-medium text-gray-800 focus:ring-2 focus:ring-brand-700">
+                    <label class="block font-bold text-gray-700 mb-1 text-[11px]">Penulis</label>
+                    <select name="penulis_id" class="w-full px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1 focus:ring-brand-700 focus:outline-none text-xs">
                         <option value="">Semua Penulis</option>
                         @foreach($penulis_list as $pen)
                             <option value="{{ $pen->id }}" {{ request('penulis_id') == $pen->id ? 'selected' : '' }}>{{ $pen->nama }}</option>
@@ -168,31 +210,31 @@
                 </div>
 
                 <div>
-                    <label class="block font-extrabold text-gray-700 mb-1">Lokasi Rak</label>
-                    <select name="rak_id" class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-200 rounded-xl font-medium text-gray-800 focus:ring-2 focus:ring-brand-700">
-                        <option value="">Semua Lokasi Rak</option>
+                    <label class="block font-bold text-gray-700 mb-1 text-[11px]">Lokasi Rak</label>
+                    <select name="rak_id" class="w-full px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1 focus:ring-brand-700 focus:outline-none text-xs">
+                        <option value="">Semua Rak</option>
                         @foreach($rak_list as $rk)
-                            <option value="{{ $rk->id }}" {{ request('rak_id') == $rk->id ? 'selected' : '' }}>{{ $rk->kode_rak }} ({{ $rk->nama_rak }})</option>
+                            <option value="{{ $rk->id }}" {{ request('rak_id') == $rk->id ? 'selected' : '' }}>{{ $rk->kode_rak }} - {{ $rk->nama_rak }}</option>
                         @endforeach
                     </select>
                 </div>
 
                 <div>
-                    <label class="block font-extrabold text-gray-700 mb-1">Tahun Terbit</label>
-                    <select name="tahun" class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-200 rounded-xl font-medium text-gray-800 focus:ring-2 focus:ring-brand-700">
+                    <label class="block font-bold text-gray-700 mb-1 text-[11px]">Tahun Terbit</label>
+                    <select name="tahun" class="w-full px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1 focus:ring-brand-700 focus:outline-none text-xs">
                         <option value="">Semua Tahun</option>
-                        @foreach($tahun_list as $th)
-                            <option value="{{ $th }}" {{ request('tahun') == $th ? 'selected' : '' }}>Tahun {{ $th }}</option>
+                        @foreach($tahun_list as $thn)
+                            <option value="{{ $thn }}" {{ request('tahun') == $thn ? 'selected' : '' }}>{{ $thn }}</option>
                         @endforeach
                     </select>
                 </div>
 
                 <div>
-                    <label class="block font-extrabold text-gray-700 mb-1">Status Ketersediaan</label>
-                    <select name="status" class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-200 rounded-xl font-bold text-gray-800 focus:ring-2 focus:ring-brand-700">
+                    <label class="block font-bold text-gray-700 mb-1 text-[11px]">Ketersediaan</label>
+                    <select name="status" class="w-full px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1 focus:ring-brand-700 focus:outline-none text-xs">
                         <option value="">Semua Status</option>
-                        <option value="tersedia" {{ request('status') == 'tersedia' ? 'selected' : '' }}>Tersedia Dipinjam</option>
-                        <option value="dipinjam" {{ request('status') == 'dipinjam' ? 'selected' : '' }}>Sedang Dipinjam</option>
+                        <option value="tersedia" {{ request('status') === 'tersedia' ? 'selected' : '' }}>Tersedia</option>
+                        <option value="dipinjam" {{ request('status') === 'dipinjam' ? 'selected' : '' }}>Sedang Dipinjam</option>
                     </select>
                 </div>
             </div>
@@ -263,7 +305,7 @@
         </div>
     @endif
 
-    <div class="space-y-5" x-data="{ isLoading: true }" x-init="setTimeout(() => isLoading = false, 200)">
+    <div class="space-y-5" x-data="{ isLoading: true }" x-init="setTimeout(() => isLoading = false, 150)">
 
         <div x-show="isLoading" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-pulse" x-cloak>
             @for($i=0; $i<8; $i++)
@@ -286,12 +328,11 @@
                         $available = $item->available_quantity;
                         $totalEx = $item->total_quantity;
                         $coverUrl = $item->cover_url;
+                        $laciName = $item->laci->nama_laci ?? ($item->rak ? 'Laci 1' : 'Tanpa Laci');
                     @endphp
 
                     <div class="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden shadow-2xs hover:shadow-lg hover:border-brand-700 transition duration-300 flex flex-col justify-between group">
-
                         <div>
-
                             <div class="relative w-full h-60 bg-gray-100 overflow-hidden flex items-center justify-center border-b-2 border-gray-100">
                                 @if($coverUrl)
                                     <img src="{{ $coverUrl }}" alt="Cover {{ $item->judul }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
@@ -300,7 +341,6 @@
                                         <div class="w-12 h-12 rounded-2xl bg-brand-700 text-white flex items-center justify-center font-black text-lg shadow-sm">
                                             {{ substr($item->judul, 0, 1) }}
                                         </div>
-                                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Cover Tidak Tersedia</span>
                                     </div>
                                 @endif
 
@@ -339,6 +379,7 @@
                                         'isbn' => (string) ($item->isbn ?? 'Tanpa ISBN'),
                                         'kategori' => $item->kategori->nama ?? 'Umum',
                                         'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
+                                        'laci' => $laciName,
                                         'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi SMK PGRI Pekanbaru.',
                                         'tersedia' => $item->available_quantity,
                                         'total' => $item->total_quantity,
@@ -354,8 +395,10 @@
                                         <span class="font-bold text-gray-900 truncate max-w-[120px]">{{ $item->penulis->nama ?? '-' }}</span>
                                     </div>
                                     <div class="flex items-center justify-between">
-                                        <span class="text-gray-400">Lokasi Rak:</span>
-                                        <span class="font-mono font-bold text-brand-700 bg-brand-50 px-1.5 py-0.5 rounded border border-brand-200 text-[10px]">{{ $item->rak->kode_rak ?? '-' }}</span>
+                                        <span class="text-gray-400">Lokasi:</span>
+                                        <span class="font-bold text-brand-700 bg-brand-50 px-1.5 py-0.5 rounded border border-brand-200 text-[10px]">
+                                            {{ $item->rak->kode_rak ?? '-' }} • {{ $laciName }}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -372,6 +415,7 @@
                                 'isbn' => (string) ($item->isbn ?? 'Tanpa ISBN'),
                                 'kategori' => $item->kategori->nama ?? 'Umum',
                                 'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
+                                'laci' => $laciName,
                                 'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi SMK PGRI Pekanbaru.',
                                 'tersedia' => $item->available_quantity,
                                 'total' => $item->total_quantity,
@@ -380,10 +424,8 @@
                                 Lihat Detail
                             </button>
                         </div>
-
                     </div>
                 @empty
-
                     <div class="col-span-full py-16 px-6 text-center bg-white rounded-2xl border-2 border-gray-200 space-y-4">
                         <div class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-400 flex items-center justify-center mx-auto border border-gray-200 font-bold text-lg">
                             ?
@@ -412,6 +454,7 @@
                         $available = $item->available_quantity;
                         $totalEx = $item->total_quantity;
                         $coverUrl = $item->cover_url;
+                        $laciName = $item->laci->nama_laci ?? ($item->rak ? 'Laci 1' : 'Tanpa Laci');
                     @endphp
 
                     <div class="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden p-4 shadow-2xs hover:border-brand-700 transition duration-300 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -439,6 +482,7 @@
                                         'isbn' => (string) ($item->isbn ?? 'Tanpa ISBN'),
                                         'kategori' => $item->kategori->nama ?? 'Umum',
                                         'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
+                                        'laci' => $laciName,
                                         'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi SMK PGRI Pekanbaru.',
                                         'tersedia' => $item->available_quantity,
                                         'total' => $item->total_quantity,
@@ -447,8 +491,8 @@
                                         {{ $item->judul }}
                                     </button>
                                 </h3>
-                                <p class="text-[11px] text-gray-500">Penulis: <strong class="text-gray-900">{{ $item->penulis->nama ?? '-' }}</strong> | Rak: <strong class="font-mono text-brand-700">{{ $item->rak->kode_rak ?? '-' }}</strong></p>
-                                <p class="text-[10px] text-gray-400 font-mono">ISBN: {{ $item->isbn }}</p>
+                                <p class="text-[11px] text-gray-500">Penulis: <strong class="text-gray-900">{{ $item->penulis->nama ?? '-' }}</strong> | Lokasi: <strong class="font-mono text-brand-700">{{ $item->rak->kode_rak ?? '-' }} ({{ $laciName }})</strong></p>
+                                <p class="text-[10px] text-gray-400 font-mono">ISBN: {{ $item->isbn ?? '-' }}</p>
                             </div>
                         </div>
 
@@ -466,6 +510,7 @@
                                 'isbn' => (string) ($item->isbn ?? 'Tanpa ISBN'),
                                 'kategori' => $item->kategori->nama ?? 'Umum',
                                 'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
+                                'laci' => $laciName,
                                 'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi SMK PGRI Pekanbaru.',
                                 'tersedia' => $item->available_quantity,
                                 'total' => $item->total_quantity,
@@ -481,7 +526,6 @@
                     </div>
                 @endforelse
             </div>
-
         </div>
 
         @if($buku->hasPages())
@@ -489,7 +533,6 @@
                 {{ $buku->links() }}
             </div>
         @endif
-
     </div>
 
     <div x-show="openDetailModal" @click.self="openDetailModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 backdrop-blur-xs p-4 overflow-y-auto"
@@ -504,7 +547,6 @@
             <button @click="openDetailModal = false" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 flex items-center justify-center transition font-bold">&times;</button>
 
             <div class="flex flex-col sm:flex-row gap-6">
-
                 <div class="w-full sm:w-48 h-64 bg-gray-900 rounded-2xl overflow-hidden shrink-0 border-2 border-gray-200 shadow-md relative">
                     <template x-if="modalData.cover">
                         <img :src="modalData.cover" class="w-full h-full object-cover">
@@ -536,8 +578,8 @@
                             <span class="font-bold text-gray-900" x-text="modalData.penerbit + ' (' + modalData.tahun + ')'"></span>
                         </div>
                         <div>
-                            <span class="text-[9px] font-bold text-gray-400 uppercase block">Kode Rak</span>
-                            <span class="font-mono font-bold text-brand-700" x-text="modalData.rak"></span>
+                            <span class="text-[9px] font-bold text-gray-400 uppercase block">Lokasi Rak &amp; Laci</span>
+                            <span class="font-mono font-bold text-brand-700" x-text="modalData.rak + ' • ' + modalData.laci"></span>
                         </div>
                         <div>
                             <span class="text-[9px] font-bold text-gray-400 uppercase block">ISBN</span>

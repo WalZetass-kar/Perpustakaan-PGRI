@@ -40,7 +40,7 @@
             </div>
 
             <div class="lg:col-span-5 flex justify-center" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
-                <div class="w-full max-w-md bg-white/95 backdrop-blur-md rounded-3xl p-6 text-gray-800 shadow-2xl border border-white/40 transform hover:scale-[1.03] hover:-rotate-1 transition duration-500">
+                <div class="w-full max-w-md bg-white/95 backdrop-blur-md rounded-3xl p-6 text-gray-800 shadow-2xl border border-white/40 transform hover:scale-[1.03] transition duration-500">
                     <div class="flex items-center gap-3 border-b border-gray-100 pb-4 mb-4">
                         <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI Official" class="w-11 h-11 object-contain transform hover:rotate-6 transition duration-300 drop-shadow-xs">
                         <div>
@@ -49,11 +49,62 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('katalog') }}" method="GET" class="space-y-3">
+                    <form action="{{ route('katalog') }}" method="GET" class="space-y-3" x-data="{
+                        searchQuery: '',
+                        suggestions: [],
+                        loading: false,
+                        showDropdown: false,
+                        fetchSuggestions() {
+                            if (this.searchQuery.trim().length < 2) {
+                                this.suggestions = [];
+                                this.showDropdown = false;
+                                return;
+                            }
+                            this.loading = true;
+                            fetch('/api/buku/search-suggestions?q=' + encodeURIComponent(this.searchQuery))
+                                .then(res => res.json())
+                                .then(data => {
+                                    this.suggestions = data;
+                                    this.showDropdown = data.length > 0;
+                                    this.loading = false;
+                                })
+                                .catch(() => { this.loading = false; });
+                        }
+                    }" @click.outside="showDropdown = false">
                         <label class="block text-xs font-bold text-gray-700">Pencarian Koleksi Katalog (OPAC)</label>
                         <div class="relative group">
-                            <input type="text" name="search" placeholder="Cari judul buku, penulis, ISBN..." class="w-full pl-9 pr-3 py-3 bg-gray-50 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none transition">
+                            <input type="text" name="search" x-model="searchQuery" @input.debounce.200ms="fetchSuggestions()" @focus="if(suggestions.length > 0) showDropdown = true" placeholder="Ketik judul buku, penulis, ISBN..." autocomplete="off" class="w-full pl-9 pr-8 py-3 bg-gray-50 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none transition">
                             <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3.5 group-hover:text-brand-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            <div x-show="loading" class="absolute right-3 top-3.5" x-cloak>
+                                <svg class="animate-spin w-4 h-4 text-brand-700" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            </div>
+
+                            <div x-show="showDropdown && suggestions.length > 0" x-cloak class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl border-2 border-gray-200 shadow-2xl z-50 max-h-72 overflow-y-auto p-2 space-y-1.5 text-left">
+                                <div class="px-2.5 py-1 text-[10px] font-black text-gray-400 uppercase tracking-wider flex items-center justify-between border-b border-gray-100">
+                                    <span>Rekomendasi Buku Cepat</span>
+                                    <span class="text-emerald-600 font-bold" x-text="suggestions.length + ' Ditemukan'"></span>
+                                </div>
+                                <template x-for="item in suggestions" :key="item.id">
+                                    <a :href="item.detail_url" class="p-2 rounded-xl hover:bg-brand-50/80 transition flex items-center gap-2.5 group border border-transparent hover:border-brand-200">
+                                        <div class="w-8 h-11 bg-gray-100 rounded-md overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center">
+                                            <template x-if="item.cover_url">
+                                                <img :src="item.cover_url" class="w-full h-full object-cover">
+                                            </template>
+                                            <template x-if="!item.cover_url">
+                                                <div class="w-full h-full bg-brand-700 text-white font-black text-[10px] flex items-center justify-center" x-text="item.judul.substr(0, 1)"></div>
+                                            </template>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <p class="font-bold text-gray-900 text-xs truncate group-hover:text-brand-700" x-text="item.judul"></p>
+                                            <p class="text-[10px] text-gray-500 truncate" x-text="item.penulis + ' • ' + item.kategori"></p>
+                                            <div class="flex items-center gap-1.5 mt-1 text-[9.5px]">
+                                                <span class="px-1.5 py-0.5 rounded bg-gray-100 font-bold text-gray-700 border border-gray-200" x-text="'📍 ' + item.rak + ' (' + item.laci + ')'"></span>
+                                                <span class="px-1.5 py-0.5 rounded font-black" :class="item.available_quantity > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'" x-text="'Stok: ' + item.available_quantity + ' Eks'"></span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </template>
+                            </div>
                         </div>
                         <button type="submit" class="w-full py-3 bg-brand-700 text-white font-bold text-xs rounded-xl hover:bg-brand-800 transition duration-300 shadow-md hover:shadow-lg transform active:scale-95 flex items-center justify-center gap-2">
                             <span>Cari Katalog Sekarang</span>
@@ -98,42 +149,41 @@
                         <span class="text-xl font-black">{{ number_format($stats['total_koleksi']) }} Judul</span>
                     </div>
                     <div class="bg-emerald-600 p-4 rounded-xl shadow-xs hover:bg-emerald-700 transition transform hover:-translate-y-0.5">
-                        <span class="text-[10px] text-emerald-100 font-normal block">Eksemplar Fisik Tersedia</span>
-                        <span class="text-xl font-black">{{ number_format($stats['buku_tersedia']) }} Buku</span>
+                        <span class="text-[10px] text-emerald-100 font-normal block">Buku Siap Pinjam</span>
+                        <span class="text-xl font-black">{{ number_format($stats['buku_tersedia']) }} Eks</span>
                     </div>
                 </div>
-                <div class="bg-gray-100 p-3 rounded-xl text-[11px] text-gray-700 font-mono flex items-center justify-between border border-gray-200">
-                    <span>System INLISLite v11</span>
-                    <span class="text-emerald-600 font-bold flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                        <span>Operational</span>
-                    </span>
+                <div class="grid grid-cols-2 gap-3 text-xs font-bold text-gray-800">
+                    <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl">
+                        <span class="text-[10px] text-amber-700 font-medium block">Sedang Dipinjam</span>
+                        <span class="text-base font-black text-amber-900">{{ number_format($stats['sedang_dipinjam']) }} Buku</span>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 p-3 rounded-xl">
+                        <span class="text-[10px] text-blue-700 font-medium block">Total Pengelola</span>
+                        <span class="text-base font-black text-blue-900">{{ number_format($stats['anggota_aktif']) }} Akun</span>
+                    </div>
                 </div>
             </div>
 
             <div class="lg:col-span-6 space-y-4">
-                <h3 class="text-xl font-bold text-gray-900">Sistem Informasi Perpustakaan</h3>
-                <p class="text-xs text-gray-600 leading-relaxed">
-                    Dirancang untuk memberikan pengalaman terbaik dalam mengelola perpustakaan berbasis digital demi mewujudkan modernisasi layanan di SMK PGRI Pekanbaru.
+                <h3 class="text-lg sm:text-xl font-black text-gray-900">
+                    Layanan Perpustakaan Berbasis Komputer & Digital
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 leading-relaxed font-normal">
+                    Pengelolaan katalog buku otomatis terpusat di server lokal sekolah dengan pengelompokan lokasi rak, laci fleksibel, barcode eksemplar, dan rekapitulasi data sirkulasi siswa.
                 </p>
-                <ul class="space-y-3 text-xs text-gray-700 font-medium">
+                <ul class="space-y-2.5 text-xs text-gray-700 font-medium">
                     <li class="flex items-center gap-3 group">
                         <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition duration-300">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                         </span>
-                        <span class="group-hover:text-gray-900 transition">Katalog digital OPAC dengan pencarian multi-kategori.</span>
+                        <span class="group-hover:text-gray-900 transition">Pencarian buku cepat OPAC dengan penunjuk lokasi nomor rak & laci.</span>
                     </li>
                     <li class="flex items-center gap-3 group">
                         <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition duration-300">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                         </span>
-                        <span class="group-hover:text-gray-900 transition">Manajemen transaksi sirkulasi cepat dan teratur.</span>
-                    </li>
-                    <li class="flex items-center gap-3 group">
-                        <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition duration-300">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        </span>
-                        <span class="group-hover:text-gray-900 transition">Kartu Digital Anggota Siswa terintegrasi QR Code scannable.</span>
+                        <span class="group-hover:text-gray-900 transition">Sirkulasi peminjaman siswa cepat dan pencatatan instan.</span>
                     </li>
                 </ul>
             </div>
@@ -164,20 +214,18 @@
                 <div class="bg-white rounded-3xl border-2 border-gray-200/80 p-5 shadow-xs hover:shadow-xl hover:border-brand-700 transition duration-500 transform hover:-translate-y-1 flex flex-col justify-between group" data-aos="fade-up" data-aos-delay="{{ 100 * (($index % 3) + 1) }}">
 
                     <div>
-
                         <div class="flex items-center justify-between gap-2 mb-3">
                             <span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-brand-50 text-brand-700 border border-brand-200 uppercase tracking-wider">
                                 {{ $buku->kategori->nama ?? 'Kejuruan' }}
                             </span>
                             @if($buku->rak)
-                                <span class="text-[10px] font-mono font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md border border-gray-200">
-                                    Rak: {{ $buku->rak->nama_rak ?? $buku->rak->kode_rak }}
+                                <span class="text-[10px] font-mono font-bold text-gray-700 bg-gray-100 px-2 py-0.5 rounded-md border border-gray-200">
+                                    📍 {{ $buku->rak->kode_rak }} • {{ $buku->laci->nama_laci ?? 'Laci 1' }}
                                 </span>
                             @endif
                         </div>
 
                         <div class="flex gap-4 items-start">
-
                             <div class="w-20 h-28 bg-gradient-to-br from-brand-800 to-brand-900 text-white font-black text-2xl rounded-2xl flex items-center justify-center shrink-0 shadow-md group-hover:scale-105 transition duration-300 border border-brand-700 overflow-hidden relative">
                                 @if($buku->cover_url)
                                     <img src="{{ $buku->cover_url }}" alt="{{ $buku->judul }}" class="w-full h-full object-cover">

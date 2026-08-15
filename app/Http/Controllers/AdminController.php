@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Models\Buku;
 use App\Models\Kategori;
 use App\Models\Rak;
+use App\Models\RakLaci;
 use App\Models\Penulis;
 use App\Models\Penerbit;
 use App\Models\Anggota;
@@ -35,7 +36,7 @@ class AdminController extends Controller
             'total_penulis'          => Penulis::count(),
             'total_penerbit'         => Penerbit::count(),
             'total_rak'              => Rak::count(),
-            'total_anggota'          => Anggota::count(),
+            'total_anggota'          => User::count(),
             'peminjaman_hari_ini'    => Peminjaman::whereDate('tanggal_pinjam', $today)->count(),
             'pengembalian_hari_ini'  => Peminjaman::where('status', 'dikembalikan')->whereDate('waktu_kembali', $today)->count(),
         ];
@@ -68,7 +69,7 @@ class AdminController extends Controller
 
     public function bukuIndex(Request $request)
     {
-        $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak']);
+        $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci']);
 
         if ($request->filled('search')) {
             $search = trim($request->search);
@@ -85,7 +86,7 @@ class AdminController extends Controller
         $penulisList = Penulis::orderBy('nama', 'asc')->get();
         $penerbitList = Penerbit::orderBy('nama', 'asc')->get();
         $kategoriList = Kategori::orderBy('nama', 'asc')->get();
-        $rakList = Rak::orderBy('kode_rak', 'asc')->get();
+        $rakList = Rak::with('laci')->orderBy('kode_rak', 'asc')->get();
 
         return view('admin.buku.index', compact('bukuList', 'penulisList', 'penerbitList', 'kategoriList', 'rakList'));
     }
@@ -101,6 +102,7 @@ class AdminController extends Controller
             'penerbit_id'    => 'nullable|exists:penerbit,id',
             'kategori_id'    => 'nullable|exists:kategori,id',
             'rak_id'         => 'nullable|exists:rak,id',
+            'rak_laci_id'    => 'nullable|exists:rak_laci,id',
             'sinopsis'       => 'nullable|string',
             'cover'          => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
         ]);
@@ -120,6 +122,7 @@ class AdminController extends Controller
             'penerbit_id'        => $request->penerbit_id,
             'kategori_id'        => $request->kategori_id,
             'rak_id'             => $request->rak_id,
+            'rak_laci_id'        => $request->rak_laci_id,
             'sinopsis'           => $request->sinopsis,
             'cover'              => $coverPath,
             'status'             => 'tersedia',
@@ -149,45 +152,41 @@ class AdminController extends Controller
             'penerbit_id'    => 'nullable|exists:penerbit,id',
             'kategori_id'    => 'nullable|exists:kategori,id',
             'rak_id'         => 'nullable|exists:rak,id',
+            'rak_laci_id'    => 'nullable|exists:rak_laci,id',
             'sinopsis'       => 'nullable|string',
             'cover'          => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
         ]);
 
-        $borrowedNow = Peminjaman::where('buku_id', $buku->id)->where('status', 'dipinjam')->sum('jumlah');
-        $newTotal = (int) $request->total_quantity;
-        
-        if ($newTotal < $borrowedNow) {
-            return back()->with('error', "Total stok tidak boleh kurang dari jumlah buku yang sedang dipinjam ({$borrowedNow} buku).");
+        $coverPath = $buku->cover;
+        if ($request->hasFile('cover')) {
+            if ($buku->cover && Storage::disk('public')->exists($buku->cover)) {
+                Storage::disk('public')->delete($buku->cover);
+            }
+            $coverPath = $request->file('cover')->store('covers', 'public');
         }
 
-        $newAvailable = max(0, $newTotal - $borrowedNow);
+        $qtyDiff = $request->total_quantity - $buku->total_quantity;
+        $newAvailable = max(0, $buku->available_quantity + $qtyDiff);
 
-        $data = [
+        $buku->update([
             'isbn'               => $request->isbn,
             'judul'              => $request->judul,
             'tahun_terbit'       => $request->tahun_terbit,
-            'total_quantity'     => $newTotal,
+            'total_quantity'     => $request->total_quantity,
             'available_quantity' => $newAvailable,
             'penulis_id'         => $request->penulis_id,
             'penerbit_id'        => $request->penerbit_id,
             'kategori_id'        => $request->kategori_id,
             'rak_id'             => $request->rak_id,
+            'rak_laci_id'        => $request->rak_laci_id,
             'sinopsis'           => $request->sinopsis,
-        ];
-
-        if ($request->hasFile('cover')) {
-            if ($buku->cover && Storage::disk('public')->exists($buku->cover)) {
-                Storage::disk('public')->delete($buku->cover);
-            }
-            $data['cover'] = $request->file('cover')->store('covers', 'public');
-        }
-
-        $buku->update($data);
+            'cover'              => $coverPath,
+        ]);
 
         AuditLog::create([
             'user_id'    => auth()->id(),
             'user_name'  => auth()->user()->name,
-            'aktivitas'  => 'EDIT_BUKU',
+            'aktivitas'  => 'UPDATE_BUKU',
             'deskripsi'  => "Memperbarui data buku: '{$buku->judul}'",
             'ip_address' => $request->ip(),
         ]);
@@ -195,150 +194,36 @@ class AdminController extends Controller
         return back()->with('success', 'Data buku berhasil diperbarui.');
     }
 
-    public function bukuDestroy(Request $request, $id)
+    public function bukuDestroy($id)
     {
-        $buku = Buku::withCount(['peminjaman' => function($q) {
-            $q->where('status', 'dipinjam');
-        }])->findOrFail($id);
+        $buku = Buku::findOrFail($id);
 
-        if ($buku->peminjaman_count > 0) {
-            return back()->with('error', 'Buku tidak dapat dihapus karena masih ada yang sedang dalam status dipinjam.');
+        $activeLoans = Peminjaman::where('buku_id', $buku->id)->where('status', 'dipinjam')->count();
+        if ($activeLoans > 0) {
+            return back()->with('error', "Buku tidak dapat dihapus karena masih memiliki {$activeLoans} transaksi peminjaman aktif.");
         }
 
         if ($buku->cover && Storage::disk('public')->exists($buku->cover)) {
             Storage::disk('public')->delete($buku->cover);
         }
 
-        $judul = $buku->judul;
+        $bukuTitle = $buku->judul;
         $buku->delete();
 
         AuditLog::create([
             'user_id'    => auth()->id(),
             'user_name'  => auth()->user()->name,
             'aktivitas'  => 'HAPUS_BUKU',
-            'deskripsi'  => "Menghapus buku: {$judul}",
-            'ip_address' => $request->ip(),
+            'deskripsi'  => "Menghapus buku: '{$bukuTitle}'",
+            'ip_address' => request()->ip(),
         ]);
 
         return back()->with('success', 'Buku berhasil dihapus dari katalog.');
     }
 
-    public function penulisIndex(Request $request)
+    public function kategoriIndex()
     {
-        $query = Penulis::withCount('buku');
-        if ($request->filled('search')) {
-            $search = trim($request->search);
-            $query->where('nama', 'like', "%{$search}%");
-        }
-        $penulisList = $query->latest()->paginate(10)->withQueryString();
-        return view('admin.penulis.index', compact('penulisList'));
-    }
-
-    public function penulisStore(Request $request)
-    {
-        $request->validate([
-            'nama'     => 'required|string|max:255|unique:penulis,nama',
-            'biografi' => 'nullable|string',
-        ], [
-            'nama.unique' => 'Nama penulis ini sudah terdaftar.',
-        ]);
-
-        Penulis::create([
-            'nama'     => $request->nama,
-            'biografi' => $request->biografi,
-        ]);
-
-        return back()->with('success', 'Penulis baru berhasil ditambahkan.');
-    }
-
-    public function penulisUpdate(Request $request, $id)
-    {
-        $penulis = Penulis::findOrFail($id);
-        $request->validate([
-            'nama'     => 'required|string|max:255|unique:penulis,nama,' . $id,
-            'biografi' => 'nullable|string',
-        ]);
-
-        $penulis->update([
-            'nama'     => $request->nama,
-            'biografi' => $request->biografi,
-        ]);
-
-        return back()->with('success', 'Data penulis berhasil diperbarui.');
-    }
-
-    public function penulisDestroy($id)
-    {
-        $penulis = Penulis::withCount('buku')->findOrFail($id);
-        if ($penulis->buku_count > 0) {
-            return back()->with('error', "Penulis tidak dapat dihapus karena masih digunakan oleh {$penulis->buku_count} buku.");
-        }
-        $penulis->delete();
-        return back()->with('success', 'Penulis berhasil dihapus.');
-    }
-
-    public function penerbitIndex(Request $request)
-    {
-        $query = Penerbit::withCount('buku');
-        if ($request->filled('search')) {
-            $search = trim($request->search);
-            $query->where('nama', 'like', "%{$search}%")->orWhere('kota', 'like', "%{$search}%");
-        }
-        $penerbitList = $query->latest()->paginate(10)->withQueryString();
-        return view('admin.penerbit.index', compact('penerbitList'));
-    }
-
-    public function penerbitStore(Request $request)
-    {
-        $request->validate([
-            'nama' => 'required|string|max:255|unique:penerbit,nama',
-            'kota' => 'nullable|string|max:100',
-        ], [
-            'nama.unique' => 'Nama penerbit ini sudah terdaftar.',
-        ]);
-
-        Penerbit::create([
-            'nama' => $request->nama,
-            'kota' => $request->kota,
-        ]);
-
-        return back()->with('success', 'Penerbit baru berhasil ditambahkan.');
-    }
-
-    public function penerbitUpdate(Request $request, $id)
-    {
-        $penerbit = Penerbit::findOrFail($id);
-        $request->validate([
-            'nama' => 'required|string|max:255|unique:penerbit,nama,' . $id,
-            'kota' => 'nullable|string|max:100',
-        ]);
-
-        $penerbit->update([
-            'nama' => $request->nama,
-            'kota' => $request->kota,
-        ]);
-
-        return back()->with('success', 'Data penerbit berhasil diperbarui.');
-    }
-
-    public function penerbitDestroy($id)
-    {
-        $penerbit = Penerbit::withCount('buku')->findOrFail($id);
-        if ($penerbit->buku_count > 0) {
-            return back()->with('error', "Penerbit tidak dapat dihapus karena masih digunakan oleh {$penerbit->buku_count} buku.");
-        }
-        $penerbit->delete();
-        return back()->with('success', 'Penerbit berhasil dihapus.');
-    }
-
-    public function kategoriIndex(Request $request)
-    {
-        $query = Kategori::withCount('buku');
-        if ($request->filled('search')) {
-            $search = trim($request->search);
-            $query->where('nama', 'like', "%{$search}%");
-        }
-        $kategoriList = $query->latest()->paginate(10)->withQueryString();
+        $kategoriList = Kategori::withCount('buku')->latest()->paginate(10);
         return view('admin.kategori.index', compact('kategoriList'));
     }
 
@@ -372,7 +257,7 @@ class AdminController extends Controller
             'deskripsi' => $request->deskripsi,
         ]);
 
-        return back()->with('success', 'Kategori berhasil diperbarui.');
+        return back()->with('success', 'Data kategori berhasil diperbarui.');
     }
 
     public function kategoriDestroy($id)
@@ -385,9 +270,87 @@ class AdminController extends Controller
         return back()->with('success', 'Kategori berhasil dihapus.');
     }
 
+    public function penulisIndex()
+    {
+        $penulisList = Penulis::withCount('buku')->latest()->paginate(10);
+        return view('admin.penulis.index', compact('penulisList'));
+    }
+
+    public function penulisStore(Request $request)
+    {
+        $request->validate([
+            'nama'     => 'required|string|max:255',
+            'biografi' => 'nullable|string',
+        ]);
+
+        Penulis::create($request->only('nama', 'biografi'));
+        return back()->with('success', 'Penulis baru berhasil ditambahkan.');
+    }
+
+    public function penulisUpdate(Request $request, $id)
+    {
+        $penulis = Penulis::findOrFail($id);
+        $request->validate([
+            'nama'     => 'required|string|max:255',
+            'biografi' => 'nullable|string',
+        ]);
+
+        $penulis->update($request->only('nama', 'biografi'));
+        return back()->with('success', 'Data penulis berhasil diperbarui.');
+    }
+
+    public function penulisDestroy($id)
+    {
+        $penulis = Penulis::withCount('buku')->findOrFail($id);
+        if ($penulis->buku_count > 0) {
+            return back()->with('error', 'Penulis tidak dapat dihapus karena masih terkait dengan ' . $penulis->buku_count . ' buku.');
+        }
+        $penulis->delete();
+        return back()->with('success', 'Penulis berhasil dihapus.');
+    }
+
+    public function penerbitIndex()
+    {
+        $penerbitList = Penerbit::withCount('buku')->latest()->paginate(10);
+        return view('admin.penerbit.index', compact('penerbitList'));
+    }
+
+    public function penerbitStore(Request $request)
+    {
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'kota' => 'nullable|string|max:255',
+        ]);
+
+        Penerbit::create($request->only('nama', 'kota'));
+        return back()->with('success', 'Penerbit baru berhasil ditambahkan.');
+    }
+
+    public function penerbitUpdate(Request $request, $id)
+    {
+        $penerbit = Penerbit::findOrFail($id);
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'kota' => 'nullable|string|max:255',
+        ]);
+
+        $penerbit->update($request->only('nama', 'kota'));
+        return back()->with('success', 'Data penerbit berhasil diperbarui.');
+    }
+
+    public function penerbitDestroy($id)
+    {
+        $penerbit = Penerbit::withCount('buku')->findOrFail($id);
+        if ($penerbit->buku_count > 0) {
+            return back()->with('error', 'Penerbit tidak dapat dihapus karena masih terkait dengan ' . $penerbit->buku_count . ' buku.');
+        }
+        $penerbit->delete();
+        return back()->with('success', 'Penerbit berhasil dihapus.');
+    }
+
     public function rakIndex(Request $request)
     {
-        $query = Rak::with(['kategori'])->withCount('buku');
+        $query = Rak::with(['kategori', 'laci.buku.kategori'])->withCount('buku');
         if ($request->filled('search')) {
             $search = trim($request->search);
             $query->where('nama_rak', 'like', "%{$search}%")->orWhere('kode_rak', 'like', "%{$search}%");
@@ -404,16 +367,35 @@ class AdminController extends Controller
             'nama_rak'    => 'required|string|max:255',
             'lokasi'      => 'nullable|string|max:255',
             'kategori_id' => 'nullable|exists:kategori,id',
+            'jumlah_laci' => 'nullable|integer|min:1|max:20',
         ]);
 
-        Rak::create([
+        $rak = Rak::create([
             'kode_rak'    => $request->kode_rak,
             'nama_rak'    => $request->nama_rak,
             'lokasi'      => $request->lokasi,
             'kategori_id' => $request->kategori_id,
         ]);
 
-        return back()->with('success', 'Rak baru berhasil ditambahkan.');
+        $jumlahLaci = $request->input('jumlah_laci', 3);
+        for ($i = 1; $i <= $jumlahLaci; $i++) {
+            RakLaci::create([
+                'rak_id'     => $rak->id,
+                'nomor_laci' => $i,
+                'nama_laci'  => 'Laci ' . $i,
+                'keterangan' => 'Tingkat ' . $i . ' pada ' . $rak->nama_rak,
+            ]);
+        }
+
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'TAMBAH_RAK',
+            'deskripsi'  => "Menambahkan rak '{$rak->nama_rak}' dengan {$jumlahLaci} laci/baris",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', 'Rak baru dan laci-lacinya berhasil ditambahkan.');
     }
 
     public function rakUpdate(Request $request, $id)
@@ -443,13 +425,80 @@ class AdminController extends Controller
             return back()->with('error', 'Rak tidak dapat dihapus karena masih menampung ' . $rak->buku_count . ' buku.');
         }
         $rak->delete();
-        return back()->with('success', 'Rak berhasil dihapus.');
+        return back()->with('success', 'Rak dan seluruh lacinya berhasil dihapus.');
+    }
+
+    public function laciStore(Request $request, $rakId)
+    {
+        $rak = Rak::findOrFail($rakId);
+
+        $request->validate([
+            'nama_laci'   => 'required|string|max:100',
+            'nomor_laci'  => 'nullable|integer|min:1',
+            'keterangan'  => 'nullable|string|max:255',
+        ]);
+
+        $nomorLaci = $request->nomor_laci ?? (RakLaci::where('rak_id', $rakId)->max('nomor_laci') + 1);
+
+        RakLaci::create([
+            'rak_id'     => $rak->id,
+            'nomor_laci' => $nomorLaci,
+            'nama_laci'  => $request->nama_laci,
+            'keterangan' => $request->keterangan,
+        ]);
+
+        return back()->with('success', "Laci baru '{$request->nama_laci}' berhasil ditambahkan ke rak {$rak->nama_rak}.");
+    }
+
+    public function laciUpdate(Request $request, $id)
+    {
+        $laci = RakLaci::findOrFail($id);
+
+        $request->validate([
+            'nama_laci'  => 'required|string|max:100',
+            'nomor_laci' => 'required|integer|min:1',
+            'keterangan' => 'nullable|string|max:255',
+        ]);
+
+        $laci->update([
+            'nama_laci'  => $request->nama_laci,
+            'nomor_laci' => $request->nomor_laci,
+            'keterangan' => $request->keterangan,
+        ]);
+
+        return back()->with('success', 'Data laci rak berhasil diperbarui.');
+    }
+
+    public function laciDestroy($id)
+    {
+        $laci = RakLaci::withCount('buku')->findOrFail($id);
+
+        Buku::where('rak_laci_id', $laci->id)->update(['rak_laci_id' => null]);
+        $laci->delete();
+
+        return back()->with('success', 'Laci rak berhasil dihapus.');
+    }
+
+    public function getLacisByRak($rakId)
+    {
+        $lacis = RakLaci::with('buku.kategori')->where('rak_id', $rakId)->orderBy('nomor_laci')->get()->map(function($laci) {
+            $categories = $laci->buku->pluck('kategori.nama')->filter()->unique()->values()->all();
+            return [
+                'id'          => $laci->id,
+                'nomor_laci'  => $laci->nomor_laci,
+                'nama_laci'   => $laci->nama_laci,
+                'keterangan'  => $laci->keterangan,
+                'buku_count'  => $laci->buku->count(),
+                'categories'  => $categories,
+            ];
+        });
+
+        return response()->json($lacis);
     }
 
     public function peminjamanIndex(Request $request)
     {
-        $query = Peminjaman::with(['user', 'buku', 'petugas'])
-            ->where('status', 'dipinjam');
+        $query = Peminjaman::with(['user', 'buku', 'petugas'])->where('status', 'dipinjam');
 
         if ($request->filled('search')) {
             $search = trim($request->search);
@@ -458,19 +507,16 @@ class AdminController extends Controller
                   ->orWhere('nama_peminjam', 'like', "%{$search}%")
                   ->orWhere('jurusan', 'like', "%{$search}%")
                   ->orWhere('nomor_induk', 'like', "%{$search}%")
-                  ->orWhereHas('user', function($qu) use ($search) {
-                      $qu->where('name', 'like', "%{$search}%");
-                  })
                   ->orWhereHas('buku', function($qb) use ($search) {
                       $qb->where('judul', 'like', "%{$search}%");
                   });
             });
         }
 
-        $activeLoans = $query->latest('tanggal_pinjam')->paginate(10)->withQueryString();
-        $booksList = Buku::where('available_quantity', '>', 0)->orderBy('judul', 'asc')->get();
+        $peminjamanList = $query->latest()->paginate(10)->withQueryString();
+        $bukuList = Buku::where('status', 'tersedia')->where('available_quantity', '>', 0)->orderBy('judul', 'asc')->get();
 
-        return view('admin.peminjaman.index', compact('activeLoans', 'booksList'));
+        return view('admin.peminjaman.index', compact('peminjamanList', 'bukuList'));
     }
 
     public function peminjamanStore(Request $request)
@@ -483,20 +529,25 @@ class AdminController extends Controller
             'jumlah'        => 'required|integer|min:1|max:10',
         ]);
 
-        try {
-            $loan = DB::transaction(function () use ($request) {
-                $buku = Buku::where('id', $request->buku_id)->lockForUpdate()->first();
-                $jumlahPinjam = (int) $request->jumlah;
+        $buku = Buku::findOrFail($request->buku_id);
+        $jumlahPinjam = (int) $request->jumlah;
 
-                if (!$buku || $buku->available_quantity < $jumlahPinjam) {
+        if ($buku->available_quantity < $jumlahPinjam) {
+            return back()->with('error', "Stok buku tidak mencukupi. Sisa stok tersedia saat ini: {$buku->available_quantity} buku.");
+        }
+
+        $kodePinjam = 'PJ-' . date('Ymd') . '-' . strtoupper(Str::random(4));
+        $today = Carbon::today()->toDateString();
+
+        try {
+            $loan = DB::transaction(function () use ($buku, $request, $jumlahPinjam, $kodePinjam, $today) {
+                $lockedBook = Buku::where('id', $buku->id)->lockForUpdate()->first();
+                if ($lockedBook->available_quantity < $jumlahPinjam) {
                     throw new \Exception('STOCK_INSUFFICIENT');
                 }
 
-                $buku->available_quantity -= $jumlahPinjam;
-                $buku->save();
-
-                $kodePinjam = 'TRX-' . date('Ymd') . '-' . strtoupper(Str::random(4));
-                $today = Carbon::today()->toDateString();
+                $lockedBook->available_quantity -= $jumlahPinjam;
+                $lockedBook->save();
 
                 return Peminjaman::create([
                     'kode_peminjaman'     => $kodePinjam,
@@ -606,18 +657,16 @@ class AdminController extends Controller
     public function anggotaIndex(Request $request)
     {
         $query = User::with(['role', 'anggota']);
+
         if ($request->filled('search')) {
             $search = trim($request->search);
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhereHas('anggota', function($qa) use ($search) {
-                      $qa->where('nomor_anggota', 'like', "%{$search}%")
-                         ->orWhere('nim', 'like', "%{$search}%");
-                  });
+                  ->orWhere('phone', 'like', "%{$search}%");
             });
         }
+
         $anggotaList = $query->latest()->paginate(10)->withQueryString();
         $roles = Role::all();
         return view('admin.anggota.index', compact('anggotaList', 'roles'));
@@ -625,89 +674,148 @@ class AdminController extends Controller
 
     public function anggotaStore(Request $request)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Administrator yang berwenang menambahkan akun admin baru.');
+        }
+
         $request->validate([
             'name'          => 'required|string|max:255',
             'email'         => 'required|string|email|max:255|unique:users,email',
             'password'      => 'required|string|min:8',
             'phone'         => 'nullable|string|max:20',
-            'nim'           => 'required|string|max:50|unique:anggota,nim',
-            'program_studi' => 'required|string|max:150',
-            'status'        => 'required|in:aktif,nonaktif,dibekukan',
+            'role_id'       => 'required|exists:roles,id',
+            'status'        => 'required|in:active,inactive',
         ]);
 
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
-            'role_id'  => 1,
+            'role_id'  => $request->role_id,
             'phone'    => $request->phone,
-            'status'   => 'active',
+            'status'   => $request->status,
         ]);
 
-        $nomorAnggota = 'LIB-' . date('Y') . '-' . str_pad($user->id, 3, '0', STR_PAD_LEFT);
-
-        Anggota::create([
-            'user_id'       => $user->id,
-            'nomor_anggota' => $nomorAnggota,
-            'nim'           => $request->nim,
-            'program_studi' => $request->program_studi,
-            'status'        => $request->status,
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'TAMBAH_ADMIN',
+            'deskripsi'  => "Menambahkan akun pengelola baru: '{$user->name}' ({$user->email})",
+            'ip_address' => $request->ip(),
         ]);
 
-        return back()->with('success', 'Anggota/Pengguna baru berhasil didaftarkan.');
+        return back()->with('success', 'Akun pengelola/admin baru berhasil didaftarkan.');
     }
 
     public function anggotaUpdate(Request $request, $id)
     {
         $user = User::findOrFail($id);
+
+        if (!auth()->user()->isSuperAdmin() && auth()->id() !== $user->id) {
+            abort(403, 'Anda tidak memiliki hak akses untuk mengubah akun admin lain.');
+        }
+
         $request->validate([
-            'name'          => 'required|string|max:255',
-            'email'         => 'required|string|email|max:255|unique:users,email,' . $id,
-            'password'      => 'nullable|string|min:8',
-            'phone'         => 'nullable|string|max:20',
-            'nim'           => 'required|string|max:50|unique:anggota,nim,' . ($user->anggota->id ?? 0),
-            'program_studi' => 'required|string|max:150',
-            'status'        => 'required|in:aktif,nonaktif,dibekukan',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users,email,' . $id,
+            'phone'    => 'nullable|string|max:20',
+            'role_id'  => 'nullable|exists:roles,id',
+            'status'   => 'nullable|in:active,inactive',
         ]);
 
         $userData = [
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'phone'    => $request->phone,
-            'role_id'  => 1,
+            'name'  => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
         ];
 
-        if ($request->filled('password')) {
-            $userData['password'] = Hash::make($request->password);
+        if (auth()->user()->isSuperAdmin() && $user->id !== 1) {
+            if ($request->filled('role_id')) {
+                $userData['role_id'] = $request->role_id;
+            }
+            if ($request->filled('status')) {
+                $userData['status'] = $request->status;
+            }
         }
 
         $user->update($userData);
 
-        if ($user->anggota) {
-            $user->anggota->update([
-                'nim'           => $request->nim,
-                'program_studi' => $request->program_studi,
-                'status'        => $request->status,
-            ]);
-        } else {
-            $nomorAnggota = 'LIB-' . date('Y') . '-' . str_pad($user->id, 3, '0', STR_PAD_LEFT);
-            Anggota::create([
-                'user_id'       => $user->id,
-                'nomor_anggota' => $nomorAnggota,
-                'nim'           => $request->nim,
-                'program_studi' => $request->program_studi,
-                'status'        => $request->status,
-            ]);
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'UPDATE_ADMIN',
+            'deskripsi'  => "Memperbarui data akun pengelola: '{$user->name}'",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', 'Data akun pengelola berhasil diperbarui.');
+    }
+
+    public function anggotaResetPassword(Request $request, $id)
+    {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Administrator yang berwenang mereset password akun admin.');
         }
 
-        return back()->with('success', 'Data anggota/pengguna berhasil diperbarui.');
+        $user = User::findOrFail($id);
+
+        $request->validate([
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'RESET_PASSWORD_ADMIN',
+            'deskripsi'  => "Mereset password untuk akun admin: '{$user->name}' ({$user->email})",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', "Password untuk akun {$user->name} berhasil diubah.");
+    }
+
+    public function anggotaToggleStatus(Request $request, $id)
+    {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Administrator yang berwenang mengubah status aktif akun admin.');
+        }
+
+        $user = User::findOrFail($id);
+
+        if ($user->id === 1 || $user->id === auth()->id()) {
+            return back()->with('error', 'Akun Super Admin Utama atau akun Anda sendiri tidak dapat dinonaktifkan.');
+        }
+
+        $newStatus = $user->status === 'active' ? 'inactive' : 'active';
+        $user->update(['status' => $newStatus]);
+
+        $statusText = $newStatus === 'active' ? 'diaktifkan' : 'dinonaktifkan / diblokir';
+
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'TOGGLE_STATUS_ADMIN',
+            'deskripsi'  => "Status akun admin '{$user->name}' diubah menjadi {$newStatus}",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', "Akun {$user->name} berhasil {$statusText}.");
     }
 
     public function anggotaDestroy($id)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Administrator yang berwenang menghapus akun admin.');
+        }
+
         $user = User::findOrFail($id);
-        if ($user->id === auth()->id()) {
-            return back()->with('error', 'Anda tidak dapat menghapus akun Anda sendiri yang sedang aktif.');
+
+        if ($user->id === 1 || $user->id === auth()->id()) {
+            return back()->with('error', 'Akun Super Administrator Utama atau akun Anda sendiri tidak dapat dihapus.');
         }
 
         $activeLoans = Peminjaman::where('user_id', $user->id)->where('status', 'dipinjam')->count();
@@ -718,9 +826,18 @@ class AdminController extends Controller
         if ($user->anggota) {
             $user->anggota->delete();
         }
+        $userName = $user->name;
         $user->delete();
 
-        return back()->with('success', 'Pengguna berhasil dihapus.');
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'HAPUS_ADMIN',
+            'deskripsi'  => "Menghapus akun admin: '{$userName}'",
+            'ip_address' => request()->ip(),
+        ]);
+
+        return back()->with('success', "Akun admin {$userName} berhasil dihapus.");
     }
 
     public function auditLogIndex()

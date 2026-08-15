@@ -8,6 +8,7 @@ use App\Http\Controllers\AdminController;
 Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/katalog', [PublicController::class, 'katalog'])->name('katalog');
 Route::get('/buku/{id}', [PublicController::class, 'detailBuku'])->name('buku.detail');
+Route::get('/api/buku/search-suggestions', [PublicController::class, 'searchSuggestions'])->name('buku.search-suggestions');
 
 Route::get('/aksesperpuspgri', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/aksesperpuspgri', [AuthController::class, 'login'])->name('login.post')->middleware('throttle:5,1');
@@ -59,6 +60,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/rak', [AdminController::class, 'rakStore'])->name('rak.store');
         Route::post('/rak/update/{id}', [AdminController::class, 'rakUpdate'])->name('rak.update');
         Route::post('/rak/delete/{id}', [AdminController::class, 'rakDestroy'])->name('rak.delete');
+        Route::post('/rak/{rakId}/laci', [AdminController::class, 'laciStore'])->name('rak.laci.store');
+        Route::post('/rak/laci/update/{id}', [AdminController::class, 'laciUpdate'])->name('rak.laci.update');
+        Route::post('/rak/laci/delete/{id}', [AdminController::class, 'laciDestroy'])->name('rak.laci.delete');
+        Route::get('/rak/{rakId}/lacis', [AdminController::class, 'getLacisByRak'])->name('rak.lacis');
 
         Route::get('/peminjaman', [AdminController::class, 'peminjamanIndex'])->name('peminjaman');
         Route::post('/peminjaman', [AdminController::class, 'peminjamanStore'])->name('peminjaman.store');
@@ -68,6 +73,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/anggota', [AdminController::class, 'anggotaIndex'])->name('anggota');
         Route::post('/anggota', [AdminController::class, 'anggotaStore'])->name('anggota.store');
         Route::post('/anggota/update/{id}', [AdminController::class, 'anggotaUpdate'])->name('anggota.update');
+        Route::post('/anggota/reset-password/{id}', [AdminController::class, 'anggotaResetPassword'])->name('anggota.reset-password');
+        Route::post('/anggota/toggle-status/{id}', [AdminController::class, 'anggotaToggleStatus'])->name('anggota.toggle-status');
         Route::post('/anggota/delete/{id}', [AdminController::class, 'anggotaDestroy'])->name('anggota.delete');
 
         Route::get('/pengaturan', [AdminController::class, 'pengaturanIndex'])->name('pengaturan');

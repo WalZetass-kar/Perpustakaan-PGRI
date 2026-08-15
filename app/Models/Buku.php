@@ -17,6 +17,7 @@ class Buku extends Model
         'penerbit_id',
         'kategori_id',
         'rak_id',
+        'rak_laci_id',
         'tahun_terbit',
         'total_quantity',
         'available_quantity',
@@ -46,6 +47,11 @@ class Buku extends Model
         return $this->belongsTo(Rak::class);
     }
 
+    public function laci()
+    {
+        return $this->belongsTo(RakLaci::class, 'rak_laci_id');
+    }
+
     public function peminjaman()
     {
         return $this->hasMany(Peminjaman::class);
@@ -57,5 +63,12 @@ class Buku extends Model
             return asset('storage/' . $this->cover);
         }
         return null;
+    }
+
+    public function getLokasiLengkapAttribute()
+    {
+        $rakNama = $this->rak ? $this->rak->nama_rak : 'Belum diatur';
+        $laciNama = $this->laci ? $this->laci->nama_laci : ($this->rak ? 'Laci 1' : '-');
+        return $rakNama . ' - ' . $laciNama;
     }
 }
