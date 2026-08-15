@@ -732,35 +732,48 @@ class AdminController extends Controller
     public function pengaturanIndex()
     {
         $pengaturan = Pengaturan::all()->pluck('value', 'key');
-        return view('admin.pengaturan.index', compact('pengaturan'));
+        $systemInfo = [
+            'laravel_version' => app()->version(),
+            'php_version'     => PHP_VERSION,
+            'db_driver'       => config('database.default'),
+            'app_env'         => config('app.env'),
+            'total_buku'      => Buku::count(),
+            'total_pinjam'    => Peminjaman::count(),
+            'total_pengguna'  => User::count(),
+        ];
+        return view('admin.pengaturan.index', compact('pengaturan', 'systemInfo'));
     }
 
     public function pengaturanUpdate(Request $request)
     {
         $validated = $request->validate([
-            'nama_perpustakaan'  => 'required|string|max:255',
-            'jam_operasional'    => 'required|string|max:255',
-            'alamat'             => 'nullable|string|max:500',
-            'durasi_pinjam_hari' => 'required|integer|min:1|max:365',
-            'max_buku_pinjam'    => 'required|integer|min:1|max:50',
+            'nama_perpustakaan'       => 'required|string|max:255',
+            'nama_sekolah'            => 'nullable|string|max:255',
+            'npsn'                    => 'nullable|string|max:50',
+            'kepala_perpustakaan'     => 'nullable|string|max:255',
+            'nip_kepala_perpustakaan' => 'nullable|string|max:50',
+            'alamat'                  => 'nullable|string|max:500',
+            'email_perpustakaan'      => 'nullable|string|max:255',
+            'telepon'                 => 'nullable|string|max:50',
+            'website_sekolah'         => 'nullable|string|max:255',
+            'jam_operasional'         => 'required|string|max:255',
+            'jam_operasional_jumat'   => 'nullable|string|max:255',
+            'pesan_sirkulasi'         => 'nullable|string|max:500',
+            'max_buku_pinjam'         => 'required|integer|min:1|max:50',
+            'durasi_pinjam_hari'      => 'required|integer|min:1|max:365',
+            'syarat_peminjaman'       => 'nullable|string|max:500',
+            'judul_hero'              => 'nullable|string|max:255',
+            'subjudul_hero'           => 'nullable|string|max:500',
+            'buku_per_halaman'        => 'nullable|integer|min:4|max:100',
         ]);
 
-        $settingDefinitions = [
-            'nama_perpustakaan'  => ['label' => 'Nama Resmi Perpustakaan', 'tipe' => 'text'],
-            'jam_operasional'    => ['label' => 'Informasi Jam Operasional Perpustakaan', 'tipe' => 'text'],
-            'alamat'             => ['label' => 'Alamat & Lokasi Gedung', 'tipe' => 'text'],
-            'durasi_pinjam_hari' => ['label' => 'Durasi Peminjaman Standar (Hari)', 'tipe' => 'number'],
-            'max_buku_pinjam'    => ['label' => 'Maksimal Buku Dipinjam Per Siswa', 'tipe' => 'number'],
-        ];
-
         foreach ($validated as $key => $value) {
-            $def = $settingDefinitions[$key] ?? ['label' => ucwords(str_replace('_', ' ', $key)), 'tipe' => 'text'];
             Pengaturan::updateOrCreate(
                 ['key' => $key],
                 [
                     'value' => strip_tags((string) $value),
-                    'label' => $def['label'],
-                    'tipe'  => $def['tipe'],
+                    'label' => ucwords(str_replace('_', ' ', $key)),
+                    'tipe'  => is_numeric($value) ? 'number' : 'text',
                 ]
             );
         }
@@ -769,7 +782,7 @@ class AdminController extends Controller
             'user_id'    => auth()->id(),
             'user_name'  => auth()->user()->name,
             'aktivitas'  => 'UPDATE_PENGATURAN',
-            'deskripsi'  => 'Memperbarui konfigurasi sistem perpustakaan',
+            'deskripsi'  => 'Memperbarui konfigurasi sistem & identitas perpustakaan',
             'ip_address' => $request->ip(),
         ]);
 
