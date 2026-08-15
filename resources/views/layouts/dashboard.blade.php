@@ -3,47 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Dashboard') - Perpustakaan SMK PGRI Pekanbaru</title>
+    <title>@yield('title', 'Admin Perpustakaan') - {{ $pengaturan['nama_perpustakaan'] ?? 'SMK PGRI Pekanbaru' }}</title>
 
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        brand: {
-                            50: '#FEF2F2',
-                            100: '#FEE2E2',
-                            200: '#FECACA',
-                            300: '#FCA5A5',
-                            400: '#F87171',
-                            500: '#EF4444',
-                            600: '#DC2626',
-                            700: '#B91C1C',
-                            800: '#991B1B',
-                            900: '#7F1D1D',
-                            950: '#450A0A',
-                        }
-                    },
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
                         mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fef2f2',
+                            100: '#fee2e2',
+                            200: '#fecaca',
+                            300: '#fca5a5',
+                            400: '#f87171',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c',
+                            800: '#991b1b',
+                            900: '#7f1d1d',
+                            950: '#450a0a',
+                        }
                     }
                 }
             }
         }
     </script>
-    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
         [x-cloak] { display: none !important; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .skeleton-shimmer {
             background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
             background-size: 200% 100%;
@@ -60,28 +63,8 @@
           sidebarOpen: false,
           openManageBuku: true,
           openSirkulasi: true,
-          openAdmin: true,
-          openQuickSearch: false,
-          quickQuery: '',
-          quickResults: [],
-          quickLoading: false,
-          searchQuick() {
-              if (this.quickQuery.trim().length < 2) {
-                  this.quickResults = [];
-                  return;
-              }
-              this.quickLoading = true;
-              fetch('/api/buku/search-suggestions?q=' + encodeURIComponent(this.quickQuery))
-                  .then(res => res.json())
-                  .then(data => {
-                      this.quickResults = data;
-                      this.quickLoading = false;
-                  })
-                  .catch(() => { this.quickLoading = false; });
-          }
-      }"
-      @keydown.window.ctrl.k.prevent="openQuickSearch = true; $nextTick(() => $refs.quickSearchInput.focus())"
-      @keydown.window.meta.k.prevent="openQuickSearch = true; $nextTick(() => $refs.quickSearchInput.focus())">
+          openAdmin: true
+      }">
 
     <div id="global-dashboard-skeleton" class="fixed inset-0 bg-gray-100 z-50 flex transition-opacity duration-300 pointer-events-auto">
         <div class="w-72 bg-white border-r-2 border-gray-200 p-5 space-y-6 hidden lg:block shrink-0">
@@ -132,20 +115,26 @@
                     <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
                         <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI Pekanbaru" class="w-10 h-10 object-contain drop-shadow-xs">
                         <div class="leading-tight">
-                            <span class="text-sm font-black text-gray-900 tracking-tight block">SMK PGRI</span>
+                            <span class="text-sm font-black text-gray-900 tracking-tight block">{{ $pengaturan['nama_sekolah'] ?? 'SMK PGRI' }}</span>
                             <span class="text-[10px] font-extrabold text-brand-700 tracking-wider uppercase block">Perpustakaan</span>
                         </div>
                     </a>
-                    <button @click="sidebarOpen = false" class="lg:hidden p-2 rounded-xl text-gray-400 hover:text-gray-900 hover:bg-gray-100">
+                    <button @click="sidebarOpen = false" class="lg:hidden p-2 rounded-xl text-gray-400 hover:text-gray-900 hover:bg-gray-100" aria-label="Tutup Sidebar">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
 
                 <nav class="p-3 space-y-2 overflow-y-auto flex-1 text-xs font-bold">
                     <a href="{{ route('admin.dashboard') }}"
-                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 border {{ request()->routeIs('admin.dashboard') ? 'bg-brand-700 text-white border-brand-800 shadow-md transform translate-x-1' : 'text-gray-700 border-transparent hover:bg-gray-100 hover:text-brand-700' }}">
+                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 border {{ request()->routeIs('admin.dashboard') ? 'bg-brand-700 text-white border-brand-800 shadow-md transform translate-x-1 font-black' : 'text-gray-700 border-transparent hover:bg-gray-100 hover:text-brand-700 font-bold' }}">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 00-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                         <span>Dashboard</span>
+                    </a>
+
+                    <a href="{{ route('admin.temukan-buku') }}"
+                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 border {{ request()->routeIs('admin.temukan-buku*') ? 'bg-brand-700 text-white border-brand-800 shadow-md transform translate-x-1 font-black' : 'text-gray-700 border-transparent hover:bg-gray-100 hover:text-brand-700 font-bold' }}">
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <span>Temukan Buku</span>
                     </a>
 
                     <div class="space-y-1">
@@ -264,22 +253,16 @@
         <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
             <header class="h-20 bg-white border-b-2 border-gray-200/90 flex items-center justify-between px-4 sm:px-6 lg:px-8 z-10 shrink-0 shadow-2xs">
                 <div class="flex items-center gap-2.5 min-w-0 pr-2">
-                    <button @click="sidebarOpen = true" class="lg:hidden p-2 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 shrink-0">
+                    <button @click="sidebarOpen = true" class="lg:hidden p-2 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 shrink-0" aria-label="Buka Sidebar">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     </button>
                     <div class="min-w-0">
                         <h1 class="text-xs sm:text-base font-black text-gray-900 truncate tracking-tight leading-tight">@yield('page_heading', 'Overview')</h1>
-                        <p class="text-[10px] sm:text-[11px] text-gray-500 font-medium truncate hidden sm:block">Perpustakaan SMK PGRI Pekanbaru</p>
+                        <p class="text-[10px] sm:text-[11px] text-gray-500 font-medium truncate hidden sm:block">{{ $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI Pekanbaru' }}</p>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <button type="button" @click="openQuickSearch = true; $nextTick(() => $refs.quickSearchInput.focus())" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 hover:text-gray-900 rounded-xl border border-gray-200 transition">
-                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        <span class="hidden md:inline">Cari Cepat Buku & Rak</span>
-                        <kbd class="hidden sm:inline-block px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded text-[10px] font-mono font-bold">Ctrl+K</kbd>
-                    </button>
-
                     <a href="{{ route('katalog') }}" target="_blank" class="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-gray-700 bg-gray-50 hover:bg-brand-50 hover:text-brand-700 rounded-xl border border-gray-200 transition">
                         <svg class="w-4 h-4 text-brand-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                         <span>Katalog OPAC</span>
@@ -337,67 +320,6 @@
 
                 @yield('content')
             </main>
-        </div>
-    </div>
-
-    <div x-show="openQuickSearch" @click.self="openQuickSearch = false" class="fixed inset-0 z-50 flex items-start justify-center bg-gray-950/70 backdrop-blur-xs p-4 sm:p-6 overflow-y-auto" x-cloak>
-        <div @click.stop class="bg-white rounded-3xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl border-2 border-gray-200 overflow-hidden transform transition-all mt-10">
-            <div class="p-4 border-b border-gray-100 flex items-center gap-3 bg-gray-50/80">
-                <svg class="w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                <input type="text" x-ref="quickSearchInput" x-model="quickQuery" @input.debounce.200ms="searchQuick()" placeholder="Ketik judul buku, ISBN, atau penulis untuk cek rak & stok..." class="w-full text-xs sm:text-sm font-bold text-gray-900 bg-transparent focus:outline-none">
-                <div x-show="quickLoading" x-cloak>
-                    <svg class="animate-spin w-4 h-4 text-brand-700" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                </div>
-                <button @click="openQuickSearch = false" class="text-xs font-bold text-gray-400 hover:text-gray-700 px-2 py-1 bg-gray-200/70 rounded-lg">ESC</button>
-            </div>
-
-            <div class="flex-1 overflow-y-auto p-3 space-y-2 text-xs">
-                <template x-if="quickResults.length > 0">
-                    <div>
-                        <div class="px-2 py-1 text-[10px] font-black text-gray-400 uppercase tracking-wider flex items-center justify-between">
-                            <span>Hasil Pencarian Cepat</span>
-                            <span class="text-emerald-600 font-bold" x-text="quickResults.length + ' Buku Ditemukan'"></span>
-                        </div>
-                        <div class="space-y-1.5 mt-1">
-                            <template x-for="book in quickResults" :key="book.id">
-                                <a :href="book.detail_url" target="_blank" class="p-3 rounded-2xl border border-gray-200 hover:border-brand-300 hover:bg-brand-50/50 flex items-center gap-3 transition group">
-                                    <div class="w-10 h-14 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center">
-                                        <template x-if="book.cover_url">
-                                            <img :src="book.cover_url" class="w-full h-full object-cover">
-                                        </template>
-                                        <template x-if="!book.cover_url">
-                                            <div class="w-full h-full bg-brand-700 text-white font-black text-xs flex items-center justify-center" x-text="book.judul.substr(0, 1)"></div>
-                                        </template>
-                                    </div>
-                                    <div class="min-w-0 flex-1">
-                                        <h4 class="font-extrabold text-gray-900 text-xs truncate group-hover:text-brand-700" x-text="book.judul"></h4>
-                                        <p class="text-[11px] text-gray-500 truncate" x-text="book.penulis + ' • ' + book.kategori"></p>
-                                        <div class="flex items-center gap-2 mt-1.5 text-[10px]">
-                                            <span class="px-2 py-0.5 rounded-md bg-gray-100 font-bold text-gray-800 border border-gray-200" x-text="'📍 ' + book.rak + ' (' + book.laci + ')'"></span>
-                                            <span class="px-2 py-0.5 rounded-md font-black" :class="book.available_quantity > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'" x-text="'Stok: ' + book.available_quantity + ' / ' + book.total_quantity + ' Eks'"></span>
-                                        </div>
-                                    </div>
-                                    <svg class="w-4 h-4 text-gray-300 group-hover:text-brand-700 shrink-0 transform group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                                </a>
-                            </template>
-                        </div>
-                    </div>
-                </template>
-
-                <template x-if="quickQuery.trim().length >= 2 && quickResults.length === 0 && !quickLoading">
-                    <div class="py-12 text-center text-gray-400 space-y-2">
-                        <svg class="w-8 h-8 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <p class="font-bold">Tidak ada buku ditemukan untuk "<span x-text="quickQuery"></span>"</p>
-                    </div>
-                </template>
-
-                <template x-if="quickQuery.trim().length < 2">
-                    <div class="py-10 text-center text-gray-400 space-y-1">
-                        <p class="font-bold text-xs text-gray-500">Ketik minimal 2 karakter untuk memulai pencarian cepat</p>
-                        <p class="text-[10px] text-gray-400">Pencarian mencakup judul buku, pengarang, nomor rak, dan laci</p>
-                    </div>
-                </template>
-            </div>
         </div>
     </div>
 

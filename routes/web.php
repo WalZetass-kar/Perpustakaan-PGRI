@@ -35,6 +35,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/temukan-buku', [AdminController::class, 'temukanBukuIndex'])->name('temukan-buku');
 
         Route::get('/buku', [AdminController::class, 'bukuIndex'])->name('buku');
         Route::post('/buku', [AdminController::class, 'bukuStore'])->name('buku.store');

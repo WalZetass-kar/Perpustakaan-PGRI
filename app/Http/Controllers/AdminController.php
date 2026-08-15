@@ -67,6 +67,76 @@ class AdminController extends Controller
         return view('admin.dashboard', compact('stats', 'chartDates', 'chartLoans', 'chartReturns', 'recentLoans', 'mostBorrowedBooks', 'recentAuditLogs'));
     }
 
+    public function temukanBukuIndex(Request $request)
+    {
+        $query = Buku::with([
+            'penulis',
+            'penerbit',
+            'kategori',
+            'rak.laci',
+            'laci.rak'
+        ]);
+
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                  ->orWhere('isbn', 'like', "%{$search}%")
+                  ->orWhereHas('penulis', function($qp) use ($search) {
+                      $qp->where('nama', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('penerbit', function($qp) use ($search) {
+                      $qp->where('nama', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('kategori', function($qk) use ($search) {
+                      $qk->where('nama', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('rak', function($qr) use ($search) {
+                      $qr->where('kode_rak', 'like', "%{$search}%")
+                         ->orWhere('nama_rak', 'like', "%{$search}%")
+                         ->orWhere('lokasi', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('laci', function($ql) use ($search) {
+                      $ql->where('nama_laci', 'like', "%{$search}%")
+                         ->orWhere('keterangan', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        if ($request->filled('kategori_id')) {
+            $query->where('kategori_id', $request->kategori_id);
+        }
+
+        if ($request->filled('rak_id')) {
+            $query->where('rak_id', $request->rak_id);
+        }
+
+        if ($request->filled('status_stok')) {
+            if ($request->status_stok === 'tersedia') {
+                $query->where('available_quantity', '>', 0);
+            } elseif ($request->status_stok === 'penuh') {
+                $query->whereColumn('available_quantity', '=', 'total_quantity')->where('total_quantity', '>', 0);
+            } elseif ($request->status_stok === 'habis') {
+                $query->where('available_quantity', '<=', 0);
+            }
+        }
+
+        $bukuList = $query->orderBy('judul', 'asc')->paginate(12)->withQueryString();
+        $kategoriList = Kategori::orderBy('nama', 'asc')->get();
+        $rakList = Rak::with('laci')->orderBy('kode_rak', 'asc')->get();
+
+        $metrics = [
+            'total_koleksi'  => Buku::count(),
+            'total_buku'     => (int) Buku::sum('total_quantity'),
+            'buku_tersedia'  => (int) Buku::sum('available_quantity'),
+            'sedang_pinjam'  => (int) Peminjaman::where('status', 'dipinjam')->sum('jumlah'),
+            'total_rak'      => Rak::count(),
+            'total_laci'     => RakLaci::count(),
+        ];
+
+        return view('admin.temukan-buku.index', compact('bukuList', 'kategoriList', 'rakList', 'metrics'));
+    }
+
     public function bukuIndex(Request $request)
     {
         $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci']);
