@@ -91,11 +91,11 @@
         </p>
         @auth
             <a href="{{ route('dashboard') }}" class="btn">
-                ← Kembali ke Dashboard Saya
+                ← Kembali ke Dashboard
             </a>
         @else
-            <a href="{{ route('login') }}" class="btn">
-                ← Login ke Portal Siswa
+            <a href="{{ route('home') }}" class="btn">
+                ← Kembali ke Beranda
             </a>
         @endauth
     </div>
