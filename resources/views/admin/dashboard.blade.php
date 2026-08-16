@@ -11,42 +11,65 @@
          yearlyData: {{ json_encode($chartYearly) }},
          chartInstance: null,
          initChart() {
-             const ctx = document.getElementById('sirkulasiBarChart');
-             if (!ctx) return;
+             const canvas = document.getElementById('sirkulasiLineChart');
+             if (!canvas) return;
 
+             const ctx = canvas.getContext('2d');
              const isMonthly = this.chartPeriod === 'monthly';
              const labels = isMonthly ? this.monthlyData.labels : this.yearlyData.labels;
              const loans = isMonthly ? this.monthlyData.loans : this.yearlyData.loans;
              const returns = isMonthly ? this.monthlyData.returns : this.yearlyData.returns;
+
+             const gradientLoans = ctx.createLinearGradient(0, 0, 0, 280);
+             gradientLoans.addColorStop(0, 'rgba(185, 28, 28, 0.20)');
+             gradientLoans.addColorStop(1, 'rgba(185, 28, 28, 0.0)');
+
+             const gradientReturns = ctx.createLinearGradient(0, 0, 0, 280);
+             gradientReturns.addColorStop(0, 'rgba(16, 185, 129, 0.20)');
+             gradientReturns.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
 
              if (this.chartInstance) {
                  this.chartInstance.destroy();
              }
 
              this.chartInstance = new Chart(ctx, {
-                 type: 'bar',
+                 type: 'line',
                  data: {
                      labels: labels,
                      datasets: [
                          {
-                             label: 'Peminjaman Buku (Eks)',
+                             label: 'Peminjaman Buku',
                              data: loans,
-                             backgroundColor: '#B91C1C',
-                             hoverBackgroundColor: '#991B1B',
-                             borderRadius: 6,
-                             borderSkipped: false,
-                             barPercentage: 0.7,
-                             categoryPercentage: 0.6
+                             borderColor: '#B91C1C',
+                             borderWidth: 3,
+                             backgroundColor: gradientLoans,
+                             fill: true,
+                             tension: 0.38,
+                             pointBackgroundColor: '#FFFFFF',
+                             pointBorderColor: '#B91C1C',
+                             pointBorderWidth: 2.5,
+                             pointRadius: 4,
+                             pointHoverRadius: 7,
+                             pointHoverBackgroundColor: '#B91C1C',
+                             pointHoverBorderColor: '#FFFFFF',
+                             pointHoverBorderWidth: 3
                          },
                          {
-                             label: 'Pengembalian Buku (Eks)',
+                             label: 'Pengembalian Buku',
                              data: returns,
-                             backgroundColor: '#059669',
-                             hoverBackgroundColor: '#047857',
-                             borderRadius: 6,
-                             borderSkipped: false,
-                             barPercentage: 0.7,
-                             categoryPercentage: 0.6
+                             borderColor: '#10B981',
+                             borderWidth: 3,
+                             backgroundColor: gradientReturns,
+                             fill: true,
+                             tension: 0.38,
+                             pointBackgroundColor: '#FFFFFF',
+                             pointBorderColor: '#10B981',
+                             pointBorderWidth: 2.5,
+                             pointRadius: 4,
+                             pointHoverRadius: 7,
+                             pointHoverBackgroundColor: '#10B981',
+                             pointHoverBorderColor: '#FFFFFF',
+                             pointHoverBorderWidth: 3
                          }
                      ]
                  },
@@ -62,35 +85,53 @@
                              display: false
                          },
                          tooltip: {
-                             backgroundColor: '#111827',
-                             titleColor: '#F9FAFB',
-                             bodyColor: '#F3F4F6',
-                             padding: 10,
-                             cornerRadius: 10,
-                             titleFont: { family: 'Plus Jakarta Sans', size: 12, weight: 'bold' },
-                             bodyFont: { family: 'Plus Jakarta Sans', size: 11, weight: '500' }
+                             backgroundColor: '#18181B',
+                             titleColor: '#9CA3AF',
+                             titleFont: { family: 'Plus Jakarta Sans', size: 11, weight: '600' },
+                             bodyColor: '#FFFFFF',
+                             bodyFont: { family: 'Plus Jakarta Sans', size: 12, weight: '700' },
+                             padding: 12,
+                             cornerRadius: 12,
+                             boxPadding: 6,
+                             usePointStyle: true,
+                             callbacks: {
+                                 label: function(context) {
+                                     return ' ' + context.dataset.label + ': ' + context.parsed.y + ' Eks';
+                                 }
+                             }
                          }
                      },
                      scales: {
                          x: {
                              grid: {
-                                 display: false
+                                 display: true,
+                                 color: '#F3F4F6',
+                                 borderDash: [3, 4]
                              },
                              ticks: {
-                                 font: { family: 'Plus Jakarta Sans', size: 11, weight: 'bold' },
-                                 color: '#6B7280'
+                                 font: { family: 'Plus Jakarta Sans', size: 11, weight: '700' },
+                                 color: '#9CA3AF'
+                             },
+                             border: {
+                                 display: false
                              }
                          },
                          y: {
                              beginAtZero: true,
                              grid: {
                                  color: '#F3F4F6',
-                                 borderDash: [4, 4]
+                                 borderDash: [3, 4]
                              },
                              ticks: {
                                  precision: 0,
-                                 font: { family: 'Plus Jakarta Sans', size: 11, weight: '600' },
-                                 color: '#6B7280'
+                                 font: { family: 'Plus Jakarta Sans', size: 11, weight: '700' },
+                                 color: '#9CA3AF',
+                                 callback: function(value) {
+                                     return value + ' Eks';
+                                 }
+                             },
+                             border: {
+                                 display: false
                              }
                          }
                      }
@@ -198,14 +239,25 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm p-4 sm:p-6 space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100">
+    <div class="bg-white rounded-3xl border-2 border-gray-200 shadow-sm p-6 sm:p-8 space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-gray-100">
             <div>
-                <h3 class="text-sm font-black text-gray-900">Statistik &amp; Tren Peminjaman Buku</h3>
-                <p class="text-xs text-gray-500 mt-0.5">Visualisasi jumlah sirkulasi peminjaman dan pengembalian buku fisik perpustakaan</p>
+                <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Total Sirkulasi Buku</span>
+                <div class="flex items-baseline gap-2 mt-1">
+                    <span class="text-3xl sm:text-4xl font-black text-gray-900 tracking-tight"
+                          x-text="(chartPeriod === 'monthly' ? monthlyData.loans.reduce((a,b)=>a+b, 0) : yearlyData.loans.reduce((a,b)=>a+b, 0)) + ' Peminjaman'"></span>
+                </div>
+                <div class="flex items-center gap-2 mt-1">
+                    <span class="text-xs font-bold text-emerald-600 flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span x-text="chartPeriod === 'monthly' ? '+' + monthlyData.returns.reduce((a,b)=>a+b, 0) + ' Pengembalian (Tahun ' + monthlyData.year + ')' : '+' + yearlyData.returns.reduce((a,b)=>a+b, 0) + ' Pengembalian (5 Tahun)'"></span>
+                    </span>
+                    <span class="text-xs text-gray-400 font-medium">• Database Terverifikasi</span>
+                </div>
             </div>
+
             <div class="flex flex-wrap items-center gap-3">
-                <div class="flex items-center gap-3 text-xs font-bold mr-2">
+                <div class="flex items-center gap-3 text-xs font-bold mr-1">
                     <span class="inline-flex items-center gap-1.5 text-brand-700">
                         <span class="w-2.5 h-2.5 rounded-full bg-brand-700"></span>
                         <span>Peminjaman</span>
@@ -215,23 +267,24 @@
                         <span>Pengembalian</span>
                     </span>
                 </div>
-                <div class="inline-flex p-1 bg-gray-100 rounded-xl border border-gray-200">
+
+                <div class="inline-flex p-1 bg-gray-100/90 rounded-2xl border border-gray-200 shadow-2xs">
                     <button type="button" @click="setPeriod('monthly')"
-                            class="px-3 py-1 text-xs font-bold rounded-lg transition"
-                            :class="chartPeriod === 'monthly' ? 'bg-white text-brand-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'">
-                        Bulanan ({{ $chartMonthly['year'] }})
+                            class="px-4 py-1.5 text-xs font-black rounded-xl transition-all duration-200"
+                            :class="chartPeriod === 'monthly' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-900'">
+                        12 Bulan ({{ $chartMonthly['year'] }})
                     </button>
                     <button type="button" @click="setPeriod('yearly')"
-                            class="px-3 py-1 text-xs font-bold rounded-lg transition"
-                            :class="chartPeriod === 'yearly' ? 'bg-white text-brand-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'">
-                        Tahunan
+                            class="px-4 py-1.5 text-xs font-black rounded-xl transition-all duration-200"
+                            :class="chartPeriod === 'yearly' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-900'">
+                        5 Tahun Terakhir
                     </button>
                 </div>
             </div>
         </div>
 
-        <div class="h-64 sm:h-72 w-full relative">
-            <canvas id="sirkulasiBarChart"></canvas>
+        <div class="h-72 sm:h-80 w-full relative">
+            <canvas id="sirkulasiLineChart"></canvas>
         </div>
     </div>
 
