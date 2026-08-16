@@ -70,9 +70,9 @@
                   localStorage.setItem('sidebar_collapsed', this.sidebarCollapsed);
               }
           },
-          openManageBuku: true,
-          openSirkulasi: true,
-          openAdmin: true
+          openManageBuku: {{ request()->routeIs('admin.buku*', 'admin.kategori*', 'admin.penulis*', 'admin.penerbit*', 'admin.rak*') ? 'true' : 'false' }},
+          openSirkulasi: {{ request()->routeIs('admin.peminjaman*', 'admin.riwayat*') ? 'true' : 'false' }},
+          openAdmin: {{ request()->routeIs('admin.anggota*', 'admin.pengaturan*', 'admin.audit-log*') ? 'true' : 'false' }}
       }">
 
     <div id="global-dashboard-skeleton" class="fixed inset-0 bg-gray-100 z-50 flex transition-opacity duration-300 pointer-events-auto">
