@@ -32,9 +32,11 @@
      }"
      x-init="openDetailModal = false; modalData = {}">
 
-    <div class="relative bg-gradient-to-r from-brand-900 via-brand-800 to-red-950 text-white rounded-3xl p-6 sm:p-10 shadow-xl overflow-hidden border-2 border-brand-700">
-        <div class="absolute -top-24 -right-24 w-80 h-80 bg-amber-400/20 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="relative bg-gradient-to-r from-brand-900 via-brand-800 to-red-950 text-white rounded-3xl p-6 sm:p-10 shadow-xl border-2 border-brand-700 z-20">
+        <div class="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+            <div class="absolute -top-24 -right-24 w-80 h-80 bg-amber-400/20 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl"></div>
+        </div>
 
         <div class="relative z-10 text-center space-y-4 max-w-3xl mx-auto">
             <div class="space-y-2">
@@ -62,7 +64,7 @@
                     <div class="pl-3 pr-2 text-gray-400 shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
-                    <input type="text" name="search" x-model="searchQuery" @input.debounce.200ms="fetchSuggestions()" @focus="if(suggestions.length > 0) showSuggest = true" autocomplete="off" placeholder="Cari judul buku, penulis, kata kunci, atau ISBN..."
+                    <input type="text" name="search" x-model="searchQuery" @input.debounce.200ms="fetchSuggestions()" @focus="if(searchQuery.trim().length >= 2) showSuggest = true" autocomplete="off" placeholder="Cari judul buku, penulis, kata kunci, atau ISBN..."
                         class="w-full px-2 py-2 text-xs sm:text-sm font-bold text-gray-900 placeholder-gray-400 bg-transparent focus:outline-none text-left">
 
                     <div x-show="loadingSuggest" class="pr-2" x-cloak>
@@ -78,30 +80,41 @@
                     </button>
                 </div>
 
-                <div x-show="showSuggest && suggestions.length > 0" x-cloak class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl border-2 border-gray-200 shadow-2xl z-50 max-h-80 overflow-y-auto p-2 space-y-1.5 text-left text-gray-900">
+                <div x-show="showSuggest && searchQuery.trim().length >= 2" x-cloak class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl border-2 border-gray-200 shadow-2xl z-50 max-h-80 overflow-y-auto p-2 space-y-1.5 text-left text-gray-900">
                     <div class="px-2.5 py-1 text-[10px] font-black text-gray-400 uppercase tracking-wider flex items-center justify-between border-b border-gray-100">
                         <span>Rekomendasi Pencarian</span>
                         <span class="text-emerald-600 font-bold" x-text="suggestions.length + ' Ditemukan'"></span>
                     </div>
-                    <template x-for="item in suggestions" :key="item.id">
-                        <a :href="item.detail_url" class="p-2 rounded-xl hover:bg-brand-50 transition flex items-center gap-3 group border border-transparent hover:border-brand-200">
-                            <div class="w-9 h-12 bg-gray-100 rounded-md overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center">
-                                <template x-if="item.cover_url">
-                                    <img :src="item.cover_url" class="w-full h-full object-cover">
-                                </template>
-                                <template x-if="!item.cover_url">
-                                    <div class="w-full h-full bg-brand-700 text-white font-black text-[11px] flex items-center justify-center" x-text="item.judul.substr(0, 1)"></div>
-                                </template>
-                            </div>
-                            <div class="min-w-0 flex-1 text-xs">
-                                <p class="font-bold text-gray-900 truncate group-hover:text-brand-700" x-text="item.judul"></p>
-                                <p class="text-[10px] text-gray-500 truncate" x-text="item.penulis + ' • ' + item.kategori"></p>
-                                <div class="flex items-center gap-1.5 mt-1 text-[9.5px]">
-                                    <span class="px-1.5 py-0.5 rounded bg-gray-100 font-bold text-gray-700 border border-gray-200" x-text="item.rak + ' (' + item.laci + ')'"></span>
-                                    <span class="px-1.5 py-0.5 rounded font-black" :class="item.available_quantity > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'" x-text="'Stok: ' + item.available_quantity + ' Eks'"></span>
-                                </div>
-                            </div>
-                        </a>
+                    <template x-if="suggestions.length > 0">
+                        <div class="space-y-1">
+                            <template x-for="item in suggestions" :key="item.id">
+                                <a :href="item.detail_url" class="p-2.5 rounded-xl hover:bg-brand-50/80 transition flex items-center gap-3 group border border-transparent hover:border-brand-200">
+                                    <div class="w-10 h-14 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center shadow-xs">
+                                        <template x-if="item.cover_url">
+                                            <img :src="item.cover_url" class="w-full h-full object-cover">
+                                        </template>
+                                        <template x-if="!item.cover_url">
+                                            <div class="w-full h-full bg-brand-700 text-white font-black text-xs flex items-center justify-center" x-text="item.judul.substr(0, 1)"></div>
+                                        </template>
+                                    </div>
+                                    <div class="min-w-0 flex-1 text-xs">
+                                        <p class="font-bold text-gray-900 truncate group-hover:text-brand-700" x-text="item.judul"></p>
+                                        <p class="text-[10px] text-gray-500 truncate" x-text="item.penulis + ' • ' + item.kategori"></p>
+                                        <div class="flex items-center gap-1.5 mt-1 text-[9.5px]">
+                                            <span class="px-1.5 py-0.5 rounded bg-gray-100 font-bold text-gray-700 border border-gray-200" x-text="item.rak + ' (' + item.laci + ')'"></span>
+                                            <span class="px-1.5 py-0.5 rounded font-black" :class="item.available_quantity > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'" x-text="'Stok: ' + item.available_quantity + ' Eks'"></span>
+                                        </div>
+                                    </div>
+                                    <svg class="w-4 h-4 text-gray-300 group-hover:text-brand-700 shrink-0 transform group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                </a>
+                            </template>
+                        </div>
+                    </template>
+                    <template x-if="suggestions.length === 0 && !loadingSuggest">
+                        <div class="py-6 px-4 text-center">
+                            <p class="text-xs font-bold text-gray-700">Tidak ada buku ditemukan</p>
+                            <p class="text-[11px] text-gray-400 mt-0.5">Coba kata kunci judul, pengarang, atau nomor ISBN lain</p>
+                        </div>
                     </template>
                 </div>
             </form>
