@@ -40,7 +40,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -61,6 +61,15 @@
 <body class="h-full font-sans text-gray-800 antialiased flex flex-col bg-gray-100 selection:bg-brand-700 selection:text-white"
       x-data="{
           sidebarOpen: false,
+          sidebarCollapsed: localStorage.getItem('sidebar_collapsed') === 'true',
+          toggleSidebar() {
+              if (window.innerWidth < 1024) {
+                  this.sidebarOpen = !this.sidebarOpen;
+              } else {
+                  this.sidebarCollapsed = !this.sidebarCollapsed;
+                  localStorage.setItem('sidebar_collapsed', this.sidebarCollapsed);
+              }
+          },
           openManageBuku: true,
           openSirkulasi: true,
           openAdmin: true
@@ -107,19 +116,24 @@
          class="fixed inset-0 bg-gray-950/60 backdrop-blur-xs z-40 lg:hidden" x-cloak></div>
 
     <div class="flex h-screen overflow-hidden">
-        <aside class="fixed inset-y-0 left-0 z-50 w-72 bg-white border-r-2 border-gray-200/90 flex flex-col justify-between transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 shrink-0 shadow-lg lg:shadow-none"
-               :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
+        <aside class="fixed inset-y-0 left-0 z-50 bg-white border-r-2 border-gray-200/90 flex flex-col justify-between transform transition-all duration-300 ease-in-out lg:static shrink-0 shadow-lg lg:shadow-none"
+               :class="{
+                   'translate-x-0 w-72': sidebarOpen,
+                   '-translate-x-full lg:translate-x-0': !sidebarOpen,
+                   'lg:w-72 lg:translate-x-0': !sidebarCollapsed,
+                   'lg:w-0 lg:-translate-x-full lg:overflow-hidden lg:border-r-0': sidebarCollapsed
+               }">
 
             <div class="flex flex-col flex-1 min-h-0">
-                <div class="h-20 flex items-center justify-between px-5 border-b-2 border-gray-100 bg-gradient-to-r from-gray-50 to-white">
-                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI Pekanbaru" class="w-10 h-10 object-contain drop-shadow-xs">
-                        <div class="leading-tight">
-                            <span class="text-sm font-black text-gray-900 tracking-tight block">{{ $pengaturan['nama_sekolah'] ?? 'SMK PGRI' }}</span>
+                <div class="h-20 flex items-center justify-between px-5 border-b-2 border-gray-100 bg-gradient-to-r from-gray-50 to-white shrink-0">
+                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 min-w-0">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI Pekanbaru" class="w-10 h-10 object-contain drop-shadow-xs shrink-0">
+                        <div class="leading-tight truncate">
+                            <span class="text-sm font-black text-gray-900 tracking-tight block truncate">{{ $pengaturan['nama_sekolah'] ?? 'SMK PGRI' }}</span>
                             <span class="text-[10px] font-extrabold text-brand-700 tracking-wider uppercase block">Perpustakaan</span>
                         </div>
                     </a>
-                    <button @click="sidebarOpen = false" class="lg:hidden p-2 rounded-xl text-gray-400 hover:text-gray-900 hover:bg-gray-100" aria-label="Tutup Sidebar">
+                    <button @click="toggleSidebar()" class="p-2 rounded-xl text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition shrink-0 cursor-pointer" title="Tutup Sidebar" aria-label="Tutup Sidebar">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -231,7 +245,7 @@
                 </nav>
             </div>
 
-            <div class="p-3 border-t-2 border-gray-100 bg-gray-50/80">
+            <div class="p-3 border-t-2 border-gray-100 bg-gray-50/80 shrink-0">
                 <div class="flex items-center justify-between p-2.5 rounded-xl bg-white border-2 border-gray-200 shadow-xs">
                     <div class="min-w-0 pr-2">
                         <p class="text-xs font-black text-gray-900 truncate">{{ auth()->user()->name }}</p>
@@ -253,7 +267,7 @@
         <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
             <header class="h-20 bg-white border-b-2 border-gray-200/90 flex items-center justify-between px-4 sm:px-6 lg:px-8 z-10 shrink-0 shadow-2xs">
                 <div class="flex items-center gap-2.5 min-w-0 pr-2">
-                    <button @click="sidebarOpen = true" class="lg:hidden p-2 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 shrink-0" aria-label="Buka Sidebar">
+                    <button @click="toggleSidebar()" class="p-2 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 shrink-0 transition cursor-pointer" :title="sidebarCollapsed ? 'Buka Sidebar' : 'Tutup Sidebar'" aria-label="Buka/Tutup Sidebar">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     </button>
                     <div class="min-w-0">
