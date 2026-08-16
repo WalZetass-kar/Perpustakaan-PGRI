@@ -11,7 +11,6 @@ use App\Models\Rak;
 use App\Models\RakLaci;
 use App\Models\Penulis;
 use App\Models\Penerbit;
-use App\Models\Anggota;
 use App\Models\Peminjaman;
 use App\Models\AuditLog;
 use App\Models\Pengaturan;

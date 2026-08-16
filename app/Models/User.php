@@ -37,11 +37,6 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
-    public function anggota()
-    {
-        return $this->hasOne(Anggota::class);
-    }
-
     public function peminjaman()
     {
         return $this->hasMany(Peminjaman::class);

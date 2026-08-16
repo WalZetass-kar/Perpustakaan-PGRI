@@ -22,6 +22,9 @@ return new class extends Migration
         Schema::dropIfExists('reservasi');
         Schema::dropIfExists('notifikasi');
         Schema::dropIfExists('eksemplar');
+        Schema::dropIfExists('anggota');
+        Schema::dropIfExists('role_permissions');
+        Schema::dropIfExists('permissions');
     }
 
     public function down(): void

@@ -8,9 +8,9 @@ use App\Models\Kategori;
 use App\Models\Rak;
 use App\Models\Penulis;
 use App\Models\Penerbit;
-use App\Models\Anggota;
 use App\Models\Pengaturan;
 use App\Models\Peminjaman;
+use App\Models\User;
 
 class PublicController extends Controller
 {
@@ -20,7 +20,7 @@ class PublicController extends Controller
             'total_koleksi'   => Buku::count(),
             'buku_tersedia'   => (int) Buku::sum('available_quantity'),
             'sedang_dipinjam' => (int) Peminjaman::where('status', 'dipinjam')->sum('jumlah'),
-            'anggota_aktif'   => Anggota::where('status', 'aktif')->count(),
+            'anggota_aktif'   => User::where('status', 'active')->count(),
         ];
 
         $buku_terbaru = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci'])
