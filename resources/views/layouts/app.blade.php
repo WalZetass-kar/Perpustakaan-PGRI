@@ -98,7 +98,7 @@
             <a href="{{ route('home') }}" class="flex items-center gap-3.5 shrink-0 group">
                 <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI" class="w-12 h-12 object-contain transform group-hover:scale-105 transition duration-300 drop-shadow-xs">
                 <div>
-                    <span class="text-base sm:text-lg font-black text-gray-900 leading-tight block group-hover:text-brand-700 transition">{{ $pengaturan['nama_perpustakaan'] ?? 'Sistem Perpustakaan PGRI' }}</span>
+                    <span class="text-base sm:text-lg font-black text-gray-900 leading-tight block group-hover:text-brand-700 transition">Sistem Perpustakaan</span>
                     <span class="text-xs text-gray-500 font-bold tracking-wider uppercase block">{{ $pengaturan['nama_sekolah'] ?? 'SMK PGRI Pekanbaru' }}</span>
                 </div>
             </a>
