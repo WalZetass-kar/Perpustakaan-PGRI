@@ -120,125 +120,141 @@
                :class="{
                    'translate-x-0 w-72': sidebarOpen,
                    '-translate-x-full lg:translate-x-0': !sidebarOpen,
-                   'lg:w-72 lg:translate-x-0': !sidebarCollapsed,
-                   'lg:w-0 lg:-translate-x-full lg:overflow-hidden lg:border-r-0': sidebarCollapsed
+                   'lg:w-72': !sidebarCollapsed,
+                   'lg:w-20': sidebarCollapsed
                }">
 
             <div class="flex flex-col flex-1 min-h-0">
-                <div class="h-20 flex items-center justify-between px-5 border-b-2 border-gray-100 bg-gradient-to-r from-gray-50 to-white shrink-0">
-                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 min-w-0">
+                <div class="h-20 flex items-center border-b-2 border-gray-100 bg-gradient-to-r from-gray-50 to-white shrink-0"
+                     :class="sidebarCollapsed ? 'lg:justify-center px-2' : 'justify-between px-5'">
+                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 min-w-0" :title="sidebarCollapsed ? 'Perpustakaan SMK PGRI' : ''">
                         <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI Pekanbaru" class="w-10 h-10 object-contain drop-shadow-xs shrink-0">
-                        <div class="leading-tight truncate">
+                        <div class="leading-tight truncate" x-show="!sidebarCollapsed || sidebarOpen">
                             <span class="text-sm font-black text-gray-900 tracking-tight block truncate">{{ $pengaturan['nama_sekolah'] ?? 'SMK PGRI' }}</span>
                             <span class="text-[10px] font-extrabold text-brand-700 tracking-wider uppercase block">Perpustakaan</span>
                         </div>
                     </a>
-                    <button @click="toggleSidebar()" class="p-2 rounded-xl text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition shrink-0 cursor-pointer" title="Tutup Sidebar" aria-label="Tutup Sidebar">
+                    <button @click="sidebarOpen = false" class="lg:hidden p-2 rounded-xl text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition shrink-0" aria-label="Tutup Sidebar">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
 
                 <nav class="p-3 space-y-2 overflow-y-auto flex-1 text-xs font-bold">
-                    <a href="{{ route('admin.dashboard') }}"
-                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 border {{ request()->routeIs('admin.dashboard') ? 'bg-brand-700 text-white border-brand-800 shadow-md transform translate-x-1 font-black' : 'text-gray-700 border-transparent hover:bg-gray-100 hover:text-brand-700 font-bold' }}">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 00-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                        <span>Dashboard</span>
+                    <a href="{{ route('admin.dashboard') }}" title="Dashboard"
+                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 border {{ request()->routeIs('admin.dashboard') ? 'bg-brand-700 text-white border-brand-800 shadow-md transform translate-x-1 font-black' : 'text-gray-700 border-transparent hover:bg-gray-100 hover:text-brand-700 font-bold' }}"
+                       :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
+                        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 00-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                        <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Dashboard</span>
                     </a>
 
-                    <a href="{{ route('admin.temukan-buku') }}"
-                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 border {{ request()->routeIs('admin.temukan-buku*') ? 'bg-brand-700 text-white border-brand-800 shadow-md transform translate-x-1 font-black' : 'text-gray-700 border-transparent hover:bg-gray-100 hover:text-brand-700 font-bold' }}">
-                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        <span>Temukan Buku</span>
+                    <a href="{{ route('admin.temukan-buku') }}" title="Temukan Buku"
+                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 border {{ request()->routeIs('admin.temukan-buku*') ? 'bg-brand-700 text-white border-brand-800 shadow-md transform translate-x-1 font-black' : 'text-gray-700 border-transparent hover:bg-gray-100 hover:text-brand-700 font-bold' }}"
+                       :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
+                        <svg class="w-5 h-5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Temukan Buku</span>
                     </a>
 
                     <div class="space-y-1">
-                        <button type="button" @click="openManageBuku = !openManageBuku"
-                                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-700 hover:bg-gray-100 transition duration-200 border border-transparent font-extrabold text-xs">
-                            <div class="flex items-center gap-3">
-                                <svg class="w-4 h-4 text-brand-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                                <span>MANAGE BUKU</span>
+                        <button type="button" @click="openManageBuku = !openManageBuku" title="MANAGE BUKU"
+                                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-700 hover:bg-gray-100 transition duration-200 border border-transparent font-extrabold text-xs"
+                                :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <svg class="w-5 h-5 text-brand-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">MANAGE BUKU</span>
                             </div>
-                            <svg class="w-3.5 h-3.5 text-gray-400 transform transition-transform duration-200" :class="openManageBuku ? 'rotate-180 text-brand-700' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            <svg x-show="!sidebarCollapsed || sidebarOpen" class="w-3.5 h-3.5 text-gray-400 transform transition-transform duration-200 shrink-0" :class="openManageBuku ? 'rotate-180 text-brand-700' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </button>
 
-                        <div x-show="openManageBuku" x-collapse class="pl-4 pr-1 py-1 space-y-1">
-                            <a href="{{ route('admin.buku') }}"
-                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.buku*') ? 'bg-brand-50 text-brand-700 border-brand-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}">
-                                <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('admin.buku*') ? 'bg-brand-700' : 'bg-gray-300' }}"></span>
-                                <span>Koleksi Buku</span>
+                        <div x-show="openManageBuku" x-collapse class="space-y-1" :class="sidebarCollapsed ? 'lg:pl-0' : 'pl-4 pr-1 py-1'">
+                            <a href="{{ route('admin.buku') }}" title="Koleksi Buku"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.buku*') ? 'bg-brand-50 text-brand-700 border-brand-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"
+                               :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
+                                <span class="w-2 h-2 rounded-full shrink-0 {{ request()->routeIs('admin.buku*') ? 'bg-brand-700' : 'bg-gray-300' }}"></span>
+                                <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Koleksi Buku</span>
                             </a>
-                            <a href="{{ route('admin.kategori') }}"
-                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.kategori*') ? 'bg-brand-50 text-brand-700 border-brand-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}">
-                                <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('admin.kategori*') ? 'bg-brand-700' : 'bg-gray-300' }}"></span>
-                                <span>Kategori</span>
+                            <a href="{{ route('admin.kategori') }}" title="Kategori"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.kategori*') ? 'bg-brand-50 text-brand-700 border-brand-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"
+                               :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
+                                <span class="w-2 h-2 rounded-full shrink-0 {{ request()->routeIs('admin.kategori*') ? 'bg-brand-700' : 'bg-gray-300' }}"></span>
+                                <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Kategori</span>
                             </a>
-                            <a href="{{ route('admin.penulis') }}"
-                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.penulis*') ? 'bg-brand-50 text-brand-700 border-brand-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}">
-                                <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('admin.penulis*') ? 'bg-brand-700' : 'bg-gray-300' }}"></span>
-                                <span>Penulis</span>
+                            <a href="{{ route('admin.penulis') }}" title="Penulis"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.penulis*') ? 'bg-brand-50 text-brand-700 border-brand-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"
+                               :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
+                                <span class="w-2 h-2 rounded-full shrink-0 {{ request()->routeIs('admin.penulis*') ? 'bg-brand-700' : 'bg-gray-300' }}"></span>
+                                <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Penulis</span>
                             </a>
-                            <a href="{{ route('admin.penerbit') }}"
-                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.penerbit*') ? 'bg-brand-50 text-brand-700 border-brand-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}">
-                                <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('admin.penerbit*') ? 'bg-brand-700' : 'bg-gray-300' }}"></span>
-                                <span>Penerbit</span>
+                            <a href="{{ route('admin.penerbit') }}" title="Penerbit"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.penerbit*') ? 'bg-brand-50 text-brand-700 border-brand-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"
+                               :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
+                                <span class="w-2 h-2 rounded-full shrink-0 {{ request()->routeIs('admin.penerbit*') ? 'bg-brand-700' : 'bg-gray-300' }}"></span>
+                                <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Penerbit</span>
                             </a>
-                            <a href="{{ route('admin.rak') }}"
-                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.rak*') ? 'bg-brand-50 text-brand-700 border-brand-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}">
-                                <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('admin.rak*') ? 'bg-brand-700' : 'bg-gray-300' }}"></span>
-                                <span>Rak & Laci Buku</span>
+                            <a href="{{ route('admin.rak') }}" title="Rak &amp; Laci Buku"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.rak*') ? 'bg-brand-50 text-brand-700 border-brand-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"
+                               :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
+                                <span class="w-2 h-2 rounded-full shrink-0 {{ request()->routeIs('admin.rak*') ? 'bg-brand-700' : 'bg-gray-300' }}"></span>
+                                <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Rak &amp; Laci Buku</span>
                             </a>
                         </div>
                     </div>
 
                     <div class="space-y-1">
-                        <button type="button" @click="openSirkulasi = !openSirkulasi"
-                                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-700 hover:bg-gray-100 transition duration-200 border border-transparent font-extrabold text-xs">
-                            <div class="flex items-center gap-3">
-                                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
-                                <span>SIRKULASI PINJAM</span>
+                        <button type="button" @click="openSirkulasi = !openSirkulasi" title="SIRKULASI PINJAM"
+                                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-700 hover:bg-gray-100 transition duration-200 border border-transparent font-extrabold text-xs"
+                                :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <svg class="w-5 h-5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                                <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">SIRKULASI PINJAM</span>
                             </div>
-                            <svg class="w-3.5 h-3.5 text-gray-400 transform transition-transform duration-200" :class="openSirkulasi ? 'rotate-180 text-brand-700' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            <svg x-show="!sidebarCollapsed || sidebarOpen" class="w-3.5 h-3.5 text-gray-400 transform transition-transform duration-200 shrink-0" :class="openSirkulasi ? 'rotate-180 text-brand-700' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </button>
 
-                        <div x-show="openSirkulasi" x-collapse class="pl-4 pr-1 py-1 space-y-1">
-                            <a href="{{ route('admin.peminjaman') }}"
-                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.peminjaman') ? 'bg-amber-50 text-amber-900 border-amber-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}">
-                                <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('admin.peminjaman') ? 'bg-amber-600' : 'bg-gray-300' }}"></span>
-                                <span>Peminjaman Aktif</span>
+                        <div x-show="openSirkulasi" x-collapse class="space-y-1" :class="sidebarCollapsed ? 'lg:pl-0' : 'pl-4 pr-1 py-1'">
+                            <a href="{{ route('admin.peminjaman') }}" title="Peminjaman Aktif"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.peminjaman') ? 'bg-amber-50 text-amber-900 border-amber-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"
+                               :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
+                                <span class="w-2 h-2 rounded-full shrink-0 {{ request()->routeIs('admin.peminjaman') ? 'bg-amber-600' : 'bg-gray-300' }}"></span>
+                                <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Peminjaman Aktif</span>
                             </a>
-                            <a href="{{ route('admin.riwayat') }}"
-                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.riwayat*') ? 'bg-amber-50 text-amber-900 border-amber-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}">
-                                <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('admin.riwayat*') ? 'bg-amber-600' : 'bg-gray-300' }}"></span>
-                                <span>Riwayat Transaksi</span>
+                            <a href="{{ route('admin.riwayat') }}" title="Riwayat Transaksi"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.riwayat*') ? 'bg-amber-50 text-amber-900 border-amber-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"
+                               :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
+                                <span class="w-2 h-2 rounded-full shrink-0 {{ request()->routeIs('admin.riwayat*') ? 'bg-amber-600' : 'bg-gray-300' }}"></span>
+                                <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Riwayat Transaksi</span>
                             </a>
                         </div>
                     </div>
 
                     <div class="space-y-1">
-                        <button type="button" @click="openAdmin = !openAdmin"
-                                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-700 hover:bg-gray-100 transition duration-200 border border-transparent font-extrabold text-xs">
-                            <div class="flex items-center gap-3">
-                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                <span>PENGATURAN & AKUN</span>
+                        <button type="button" @click="openAdmin = !openAdmin" title="PENGATURAN &amp; AKUN"
+                                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-700 hover:bg-gray-100 transition duration-200 border border-transparent font-extrabold text-xs"
+                                :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">PENGATURAN &amp; AKUN</span>
                             </div>
-                            <svg class="w-3.5 h-3.5 text-gray-400 transform transition-transform duration-200" :class="openAdmin ? 'rotate-180 text-brand-700' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            <svg x-show="!sidebarCollapsed || sidebarOpen" class="w-3.5 h-3.5 text-gray-400 transform transition-transform duration-200 shrink-0" :class="openAdmin ? 'rotate-180 text-brand-700' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </button>
 
-                        <div x-show="openAdmin" x-collapse class="pl-4 pr-1 py-1 space-y-1">
-                            <a href="{{ route('admin.anggota') }}"
-                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.anggota*') ? 'bg-emerald-50 text-emerald-900 border-emerald-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}">
-                                <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('admin.anggota*') ? 'bg-emerald-600' : 'bg-gray-300' }}"></span>
-                                <span>Akun Pengelola</span>
+                        <div x-show="openAdmin" x-collapse class="space-y-1" :class="sidebarCollapsed ? 'lg:pl-0' : 'pl-4 pr-1 py-1'">
+                            <a href="{{ route('admin.anggota') }}" title="Akun Pengelola"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.anggota*') ? 'bg-emerald-50 text-emerald-900 border-emerald-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"
+                               :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
+                                <span class="w-2 h-2 rounded-full shrink-0 {{ request()->routeIs('admin.anggota*') ? 'bg-emerald-600' : 'bg-gray-300' }}"></span>
+                                <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Akun Pengelola</span>
                             </a>
-                            <a href="{{ route('admin.pengaturan') }}"
-                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.pengaturan*') ? 'bg-emerald-50 text-emerald-900 border-emerald-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}">
-                                <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('admin.pengaturan*') ? 'bg-emerald-600' : 'bg-gray-300' }}"></span>
-                                <span>Pengaturan Sistem</span>
+                            <a href="{{ route('admin.pengaturan') }}" title="Pengaturan Sistem"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.pengaturan*') ? 'bg-emerald-50 text-emerald-900 border-emerald-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"
+                               :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
+                                <span class="w-2 h-2 rounded-full shrink-0 {{ request()->routeIs('admin.pengaturan*') ? 'bg-emerald-600' : 'bg-gray-300' }}"></span>
+                                <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Pengaturan Sistem</span>
                             </a>
-                            <a href="{{ route('admin.audit-log') }}"
-                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.audit-log*') ? 'bg-gray-100 text-gray-900 border-gray-300 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}">
-                                <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('admin.audit-log*') ? 'bg-gray-900' : 'bg-gray-300' }}"></span>
-                                <span>Audit Log</span>
+                            <a href="{{ route('admin.audit-log') }}" title="Audit Log"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.audit-log*') ? 'bg-gray-100 text-gray-900 border-gray-300 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"
+                               :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
+                                <span class="w-2 h-2 rounded-full shrink-0 {{ request()->routeIs('admin.audit-log*') ? 'bg-gray-900' : 'bg-gray-300' }}"></span>
+                                <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Audit Log</span>
                             </a>
                         </div>
                     </div>
@@ -246,12 +262,13 @@
             </div>
 
             <div class="p-3 border-t-2 border-gray-100 bg-gray-50/80 shrink-0">
-                <div class="flex items-center justify-between p-2.5 rounded-xl bg-white border-2 border-gray-200 shadow-xs">
-                    <div class="min-w-0 pr-2">
+                <div class="flex items-center p-2.5 rounded-xl bg-white border-2 border-gray-200 shadow-xs"
+                     :class="sidebarCollapsed ? 'lg:justify-center lg:p-2' : 'justify-between'">
+                    <div class="min-w-0 pr-2" x-show="!sidebarCollapsed || sidebarOpen">
                         <p class="text-xs font-black text-gray-900 truncate">{{ auth()->user()->name }}</p>
                         <p class="text-[10px] font-bold {{ auth()->user()->isSuperAdmin() ? 'text-amber-700' : 'text-brand-700' }} flex items-center gap-1">
                             <span class="w-2 h-2 rounded-full {{ auth()->user()->isSuperAdmin() ? 'bg-amber-500' : 'bg-emerald-500' }}"></span>
-                            <span>{{ auth()->user()->isSuperAdmin() ? 'Super Administrator' : 'Admin Perpustakaan' }}</span>
+                            <span>{{ auth()->user()->isSuperAdmin() ? 'Super Admin' : 'Admin' }}</span>
                         </p>
                     </div>
                     <form action="{{ route('logout') }}" method="POST">
@@ -267,7 +284,7 @@
         <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
             <header class="h-20 bg-white border-b-2 border-gray-200/90 flex items-center justify-between px-4 sm:px-6 lg:px-8 z-10 shrink-0 shadow-2xs">
                 <div class="flex items-center gap-2.5 min-w-0 pr-2">
-                    <button @click="toggleSidebar()" class="p-2 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 shrink-0 transition cursor-pointer" :title="sidebarCollapsed ? 'Buka Sidebar' : 'Tutup Sidebar'" aria-label="Buka/Tutup Sidebar">
+                    <button @click="toggleSidebar()" class="p-2 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 shrink-0 transition cursor-pointer" :title="sidebarCollapsed ? 'Perluas Sidebar' : 'Kecilkan Sidebar'" aria-label="Buka/Tutup Sidebar">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     </button>
                     <div class="min-w-0">
