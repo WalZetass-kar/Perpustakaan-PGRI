@@ -1,66 +1,124 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistem Perpustakaan SMK PGRI Pekanbaru
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem Informasi Manajemen Perpustakaan dan Katalog Publik (OPAC) modern yang dirancang khusus untuk mendukung operasional perpustakaan, pencatatan sirkulasi buku fisik, serta penunjuk lokasi rak & laci (Physical Wayfinding) di SMK PGRI Pekanbaru.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Fitur Utama Sistem
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 1. Katalog Publik & OPAC (Online Public Access Catalog)
+* **Pencarian Koleksi Cepat**: Pencarian instan berbasis judul, pengarang, penerbit, ISBN, subjek kategori, dan tahun terbit.
+* **Status Ketersediaan Real-Time**: Informasi stok buku fisik yang siap dipinjam vs sedang dipinjam oleh siswa.
+* **Autosuggestion & Filter Dinamis**: Saran pencarian otomatis dan penyaringan berdasarkan kategori dan lokasi rak.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 2. Fitur Wayfinding Lokasi Fisik Buku
+* **Navigasi Cepat (2–3 Detik)**: Alur lokasi berurutan dari `Lantai & Ruangan` &rarr; `Lemari Rak` &rarr; `Laci Tujuan (Endpoint)`.
+* **Kode Lokasi Terstandarisasi**: Format lokasi ringkas (contoh: `L1 · RAK-TKJ-01 · L01`).
+* **Modal Peta Rak Interaktif**: Fitur visual denah tata letak lemari rak di ruangan perpustakaan yang menandai secara dinamis posisi rak dan laci target buku.
 
-## Learning Laravel
+### 3. Portal Back-Office & Manajemen Sirkulasi
+* **Fitur Mandiri "Temukan Buku"**: Menu lokator buku mandiri pada sidebar admin untuk membantu pustakawan menemukan letak buku secara instan.
+* **Sirkulasi Peminjaman Fisik**:
+  * Pencatatan peminjaman cepat di meja sirkulasi menggunakan data nama peminjam, kelas/jurusan, dan NIS.
+  * Pelacakan jatuh tempo pinjaman, perpanjangan, dan pengembalian buku dengan validasi otomatis stok.
+* **Manajemen Master Data Lengkap**:
+  * Pengelolaan Koleksi Buku beserta cover dan spesifikasi bibliografi.
+  * Pengelolaan Kategori Subjek, Penulis, dan Penerbit.
+  * Pengelolaan Lemari Rak dan Tingkat Laci (*Multi-tier Drawers*).
+* **Sidebar Fleksibel & Mini Sidebar Mode**:
+  * Dukungan buka/tutup (*collapsible*) pada desktop dan mobile.
+  * Mode mini sidebar (`w-20`) dengan logo tengah dan ikon menu ber-tooltip.
+* **Keamanan & Audit Log**:
+  * Role-based access control (`super_admin` dan `admin`).
+  * Pencatatan riwayat aktivitas penting pengguna (*Audit Trail*).
+  * Perlindungan headers keamanan standar web.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Teknologi yang Digunakan
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+* **Backend**: PHP 8.2+, Laravel 11.x
+* **Database**: MySQL / MariaDB (XAMPP / LAMPP)
+* **Frontend**: Blade Templating, TailwindCSS, Alpine.js
+* **Komponen & Dialog**: SweetAlert2, Plus Jakarta Sans & JetBrains Mono Fonts
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Struktur Database Inti
 
-### Premium Partners
+Sistem menggunakan 19 tabel aktif yang terorganisir dan bersih:
+* **Master Buku & Lokasi**: `buku`, `kategori`, `penulis`, `penerbit`, `rak`, `rak_laci`
+* **Transaksi Sirkulasi**: `peminjaman`
+* **Akun & Konfigurasi**: `users`, `roles`, `audit_logs`, `pengaturan`
+* **Sistem Laravel**: `migrations`, `sessions`, `cache`, `cache_locks`, `jobs`, `job_batches`, `failed_jobs`, `password_reset_tokens`
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+---
 
-## Contributing
+## Panduan Instalasi & Menjalankan Proyek
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 1. Prasyarat Sistem
+* PHP >= 8.2 dengan ekstensi `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `fileinfo`
+* Composer
+* Web Server & Database (MySQL / MariaDB via XAMPP/LAMPP)
+* Node.js & NPM (opsional jika memerlukan build asset tambahan)
 
-## Code of Conduct
+### 2. Kloning Repositori
+```bash
+git clone https://github.com/WalZetass-kar/Perpustakaan-PGRI.git
+cd Perpustakaan-PGRI
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 3. Instalasi Dependensi
+```bash
+composer install
+```
 
-## Security Vulnerabilities
+### 4. Konfigurasi Environment (`.env`)
+Salin file konfigurasi environment dan sesuaikan pengaturan database:
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Sesuaikan baris konfigurasi database di file `.env`:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=perpustakaan_pgri
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-## License
+### 5. Jalankan Migrasi & Database Seeder
+Pastikan MySQL service di LAMPP/XAMPP telah berjalan, kemudian jalankan:
+```bash
+php artisan migrate --seed
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 6. Buat Symlink Storage Cover Buku
+```bash
+php artisan storage:link
+```
+
+### 7. Jalankan Server Lokal
+```bash
+php artisan serve
+```
+Akses aplikasi melalui browser:
+* **Katalog Publik (OPAC)**: `http://localhost:8000/`
+* **Portal Login Admin**: `http://localhost:8000/aksesperpuspgri`
+
+---
+
+## Akun Default Masuk Admin
+
+* **URL Login**: `/aksesperpuspgri`
+* **Email**: `admin@smkpgri.sch.id`
+* **Password**: `password123` (atau sesuai konfigurasi seeder awal)
+
+---
+
+## Lisensi & Hak Cipta
+
+Dikembangkan untuk SMK PGRI Pekanbaru. Hak cipta dilindungi undang-undang.
