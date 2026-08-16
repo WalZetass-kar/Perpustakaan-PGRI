@@ -155,7 +155,9 @@ class PublicController extends Controller
                 ->get();
         }
 
-        return view('public.detail-buku', compact('buku', 'userLoan', 'relatedBooks'));
+        $allRaks = Rak::with('laci')->orderBy('kode_rak', 'asc')->get();
+
+        return view('public.detail-buku', compact('buku', 'userLoan', 'relatedBooks', 'allRaks'));
     }
 
     public function searchSuggestions(Request $request)
