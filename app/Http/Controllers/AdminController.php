@@ -40,15 +40,57 @@ class AdminController extends Controller
             'pengembalian_hari_ini'  => Peminjaman::where('status', 'dikembalikan')->whereDate('waktu_kembali', $today)->count(),
         ];
 
-        $chartDates = [];
-        $chartLoans = [];
-        $chartReturns = [];
+        $currentYear = (int) date('Y');
+        $monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::today()->subDays($i)->format('Y-m-d');
-            $chartDates[] = Carbon::today()->subDays($i)->format('d M');
-            $chartLoans[] = Peminjaman::whereDate('tanggal_pinjam', $date)->count();
-            $chartReturns[] = Peminjaman::where('status', 'dikembalikan')->whereDate('waktu_kembali', $date)->count();
+        $monthlyLoansData = Peminjaman::whereYear('tanggal_pinjam', $currentYear)
+            ->selectRaw('MONTH(tanggal_pinjam) as bulan, SUM(jumlah) as total_buku')
+            ->groupBy('bulan')
+            ->pluck('total_buku', 'bulan')
+            ->all();
+
+        $monthlyReturnsData = Peminjaman::where('status', 'dikembalikan')
+            ->whereYear('waktu_kembali', $currentYear)
+            ->selectRaw('MONTH(waktu_kembali) as bulan, SUM(jumlah) as total_buku')
+            ->groupBy('bulan')
+            ->pluck('total_buku', 'bulan')
+            ->all();
+
+        $chartMonthly = [
+            'labels'  => $monthNames,
+            'loans'   => [],
+            'returns' => [],
+            'year'    => $currentYear,
+        ];
+
+        for ($m = 1; $m <= 12; $m++) {
+            $chartMonthly['loans'][] = (int) ($monthlyLoansData[$m] ?? 0);
+            $chartMonthly['returns'][] = (int) ($monthlyReturnsData[$m] ?? 0);
+        }
+
+        $yearsRange = range($currentYear - 4, $currentYear);
+        $yearlyLoansData = Peminjaman::whereIn(DB::raw('YEAR(tanggal_pinjam)'), $yearsRange)
+            ->selectRaw('YEAR(tanggal_pinjam) as tahun, SUM(jumlah) as total_buku')
+            ->groupBy('tahun')
+            ->pluck('total_buku', 'tahun')
+            ->all();
+
+        $yearlyReturnsData = Peminjaman::where('status', 'dikembalikan')
+            ->whereIn(DB::raw('YEAR(waktu_kembali)'), $yearsRange)
+            ->selectRaw('YEAR(waktu_kembali) as tahun, SUM(jumlah) as total_buku')
+            ->groupBy('tahun')
+            ->pluck('total_buku', 'tahun')
+            ->all();
+
+        $chartYearly = [
+            'labels'  => array_map('strval', $yearsRange),
+            'loans'   => [],
+            'returns' => [],
+        ];
+
+        foreach ($yearsRange as $y) {
+            $chartYearly['loans'][] = (int) ($yearlyLoansData[$y] ?? 0);
+            $chartYearly['returns'][] = (int) ($yearlyReturnsData[$y] ?? 0);
         }
 
         $recentLoans = Peminjaman::with(['user', 'buku'])
@@ -63,7 +105,7 @@ class AdminController extends Controller
 
         $recentAuditLogs = AuditLog::latest()->take(6)->get();
 
-        return view('admin.dashboard', compact('stats', 'chartDates', 'chartLoans', 'chartReturns', 'recentLoans', 'mostBorrowedBooks', 'recentAuditLogs'));
+        return view('admin.dashboard', compact('stats', 'chartMonthly', 'chartYearly', 'recentLoans', 'mostBorrowedBooks', 'recentAuditLogs'));
     }
 
     public function temukanBukuIndex(Request $request)

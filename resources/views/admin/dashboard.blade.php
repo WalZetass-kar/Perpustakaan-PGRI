@@ -4,30 +4,124 @@
 @section('page_heading', 'Dashboard Overview Perpustakaan')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6"
+     x-data="{
+         chartPeriod: 'monthly',
+         monthlyData: {{ json_encode($chartMonthly) }},
+         yearlyData: {{ json_encode($chartYearly) }},
+         chartInstance: null,
+         initChart() {
+             const ctx = document.getElementById('sirkulasiLineChart');
+             if (!ctx) return;
 
-    <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div>
-            <h2 class="text-sm font-black text-gray-900">Aksi Cepat Perpustakaan</h2>
-            <p class="text-[11px] text-gray-500 mt-0.5">Pintasan transaksi dan penambahan data master utama</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-2">
-            <a href="{{ route('admin.peminjaman') }}" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs rounded-xl transition shadow-sm flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                <span>+ Peminjaman Baru</span>
-            </a>
-            <a href="{{ route('admin.buku') }}" class="px-3.5 py-2 bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-xs rounded-xl transition shadow-sm flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                <span>+ Tambah Buku</span>
-            </a>
-            <a href="{{ route('admin.kategori') }}" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl transition">
-                Kelola Kategori
-            </a>
-            <a href="{{ route('admin.rak') }}" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl transition">
-                Kelola Rak
-            </a>
-        </div>
-    </div>
+             const isMonthly = this.chartPeriod === 'monthly';
+             const labels = isMonthly ? this.monthlyData.labels : this.yearlyData.labels;
+             const loans = isMonthly ? this.monthlyData.loans : this.yearlyData.loans;
+             const returns = isMonthly ? this.monthlyData.returns : this.yearlyData.returns;
+
+             if (this.chartInstance) {
+                 this.chartInstance.destroy();
+             }
+
+             this.chartInstance = new Chart(ctx, {
+                 type: 'line',
+                 data: {
+                     labels: labels,
+                     datasets: [
+                         {
+                             label: 'Peminjaman Buku (Eks)',
+                             data: loans,
+                             borderColor: '#B91C1C',
+                             backgroundColor: 'rgba(185, 28, 28, 0.08)',
+                             borderWidth: 2.5,
+                             pointBackgroundColor: '#B91C1C',
+                             pointBorderColor: '#ffffff',
+                             pointBorderWidth: 2,
+                             pointRadius: 4,
+                             pointHoverRadius: 6,
+                             fill: true,
+                             tension: 0.35
+                         },
+                         {
+                             label: 'Pengembalian Buku (Eks)',
+                             data: returns,
+                             borderColor: '#059669',
+                             backgroundColor: 'rgba(5, 150, 105, 0.06)',
+                             borderWidth: 2.5,
+                             pointBackgroundColor: '#059669',
+                             pointBorderColor: '#ffffff',
+                             pointBorderWidth: 2,
+                             pointRadius: 4,
+                             pointHoverRadius: 6,
+                             fill: true,
+                             tension: 0.35
+                         }
+                     ]
+                 },
+                 options: {
+                     responsive: true,
+                     maintainAspectRatio: false,
+                     interaction: {
+                         intersect: false,
+                         mode: 'index'
+                     },
+                     plugins: {
+                         legend: {
+                             display: false
+                         },
+                         tooltip: {
+                             backgroundColor: '#111827',
+                             titleColor: '#F9FAFB',
+                             bodyColor: '#F3F4F6',
+                             padding: 10,
+                             cornerRadius: 10,
+                             titleFont: { family: 'Plus Jakarta Sans', size: 12, weight: 'bold' },
+                             bodyFont: { family: 'Plus Jakarta Sans', size: 11, weight: '500' }
+                         }
+                     },
+                     scales: {
+                         x: {
+                             grid: {
+                                 display: false
+                             },
+                             ticks: {
+                                 font: { family: 'Plus Jakarta Sans', size: 11, weight: 'bold' },
+                                 color: '#6B7280'
+                             }
+                         },
+                         y: {
+                             beginAtZero: true,
+                             grid: {
+                                 color: '#F3F4F6',
+                                 borderDash: [4, 4]
+                             },
+                             ticks: {
+                                 precision: 0,
+                                 font: { family: 'Plus Jakarta Sans', size: 11, weight: '600' },
+                                 color: '#6B7280'
+                             }
+                         }
+                     }
+                 }
+             });
+         },
+         setPeriod(p) {
+             this.chartPeriod = p;
+             this.initChart();
+         }
+     }"
+     x-init="
+         $nextTick(() => {
+             if (typeof Chart === 'undefined') {
+                 const script = document.createElement('script');
+                 script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+                 script.onload = () => initChart();
+                 document.head.appendChild(script);
+             } else {
+                 initChart();
+             }
+         });
+     ">
 
     <div>
         <h3 class="text-xs font-black text-gray-500 uppercase tracking-wider mb-3">Sirkulasi Hari Ini ({{ date('d M Y') }})</h3>
@@ -70,7 +164,7 @@
     </div>
 
     <div>
-        <h3 class="text-xs font-black text-gray-500 uppercase tracking-wider mb-3">Master Koleksi & Inventaris Fisik</h3>
+        <h3 class="text-xs font-black text-gray-500 uppercase tracking-wider mb-3">Master Koleksi &amp; Inventaris Fisik</h3>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
 
             <a href="{{ route('admin.buku') }}" class="p-4 rounded-2xl bg-white border-2 border-gray-200 shadow-sm hover:border-brand-300 transition block">
@@ -109,6 +203,43 @@
                 <span class="text-[9.5px] text-gray-400 font-bold block mt-0.5">Posisi Ruang &rarr;</span>
             </a>
 
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm p-4 sm:p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100">
+            <div>
+                <h3 class="text-sm font-black text-gray-900">Statistik &amp; Tren Peminjaman Buku</h3>
+                <p class="text-xs text-gray-500 mt-0.5">Visualisasi jumlah sirkulasi peminjaman dan pengembalian buku fisik perpustakaan</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="flex items-center gap-3 text-xs font-bold mr-2">
+                    <span class="inline-flex items-center gap-1.5 text-brand-700">
+                        <span class="w-2.5 h-2.5 rounded-full bg-brand-700"></span>
+                        <span>Peminjaman</span>
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 text-emerald-600">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+                        <span>Pengembalian</span>
+                    </span>
+                </div>
+                <div class="inline-flex p-1 bg-gray-100 rounded-xl border border-gray-200">
+                    <button type="button" @click="setPeriod('monthly')"
+                            class="px-3 py-1 text-xs font-bold rounded-lg transition"
+                            :class="chartPeriod === 'monthly' ? 'bg-white text-brand-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'">
+                        Bulanan ({{ $chartMonthly['year'] }})
+                    </button>
+                    <button type="button" @click="setPeriod('yearly')"
+                            class="px-3 py-1 text-xs font-bold rounded-lg transition"
+                            :class="chartPeriod === 'yearly' ? 'bg-white text-brand-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'">
+                        Tahunan
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="h-64 sm:h-72 w-full relative">
+            <canvas id="sirkulasiLineChart"></canvas>
         </div>
     </div>
 

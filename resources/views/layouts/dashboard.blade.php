@@ -126,17 +126,22 @@
 
             <div class="flex flex-col flex-1 min-h-0">
                 <div class="h-20 flex items-center border-b-2 border-gray-100 bg-gradient-to-r from-gray-50 to-white shrink-0"
-                     :class="sidebarCollapsed ? 'lg:justify-center px-2' : 'justify-between px-5'">
+                     :class="sidebarCollapsed ? 'lg:flex-col lg:justify-center lg:gap-1 px-2' : 'justify-between px-4'">
                     <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 min-w-0" :title="sidebarCollapsed ? 'Perpustakaan SMK PGRI' : ''">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI Pekanbaru" class="w-10 h-10 object-contain drop-shadow-xs shrink-0">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI Pekanbaru" class="w-9 h-9 object-contain drop-shadow-xs shrink-0">
                         <div class="leading-tight truncate" x-show="!sidebarCollapsed || sidebarOpen">
                             <span class="text-sm font-black text-gray-900 tracking-tight block truncate">{{ $pengaturan['nama_sekolah'] ?? 'SMK PGRI' }}</span>
                             <span class="text-[10px] font-extrabold text-brand-700 tracking-wider uppercase block">Perpustakaan</span>
                         </div>
                     </a>
-                    <button @click="sidebarOpen = false" class="lg:hidden p-2 rounded-xl text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition shrink-0" aria-label="Tutup Sidebar">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
+                    <div class="flex items-center gap-1">
+                        <button @click="toggleSidebar()" class="hidden lg:flex p-1.5 rounded-xl text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition shrink-0 cursor-pointer" :title="sidebarCollapsed ? 'Perluas Sidebar' : 'Kecilkan Sidebar'" aria-label="Buka/Tutup Sidebar">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                        </button>
+                        <button @click="sidebarOpen = false" class="lg:hidden p-2 rounded-xl text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition shrink-0" aria-label="Tutup Sidebar">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
                 </div>
 
                 <nav class="p-3 space-y-2 overflow-y-auto flex-1 text-xs font-bold">
@@ -284,7 +289,7 @@
         <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
             <header class="h-20 bg-white border-b-2 border-gray-200/90 flex items-center justify-between px-4 sm:px-6 lg:px-8 z-10 shrink-0 shadow-2xs">
                 <div class="flex items-center gap-2.5 min-w-0 pr-2">
-                    <button @click="toggleSidebar()" class="p-2 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 shrink-0 transition cursor-pointer" :title="sidebarCollapsed ? 'Perluas Sidebar' : 'Kecilkan Sidebar'" aria-label="Buka/Tutup Sidebar">
+                    <button @click="sidebarOpen = true" class="lg:hidden p-2 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 shrink-0 transition cursor-pointer" title="Buka Sidebar" aria-label="Buka Sidebar">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     </button>
                     <div class="min-w-0">
@@ -294,25 +299,13 @@
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <a href="{{ route('katalog') }}" target="_blank" class="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-gray-700 bg-gray-50 hover:bg-brand-50 hover:text-brand-700 rounded-xl border border-gray-200 transition">
-                        <svg class="w-4 h-4 text-brand-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                        <span>Katalog OPAC</span>
-                    </a>
-                    <span class="h-5 w-2px bg-gray-200 hidden sm:block"></span>
-                    <div class="text-right hidden sm:block">
+                    <div class="text-right">
                         <span class="text-xs font-black text-gray-800 block">{{ date('l, d M Y') }}</span>
                         <span class="text-[10px] text-emerald-600 font-bold flex items-center justify-end gap-1">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                             <span>Sistem Aktif</span>
                         </span>
                     </div>
-                    <form action="{{ route('logout') }}" method="POST" class="inline">
-                        @csrf
-                        <button type="button" onclick="confirmLogout(event)" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-extrabold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-200 transition cursor-pointer">
-                            <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                            <span class="hidden sm:inline">Keluar</span>
-                        </button>
-                    </form>
                 </div>
             </header>
 

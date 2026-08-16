@@ -40,73 +40,91 @@
             </div>
 
             <div class="lg:col-span-5 flex justify-center" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
-                <div class="w-full max-w-md bg-white/95 backdrop-blur-md rounded-3xl p-6 text-gray-800 shadow-2xl border border-white/40 transform hover:scale-[1.03] transition duration-500">
+                <div class="w-full max-w-md bg-white/95 backdrop-blur-md rounded-3xl p-6 text-gray-800 shadow-2xl border border-white/40 relative z-30 transition duration-300">
                     <div class="flex items-center gap-3 border-b border-gray-100 pb-4 mb-4">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI Official" class="w-11 h-11 object-contain transform hover:rotate-6 transition duration-300 drop-shadow-xs">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI Official" class="w-11 h-11 object-contain drop-shadow-xs">
                         <div>
-                            <span class="text-xs font-bold text-gray-900 block leading-tight">INLISLITE SMK PGRI</span>
-                            <span class="text-[10px] text-gray-500 font-medium">Official School Library Portal</span>
+                            <span class="text-xs font-black text-gray-900 block leading-tight">INLISLITE SMK PGRI</span>
+                            <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Official School Library Portal</span>
                         </div>
                     </div>
 
-                    <form action="{{ route('katalog') }}" method="GET" class="space-y-3" x-data="{
+                    <form action="{{ route('katalog') }}" method="GET" class="space-y-3.5" x-data="{
                         searchQuery: '',
                         suggestions: [],
                         loading: false,
                         showDropdown: false,
+                        hasSearched: false,
                         fetchSuggestions() {
                             if (this.searchQuery.trim().length < 2) {
                                 this.suggestions = [];
                                 this.showDropdown = false;
+                                this.hasSearched = false;
                                 return;
                             }
                             this.loading = true;
+                            this.hasSearched = true;
                             fetch('/api/buku/search-suggestions?q=' + encodeURIComponent(this.searchQuery))
                                 .then(res => res.json())
                                 .then(data => {
                                     this.suggestions = data;
-                                    this.showDropdown = data.length > 0;
+                                    this.showDropdown = true;
                                     this.loading = false;
                                 })
-                                .catch(() => { this.loading = false; });
+                                .catch(() => {
+                                    this.loading = false;
+                                });
                         }
                     }" @click.outside="showDropdown = false">
-                        <label class="block text-xs font-bold text-gray-700">Pencarian Koleksi Katalog (OPAC)</label>
-                        <div class="relative group">
-                            <input type="text" name="search" x-model="searchQuery" @input.debounce.200ms="fetchSuggestions()" @focus="if(suggestions.length > 0) showDropdown = true" placeholder="Ketik judul buku, penulis, ISBN..." autocomplete="off" class="w-full pl-9 pr-8 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none transition duration-200 font-medium">
-                            <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3 group-hover:text-brand-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                            <div x-show="loading" class="absolute right-3 top-3" x-cloak>
-                                <svg class="animate-spin w-4 h-4 text-brand-700" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                            </div>
-
-                            <div x-show="showDropdown && suggestions.length > 0" x-cloak class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl border-2 border-gray-200 shadow-2xl z-50 max-h-72 overflow-y-auto p-2 space-y-1 text-left animate-fade-in">
-                                <div class="px-3 py-1.5 text-[10px] font-black text-gray-400 uppercase tracking-wider flex items-center justify-between border-b border-gray-100">
-                                    <span>Rekomendasi Pencarian</span>
-                                    <span class="text-emerald-600 font-bold" x-text="suggestions.length + ' Ditemukan'"></span>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1.5">Pencarian Koleksi Katalog (OPAC)</label>
+                            <div class="relative">
+                                <input type="text" name="search" x-model="searchQuery" @input.debounce.200ms="fetchSuggestions()" @focus="if(searchQuery.trim().length >= 2) showDropdown = true" placeholder="Ketik judul buku, penulis, ISBN..." autocomplete="off" class="w-full pl-9 pr-9 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none transition duration-200 font-bold text-gray-900">
+                                <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                <div x-show="loading" class="absolute right-3 top-3 pointer-events-none" x-cloak>
+                                    <svg class="animate-spin w-4 h-4 text-brand-700" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                 </div>
-                                <template x-for="item in suggestions" :key="item.id">
-                                    <a :href="item.detail_url" class="p-2 rounded-xl hover:bg-brand-50/60 transition flex items-center gap-2.5 group border border-transparent hover:border-brand-200">
-                                        <div class="w-9 h-12 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center shadow-xs">
-                                            <template x-if="item.cover_url">
-                                                <img :src="item.cover_url" class="w-full h-full object-cover">
-                                            </template>
-                                            <template x-if="!item.cover_url">
-                                                <div class="w-full h-full bg-brand-700 text-white font-bold text-xs flex items-center justify-center" x-text="item.judul.substr(0, 1)"></div>
+
+                                <div x-show="showDropdown && hasSearched" x-cloak class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl border-2 border-gray-200 shadow-2xl z-50 max-h-80 overflow-y-auto p-2 space-y-1.5 text-left text-gray-900">
+                                    <div class="px-3 py-1.5 text-[10px] font-black text-gray-400 uppercase tracking-wider flex items-center justify-between border-b border-gray-100">
+                                        <span>Rekomendasi Koleksi Buku</span>
+                                        <span class="text-emerald-600 font-bold" x-text="suggestions.length + ' Ditemukan'"></span>
+                                    </div>
+                                    <template x-if="suggestions.length > 0">
+                                        <div class="space-y-1">
+                                            <template x-for="item in suggestions" :key="item.id">
+                                                <a :href="item.detail_url" class="p-2.5 rounded-xl hover:bg-brand-50/70 transition flex items-center gap-3 group border border-transparent hover:border-brand-200">
+                                                    <div class="w-10 h-14 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center shadow-xs">
+                                                        <template x-if="item.cover_url">
+                                                            <img :src="item.cover_url" class="w-full h-full object-cover">
+                                                        </template>
+                                                        <template x-if="!item.cover_url">
+                                                            <div class="w-full h-full bg-brand-700 text-white font-black text-xs flex items-center justify-center" x-text="item.judul.substr(0, 1)"></div>
+                                                        </template>
+                                                    </div>
+                                                    <div class="min-w-0 flex-1">
+                                                        <p class="font-bold text-gray-900 text-xs truncate group-hover:text-brand-700 transition" x-text="item.judul"></p>
+                                                        <p class="text-[10px] text-gray-500 truncate" x-text="item.penulis + ' • ' + item.kategori"></p>
+                                                        <div class="flex items-center gap-1.5 mt-1 text-[9.5px]">
+                                                            <span class="px-1.5 py-0.5 rounded bg-gray-100 font-semibold text-gray-700 border border-gray-200" x-text="item.rak + ' (' + item.laci + ')'"></span>
+                                                            <span class="px-1.5 py-0.5 rounded font-black" :class="item.available_quantity > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'" x-text="'Stok: ' + item.available_quantity + ' Eks'"></span>
+                                                        </div>
+                                                    </div>
+                                                    <svg class="w-4 h-4 text-gray-300 group-hover:text-brand-700 shrink-0 transform group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                                </a>
                                             </template>
                                         </div>
-                                        <div class="min-w-0 flex-1">
-                                            <p class="font-bold text-gray-900 text-xs truncate group-hover:text-brand-700 transition" x-text="item.judul"></p>
-                                            <p class="text-[10px] text-gray-500 truncate" x-text="item.penulis + ' • ' + item.kategori"></p>
-                                            <div class="flex items-center gap-1.5 mt-1 text-[9.5px]">
-                                                <span class="px-1.5 py-0.5 rounded bg-gray-100 font-semibold text-gray-700 border border-gray-200" x-text="item.rak + ' (' + item.laci + ')'"></span>
-                                                <span class="px-1.5 py-0.5 rounded font-black" :class="item.available_quantity > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'" x-text="'Stok: ' + item.available_quantity + ' Eks'"></span>
-                                            </div>
+                                    </template>
+                                    <template x-if="suggestions.length === 0 && !loading">
+                                        <div class="py-6 px-4 text-center">
+                                            <p class="text-xs font-bold text-gray-700">Tidak ada buku ditemukan</p>
+                                            <p class="text-[11px] text-gray-400 mt-0.5">Coba kata kunci judul, pengarang, atau nomor ISBN lain</p>
                                         </div>
-                                        <svg class="w-3.5 h-3.5 text-gray-300 group-hover:text-brand-700 shrink-0 transform group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                                    </a>
-                                </template>
+                                    </template>
+                                </div>
                             </div>
                         </div>
+
                         <button type="submit" class="w-full py-3 bg-brand-700 text-white font-extrabold text-xs rounded-xl hover:bg-brand-800 transition duration-300 shadow-md hover:shadow-lg transform active:scale-95 flex items-center justify-center gap-2">
                             <span>Cari Katalog Sekarang</span>
                             <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
