@@ -826,7 +826,7 @@ class AdminController extends Controller
 
     public function anggotaIndex(Request $request)
     {
-        $query = User::with(['role', 'anggota']);
+        $query = User::with('role');
 
         if ($request->filled('search')) {
             $search = trim($request->search);
