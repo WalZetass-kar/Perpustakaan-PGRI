@@ -1035,9 +1035,6 @@ class AdminController extends Controller
             return back()->with('error', "Pengguna tidak dapat dihapus karena masih memiliki {$activeLoans} buku yang sedang dipinjam.");
         }
 
-        if ($user->anggota) {
-            $user->anggota->delete();
-        }
         $userName = $user->name;
         $user->delete();
 
