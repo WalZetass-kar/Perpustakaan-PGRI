@@ -59,7 +59,7 @@
                        class="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:outline-none">
                 <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </form>
-            @if(auth()->user()->isSuperAdmin())
+            @if(auth()->user()->isAdmin())
                 <button @click="openAddModal = true" class="px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0">
                     <svg class="w-3.5 h-3.5 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                     <span>+ Tambah Admin</span>
@@ -142,7 +142,7 @@
                                     </button>
                                 @endif
 
-                                @if(auth()->user()->isSuperAdmin())
+                                @if(auth()->user()->isAdmin())
                                     <button type="button" @click="passwordData = {{ json_encode([
                                         'id' => $user->id,
                                         'name' => $user->name,
@@ -188,7 +188,7 @@
         </div>
     </div>
 
-    @if(auth()->user()->isSuperAdmin())
+    @if(auth()->user()->isAdmin())
         <div x-show="openAddModal" @click.self="openAddModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto" x-cloak>
             <div @click.stop class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl border-2 border-gray-200 overflow-hidden transform transition-all my-auto">
                 <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-gray-50/70">
@@ -277,7 +277,7 @@
                     <input type="text" name="phone" x-model="editData.phone" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                 </div>
 
-                @if(auth()->user()->isSuperAdmin())
+                @if(auth()->user()->isAdmin())
                     <template x-if="editData.id !== 1">
                         <div class="grid grid-cols-2 gap-3">
                             <div>
@@ -307,7 +307,7 @@
         </div>
     </div>
 
-    @if(auth()->user()->isSuperAdmin())
+    @if(auth()->user()->isAdmin())
         <div x-show="openPasswordModal" @click.self="openPasswordModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto" x-cloak>
             <div @click.stop class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl border-2 border-gray-200 overflow-hidden transform transition-all my-auto">
                 <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-gray-50/70">

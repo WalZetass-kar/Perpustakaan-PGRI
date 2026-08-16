@@ -844,14 +844,14 @@ class AdminController extends Controller
 
     public function anggotaStore(Request $request)
     {
-        if (!auth()->user()->isSuperAdmin()) {
-            abort(403, 'Hanya Super Administrator yang berwenang menambahkan akun admin baru.');
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Hanya Administrator yang berwenang menambahkan akun admin baru.');
         }
 
         $request->validate([
             'name'          => 'required|string|max:255',
             'email'         => 'required|string|email|max:255|unique:users,email',
-            'password'      => 'required|string|min:8',
+            'password'      => 'required|string|min:6',
             'phone'         => 'nullable|string|max:20',
             'role_id'       => 'required|exists:roles,id',
             'status'        => 'required|in:active,inactive',
@@ -881,8 +881,8 @@ class AdminController extends Controller
     {
         $user = User::findOrFail($id);
 
-        if (!auth()->user()->isSuperAdmin() && auth()->id() !== $user->id) {
-            abort(403, 'Anda tidak memiliki hak akses untuk mengubah akun admin lain.');
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Anda tidak memiliki hak akses untuk mengubah akun admin.');
         }
 
         $request->validate([
@@ -899,7 +899,7 @@ class AdminController extends Controller
             'phone' => $request->phone,
         ];
 
-        if (auth()->user()->isSuperAdmin() && $user->id !== 1) {
+        if ($user->id !== 1) {
             if ($request->filled('role_id')) {
                 $userData['role_id'] = $request->role_id;
             }
@@ -923,14 +923,14 @@ class AdminController extends Controller
 
     public function anggotaResetPassword(Request $request, $id)
     {
-        if (!auth()->user()->isSuperAdmin()) {
-            abort(403, 'Hanya Super Administrator yang berwenang mereset password akun admin.');
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Hanya Administrator yang berwenang mereset password akun admin.');
         }
 
         $user = User::findOrFail($id);
 
         $request->validate([
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:6|confirmed',
         ]);
 
         $user->update([
@@ -950,8 +950,8 @@ class AdminController extends Controller
 
     public function anggotaToggleStatus(Request $request, $id)
     {
-        if (!auth()->user()->isSuperAdmin()) {
-            abort(403, 'Hanya Super Administrator yang berwenang mengubah status aktif akun admin.');
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Hanya Administrator yang berwenang mengubah status aktif akun admin.');
         }
 
         $user = User::findOrFail($id);
@@ -976,16 +976,16 @@ class AdminController extends Controller
         return back()->with('success', "Akun {$user->name} berhasil {$statusText}.");
     }
 
-    public function anggotaDestroy($id)
+    public function anggotaDestroy(Request $request, $id)
     {
-        if (!auth()->user()->isSuperAdmin()) {
-            abort(403, 'Hanya Super Administrator yang berwenang menghapus akun admin.');
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Hanya Administrator yang berwenang menghapus akun pengelola.');
         }
 
         $user = User::findOrFail($id);
 
         if ($user->id === 1 || $user->id === auth()->id()) {
-            return back()->with('error', 'Akun Super Administrator Utama atau akun Anda sendiri tidak dapat dihapus.');
+            return back()->with('error', 'Akun Super Admin Utama atau akun Anda sendiri tidak dapat dihapus.');
         }
 
         $activeLoans = Peminjaman::where('user_id', $user->id)->where('status', 'dipinjam')->count();
