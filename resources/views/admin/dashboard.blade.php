@@ -11,7 +11,7 @@
          yearlyData: {{ json_encode($chartYearly) }},
          chartInstance: null,
          initChart() {
-             const ctx = document.getElementById('sirkulasiLineChart');
+             const ctx = document.getElementById('sirkulasiBarChart');
              if (!ctx) return;
 
              const isMonthly = this.chartPeriod === 'monthly';
@@ -24,37 +24,29 @@
              }
 
              this.chartInstance = new Chart(ctx, {
-                 type: 'line',
+                 type: 'bar',
                  data: {
                      labels: labels,
                      datasets: [
                          {
                              label: 'Peminjaman Buku (Eks)',
                              data: loans,
-                             borderColor: '#B91C1C',
-                             backgroundColor: 'rgba(185, 28, 28, 0.08)',
-                             borderWidth: 2.5,
-                             pointBackgroundColor: '#B91C1C',
-                             pointBorderColor: '#ffffff',
-                             pointBorderWidth: 2,
-                             pointRadius: 4,
-                             pointHoverRadius: 6,
-                             fill: true,
-                             tension: 0.35
+                             backgroundColor: '#B91C1C',
+                             hoverBackgroundColor: '#991B1B',
+                             borderRadius: 6,
+                             borderSkipped: false,
+                             barPercentage: 0.7,
+                             categoryPercentage: 0.6
                          },
                          {
                              label: 'Pengembalian Buku (Eks)',
                              data: returns,
-                             borderColor: '#059669',
-                             backgroundColor: 'rgba(5, 150, 105, 0.06)',
-                             borderWidth: 2.5,
-                             pointBackgroundColor: '#059669',
-                             pointBorderColor: '#ffffff',
-                             pointBorderWidth: 2,
-                             pointRadius: 4,
-                             pointHoverRadius: 6,
-                             fill: true,
-                             tension: 0.35
+                             backgroundColor: '#059669',
+                             hoverBackgroundColor: '#047857',
+                             borderRadius: 6,
+                             borderSkipped: false,
+                             barPercentage: 0.7,
+                             categoryPercentage: 0.6
                          }
                      ]
                  },
@@ -239,7 +231,7 @@
         </div>
 
         <div class="h-64 sm:h-72 w-full relative">
-            <canvas id="sirkulasiLineChart"></canvas>
+            <canvas id="sirkulasiBarChart"></canvas>
         </div>
     </div>
 
