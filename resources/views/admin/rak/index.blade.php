@@ -142,8 +142,10 @@
                 $totalLaciRak = $rak->laci_count ?? $rak->laci->count();
                 $distinctCategoriesRak = $rak->buku->pluck('kategori.nama')->filter()->unique()->values();
             @endphp
-            <div class="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden transition duration-200">
-                <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-50/50">
+            <div class="bg-white rounded-2xl border border-gray-200 shadow-2xs transition duration-200 relative"
+                 :class="{ 'z-30': activeMenuId === {{ $rak->id }} }">
+                <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-50/50 rounded-2xl"
+                     :class="expandedRaks.includes({{ $rak->id }}) ? 'rounded-b-none' : ''">
                     <div class="flex items-start sm:items-center gap-3 min-w-0">
                         <span class="px-2.5 py-1 rounded-lg bg-gray-100 border border-gray-200 text-gray-700 font-mono font-bold text-xs shrink-0 tracking-wide">
                             {{ $rak->kode_rak }}
@@ -180,12 +182,12 @@
                         </button>
 
                         <div class="relative" x-data="{ menuOpen: false }">
-                            <button type="button" @click="menuOpen = !menuOpen" class="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-sm border border-gray-200 transition" aria-label="Menu Opsi Rak">
+                            <button type="button" @click="menuOpen = !menuOpen; activeMenuId = menuOpen ? {{ $rak->id }} : null" class="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-sm border border-gray-200 transition cursor-pointer" aria-label="Menu Opsi Rak">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
                             </button>
 
-                            <div x-show="menuOpen" @click.outside="menuOpen = false" x-cloak class="absolute right-0 top-full mt-1.5 w-44 bg-white rounded-xl border border-gray-200 shadow-lg py-1 z-20 text-xs font-semibold">
-                                <button type="button" @click="menuOpen = false; editData = {{ json_encode([
+                            <div x-show="menuOpen" @click.outside="menuOpen = false; if(activeMenuId === {{ $rak->id }}) activeMenuId = null" x-cloak class="absolute right-0 top-full mt-1.5 w-44 bg-white rounded-xl border border-gray-200 shadow-xl py-1 z-50 text-xs font-semibold">
+                                <button type="button" @click="menuOpen = false; activeMenuId = null; editData = {{ json_encode([
                                     'id' => $rak->id,
                                     'kode_rak' => $rak->kode_rak,
                                     'nama_rak' => $rak->nama_rak,
@@ -195,7 +197,7 @@
                                     <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                     <span>Edit Info Rak</span>
                                 </button>
-                                <button type="button" @click="menuOpen = false; laciData = { rak_id: {{ $rak->id }}, rak_nama: '{{ $rak->nama_rak }}' }; openAddLaciModal = true" class="w-full px-3 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                                <button type="button" @click="menuOpen = false; activeMenuId = null; laciData = { rak_id: {{ $rak->id }}, rak_nama: '{{ $rak->nama_rak }}' }; openAddLaciModal = true" class="w-full px-3 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2">
                                     <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                     <span>Tambah Laci Baru</span>
                                 </button>
