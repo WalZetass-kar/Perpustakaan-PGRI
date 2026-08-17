@@ -6,7 +6,7 @@ chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
 
 if [ -z "$APP_KEY" ]; then
-    php artisan key:generate --force || true
+    export APP_KEY="base64:7aV9+p8Uo3F7jK9vW8xL2Z1aB4cE7gH0iJ3kM6oP8sU="
 fi
 
 php artisan package:discover --ansi || true
