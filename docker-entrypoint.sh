@@ -9,6 +9,7 @@ if [ -z "$APP_KEY" ]; then
     php artisan key:generate --force || true
 fi
 
+php artisan package:discover --ansi || true
 php artisan config:clear || true
 php artisan config:cache || true
 php artisan route:cache || true
