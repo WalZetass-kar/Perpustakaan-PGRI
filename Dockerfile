@@ -1,11 +1,12 @@
 FROM php:8.4-apache
 
-ENV BUILD_VERSION=20260817-01
+ARG DEBIAN_FRONTEND=noninteractive
+ENV REBUILD_TRIGGER="2026-08-17-v4"
 ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV PORT=80
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
@@ -17,9 +18,10 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo pdo_mysql gd zip bcmath \
     && a2dismod mpm_event mpm_worker 2>/dev/null || true \
-    && a2enmod mpm_prefork rewrite
+    && a2enmod mpm_prefork rewrite \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 RUN echo "Listen \${PORT}" > /etc/apache2/ports.conf
 
@@ -29,9 +31,13 @@ RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 WORKDIR /var/www/html
 
-COPY . /var/www/html
+COPY composer.json composer.lock ./
 
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --ignore-platform-reqs
+
+COPY . .
+
+RUN composer dump-autoload --optimize --no-scripts
 
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
