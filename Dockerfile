@@ -1,5 +1,10 @@
 FROM php:8.4-apache
 
+ENV BUILD_VERSION=20260817-01
+ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV PORT=80
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
@@ -15,10 +20,6 @@ RUN apt-get update && apt-get install -y \
     && a2enmod mpm_prefork rewrite
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-ENV COMPOSER_ALLOW_SUPERUSER=1
-ENV PORT=80
-ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
 RUN echo "Listen \${PORT}" > /etc/apache2/ports.conf
 
