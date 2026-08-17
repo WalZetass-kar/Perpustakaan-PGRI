@@ -1,7 +1,6 @@
 FROM php:8.4-apache
 
 ARG DEBIAN_FRONTEND=noninteractive
-ENV REBUILD_TRIGGER="2026-08-17-v4"
 ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV PORT=80
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
@@ -30,10 +29,6 @@ RUN printf '<VirtualHost *:${PORT}>\n    DocumentRoot /var/www/html/public\n    
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 WORKDIR /var/www/html
-
-COPY composer.json composer.lock ./
-
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --ignore-platform-reqs
 
 COPY . .
 
