@@ -27,7 +27,7 @@ WORKDIR /var/www/html
 
 COPY . /var/www/html
 
-RUN if [ -d "vendor" ]; then composer dump-autoload --optimize --no-scripts; else composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs; fi
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs
 
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
