@@ -180,26 +180,162 @@ class AdminController extends Controller
 
     public function bukuIndex(Request $request)
     {
-        $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci']);
+        if ($request->ajax() || $request->wantsJson() || $request->has('draw')) {
+            $totalData = Buku::count();
+            $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci']);
 
-        if ($request->filled('search')) {
-            $search = trim($request->search);
-            $query->where(function($q) use ($search) {
-                $q->where('judul', 'like', "%{$search}%")
-                  ->orWhere('isbn', 'like', "%{$search}%")
-                  ->orWhereHas('penulis', function($qp) use ($search) {
-                      $qp->where('nama', 'like', "%{$search}%");
-                  });
-            });
+            $searchValue = $request->input('search.value');
+            if (!empty($searchValue)) {
+                $search = trim($searchValue);
+                $query->where(function($q) use ($search) {
+                    $q->where('judul', 'like', "%{$search}%")
+                      ->orWhere('isbn', 'like', "%{$search}%")
+                      ->orWhere('tahun_terbit', 'like', "%{$search}%")
+                      ->orWhereHas('penulis', function($qp) use ($search) {
+                          $qp->where('nama', 'like', "%{$search}%");
+                      })
+                      ->orWhereHas('penerbit', function($qp) use ($search) {
+                          $qp->where('nama', 'like', "%{$search}%");
+                      })
+                      ->orWhereHas('kategori', function($qk) use ($search) {
+                          $qk->where('nama', 'like', "%{$search}%");
+                      })
+                      ->orWhereHas('rak', function($qr) use ($search) {
+                          $qr->where('kode_rak', 'like', "%{$search}%")
+                            ->orWhere('nama_rak', 'like', "%{$search}%");
+                      })
+                      ->orWhereHas('laci', function($ql) use ($search) {
+                          $ql->where('nama_laci', 'like', "%{$search}%");
+                      });
+                });
+            }
+
+            $totalFiltered = (clone $query)->count();
+
+            $orderColumnIndex = (int) $request->input('order.0.column', 0);
+            $orderDir = strtolower($request->input('order.0.dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+            $columns = [
+                0 => 'judul',
+                1 => 'penulis_id',
+                2 => 'kategori_id',
+                3 => 'available_quantity',
+                4 => 'id',
+            ];
+
+            $orderColumn = $columns[$orderColumnIndex] ?? 'id';
+            $query->orderBy($orderColumn, $orderDir);
+
+            $start = (int) $request->input('start', 0);
+            $length = (int) $request->input('length', 10);
+            if ($length > 0) {
+                $query->skip($start)->take($length);
+            }
+
+            $bukuItems = $query->get();
+
+            $data = [];
+            foreach ($bukuItems as $buku) {
+                $coverUrl = $buku->cover_url;
+                $coverHtml = $coverUrl 
+                    ? '<img src="' . e($coverUrl) . '" alt="Cover" class="w-full h-full object-cover">'
+                    : '<div class="w-full h-full flex flex-col items-center justify-center bg-brand-700 text-white font-black text-xs">' . e(substr($buku->judul, 0, 1)) . '</div>';
+
+                $bukuHtml = '<div class="flex items-center gap-3">
+                    <div class="w-10 h-14 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center">
+                        ' . $coverHtml . '
+                    </div>
+                    <div class="min-w-0">
+                        <p class="font-bold text-gray-900 line-clamp-2 text-xs">' . e($buku->judul) . '</p>
+                        <div class="flex items-center gap-2 mt-0.5 text-[10px] text-gray-500 font-mono">
+                            <span>ISBN: ' . e($buku->isbn ?? 'Tanpa ISBN') . '</span>
+                            <span>•</span>
+                            <span>Tahun ' . e($buku->tahun_terbit) . '</span>
+                        </div>
+                    </div>
+                </div>';
+
+                $penulisHtml = '<p class="font-bold text-gray-800 text-xs">' . e($buku->penulis->nama ?? '-') . '</p>
+                    <p class="text-[10.5px] text-gray-500">' . e($buku->penerbit->nama ?? '-') . '</p>';
+
+                $laciName = $buku->laci->nama_laci ?? ($buku->rak ? 'Laci 1' : 'Tanpa Laci');
+                $kategoriHtml = '<div class="space-y-1">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-brand-50 text-brand-700 border border-brand-200 inline-block">
+                        ' . e($buku->kategori->nama ?? 'Umum') . '
+                    </span>
+                    <div class="flex items-center gap-1 text-[10px] font-bold text-gray-700">
+                        <span class="px-1.5 py-0.5 rounded bg-gray-100 border border-gray-200 font-mono text-gray-800">' . e($buku->rak->kode_rak ?? '-') . '</span>
+                        <span>•</span>
+                        <span class="text-amber-700">' . e($laciName) . '</span>
+                    </div>
+                </div>';
+
+                $stokClass = $buku->available_quantity > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200';
+                $stokText = $buku->available_quantity > 0 ? 'Tersedia' : 'Habis Dipinjam';
+                $stokHtml = '<div class="inline-flex flex-col items-center">
+                    <span class="px-2.5 py-0.5 rounded-lg text-[11px] font-black ' . $stokClass . '">
+                        ' . e($buku->available_quantity) . ' / ' . e($buku->total_quantity) . ' Eks
+                    </span>
+                    <span class="text-[9.5px] text-gray-400 font-medium mt-0.5">
+                        ' . $stokText . '
+                    </span>
+                </div>';
+
+                $jsonData = htmlspecialchars(json_encode([
+                    'id' => $buku->id,
+                    'isbn' => $buku->isbn ?? '',
+                    'judul' => $buku->judul,
+                    'tahun_terbit' => $buku->tahun_terbit,
+                    'total_quantity' => $buku->total_quantity,
+                    'penulis_id' => $buku->penulis_id,
+                    'penerbit_id' => $buku->penerbit_id,
+                    'kategori_id' => $buku->kategori_id,
+                    'rak_id' => $buku->rak_id,
+                    'rak_laci_id' => $buku->rak_laci_id,
+                    'sinopsis' => $buku->sinopsis ?? '',
+                    'cover_url' => $coverUrl
+                ]), ENT_QUOTES, 'UTF-8');
+
+                $deleteUrl = route('admin.buku.delete', $buku->id);
+                $csrfToken = csrf_token();
+
+                $aksiHtml = '<div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
+                    <button type="button" data-buku=\'' . $jsonData . '\' class="btn-edit-buku px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-extrabold rounded-lg text-[11px] transition shadow-xs flex items-center gap-1">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <span>Edit</span>
+                    </button>
+                    <form action="' . $deleteUrl . '" method="POST" class="inline" onsubmit="return confirmDelete(event, \'Hapus Judul Buku?\', \'Master buku ini akan dihapus dari katalog.\')">
+                        <input type="hidden" name="_token" value="' . $csrfToken . '">
+                        <button type="submit" class="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-extrabold rounded-lg text-[11px] transition shadow-xs flex items-center gap-1">
+                            <i class="fa-solid fa-trash-can"></i>
+                            <span>Hapus</span>
+                        </button>
+                    </form>
+                </div>';
+
+                $data[] = [
+                    'buku' => $bukuHtml,
+                    'penulis' => $penulisHtml,
+                    'kategori' => $kategoriHtml,
+                    'stok' => $stokHtml,
+                    'aksi' => $aksiHtml,
+                ];
+            }
+
+            return response()->json([
+                'draw' => (int) $request->input('draw', 1),
+                'recordsTotal' => $totalData,
+                'recordsFiltered' => $totalFiltered,
+                'data' => $data,
+            ]);
         }
 
-        $bukuList = $query->latest()->paginate(10)->withQueryString();
         $penulisList = Penulis::orderBy('nama', 'asc')->get();
         $penerbitList = Penerbit::orderBy('nama', 'asc')->get();
         $kategoriList = Kategori::orderBy('nama', 'asc')->get();
         $rakList = Rak::with('laci')->orderBy('kode_rak', 'asc')->get();
 
-        return view('admin.buku.index', compact('bukuList', 'penulisList', 'penerbitList', 'kategoriList', 'rakList'));
+        return view('admin.buku.index', compact('penulisList', 'penerbitList', 'kategoriList', 'rakList'));
     }
 
     public function bukuStore(Request $request)

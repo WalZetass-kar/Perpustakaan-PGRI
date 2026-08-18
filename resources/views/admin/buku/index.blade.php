@@ -3,6 +3,90 @@
 @section('title', 'Manajemen Koleksi Buku')
 @section('page_heading', 'Koleksi Buku Perpustakaan')
 
+@push('styles')
+<style>
+    .dataTables_wrapper {
+        padding: 1rem;
+        font-size: 0.75rem;
+    }
+    .dataTables_wrapper .dataTables_length {
+        margin-bottom: 0.75rem;
+    }
+    .dataTables_wrapper .dataTables_length select {
+        padding: 0.35rem 1.75rem 0.35rem 0.65rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #374151;
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        outline: none;
+    }
+    .dataTables_wrapper .dataTables_filter {
+        margin-bottom: 0.75rem;
+    }
+    .dataTables_wrapper .dataTables_filter input {
+        padding: 0.35rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #111827;
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        outline: none;
+        min-width: 220px;
+    }
+    .dataTables_wrapper .dataTables_filter input:focus {
+        border-color: #b91c1c;
+        background-color: #ffffff;
+    }
+    .dataTables_wrapper .dataTables_info {
+        padding-top: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #6b7280;
+    }
+    .dataTables_wrapper .dataTables_paginate {
+        padding-top: 0.75rem;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        display: inline-block;
+        padding: 0.35rem 0.65rem;
+        margin-left: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
+        background: #ffffff;
+        color: #374151 !important;
+        cursor: pointer;
+        transition: all 0.15s ease-in-out;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: #fee2e2 !important;
+        border-color: #fca5a5 !important;
+        color: #b91c1c !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+        background: #b91c1c !important;
+        border-color: #b91c1c !important;
+        color: #ffffff !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
+    .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
+        opacity: 0.4;
+        cursor: not-allowed;
+        background: #f9fafb !important;
+        border-color: #e5e7eb !important;
+        color: #9ca3af !important;
+    }
+    table.dataTable no-footer {
+        border-bottom: 1px solid #e5e7eb;
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="space-y-5" x-data="{ 
     openAddModal: false, 
@@ -21,29 +105,24 @@
         const found = this.allRaks.find(r => r.id == this.editRakId);
         return found ? found.laci : [];
     }
-}" x-init="openAddModal = false; openEditModal = false; editData = {}">
+}" x-init="openAddModal = false; openEditModal = false; editData = {}" id="buku-container">
 
     <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
         <div>
             <h2 class="text-sm font-black text-gray-900">Katalog Judul Buku & Stok Fisik</h2>
             <p class="text-[11px] text-gray-500 mt-0.5">Kelola data buku, jumlah stok fisik, serta nomor rak dan laci penyimpanan</p>
         </div>
-        <div class="flex items-center gap-2 w-full sm:w-auto">
-            <form action="{{ route('admin.buku') }}" method="GET" class="relative flex-1 sm:w-72">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul, ISBN, atau penulis..."
-                       class="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:outline-none">
-                <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            </form>
-            <button @click="addRakId = ''; addLaciId = ''; openAddModal = true" class="px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0">
-                <svg class="w-3.5 h-3.5 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                <span>+ Tambah Buku</span>
+        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <button @click="addRakId = ''; addLaciId = ''; openAddModal = true" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-2 shrink-0">
+                <i class="fa-solid fa-plus text-emerald-300"></i>
+                <span>Tambah Buku</span>
             </button>
         </div>
     </div>
 
     <div class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-xs">
+            <table id="tabel-buku" class="w-full text-left border-collapse text-xs">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase tracking-wider font-extrabold">
                         <th class="py-3 px-4 font-bold">Buku & Cover</th>
@@ -54,93 +133,8 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 text-gray-700 font-medium">
-                    @forelse($bukuList as $buku)
-                        @php
-                            $coverUrl = $buku->cover_url;
-                        @endphp
-                        <tr class="hover:bg-gray-50/70 transition">
-                            <td class="py-3 px-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-14 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center">
-                                        @if($coverUrl)
-                                            <img src="{{ $coverUrl }}" alt="Cover" class="w-full h-full object-cover">
-                                        @else
-                                            <div class="w-full h-full flex flex-col items-center justify-center bg-brand-700 text-white font-black text-xs">
-                                                {{ substr($buku->judul, 0, 1) }}
-                                            </div>
-                                        @endif
-                                    </div>
-                                    <div class="min-w-0">
-                                        <p class="font-bold text-gray-900 line-clamp-2">{{ $buku->judul }}</p>
-                                        <div class="flex items-center gap-2 mt-0.5 text-[10px] text-gray-500 font-mono">
-                                            <span>ISBN: {{ $buku->isbn ?? 'Tanpa ISBN' }}</span>
-                                            <span>•</span>
-                                            <span>Tahun {{ $buku->tahun_terbit }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="py-3 px-4">
-                                <p class="font-bold text-gray-800">{{ $buku->penulis->nama ?? '-' }}</p>
-                                <p class="text-[10.5px] text-gray-500">{{ $buku->penerbit->nama ?? '-' }}</p>
-                            </td>
-                            <td class="py-3 px-4">
-                                <div class="space-y-1">
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-brand-50 text-brand-700 border border-brand-200 inline-block">
-                                        {{ $buku->kategori->nama ?? 'Umum' }}
-                                    </span>
-                                    <div class="flex items-center gap-1 text-[10px] font-bold text-gray-700">
-                                        <span class="px-1.5 py-0.5 rounded bg-gray-100 border border-gray-200 font-mono text-gray-800">{{ $buku->rak->kode_rak ?? '-' }}</span>
-                                        <span>•</span>
-                                        <span class="text-amber-700">{{ $buku->laci->nama_laci ?? ($buku->rak ? 'Laci 1' : 'Tanpa Laci') }}</span>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="py-3 px-4 text-center">
-                                <div class="inline-flex flex-col items-center">
-                                    <span class="px-2.5 py-0.5 rounded-lg text-[11px] font-black {{ $buku->available_quantity > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
-                                        {{ $buku->available_quantity }} / {{ $buku->total_quantity }} Eks
-                                    </span>
-                                    <span class="text-[9.5px] text-gray-400 font-medium mt-0.5">
-                                        {{ $buku->available_quantity > 0 ? 'Tersedia' : 'Habis Dipinjam' }}
-                                    </span>
-                                </div>
-                            </td>
-                            <td class="py-3 px-4 text-right space-x-1 whitespace-nowrap">
-                                <button type="button" @click="editData = {{ json_encode([
-                                    'id' => $buku->id,
-                                    'isbn' => $buku->isbn ?? '',
-                                    'judul' => $buku->judul,
-                                    'tahun_terbit' => $buku->tahun_terbit,
-                                    'total_quantity' => $buku->total_quantity,
-                                    'penulis_id' => $buku->penulis_id,
-                                    'penerbit_id' => $buku->penerbit_id,
-                                    'kategori_id' => $buku->kategori_id,
-                                    'rak_id' => $buku->rak_id,
-                                    'rak_laci_id' => $buku->rak_laci_id,
-                                    'sinopsis' => $buku->sinopsis ?? '',
-                                    'cover_url' => $coverUrl
-                                ]) }}; editRakId = '{{ $buku->rak_id }}'; editLaciId = '{{ $buku->rak_laci_id }}'; openEditModal = true" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs">
-                                    Edit
-                                </button>
-                                <form action="{{ route('admin.buku.delete', $buku->id) }}" method="POST" class="inline" onsubmit="return confirmDelete(event, 'Hapus Judul Buku?', 'Master buku ini akan dihapus dari katalog.')">
-                                    @csrf
-                                    <button type="submit" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs">
-                                        Hapus
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="py-8 text-center text-gray-400 font-medium">Belum ada buku terdaftar di katalog.</td>
-                        </tr>
-                    @endforelse
                 </tbody>
             </table>
-        </div>
-        <div class="p-3 border-t border-gray-100">
-            {{ $bukuList->links() }}
         </div>
     </div>
 
@@ -149,7 +143,7 @@
             <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-gray-50/70">
                 <div class="flex items-center gap-2">
                     <div class="w-8 h-8 rounded-xl bg-brand-50 border border-brand-200 text-brand-700 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <i class="fa-solid fa-book text-sm"></i>
                     </div>
                     <div>
                         <h3 class="text-sm font-black text-gray-900">Tambah Koleksi Buku Baru</h3>
@@ -244,7 +238,10 @@
 
                 <div class="pt-3 border-t border-gray-100 flex justify-end gap-2 shrink-0">
                     <button type="button" @click="openAddModal = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-xs">Batal</button>
-                    <button type="submit" class="px-5 py-2 bg-brand-700 text-white font-extrabold rounded-xl hover:bg-brand-800 text-xs">Simpan Buku</button>
+                    <button type="submit" class="px-5 py-2 bg-brand-700 text-white font-extrabold rounded-xl hover:bg-brand-800 text-xs flex items-center gap-1.5">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Simpan Buku</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -255,7 +252,7 @@
             <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-amber-50/50">
                 <div class="flex items-center gap-2">
                     <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        <i class="fa-solid fa-pen-to-square text-sm"></i>
                     </div>
                     <div>
                         <h3 class="text-sm font-black text-gray-900">Edit Data Buku</h3>
@@ -350,7 +347,10 @@
 
                 <div class="pt-3 border-t border-gray-100 flex justify-end gap-2 shrink-0">
                     <button type="button" @click="openEditModal = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-xs">Batal</button>
-                    <button type="submit" class="px-5 py-2 bg-brand-700 text-white font-extrabold rounded-xl hover:bg-brand-800 text-xs">Simpan Perubahan</button>
+                    <button type="submit" class="px-5 py-2 bg-brand-700 text-white font-extrabold rounded-xl hover:bg-brand-800 text-xs flex items-center gap-1.5">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Simpan Perubahan</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -358,3 +358,59 @@
 
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        const tabelBuku = $('#tabel-buku').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{{ route('admin.buku') }}",
+                type: "GET"
+            },
+            columns: [
+                { data: 'buku', name: 'judul', orderable: true, searchable: true },
+                { data: 'penulis', name: 'penulis_id', orderable: true, searchable: true },
+                { data: 'kategori', name: 'kategori_id', orderable: true, searchable: true },
+                { data: 'stok', name: 'available_quantity', orderable: true, searchable: false, className: 'text-center' },
+                { data: 'aksi', name: 'aksi', orderable: false, searchable: false, className: 'text-right' }
+            ],
+            order: [[0, 'asc']],
+            pageLength: 10,
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+            language: {
+                processing: '<div class="py-4 text-center text-xs font-bold text-brand-700 flex items-center justify-center gap-2"><i class="fa-solid fa-spinner fa-spin text-sm"></i> Memuat data koleksi...</div>',
+                search: '',
+                searchPlaceholder: 'Cari judul, ISBN, penulis...',
+                lengthMenu: 'Tampilkan _MENU_ data',
+                info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ buku',
+                infoEmpty: 'Menampilkan 0 sampai 0 dari 0 buku',
+                infoFiltered: '(disaring dari _MAX_ total)',
+                zeroRecords: 'Tidak ditemukan data buku yang sesuai',
+                paginate: {
+                    first: '<i class="fa-solid fa-angles-left"></i>',
+                    previous: '<i class="fa-solid fa-chevron-left"></i>',
+                    next: '<i class="fa-solid fa-chevron-right"></i>',
+                    last: '<i class="fa-solid fa-angles-right"></i>'
+                }
+            }
+        });
+
+        $(document).on('click', '.btn-edit-buku', function() {
+            const rawData = $(this).attr('data-buku');
+            if (rawData) {
+                const parsed = JSON.parse(rawData);
+                const container = document.getElementById('buku-container');
+                if (container && container._x_dataStack) {
+                    const alpineData = container._x_dataStack[0];
+                    alpineData.editData = parsed;
+                    alpineData.editRakId = parsed.rak_id ? String(parsed.rak_id) : '';
+                    alpineData.editLaciId = parsed.rak_laci_id ? String(parsed.rak_laci_id) : '';
+                    alpineData.openEditModal = true;
+                }
+            }
+        });
+    });
+</script>
+@endpush
