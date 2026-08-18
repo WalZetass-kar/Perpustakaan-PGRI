@@ -479,15 +479,17 @@ function detailBukuPage() {
                 return;
             }
             this.submittingLoan = true;
-            const token = document.querySelector('meta[name=csrf-token]') ? document.querySelector('meta[name=csrf-token]').content : '';
+            const token = document.querySelector('meta[name=csrf-token]') ? document.querySelector('meta[name=csrf-token]').content : '{{ csrf_token() }}';
+            const payload = Object.assign({}, this.loanData, { _token: token });
             fetch('{{ route('katalog.ajukan') }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'X-CSRF-TOKEN': token
+                    'X-CSRF-TOKEN': token,
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: JSON.stringify(this.loanData)
+                body: JSON.stringify(payload)
             })
             .then(res => res.json().then(data => ({ status: res.status, body: data })))
             .then(res => {
