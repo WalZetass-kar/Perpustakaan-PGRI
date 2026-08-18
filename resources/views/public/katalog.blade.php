@@ -589,8 +589,8 @@
                         <input type="text" x-model="loanData.jurusan" required placeholder="Contoh: XII RPL 1 / XI TKJ 2" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                     </div>
                     <div>
-                        <label class="block font-bold text-gray-700 mb-1">NISN / Nomor Induk <span class="text-rose-600">*</span></label>
-                        <input type="text" x-model="loanData.nomor_induk" required placeholder="Contoh: 0065123489" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                        <label class="block font-bold text-gray-700 mb-1">NISN / Nomor Induk (Opsional)</label>
+                        <input type="text" x-model="loanData.nomor_induk" placeholder="Contoh: 0065123489" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                     </div>
                 </div>
 
@@ -693,16 +693,16 @@ function katalogPage() {
             this.openLoanModal = true;
         },
         submitLoanRequest() {
-            if (!this.loanData.nama_peminjam || !this.loanData.jurusan || !this.loanData.nomor_induk) {
+            if (!this.loanData.nama_peminjam || !this.loanData.jurusan) {
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
                         icon: 'error',
                         title: 'Data Belum Lengkap',
-                        text: 'Mohon isi Nama Siswa, Kelas/Jurusan, dan NISN.',
+                        text: 'Mohon isi Nama Siswa dan Kelas/Jurusan.',
                         confirmButtonColor: '#991b1b'
                     });
                 } else {
-                    alert('Mohon isi Nama Siswa, Kelas/Jurusan, dan NISN.');
+                    alert('Mohon isi Nama Siswa dan Kelas/Jurusan.');
                 }
                 return;
             }
