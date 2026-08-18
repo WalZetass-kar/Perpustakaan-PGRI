@@ -7,8 +7,8 @@ use App\Http\Controllers\AdminController;
 
 Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/katalog', [PublicController::class, 'katalog'])->name('katalog');
-Route::get('/buku/{id}', [PublicController::class, 'detailBuku'])->name('buku.detail');
-Route::get('/api/buku/search-suggestions', [PublicController::class, 'searchSuggestions'])->name('buku.search-suggestions');
+Route::get('/buku/{id}', [PublicController::class, 'detailBuku'])->name('buku.detail')->whereNumber('id');
+Route::get('/api/buku/search-suggestions', [PublicController::class, 'searchSuggestions'])->name('buku.search-suggestions')->middleware('throttle:60,1');
 
 Route::get('/aksesperpuspgri', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/aksesperpuspgri', [AuthController::class, 'login'])->name('login.post')->middleware('throttle:5,1');
@@ -39,44 +39,44 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/buku', [AdminController::class, 'bukuIndex'])->name('buku');
         Route::post('/buku', [AdminController::class, 'bukuStore'])->name('buku.store');
-        Route::post('/buku/update/{id}', [AdminController::class, 'bukuUpdate'])->name('buku.update');
-        Route::post('/buku/delete/{id}', [AdminController::class, 'bukuDestroy'])->name('buku.delete');
+        Route::post('/buku/update/{id}', [AdminController::class, 'bukuUpdate'])->name('buku.update')->whereNumber('id');
+        Route::post('/buku/delete/{id}', [AdminController::class, 'bukuDestroy'])->name('buku.delete')->whereNumber('id');
 
         Route::get('/kategori', [AdminController::class, 'kategoriIndex'])->name('kategori');
         Route::post('/kategori', [AdminController::class, 'kategoriStore'])->name('kategori.store');
-        Route::post('/kategori/update/{id}', [AdminController::class, 'kategoriUpdate'])->name('kategori.update');
-        Route::post('/kategori/delete/{id}', [AdminController::class, 'kategoriDestroy'])->name('kategori.delete');
+        Route::post('/kategori/update/{id}', [AdminController::class, 'kategoriUpdate'])->name('kategori.update')->whereNumber('id');
+        Route::post('/kategori/delete/{id}', [AdminController::class, 'kategoriDestroy'])->name('kategori.delete')->whereNumber('id');
 
         Route::get('/penulis', [AdminController::class, 'penulisIndex'])->name('penulis');
         Route::post('/penulis', [AdminController::class, 'penulisStore'])->name('penulis.store');
-        Route::post('/penulis/update/{id}', [AdminController::class, 'penulisUpdate'])->name('penulis.update');
-        Route::post('/penulis/delete/{id}', [AdminController::class, 'penulisDestroy'])->name('penulis.delete');
+        Route::post('/penulis/update/{id}', [AdminController::class, 'penulisUpdate'])->name('penulis.update')->whereNumber('id');
+        Route::post('/penulis/delete/{id}', [AdminController::class, 'penulisDestroy'])->name('penulis.delete')->whereNumber('id');
 
         Route::get('/penerbit', [AdminController::class, 'penerbitIndex'])->name('penerbit');
         Route::post('/penerbit', [AdminController::class, 'penerbitStore'])->name('penerbit.store');
-        Route::post('/penerbit/update/{id}', [AdminController::class, 'penerbitUpdate'])->name('penerbit.update');
-        Route::post('/penerbit/delete/{id}', [AdminController::class, 'penerbitDestroy'])->name('penerbit.delete');
+        Route::post('/penerbit/update/{id}', [AdminController::class, 'penerbitUpdate'])->name('penerbit.update')->whereNumber('id');
+        Route::post('/penerbit/delete/{id}', [AdminController::class, 'penerbitDestroy'])->name('penerbit.delete')->whereNumber('id');
 
         Route::get('/rak', [AdminController::class, 'rakIndex'])->name('rak');
         Route::post('/rak', [AdminController::class, 'rakStore'])->name('rak.store');
-        Route::post('/rak/update/{id}', [AdminController::class, 'rakUpdate'])->name('rak.update');
-        Route::post('/rak/delete/{id}', [AdminController::class, 'rakDestroy'])->name('rak.delete');
-        Route::post('/rak/{rakId}/laci', [AdminController::class, 'laciStore'])->name('rak.laci.store');
-        Route::post('/rak/laci/update/{id}', [AdminController::class, 'laciUpdate'])->name('rak.laci.update');
-        Route::post('/rak/laci/delete/{id}', [AdminController::class, 'laciDestroy'])->name('rak.laci.delete');
-        Route::get('/rak/{rakId}/lacis', [AdminController::class, 'getLacisByRak'])->name('rak.lacis');
+        Route::post('/rak/update/{id}', [AdminController::class, 'rakUpdate'])->name('rak.update')->whereNumber('id');
+        Route::post('/rak/delete/{id}', [AdminController::class, 'rakDestroy'])->name('rak.delete')->whereNumber('id');
+        Route::post('/rak/{rakId}/laci', [AdminController::class, 'laciStore'])->name('rak.laci.store')->whereNumber('rakId');
+        Route::post('/rak/laci/update/{id}', [AdminController::class, 'laciUpdate'])->name('rak.laci.update')->whereNumber('id');
+        Route::post('/rak/laci/delete/{id}', [AdminController::class, 'laciDestroy'])->name('rak.laci.delete')->whereNumber('id');
+        Route::get('/rak/{rakId}/lacis', [AdminController::class, 'getLacisByRak'])->name('rak.lacis')->whereNumber('rakId');
 
         Route::get('/peminjaman', [AdminController::class, 'peminjamanIndex'])->name('peminjaman');
         Route::post('/peminjaman', [AdminController::class, 'peminjamanStore'])->name('peminjaman.store');
-        Route::post('/peminjaman/kembali/{id}', [AdminController::class, 'peminjamanKembali'])->name('peminjaman.kembali');
+        Route::post('/peminjaman/kembali/{id}', [AdminController::class, 'peminjamanKembali'])->name('peminjaman.kembali')->whereNumber('id');
         Route::get('/riwayat', [AdminController::class, 'riwayatIndex'])->name('riwayat');
 
         Route::get('/anggota', [AdminController::class, 'anggotaIndex'])->name('anggota');
         Route::post('/anggota', [AdminController::class, 'anggotaStore'])->name('anggota.store');
-        Route::post('/anggota/update/{id}', [AdminController::class, 'anggotaUpdate'])->name('anggota.update');
-        Route::post('/anggota/reset-password/{id}', [AdminController::class, 'anggotaResetPassword'])->name('anggota.reset-password');
-        Route::post('/anggota/toggle-status/{id}', [AdminController::class, 'anggotaToggleStatus'])->name('anggota.toggle-status');
-        Route::post('/anggota/delete/{id}', [AdminController::class, 'anggotaDestroy'])->name('anggota.delete');
+        Route::post('/anggota/update/{id}', [AdminController::class, 'anggotaUpdate'])->name('anggota.update')->whereNumber('id');
+        Route::post('/anggota/reset-password/{id}', [AdminController::class, 'anggotaResetPassword'])->name('anggota.reset-password')->whereNumber('id');
+        Route::post('/anggota/toggle-status/{id}', [AdminController::class, 'anggotaToggleStatus'])->name('anggota.toggle-status')->whereNumber('id');
+        Route::post('/anggota/delete/{id}', [AdminController::class, 'anggotaDestroy'])->name('anggota.delete')->whereNumber('id');
 
         Route::get('/pengaturan', [AdminController::class, 'pengaturanIndex'])->name('pengaturan');
         Route::post('/pengaturan', [AdminController::class, 'pengaturanUpdate'])->name('pengaturan.update');

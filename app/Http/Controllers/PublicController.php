@@ -33,9 +33,9 @@ class PublicController extends Controller
             ->take(6)
             ->get();
 
-        $kategori_list = Kategori::all();
-        $penulis_list = Penulis::all();
-        $tahun_list = Buku::select('tahun_terbit')->distinct()->orderBy('tahun_terbit', 'desc')->pluck('tahun_terbit');
+        $kategori_list = Kategori::orderBy('nama', 'asc')->get();
+        $penulis_list = Penulis::orderBy('nama', 'asc')->get();
+        $tahun_list = Buku::select('tahun_terbit')->whereNotNull('tahun_terbit')->distinct()->orderBy('tahun_terbit', 'desc')->pluck('tahun_terbit');
 
         $jam_operasional = Pengaturan::where('key', 'jam_operasional')->value('value') ?? 'Senin - Jumat: 07.00 - 15.30 WIB';
         $nama_perpustakaan = Pengaturan::where('key', 'nama_perpustakaan')->value('value') ?? 'Perpustakaan SMK PGRI';
@@ -48,7 +48,7 @@ class PublicController extends Controller
         $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci']);
 
         if ($request->filled('search')) {
-            $search = trim($request->search);
+            $search = substr(trim($request->search), 0, 100);
             $query->where(function($q) use ($search) {
                 $q->where('judul', 'like', "%{$search}%")
                   ->orWhere('isbn', 'like', "%{$search}%")
@@ -64,31 +64,37 @@ class PublicController extends Controller
             });
         }
 
-        if ($request->filled('kategori_id')) {
-            $query->where('kategori_id', $request->kategori_id);
+        if ($request->filled('kategori_id') && is_numeric($request->kategori_id)) {
+            $query->where('kategori_id', (int) $request->kategori_id);
         }
 
-        if ($request->filled('penulis_id')) {
-            $query->where('penulis_id', $request->penulis_id);
+        if ($request->filled('penulis_id') && is_numeric($request->penulis_id)) {
+            $query->where('penulis_id', (int) $request->penulis_id);
         }
 
-        if ($request->filled('rak_id')) {
-            $query->where('rak_id', $request->rak_id);
+        if ($request->filled('rak_id') && is_numeric($request->rak_id)) {
+            $query->where('rak_id', (int) $request->rak_id);
         }
 
-        if ($request->filled('tahun')) {
-            $query->where('tahun_terbit', $request->tahun);
+        if ($request->filled('tahun') && is_numeric($request->tahun)) {
+            $query->where('tahun_terbit', (int) $request->tahun);
         }
 
         if ($request->filled('status')) {
-            if ($request->status === 'tersedia') {
+            $status = strtolower(trim($request->status));
+            if ($status === 'tersedia') {
                 $query->where('available_quantity', '>', 0);
-            } else if ($request->status === 'dipinjam') {
+            } elseif ($status === 'dipinjam') {
                 $query->where('available_quantity', '<=', 0);
             }
         }
 
-        $sort = $request->get('sort', 'terbaru');
+        $sort = strtolower(trim($request->get('sort', 'terbaru')));
+        $validSorts = ['terbaru', 'terlama', 'judul_asc', 'judul_desc', 'populer'];
+        if (!in_array($sort, $validSorts)) {
+            $sort = 'terbaru';
+        }
+
         switch ($sort) {
             case 'terlama':
                 $query->oldest();
@@ -123,7 +129,7 @@ class PublicController extends Controller
 
     public function detailBuku($id)
     {
-        $buku = Buku::with(['penulis', 'penerbit', 'kategori', 'rak.laci', 'laci'])->findOrFail($id);
+        $buku = Buku::with(['penulis', 'penerbit', 'kategori', 'rak.laci', 'laci'])->findOrFail((int) $id);
         $buku->increment('view_count');
 
         $userLoan = null;
@@ -162,7 +168,7 @@ class PublicController extends Controller
 
     public function searchSuggestions(Request $request)
     {
-        $q = trim($request->get('q', ''));
+        $q = substr(trim($request->get('q', '')), 0, 100);
         if (strlen($q) < 2) {
             return response()->json([]);
         }
