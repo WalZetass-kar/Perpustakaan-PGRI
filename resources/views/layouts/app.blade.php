@@ -65,7 +65,51 @@
 </head>
 <body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen font-sans relative selection:bg-brand-700 selection:text-white">
 
-    <header class="bg-white/95 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 transition duration-300 shadow-xs">
+    <div id="page-skeleton-loader" class="fixed inset-0 z-50 bg-gray-50 flex flex-col pointer-events-none transition-opacity duration-300">
+        <div class="h-20 bg-white border-b border-gray-200 px-4 sm:px-8 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-gray-200 skeleton-shimmer"></div>
+                <div class="space-y-1.5">
+                    <div class="w-36 h-4 bg-gray-200 rounded-md skeleton-shimmer"></div>
+                    <div class="w-24 h-2.5 bg-gray-200 rounded-md skeleton-shimmer"></div>
+                </div>
+            </div>
+            <div class="hidden md:flex items-center gap-6">
+                <div class="w-20 h-4 bg-gray-200 rounded-md skeleton-shimmer"></div>
+                <div class="w-24 h-4 bg-gray-200 rounded-md skeleton-shimmer"></div>
+                <div class="w-20 h-4 bg-gray-200 rounded-md skeleton-shimmer"></div>
+            </div>
+            <div class="w-28 h-9 bg-gray-200 rounded-xl skeleton-shimmer"></div>
+        </div>
+
+        <div class="max-w-7xl w-full mx-auto p-4 sm:p-8 space-y-6 flex-1">
+            <div class="w-full h-44 sm:h-56 bg-gray-200 rounded-3xl skeleton-shimmer"></div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div class="h-72 bg-white rounded-2xl border border-gray-200 p-4 space-y-3">
+                    <div class="w-full h-40 bg-gray-200 rounded-xl skeleton-shimmer"></div>
+                    <div class="w-3/4 h-4 bg-gray-200 rounded skeleton-shimmer"></div>
+                    <div class="w-1/2 h-3 bg-gray-200 rounded skeleton-shimmer"></div>
+                </div>
+                <div class="h-72 bg-white rounded-2xl border border-gray-200 p-4 space-y-3 hidden sm:block">
+                    <div class="w-full h-40 bg-gray-200 rounded-xl skeleton-shimmer"></div>
+                    <div class="w-3/4 h-4 bg-gray-200 rounded skeleton-shimmer"></div>
+                    <div class="w-1/2 h-3 bg-gray-200 rounded skeleton-shimmer"></div>
+                </div>
+                <div class="h-72 bg-white rounded-2xl border border-gray-200 p-4 space-y-3 hidden md:block">
+                    <div class="w-full h-40 bg-gray-200 rounded-xl skeleton-shimmer"></div>
+                    <div class="w-3/4 h-4 bg-gray-200 rounded skeleton-shimmer"></div>
+                    <div class="w-1/2 h-3 bg-gray-200 rounded skeleton-shimmer"></div>
+                </div>
+                <div class="h-72 bg-white rounded-2xl border border-gray-200 p-4 space-y-3 hidden lg:block">
+                    <div class="w-full h-40 bg-gray-200 rounded-xl skeleton-shimmer"></div>
+                    <div class="w-3/4 h-4 bg-gray-200 rounded skeleton-shimmer"></div>
+                    <div class="w-1/2 h-3 bg-gray-200 rounded skeleton-shimmer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <header class="bg-white/95 backdrop-blur-md border-b border-gray-200 sticky top-0 z-40 transition duration-300 shadow-xs">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
 
             <a href="{{ route('home') }}" class="flex items-center gap-3.5 shrink-0 group">
@@ -178,6 +222,16 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var loader = document.getElementById('page-skeleton-loader');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(function() {
+                        if (loader.parentNode) loader.parentNode.removeChild(loader);
+                    }, 300);
+                }
+            }, 120);
+
             if (typeof AOS !== 'undefined') {
                 AOS.init({
                     duration: 800,

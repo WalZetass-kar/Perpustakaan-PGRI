@@ -77,6 +77,58 @@
           openAdmin: {{ request()->routeIs('admin.anggota*', 'admin.pengaturan*', 'admin.audit-log*') ? 'true' : 'false' }}
       }">
 
+    <div id="admin-skeleton-loader" class="fixed inset-0 z-50 bg-gray-100 flex pointer-events-none transition-opacity duration-300">
+        <div class="hidden lg:flex w-72 bg-white border-r border-gray-200 p-4 flex-col justify-between shrink-0">
+            <div class="space-y-6">
+                <div class="flex items-center gap-3 pb-4 border-b border-gray-100">
+                    <div class="w-9 h-9 rounded-xl bg-gray-200 skeleton-shimmer"></div>
+                    <div class="space-y-1.5 flex-1">
+                        <div class="w-28 h-3.5 bg-gray-200 rounded skeleton-shimmer"></div>
+                        <div class="w-16 h-2.5 bg-gray-200 rounded skeleton-shimmer"></div>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="w-full h-9 bg-gray-200 rounded-xl skeleton-shimmer"></div>
+                    <div class="w-full h-9 bg-gray-200 rounded-xl skeleton-shimmer"></div>
+                    <div class="w-full h-9 bg-gray-200 rounded-xl skeleton-shimmer"></div>
+                    <div class="w-full h-9 bg-gray-200 rounded-xl skeleton-shimmer"></div>
+                    <div class="w-full h-9 bg-gray-200 rounded-xl skeleton-shimmer"></div>
+                </div>
+            </div>
+            <div class="w-full h-12 bg-gray-200 rounded-xl skeleton-shimmer"></div>
+        </div>
+
+        <div class="flex-1 flex flex-col min-w-0">
+            <div class="h-20 bg-white border-b border-gray-200 px-6 flex items-center justify-between">
+                <div class="w-48 h-5 bg-gray-200 rounded-md skeleton-shimmer"></div>
+                <div class="flex items-center gap-3">
+                    <div class="w-32 h-8 bg-gray-200 rounded-xl skeleton-shimmer"></div>
+                    <div class="w-9 h-9 rounded-xl bg-gray-200 skeleton-shimmer"></div>
+                </div>
+            </div>
+            <div class="p-6 space-y-6 flex-1 overflow-hidden">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="h-28 bg-white rounded-2xl border border-gray-200 p-4 space-y-2">
+                        <div class="w-24 h-3 bg-gray-200 rounded skeleton-shimmer"></div>
+                        <div class="w-16 h-7 bg-gray-200 rounded skeleton-shimmer"></div>
+                    </div>
+                    <div class="h-28 bg-white rounded-2xl border border-gray-200 p-4 space-y-2">
+                        <div class="w-24 h-3 bg-gray-200 rounded skeleton-shimmer"></div>
+                        <div class="w-16 h-7 bg-gray-200 rounded skeleton-shimmer"></div>
+                    </div>
+                    <div class="h-28 bg-white rounded-2xl border border-gray-200 p-4 space-y-2">
+                        <div class="w-24 h-3 bg-gray-200 rounded skeleton-shimmer"></div>
+                        <div class="w-16 h-7 bg-gray-200 rounded skeleton-shimmer"></div>
+                    </div>
+                </div>
+                <div class="h-64 bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
+                    <div class="w-40 h-4 bg-gray-200 rounded skeleton-shimmer"></div>
+                    <div class="w-full h-44 bg-gray-100 rounded-xl skeleton-shimmer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div x-show="sidebarOpen" @click="sidebarOpen = false"
          x-transition:enter="transition-opacity ease-linear duration-300"
          x-transition:enter-start="opacity-0"
@@ -345,6 +397,18 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var loader = document.getElementById('admin-skeleton-loader');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(function() {
+                        if (loader.parentNode) loader.parentNode.removeChild(loader);
+                    }, 300);
+                }
+            }, 120);
+        });
+
         function confirmDelete(event, titleText = 'Apakah Anda yakin?', messageText = 'Data ini akan dihapus permanen!') {
             event.preventDefault();
             const form = event.target.closest('form');

@@ -70,6 +70,22 @@
 </head>
 <body class="bg-gradient-to-br from-brand-950 via-brand-900 to-red-950 text-gray-900 antialiased selection:bg-brand-700 selection:text-white">
 
+    <div id="login-skeleton-loader" class="fixed inset-0 z-50 bg-gradient-to-br from-brand-950 via-brand-900 to-red-950 flex items-center justify-center p-4 pointer-events-none transition-opacity duration-300">
+        <div class="w-full max-w-4xl bg-white rounded-3xl overflow-hidden shadow-2xl grid grid-cols-1 md:grid-cols-12">
+            <div class="md:col-span-5 bg-brand-800 p-8 space-y-6">
+                <div class="w-16 h-16 rounded-2xl bg-white/20 skeleton-shimmer"></div>
+                <div class="w-48 h-6 bg-white/20 rounded skeleton-shimmer"></div>
+                <div class="w-full h-16 bg-white/20 rounded skeleton-shimmer"></div>
+            </div>
+            <div class="md:col-span-7 p-8 space-y-6 bg-white">
+                <div class="w-40 h-6 bg-gray-200 rounded skeleton-shimmer"></div>
+                <div class="w-full h-10 bg-gray-100 rounded-xl skeleton-shimmer"></div>
+                <div class="w-full h-10 bg-gray-100 rounded-xl skeleton-shimmer"></div>
+                <div class="w-full h-12 bg-gray-200 rounded-xl skeleton-shimmer"></div>
+            </div>
+        </div>
+    </div>
+
     <div class="fixed inset-0 pointer-events-none overflow-hidden -z-10" aria-hidden="true">
         <div class="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-35 transform scale-105 transition duration-1000" style="background-image: url('https://smkpgripekanbaru.sch.id/images/pgri.webp');"></div>
         <div class="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none animate-bounce" style="animation-duration: 8s;"></div>
@@ -168,5 +184,19 @@
         </div>
 
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var loader = document.getElementById('login-skeleton-loader');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(function() {
+                        if (loader.parentNode) loader.parentNode.removeChild(loader);
+                    }, 300);
+                }
+            }, 120);
+        });
+    </script>
 </body>
 </html>
