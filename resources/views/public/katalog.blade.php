@@ -3,147 +3,7 @@
 @section('title', 'Katalog OPAC - Perpustakaan SMK PGRI Pekanbaru')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6"
-     x-data="{
-        viewMode: 'grid',
-        showFilterBar: false,
-        openDetailModal: false,
-        modalData: {},
-        openLoanModal: false,
-        loanData: {
-            buku_id: '',
-            judul: '',
-            cover: '',
-            penulis: '',
-            rak: '',
-            nama_peminjam: '',
-            jurusan: '',
-            nomor_induk: '',
-            no_wa: '',
-            catatan: ''
-        },
-        submittingLoan: false,
-        searchQuery: '{{ request('search') }}',
-        suggestions: [],
-        loadingSuggest: false,
-        showSuggest: false,
-        fetchSuggestions() {
-            if (this.searchQuery.trim().length < 2) {
-                this.suggestions = [];
-                this.showSuggest = false;
-                return;
-            }
-            this.loadingSuggest = true;
-            fetch('/api/buku/search-suggestions?q=' + encodeURIComponent(this.searchQuery))
-                .then(res => res.json())
-                .then(data => {
-                    this.suggestions = data;
-                    this.showSuggest = data.length > 0;
-                    this.loadingSuggest = false;
-                })
-                .catch(() => { this.loadingSuggest = false; });
-        },
-        selectSuggestion(item) {
-            this.searchQuery = item.judul;
-            this.showSuggest = false;
-            window.location.href = '{{ route('katalog') }}?search=' + encodeURIComponent(item.judul);
-        },
-        startLoan(book) {
-            if (book.available <= 0) {
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Stok Buku Habis',
-                        text: 'Seluruh eksemplar buku ini sedang dipinjam oleh murid lain.',
-                        confirmButtonColor: '#991b1b'
-                    });
-                } else {
-                    alert('Maaf, seluruh stok buku ini sedang habis dipinjam.');
-                }
-                return;
-            }
-            this.loanData.buku_id = book.id;
-            this.loanData.judul = book.judul;
-            this.loanData.cover = book.cover;
-            this.loanData.penulis = book.penulis;
-            this.loanData.rak = book.rak;
-            this.openDetailModal = false;
-            this.openLoanModal = true;
-        },
-        submitLoanRequest() {
-            if (!this.loanData.nama_peminjam || !this.loanData.jurusan || !this.loanData.nomor_induk) {
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Data Belum Lengkap',
-                        text: 'Mohon isi Nama Siswa, Kelas/Jurusan, dan NISN.',
-                        confirmButtonColor: '#991b1b'
-                    });
-                } else {
-                    alert('Mohon isi Nama Siswa, Kelas/Jurusan, dan NISN.');
-                }
-                return;
-            }
-            this.submittingLoan = true;
-            const token = document.querySelector('meta[name=csrf-token]') ? document.querySelector('meta[name=csrf-token]').content : '';
-            fetch('{{ route('katalog.ajukan') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': token
-                },
-                body: JSON.stringify(this.loanData)
-            })
-            .then(res => res.json().then(data => ({ status: res.status, body: data })))
-            .then(res => {
-                this.submittingLoan = false;
-                if (res.status === 200 && res.body.success) {
-                    this.openLoanModal = false;
-                    this.loanData.nama_peminjam = '';
-                    this.loanData.jurusan = '';
-                    this.loanData.nomor_induk = '';
-                    this.loanData.no_wa = '';
-                    this.loanData.catatan = '';
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Pengajuan Terkirim!',
-                            html: '<p class=\"text-xs text-gray-600 mb-2\">Pengajuan peminjaman buku <strong>' + res.body.judul_buku + '</strong> berhasil dikirim ke Admin Perpustakaan.</p><p class=\"text-sm font-mono font-bold text-brand-800 bg-gray-100 py-1.5 px-3 rounded-lg border border-gray-200\">Kode Ref: ' + res.body.kode + '</p><p class=\"text-[11px] text-gray-500 mt-2\">Silakan konfirmasi ke meja sirkulasi perpustakaan saat mengambil buku fisik.</p>',
-                            confirmButtonColor: '#991b1b'
-                        });
-                    } else {
-                        alert('Pengajuan peminjaman berhasil dikirim! Kode Referensi: ' + res.body.kode);
-                    }
-                } else {
-                    const msg = res.body.message || 'Gagal mengajukan peminjaman buku.';
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Pengajuan Gagal',
-                            text: msg,
-                            confirmButtonColor: '#991b1b'
-                        });
-                    } else {
-                        alert(msg);
-                    }
-                }
-            })
-            .catch(() => {
-                this.submittingLoan = false;
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Terjadi Kesalahan',
-                        text: 'Koneksi jaringan terputus atau server sedang sibuk.',
-                        confirmButtonColor: '#991b1b'
-                    });
-                } else {
-                    alert('Terjadi kesalahan jaringan.');
-                }
-            });
-        }
-     }">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6" x-data="katalogPage()">
 
     <div class="relative bg-gradient-to-r from-brand-900 via-brand-800 to-red-950 text-white rounded-3xl p-6 sm:p-10 shadow-xl border-2 border-brand-700 z-20">
         <div class="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
@@ -765,4 +625,149 @@
     </div>
 
 </div>
+
+<script>
+function katalogPage() {
+    return {
+        viewMode: 'grid',
+        showFilterBar: false,
+        openDetailModal: false,
+        modalData: {},
+        openLoanModal: false,
+        loanData: {
+            buku_id: '',
+            judul: '',
+            cover: '',
+            penulis: '',
+            rak: '',
+            nama_peminjam: '',
+            jurusan: '',
+            nomor_induk: '',
+            no_wa: '',
+            catatan: ''
+        },
+        submittingLoan: false,
+        searchQuery: @json(request('search', '')),
+        suggestions: [],
+        loadingSuggest: false,
+        showSuggest: false,
+        fetchSuggestions() {
+            if (this.searchQuery.trim().length < 2) {
+                this.suggestions = [];
+                this.showSuggest = false;
+                return;
+            }
+            this.loadingSuggest = true;
+            fetch('/api/buku/search-suggestions?q=' + encodeURIComponent(this.searchQuery))
+                .then(res => res.json())
+                .then(data => {
+                    this.suggestions = data;
+                    this.showSuggest = data.length > 0;
+                    this.loadingSuggest = false;
+                })
+                .catch(() => { this.loadingSuggest = false; });
+        },
+        selectSuggestion(item) {
+            this.searchQuery = item.judul;
+            this.showSuggest = false;
+            window.location.href = '{{ route('katalog') }}?search=' + encodeURIComponent(item.judul);
+        },
+        startLoan(book) {
+            if (book.available <= 0) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Stok Buku Habis',
+                        text: 'Seluruh eksemplar buku ini sedang dipinjam oleh murid lain.',
+                        confirmButtonColor: '#991b1b'
+                    });
+                } else {
+                    alert('Maaf, seluruh stok buku ini sedang habis dipinjam.');
+                }
+                return;
+            }
+            this.loanData.buku_id = book.id;
+            this.loanData.judul = book.judul;
+            this.loanData.cover = book.cover;
+            this.loanData.penulis = book.penulis;
+            this.loanData.rak = book.rak;
+            this.openDetailModal = false;
+            this.openLoanModal = true;
+        },
+        submitLoanRequest() {
+            if (!this.loanData.nama_peminjam || !this.loanData.jurusan || !this.loanData.nomor_induk) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Data Belum Lengkap',
+                        text: 'Mohon isi Nama Siswa, Kelas/Jurusan, dan NISN.',
+                        confirmButtonColor: '#991b1b'
+                    });
+                } else {
+                    alert('Mohon isi Nama Siswa, Kelas/Jurusan, dan NISN.');
+                }
+                return;
+            }
+            this.submittingLoan = true;
+            const token = document.querySelector('meta[name=csrf-token]') ? document.querySelector('meta[name=csrf-token]').content : '';
+            fetch('{{ route('katalog.ajukan') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': token
+                },
+                body: JSON.stringify(this.loanData)
+            })
+            .then(res => res.json().then(data => ({ status: res.status, body: data })))
+            .then(res => {
+                this.submittingLoan = false;
+                if (res.status === 200 && res.body.success) {
+                    this.openLoanModal = false;
+                    this.loanData.nama_peminjam = '';
+                    this.loanData.jurusan = '';
+                    this.loanData.nomor_induk = '';
+                    this.loanData.no_wa = '';
+                    this.loanData.catatan = '';
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Pengajuan Terkirim!',
+                            html: '<p class="text-xs text-gray-600 mb-2">Pengajuan peminjaman buku <strong>' + res.body.judul_buku + '</strong> berhasil dikirim ke Admin Perpustakaan.</p><p class="text-sm font-mono font-bold text-brand-800 bg-gray-100 py-1.5 px-3 rounded-lg border border-gray-200">Kode Ref: ' + res.body.kode + '</p><p class="text-[11px] text-gray-500 mt-2">Silakan konfirmasi ke meja sirkulasi perpustakaan saat mengambil buku fisik.</p>',
+                            confirmButtonColor: '#991b1b'
+                        });
+                    } else {
+                        alert('Pengajuan peminjaman berhasil dikirim! Kode Referensi: ' + res.body.kode);
+                    }
+                } else {
+                    const msg = res.body.message || 'Gagal mengajukan peminjaman buku.';
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Pengajuan Gagal',
+                            text: msg,
+                            confirmButtonColor: '#991b1b'
+                        });
+                    } else {
+                        alert(msg);
+                    }
+                }
+            })
+            .catch(() => {
+                this.submittingLoan = false;
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Terjadi Kesalahan',
+                        text: 'Koneksi jaringan terputus atau server sedang sibuk.',
+                        confirmButtonColor: '#991b1b'
+                    });
+                } else {
+                    alert('Terjadi kesalahan jaringan.');
+                }
+            });
+        }
+    };
+}
+</script>
 @endsection
