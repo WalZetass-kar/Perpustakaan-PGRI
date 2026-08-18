@@ -26,7 +26,7 @@ Route::get('/register', function () {
     return redirect()->route('home');
 })->name('register');
 
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
