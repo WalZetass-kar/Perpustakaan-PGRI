@@ -5,16 +5,11 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6" x-data="katalogPage()">
 
-    <div class="relative bg-gradient-to-r from-brand-900 via-brand-800 to-red-950 text-white rounded-3xl p-6 sm:p-10 shadow-xl border-2 border-brand-700 z-20">
-        <div class="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
-            <div class="absolute -top-24 -right-24 w-80 h-80 bg-amber-400/20 rounded-full blur-3xl"></div>
-            <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl"></div>
-        </div>
-
+    <div class="relative bg-gradient-to-br from-brand-900 via-brand-800 to-brand-950 text-white rounded-3xl p-6 sm:p-10 shadow-xl border-2 border-brand-700/80 z-20">
         <div class="relative z-10 text-center space-y-4 max-w-3xl mx-auto">
             <div class="space-y-2">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-amber-300 text-[10px] font-black tracking-widest border border-white/10 uppercase">
-                    <i class="fa-solid fa-book-bookmark text-amber-400"></i>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white text-[10px] font-black tracking-widest border border-white/20 uppercase">
+                    <i class="fa-solid fa-book-bookmark text-white"></i>
                     <span>LAYANAN OPAC PERPUSTAKAAN DIGITAL</span>
                 </div>
                 <h1 class="text-xl sm:text-3xl font-black tracking-tight text-white leading-tight">
@@ -33,7 +28,7 @@
                 @if(request('status')) <input type="hidden" name="status" value="{{ request('status') }}"> @endif
                 @if(request('sort')) <input type="hidden" name="sort" value="{{ request('sort') }}"> @endif
 
-                <div class="flex items-center bg-white rounded-2xl p-1.5 shadow-lg border-2 border-amber-300 relative">
+                <div class="flex items-center bg-white rounded-2xl p-1.5 shadow-lg border-2 border-white/20 focus-within:border-brand-700 relative">
                     <div class="pl-3 pr-2 text-gray-400 shrink-0">
                         <i class="fa-solid fa-magnifying-glass text-xs"></i>
                     </div>
@@ -93,15 +88,15 @@
                 </div>
             </form>
 
-            <div class="pt-1 flex flex-wrap items-center justify-center gap-3 text-xs font-bold text-red-100">
-                <div class="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-xl border border-white/10 text-[11px]">
-                    <span class="text-amber-300 font-black">{{ $total_buku_count }}</span> Judul Koleksi
+            <div class="pt-1 flex flex-wrap items-center justify-center gap-3 text-xs font-bold text-white">
+                <div class="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-xl border border-white/15 text-[11px]">
+                    <span class="text-white font-black">{{ $total_buku_count }}</span> Judul Koleksi
                 </div>
-                <div class="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-xl border border-white/10 text-[11px]">
-                    <span class="text-amber-300 font-black">{{ $total_kategori_count }}</span> Kategori
+                <div class="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-xl border border-white/15 text-[11px]">
+                    <span class="text-white font-black">{{ $total_kategori_count }}</span> Kategori
                 </div>
-                <div class="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-xl border border-white/10 text-[11px]">
-                    <span class="text-amber-300 font-black">{{ $total_rak_count }}</span> Rak Penempatan
+                <div class="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-xl border border-white/15 text-[11px]">
+                    <span class="text-white font-black">{{ $total_rak_count }}</span> Rak Penempatan
                 </div>
             </div>
         </div>
