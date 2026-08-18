@@ -9,6 +9,7 @@ Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/katalog', [PublicController::class, 'katalog'])->name('katalog');
 Route::get('/buku/{id}', [PublicController::class, 'detailBuku'])->name('buku.detail')->whereNumber('id');
 Route::get('/api/buku/search-suggestions', [PublicController::class, 'searchSuggestions'])->name('buku.search-suggestions')->middleware('throttle:60,1');
+Route::post('/katalog/ajukan-peminjaman', [PublicController::class, 'ajukanPeminjaman'])->name('katalog.ajukan')->middleware('throttle:10,1');
 
 Route::get('/aksesperpuspgri', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/aksesperpuspgri', [AuthController::class, 'login'])->name('login.post')->middleware('throttle:5,1');
@@ -35,6 +36,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/data-buku', [AdminController::class, 'dataBukuIndex'])->name('data-buku');
         Route::get('/temukan-buku', [AdminController::class, 'temukanBukuIndex'])->name('temukan-buku');
 
         Route::get('/buku', [AdminController::class, 'bukuIndex'])->name('buku');
@@ -69,6 +71,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/peminjaman', [AdminController::class, 'peminjamanIndex'])->name('peminjaman');
         Route::post('/peminjaman', [AdminController::class, 'peminjamanStore'])->name('peminjaman.store');
         Route::post('/peminjaman/kembali/{id}', [AdminController::class, 'peminjamanKembali'])->name('peminjaman.kembali')->whereNumber('id');
+        Route::get('/peminjaman/request', [AdminController::class, 'peminjamanRequestIndex'])->name('peminjaman.request');
+        Route::post('/peminjaman/request/{id}/approve', [AdminController::class, 'peminjamanRequestApprove'])->name('peminjaman.request.approve')->whereNumber('id');
+        Route::post('/peminjaman/request/{id}/reject', [AdminController::class, 'peminjamanRequestReject'])->name('peminjaman.request.reject')->whereNumber('id');
         Route::get('/riwayat', [AdminController::class, 'riwayatIndex'])->name('riwayat');
 
         Route::get('/anggota', [AdminController::class, 'anggotaIndex'])->name('anggota');

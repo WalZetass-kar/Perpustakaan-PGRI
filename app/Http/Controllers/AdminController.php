@@ -178,6 +178,71 @@ class AdminController extends Controller
         return view('admin.temukan-buku.index', compact('bukuList', 'kategoriList', 'rakList', 'metrics'));
     }
 
+    public function dataBukuIndex(Request $request)
+    {
+        $query = Buku::with([
+            'penulis',
+            'penerbit',
+            'kategori',
+            'rak.laci',
+            'laci.rak'
+        ]);
+
+        if ($request->filled('search')) {
+            $search = substr(trim($request->search), 0, 100);
+            $query->where(function($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                  ->orWhere('isbn', 'like', "%{$search}%")
+                  ->orWhereHas('penulis', function($qp) use ($search) {
+                      $qp->where('nama', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('penerbit', function($qpb) use ($search) {
+                      $qpb->where('nama', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('kategori', function($qk) use ($search) {
+                      $qk->where('nama', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('rak', function($qr) use ($search) {
+                      $qr->where('kode_rak', 'like', "%{$search}%")
+                         ->orWhere('nama_rak', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('laci', function($ql) use ($search) {
+                      $ql->where('nama_laci', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        if ($request->filled('kategori_id') && is_numeric($request->kategori_id)) {
+            $query->where('kategori_id', (int) $request->kategori_id);
+        }
+
+        if ($request->filled('rak_id') && is_numeric($request->rak_id)) {
+            $query->where('rak_id', (int) $request->rak_id);
+        }
+
+        if ($request->filled('status')) {
+            $status = strtolower(trim($request->status));
+            if ($status === 'tersedia') {
+                $query->where('available_quantity', '>', 0);
+            } elseif ($status === 'habis') {
+                $query->where('available_quantity', '<=', 0);
+            }
+        }
+
+        $bukuList = $query->orderBy('judul', 'asc')->paginate(12)->withQueryString();
+        $kategoriList = Kategori::orderBy('nama', 'asc')->get();
+        $rakList = Rak::with('laci')->orderBy('kode_rak', 'asc')->get();
+
+        $stats = [
+            'total_judul'   => Buku::count(),
+            'total_stok'    => (int) Buku::sum('total_quantity'),
+            'buku_tersedia' => (int) Buku::sum('available_quantity'),
+            'buku_dipinjam' => (int) Peminjaman::where('status', 'dipinjam')->sum('jumlah'),
+        ];
+
+        return view('admin.data-buku.index', compact('bukuList', 'kategoriList', 'rakList', 'stats'));
+    }
+
     public function bukuIndex(Request $request)
     {
         if ($request->ajax() || $request->wantsJson() || $request->has('draw')) {
@@ -338,6 +403,57 @@ class AdminController extends Controller
         return view('admin.buku.index', compact('penulisList', 'penerbitList', 'kategoriList', 'rakList'));
     }
 
+    private function compressAndStoreCover($file)
+    {
+        $filename = 'covers/' . Str::random(40) . '.jpg';
+        $fullPath = storage_path('app/public/' . $filename);
+        $directory = dirname($fullPath);
+
+        if (!is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        $imagePath = $file->getRealPath();
+        $mime = $file->getMimeType();
+
+        $source = null;
+        if ($mime === 'image/jpeg' || $mime === 'image/jpg') {
+            $source = @imagecreatefromjpeg($imagePath);
+        } elseif ($mime === 'image/png') {
+            $source = @imagecreatefrompng($imagePath);
+        } elseif ($mime === 'image/webp') {
+            $source = @imagecreatefromwebp($imagePath);
+        }
+
+        if (!$source) {
+            return $file->store('covers', 'public');
+        }
+
+        $origWidth = imagesx($source);
+        $origHeight = imagesy($source);
+
+        $maxWidth = 600;
+        if ($origWidth > $maxWidth) {
+            $newWidth = $maxWidth;
+            $newHeight = (int) round(($origHeight * $maxWidth) / $origWidth);
+        } else {
+            $newWidth = $origWidth;
+            $newHeight = $origHeight;
+        }
+
+        $canvas = imagecreatetruecolor($newWidth, $newHeight);
+        $white = imagecolorallocate($canvas, 255, 255, 255);
+        imagefilledrectangle($canvas, 0, 0, $newWidth, $newHeight, $white);
+        imagecopyresampled($canvas, $source, 0, 0, 0, 0, $newWidth, $newHeight, $origWidth, $origHeight);
+
+        imagejpeg($canvas, $fullPath, 80);
+
+        imagedestroy($source);
+        imagedestroy($canvas);
+
+        return $filename;
+    }
+
     public function bukuStore(Request $request)
     {
         $request->validate([
@@ -351,12 +467,12 @@ class AdminController extends Controller
             'rak_id'         => 'nullable|exists:rak,id',
             'rak_laci_id'    => 'nullable|exists:rak_laci,id',
             'sinopsis'       => 'nullable|string',
-            'cover'          => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
+            'cover'          => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
         ]);
 
         $coverPath = null;
         if ($request->hasFile('cover')) {
-            $coverPath = $request->file('cover')->store('covers', 'public');
+            $coverPath = $this->compressAndStoreCover($request->file('cover'));
         }
 
         $buku = Buku::create([
@@ -401,7 +517,7 @@ class AdminController extends Controller
             'rak_id'         => 'nullable|exists:rak,id',
             'rak_laci_id'    => 'nullable|exists:rak_laci,id',
             'sinopsis'       => 'nullable|string',
-            'cover'          => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
+            'cover'          => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
         ]);
 
         $coverPath = $buku->cover;
@@ -409,7 +525,7 @@ class AdminController extends Controller
             if ($buku->cover && Storage::disk('public')->exists($buku->cover)) {
                 Storage::disk('public')->delete($buku->cover);
             }
-            $coverPath = $request->file('cover')->store('covers', 'public');
+            $coverPath = $this->compressAndStoreCover($request->file('cover'));
         }
 
         $qtyDiff = $request->total_quantity - $buku->total_quantity;
@@ -1002,6 +1118,126 @@ class AdminController extends Controller
         return view('admin.peminjaman.riwayat', compact('riwayatList'));
     }
 
+    public function peminjamanRequestIndex(Request $request)
+    {
+        $status = strtolower(trim($request->get('status', 'pending')));
+        $validStatuses = ['pending', 'dipinjam', 'ditolak', 'all'];
+        if (!in_array($status, $validStatuses)) {
+            $status = 'pending';
+        }
+
+        $query = Peminjaman::with(['user', 'buku.rak', 'buku.laci', 'petugas']);
+
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        if ($request->filled('search')) {
+            $search = substr(trim($request->search), 0, 100);
+            $query->where(function($q) use ($search) {
+                $q->where('kode_peminjaman', 'like', "%{$search}%")
+                  ->orWhere('nama_peminjam', 'like', "%{$search}%")
+                  ->orWhere('jurusan', 'like', "%{$search}%")
+                  ->orWhere('nomor_induk', 'like', "%{$search}%")
+                  ->orWhere('no_wa', 'like', "%{$search}%")
+                  ->orWhereHas('buku', function($qb) use ($search) {
+                      $qb->where('judul', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $requestList = $query->latest('created_at')->paginate(15)->withQueryString();
+
+        $counts = [
+            'pending'  => Peminjaman::where('status', 'pending')->count(),
+            'dipinjam' => Peminjaman::where('status', 'dipinjam')->count(),
+            'ditolak'  => Peminjaman::where('status', 'ditolak')->count(),
+            'all'      => Peminjaman::count(),
+        ];
+
+        return view('admin.peminjaman.request', compact('requestList', 'counts', 'status'));
+    }
+
+    public function peminjamanRequestApprove(Request $request, $id)
+    {
+        try {
+            $loan = DB::transaction(function () use ($id) {
+                $lockedLoan = Peminjaman::where('id', $id)->lockForUpdate()->firstOrFail();
+
+                if ($lockedLoan->status !== 'pending') {
+                    throw new \Exception('NOT_PENDING');
+                }
+
+                $book = Buku::where('id', $lockedLoan->buku_id)->lockForUpdate()->firstOrFail();
+                $qty = max(1, (int) $lockedLoan->jumlah);
+
+                if ($book->available_quantity < $qty) {
+                    throw new \Exception('STOCK_INSUFFICIENT');
+                }
+
+                $book->available_quantity -= $qty;
+                $book->save();
+
+                $today = Carbon::today()->toDateString();
+                $lockedLoan->status = 'dipinjam';
+                $lockedLoan->kode_peminjaman = 'PJ-' . date('Ymd') . '-' . strtoupper(Str::random(4));
+                $lockedLoan->tanggal_pinjam = $today;
+                $lockedLoan->tanggal_jatuh_tempo = Carbon::today()->addDays(7)->toDateString();
+                $lockedLoan->petugas_id = auth()->id();
+                $lockedLoan->save();
+
+                return $lockedLoan;
+            });
+        } catch (\Exception $e) {
+            if ($e->getMessage() === 'NOT_PENDING') {
+                return back()->with('error', 'Pengajuan ini sudah diproses sebelumnya.');
+            }
+            if ($e->getMessage() === 'STOCK_INSUFFICIENT') {
+                return back()->with('error', 'Stok fisik buku tidak mencukupi untuk menyetujui peminjaman.');
+            }
+            return back()->with('error', 'Terjadi kesalahan sistem saat menyetujui pengajuan.');
+        }
+
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'APPROVE_REQUEST_PINJAM',
+            'deskripsi'  => "Menyetujui pengajuan peminjaman untuk {$loan->nama_peminjam} (Kode: {$loan->kode_peminjaman})",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', "Pengajuan peminjaman untuk {$loan->nama_peminjam} berhasil disetujui! Kode: {$loan->kode_peminjaman}");
+    }
+
+    public function peminjamanRequestReject(Request $request, $id)
+    {
+        $request->validate([
+            'alasan_penolakan' => 'nullable|string|max:500',
+        ]);
+
+        $loan = Peminjaman::findOrFail($id);
+
+        if ($loan->status !== 'pending') {
+            return back()->with('error', 'Hanya pengajuan dengan status pending yang dapat ditolak.');
+        }
+
+        $loan->update([
+            'status'           => 'ditolak',
+            'alasan_penolakan' => $request->filled('alasan_penolakan') ? trim($request->alasan_penolakan) : 'Permintaan tidak dapat diproses oleh petugas perpustakaan.',
+            'petugas_id'       => auth()->id(),
+        ]);
+
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'REJECT_REQUEST_PINJAM',
+            'deskripsi'  => "Menolak pengajuan peminjaman {$loan->kode_peminjaman} untuk {$loan->nama_peminjam}",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', "Pengajuan peminjaman untuk {$loan->nama_peminjam} telah ditolak.");
+    }
+
     public function anggotaIndex(Request $request)
     {
         $query = User::with('role');
@@ -1022,8 +1258,8 @@ class AdminController extends Controller
 
     public function anggotaStore(Request $request)
     {
-        if (!auth()->user()->isAdmin()) {
-            abort(403, 'Hanya Administrator yang berwenang menambahkan akun admin baru.');
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Administrator yang berwenang menambahkan akun pengelola baru.');
         }
 
         $request->validate([
@@ -1059,8 +1295,8 @@ class AdminController extends Controller
     {
         $user = User::findOrFail($id);
 
-        if (!auth()->user()->isAdmin()) {
-            abort(403, 'Anda tidak memiliki hak akses untuk mengubah akun admin.');
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Administrator yang berwenang mengubah data akun admin.');
         }
 
         $request->validate([
@@ -1101,8 +1337,8 @@ class AdminController extends Controller
 
     public function anggotaResetPassword(Request $request, $id)
     {
-        if (!auth()->user()->isAdmin()) {
-            abort(403, 'Hanya Administrator yang berwenang mereset password akun admin.');
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Administrator yang berwenang mereset password akun admin.');
         }
 
         $user = User::findOrFail($id);
@@ -1128,8 +1364,8 @@ class AdminController extends Controller
 
     public function anggotaToggleStatus(Request $request, $id)
     {
-        if (!auth()->user()->isAdmin()) {
-            abort(403, 'Hanya Administrator yang berwenang mengubah status aktif akun admin.');
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Administrator yang berwenang mengubah status aktif akun admin.');
         }
 
         $user = User::findOrFail($id);
@@ -1156,8 +1392,8 @@ class AdminController extends Controller
 
     public function anggotaDestroy(Request $request, $id)
     {
-        if (!auth()->user()->isAdmin()) {
-            abort(403, 'Hanya Administrator yang berwenang menghapus akun pengelola.');
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Administrator yang berwenang menghapus akun pengelola.');
         }
 
         $user = User::findOrFail($id);

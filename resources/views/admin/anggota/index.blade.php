@@ -59,10 +59,10 @@
                        class="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:outline-none">
                 <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </form>
-            @if(auth()->user()->isAdmin())
+            @if(auth()->user()->isSuperAdmin())
                 <button @click="openAddModal = true" class="px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0">
-                    <svg class="w-3.5 h-3.5 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
-                    <span>+ Tambah Admin</span>
+                    <i class="fa-solid fa-plus text-emerald-300"></i>
+                    <span>Tambah Admin</span>
                 </button>
             @endif
         </div>
@@ -142,7 +142,7 @@
                                     </button>
                                 @endif
 
-                                @if(auth()->user()->isAdmin())
+                                @if(auth()->user()->isSuperAdmin())
                                     <button type="button" @click="passwordData = {{ json_encode([
                                         'id' => $user->id,
                                         'name' => $user->name,

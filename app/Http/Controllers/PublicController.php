@@ -11,6 +11,9 @@ use App\Models\Penerbit;
 use App\Models\Pengaturan;
 use App\Models\Peminjaman;
 use App\Models\User;
+use App\Models\AuditLog;
+use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class PublicController extends Controller
 {
@@ -205,5 +208,69 @@ class PublicController extends Controller
             });
 
         return response()->json($bukuList);
+    }
+
+    public function ajukanPeminjaman(Request $request)
+    {
+        $validated = $request->validate([
+            'buku_id'       => 'required|exists:buku,id',
+            'nama_peminjam' => 'required|string|max:255',
+            'jurusan'       => 'required|string|max:150',
+            'nomor_induk'   => 'required|string|max:50',
+            'no_wa'         => 'nullable|string|max:30',
+            'catatan'       => 'nullable|string|max:500',
+            'jumlah'        => 'nullable|integer|min:1|max:5',
+        ]);
+
+        $buku = Buku::findOrFail($validated['buku_id']);
+
+        if ($buku->available_quantity <= 0) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Maaf, seluruh stok buku ini sedang habis dipinjam.'
+                ], 422);
+            }
+            return back()->with('error', 'Maaf, seluruh stok buku ini sedang habis dipinjam.');
+        }
+
+        $jumlah = isset($validated['jumlah']) ? (int) $validated['jumlah'] : 1;
+        $requestCode = 'REQ-' . date('Ymd') . '-' . strtoupper(Str::random(4));
+        $today = Carbon::today()->toDateString();
+        $due = Carbon::today()->addDays(7)->toDateString();
+
+        $loan = Peminjaman::create([
+            'kode_peminjaman'     => $requestCode,
+            'nama_peminjam'       => trim($validated['nama_peminjam']),
+            'jurusan'             => trim($validated['jurusan']),
+            'nomor_induk'         => trim($validated['nomor_induk']),
+            'no_wa'               => !empty($validated['no_wa']) ? trim($validated['no_wa']) : null,
+            'user_id'             => auth()->id(),
+            'buku_id'             => $buku->id,
+            'jumlah'              => $jumlah,
+            'tanggal_pinjam'      => $today,
+            'tanggal_jatuh_tempo' => $due,
+            'status'              => 'pending',
+            'catatan'             => !empty($validated['catatan']) ? trim($validated['catatan']) : null,
+        ]);
+
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => $loan->nama_peminjam,
+            'aktivitas'  => 'PENGAJUAN_PINJAM_OPAC',
+            'deskripsi'  => "Siswa mengajukan peminjaman buku: '{$buku->judul}' ({$loan->kode_peminjaman})",
+            'ip_address' => $request->ip(),
+        ]);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success'     => true,
+                'kode'        => $requestCode,
+                'judul_buku'  => $buku->judul,
+                'message'     => 'Pengajuan peminjaman berhasil dikirim. Silakan tunggu konfirmasi petugas perpustakaan.'
+            ]);
+        }
+
+        return back()->with('success', "Pengajuan peminjaman untuk buku '{$buku->judul}' berhasil dikirim! Kode Referensi: {$requestCode}");
     }
 }

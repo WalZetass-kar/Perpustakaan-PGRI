@@ -15,6 +15,7 @@ class Peminjaman extends Model
         'nama_peminjam',
         'jurusan',
         'nomor_induk',
+        'no_wa',
         'user_id',
         'buku_id',
         'jumlah',
@@ -23,6 +24,8 @@ class Peminjaman extends Model
         'waktu_kembali',
         'jumlah_perpanjangan',
         'status',
+        'catatan',
+        'alasan_penolakan',
         'petugas_id',
     ];
 

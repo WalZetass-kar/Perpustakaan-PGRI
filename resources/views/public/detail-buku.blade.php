@@ -3,11 +3,114 @@
 @section('title', $buku->judul . ' - ' . ($pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI'))
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6" x-data="{ openPetaRak: false }">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6"
+     x-data="{ 
+        openPetaRak: false,
+        openLoanModal: false,
+        loanData: {
+            buku_id: '{{ $buku->id }}',
+            nama_peminjam: '',
+            jurusan: '',
+            nomor_induk: '',
+            no_wa: '',
+            catatan: ''
+        },
+        submittingLoan: false,
+        startLoan() {
+            @if($buku->available_quantity <= 0)
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Stok Buku Habis',
+                        text: 'Seluruh eksemplar buku ini sedang dipinjam oleh murid lain.',
+                        confirmButtonColor: '#991b1b'
+                    });
+                } else {
+                    alert('Maaf, seluruh stok buku ini sedang habis dipinjam.');
+                }
+                return;
+            @else
+                this.openLoanModal = true;
+            @endif
+        },
+        submitLoanRequest() {
+            if (!this.loanData.nama_peminjam || !this.loanData.jurusan || !this.loanData.nomor_induk) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Data Belum Lengkap',
+                        text: 'Mohon isi Nama Siswa, Kelas/Jurusan, dan NISN.',
+                        confirmButtonColor: '#991b1b'
+                    });
+                } else {
+                    alert('Mohon isi Nama Siswa, Kelas/Jurusan, dan NISN.');
+                }
+                return;
+            }
+            this.submittingLoan = true;
+            const token = document.querySelector('meta[name=csrf-token]') ? document.querySelector('meta[name=csrf-token]').content : '';
+            fetch('{{ route('katalog.ajukan') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': token
+                },
+                body: JSON.stringify(this.loanData)
+            })
+            .then(res => res.json().then(data => ({ status: res.status, body: data })))
+            .then(res => {
+                this.submittingLoan = false;
+                if (res.status === 200 && res.body.success) {
+                    this.openLoanModal = false;
+                    this.loanData.nama_peminjam = '';
+                    this.loanData.jurusan = '';
+                    this.loanData.nomor_induk = '';
+                    this.loanData.no_wa = '';
+                    this.loanData.catatan = '';
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Pengajuan Terkirim!',
+                            html: '<p class=\"text-xs text-gray-600 mb-2\">Pengajuan peminjaman buku berhasil dikirim ke Admin Perpustakaan.</p><p class=\"text-sm font-mono font-bold text-brand-800 bg-gray-100 py-1.5 px-3 rounded-lg border border-gray-200\">Kode Ref: ' + res.body.kode + '</p><p class=\"text-[11px] text-gray-500 mt-2\">Silakan konfirmasi ke meja sirkulasi perpustakaan saat mengambil buku fisik.</p>',
+                            confirmButtonColor: '#991b1b'
+                        });
+                    } else {
+                        alert('Pengajuan peminjaman berhasil dikirim! Kode Referensi: ' + res.body.kode);
+                    }
+                } else {
+                    const msg = res.body.message || 'Gagal mengajukan peminjaman buku.';
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Pengajuan Gagal',
+                            text: msg,
+                            confirmButtonColor: '#991b1b'
+                        });
+                    } else {
+                        alert(msg);
+                    }
+                }
+            })
+            .catch(() => {
+                this.submittingLoan = false;
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Terjadi Kesalahan',
+                        text: 'Koneksi jaringan terputus atau server sedang sibuk.',
+                        confirmButtonColor: '#991b1b'
+                    });
+                } else {
+                    alert('Terjadi kesalahan jaringan.');
+                }
+            });
+        }
+     }">
 
     <nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-2 text-xs font-semibold text-gray-500">
         <a href="{{ route('katalog') }}" class="hover:text-brand-700 transition flex items-center gap-1.5">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            <i class="fa-solid fa-arrow-left text-xs"></i>
             <span>Katalog OPAC</span>
         </a>
         <span class="text-gray-300">/</span>
@@ -22,7 +125,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
             <div class="lg:col-span-4 flex flex-col items-center text-center space-y-4">
-                <div class="w-full max-w-[260px] sm:max-w-[280px] aspect-[3/4] bg-gray-100 rounded-2xl border border-gray-200 overflow-hidden shadow-sm relative flex flex-col justify-between">
+                <div class="w-full max-w-[260px] sm:max-w-[280px] aspect-3/4 bg-gray-100 rounded-2xl border border-gray-200 overflow-hidden shadow-sm relative flex flex-col justify-between">
                     @if($buku->cover_url)
                         <img src="{{ $buku->cover_url }}" alt="Cover {{ $buku->judul }}" class="w-full h-full object-cover">
                     @else
@@ -44,6 +147,11 @@
                 </div>
 
                 <div class="w-full max-w-[260px] sm:max-w-[280px] space-y-2 text-xs">
+                    <button type="button" @click="startLoan()" class="w-full py-3 {{ $buku->available_quantity > 0 ? 'bg-brand-700 hover:bg-brand-800 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed' }} font-extrabold rounded-2xl text-xs flex items-center justify-center gap-2 shadow-md transition">
+                        <i class="fa-solid fa-hand-holding-hand text-sm"></i>
+                        <span>Ajukan Peminjaman</span>
+                    </button>
+
                     <div class="p-2.5 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-between text-[11px]">
                         <span class="font-bold text-gray-500">ISBN:</span>
                         <span class="font-mono font-bold text-gray-800">{{ $buku->isbn ?? 'Tidak Tercatat' }}</span>
@@ -92,7 +200,7 @@
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-gray-200/80 pb-3">
                         <div class="flex items-center gap-2">
                             <span class="p-1.5 rounded-lg bg-brand-50 text-brand-700 border border-brand-200">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <i class="fa-solid fa-location-dot text-sm"></i>
                             </span>
                             <div>
                                 <h3 class="text-xs sm:text-sm font-black text-gray-900 uppercase tracking-wide">Lokasi Fisik Buku (Wayfinding)</h3>
@@ -106,7 +214,7 @@
                             </span>
 
                             <button type="button" @click="openPetaRak = true" class="px-3 py-1 bg-brand-700 hover:bg-brand-800 text-white font-bold rounded-lg transition text-xs flex items-center gap-1.5 shadow-2xs cursor-pointer">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                                <i class="fa-solid fa-map-location-dot text-xs"></i>
                                 <span>Lihat Peta Rak</span>
                             </button>
                         </div>
@@ -115,7 +223,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
                         <div class="p-3 bg-white rounded-xl border border-gray-200 shadow-2xs space-y-1">
                             <div class="flex items-center gap-1.5 text-gray-500 text-[10px] font-bold uppercase tracking-wider">
-                                <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                <i class="fa-solid fa-building text-gray-400"></i>
                                 <span>Lantai &amp; Ruangan</span>
                             </div>
                             <p class="font-black text-gray-900 text-xs sm:text-sm leading-snug">
@@ -126,7 +234,7 @@
 
                         <div class="p-3 bg-white rounded-xl border border-gray-200 shadow-2xs space-y-1">
                             <div class="flex items-center gap-1.5 text-brand-700 text-[10px] font-bold uppercase tracking-wider">
-                                <svg class="w-3.5 h-3.5 text-brand-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                <i class="fa-solid fa-layer-group text-brand-700"></i>
                                 <span>Lemari Rak</span>
                             </div>
                             <p class="font-black text-gray-900 text-xs sm:text-sm leading-snug">
@@ -140,7 +248,7 @@
                         <div class="p-3 bg-emerald-50/70 rounded-xl border-2 border-emerald-300 shadow-2xs space-y-1 relative">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-1.5 text-emerald-800 text-[10px] font-bold uppercase tracking-wider">
-                                    <svg class="w-3.5 h-3.5 text-emerald-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                                    <i class="fa-solid fa-inbox text-emerald-700"></i>
                                     <span>Laci Tujuan (Endpoint)</span>
                                 </div>
                                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
@@ -193,11 +301,11 @@
 
                 <div class="p-4 rounded-2xl bg-gray-50 border border-gray-200 space-y-2 text-xs">
                     <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-brand-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <i class="fa-solid fa-circle-info text-brand-700"></i>
                         <h4 class="font-bold text-gray-900">Informasi &amp; Prosedur Peminjaman Fisik</h4>
                     </div>
                     <p class="text-gray-600 leading-relaxed">
-                        {{ $pengaturan['pesan_sirkulasi'] ?? 'Untuk meminjam buku fisik, silakan langsung menuju meja layanan sirkulasi perpustakaan.' }}
+                        {{ $pengaturan['pesan_sirkulasi'] ?? 'Untuk meminjam buku fisik, silakan gunakan tombol Ajukan Peminjaman di atas atau langsung menuju meja layanan sirkulasi perpustakaan.' }}
                     </p>
                     <div class="pt-2 border-t border-gray-200/60 flex flex-wrap items-center gap-x-6 gap-y-1 text-[11px] text-gray-500 font-medium">
                         <span>Jam Layanan: <strong class="text-gray-800">{{ $pengaturan['jam_operasional'] ?? 'Senin - Jumat: 07.00 - 15.30 WIB' }}</strong></span>
@@ -238,65 +346,45 @@
                             <td class="px-4 py-2.5 text-gray-900 font-medium">{{ $buku->kategori->nama ?? '-' }}</td>
                         </tr>
                         <tr class="bg-gray-50/50">
-                            <td class="px-4 py-2.5 font-bold text-gray-500">Lokasi Lemari Rak</td>
-                            <td class="px-4 py-2.5 text-gray-900 font-medium">{{ $buku->rak->nama_rak ?? '-' }} ({{ $buku->rak->kode_rak ?? '-' }})</td>
-                        </tr>
-                        <tr>
-                            <td class="px-4 py-2.5 font-bold text-gray-500">Nomor Laci / Tingkat</td>
-                            <td class="px-4 py-2.5 text-gray-900 font-medium">{{ $buku->laci->nama_laci ?? ($buku->rak ? 'Laci 1' : '-') }}</td>
+                            <td class="px-4 py-2.5 font-bold text-gray-500">Lokasi Penempatan</td>
+                            <td class="px-4 py-2.5 text-gray-900 font-medium">{{ $buku->lokasi_lengkap }}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        @if(isset($relatedBooks) && $relatedBooks->isNotEmpty())
+        @if($relatedBooks->isNotEmpty())
             <div class="pt-6 border-t border-gray-100 space-y-4">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h3 class="text-sm font-bold text-gray-900">Buku Serupa</h3>
-                        <p class="text-xs text-gray-500">Koleksi referensi terkait di kategori {{ $buku->kategori->nama ?? 'yang sama' }}</p>
+                        <h3 class="text-sm font-bold text-gray-900">Rekomendasi Buku Terkait</h3>
+                        <p class="text-xs text-gray-500 mt-0.5">Koleksi lainnya dalam kategori {{ $buku->kategori->nama ?? 'serupa' }}</p>
                     </div>
                     <a href="{{ route('katalog', ['kategori' => $buku->kategori_id]) }}" class="text-xs font-bold text-brand-700 hover:text-brand-800 transition flex items-center gap-1">
                         <span>Lihat Semua</span>
-                        <span>&rarr;</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
                     </a>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    @foreach($relatedBooks as $rBook)
-                        <div class="p-3.5 bg-gray-50/60 hover:bg-white rounded-2xl border border-gray-200 hover:border-brand-700 transition duration-200 space-y-2.5 flex flex-col justify-between group">
-                            <div class="space-y-2">
-                                <div class="w-full aspect-[3/4] max-h-40 bg-gray-100 rounded-xl overflow-hidden border border-gray-200 relative flex items-center justify-center">
-                                    @if($rBook->cover_url)
-                                        <img src="{{ $rBook->cover_url }}" alt="{{ $rBook->judul }}" class="w-full h-full object-cover">
-                                    @else
-                                        <div class="w-full h-full p-3 bg-stone-50 border-l-2 border-brand-700 flex flex-col justify-between text-left select-none">
-                                            <span class="text-[9px] font-bold text-brand-800 uppercase">{{ $rBook->kategori->nama ?? 'Umum' }}</span>
-                                            <p class="text-[10px] font-bold text-gray-900 line-clamp-3 leading-snug">{{ $rBook->judul }}</p>
-                                            <span class="text-[8px] font-mono text-gray-400 uppercase">SMK PGRI</span>
-                                        </div>
-                                    @endif
-                                </div>
-
-                                <div>
-                                    <h4 class="text-xs font-bold text-gray-900 line-clamp-2 leading-snug group-hover:text-brand-700 transition">
-                                        <a href="{{ route('buku.detail', $rBook->id) }}">{{ $rBook->judul }}</a>
-                                    </h4>
-                                    <p class="text-[10px] text-gray-500 truncate mt-0.5">{{ $rBook->penulis->nama ?? '-' }}</p>
-                                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    @foreach($relatedBooks as $rb)
+                        <a href="{{ route('buku.detail', $rb->id) }}" class="group p-3 bg-gray-50 hover:bg-brand-50/40 border border-gray-200 hover:border-brand-200 rounded-2xl transition space-y-2.5 flex flex-col justify-between">
+                            <div class="aspect-3/4 bg-gray-200 rounded-xl overflow-hidden shadow-2xs relative">
+                                @if($rb->cover_url)
+                                    <img src="{{ $rb->cover_url }}" alt="{{ $rb->judul }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                                @else
+                                    <div class="w-full h-full bg-brand-800 text-white flex items-center justify-center font-bold text-xs p-2 text-center">
+                                        {{ substr($rb->judul, 0, 1) }}
+                                    </div>
+                                @endif
                             </div>
-
-                            <div class="pt-2 border-t border-gray-200/70 flex items-center justify-between text-[10px]">
-                                <span class="font-mono text-gray-600 truncate max-w-[100px] inline-flex items-center gap-1" title="{{ $rBook->rak->kode_rak ?? '' }}">
-                                    <svg class="w-3 h-3 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                    <span>{{ $rBook->rak->kode_rak ?? 'Umum' }}</span>
-                                </span>
-                                <span class="font-bold {{ $rBook->available_quantity > 0 ? 'text-emerald-700' : 'text-rose-600' }}">
-                                    {{ $rBook->available_quantity > 0 ? $rBook->available_quantity . ' Eks' : 'Dipinjam' }}
-                                </span>
+                            <div class="space-y-1">
+                                <span class="text-[9px] font-bold text-brand-700 block uppercase">{{ $rb->kategori->nama ?? 'Umum' }}</span>
+                                <h4 class="text-xs font-bold text-gray-900 line-clamp-2 leading-snug group-hover:text-brand-700 transition">{{ $rb->judul }}</h4>
+                                <p class="text-[10px] text-gray-500 truncate">{{ $rb->penulis->nama ?? '-' }}</p>
                             </div>
-                        </div>
+                        </a>
                     @endforeach
                 </div>
             </div>
@@ -304,39 +392,100 @@
 
     </div>
 
-    <div x-show="openPetaRak" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-xs" @keydown.escape.window="openPetaRak = false">
-        <div class="bg-white rounded-3xl border border-gray-200 shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-5 sm:p-7 space-y-5" @click.outside="openPetaRak = false">
-            <div class="flex items-center justify-between border-b border-gray-100 pb-3">
-                <div class="flex items-center gap-2.5">
-                    <span class="p-2 rounded-xl bg-brand-50 text-brand-700 border border-brand-200">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
-                    </span>
+    <div x-show="openLoanModal" @click.self="openLoanModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 backdrop-blur-xs p-4 overflow-y-auto" x-cloak>
+        <div @click.stop class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 space-y-5 shadow-2xl border-2 border-gray-200 transform transition-all my-8 relative">
+            <button @click="openLoanModal = false" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 flex items-center justify-center transition font-bold">&times;</button>
+
+            <div class="space-y-1">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-brand-50 text-brand-800 text-[10px] font-black uppercase tracking-wider border border-brand-200">
+                    <i class="fa-solid fa-file-signature text-brand-700"></i>
+                    <span>Formulir Pengajuan Peminjaman</span>
+                </div>
+                <h3 class="text-base font-black text-gray-900">Form Pengajuan Peminjaman Buku</h3>
+                <p class="text-[11px] text-gray-500">Lengkapi data diri Anda untuk konfirmasi peminjaman buku ke petugas perpustakaan.</p>
+            </div>
+
+            <div class="p-3 bg-gray-50 rounded-2xl border border-gray-200 flex items-center gap-3">
+                <div class="w-12 h-16 bg-gray-200 rounded-lg overflow-hidden shrink-0 border border-gray-300 flex items-center justify-center shadow-2xs">
+                    @if($buku->cover_url)
+                        <img src="{{ $buku->cover_url }}" alt="Cover" class="w-full h-full object-cover">
+                    @else
+                        <div class="w-full h-full bg-brand-800 text-white font-bold flex items-center justify-center text-xs">
+                            <i class="fa-solid fa-book"></i>
+                        </div>
+                    @endif
+                </div>
+                <div class="min-w-0 flex-1 text-xs">
+                    <p class="font-extrabold text-gray-900 line-clamp-1">{{ $buku->judul }}</p>
+                    <p class="text-[11px] text-gray-500 mt-0.5">Penulis: <span class="font-bold text-gray-700">{{ $buku->penulis->nama ?? '-' }}</span></p>
+                    <p class="text-[10px] text-brand-700 font-mono font-bold mt-0.5">Lokasi Rak: <span>{{ $buku->rak->kode_rak ?? '-' }} ({{ $buku->laci->nama_laci ?? 'Laci 1' }})</span></p>
+                </div>
+            </div>
+
+            <form @submit.prevent="submitLoanRequest()" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">Nama Lengkap Siswa / Peminjam <span class="text-rose-600">*</span></label>
+                    <input type="text" x-model="loanData.nama_peminjam" required placeholder="Contoh: Muhammad Ihwal" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                        <h3 class="text-sm sm:text-base font-black text-gray-900">Peta Tata Letak Rak Perpustakaan</h3>
-                        <p class="text-xs text-gray-500">{{ $buku->rak->lokasi ?? 'Lantai 1 - Ruang Baca & Referensi' }}</p>
+                        <label class="block font-bold text-gray-700 mb-1">Kelas &amp; Jurusan <span class="text-rose-600">*</span></label>
+                        <input type="text" x-model="loanData.jurusan" required placeholder="Contoh: XII RPL 1 / XI TKJ 2" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">NISN / Nomor Induk <span class="text-rose-600">*</span></label>
+                        <input type="text" x-model="loanData.nomor_induk" required placeholder="Contoh: 0065123489" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                     </div>
                 </div>
 
-                <button type="button" @click="openPetaRak = false" class="p-2 text-gray-400 hover:text-gray-900 rounded-xl hover:bg-gray-100 transition" aria-label="Tutup Modal">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">No. WhatsApp Aktif (Opsional)</label>
+                    <input type="text" x-model="loanData.no_wa" placeholder="Contoh: 081234567890" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                </div>
+
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">Catatan / Keterangan Tambahan</label>
+                    <textarea x-model="loanData.catatan" rows="2" placeholder="Contoh: Untuk keperluan tugas akhir / ujian kejuruan..." class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium"></textarea>
+                </div>
+
+                <div class="pt-3 border-t border-gray-100 flex items-center justify-end gap-2">
+                    <button type="button" @click="openLoanModal = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-xs">
+                        Batal
+                    </button>
+                    <button type="submit" :disabled="submittingLoan" class="px-6 py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold rounded-xl text-xs transition shadow-md flex items-center gap-1.5 disabled:opacity-50">
+                        <template x-if="submittingLoan">
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+                        </template>
+                        <template x-if="!submittingLoan">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </template>
+                        <span x-text="submittingLoan ? 'Mengirim...' : 'Kirim Pengajuan'"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div x-show="openPetaRak" @click.self="openPetaRak = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 backdrop-blur-xs p-4 overflow-y-auto" x-cloak>
+        <div @click.stop class="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border-2 border-gray-200 transform transition-all my-8">
+            <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+                <div>
+                    <h3 class="text-base font-black text-gray-900">Peta Denah Rak Buku Perpustakaan</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Panduan penempatan rak dan nomor laci penyimpanan buku di ruangan perpustakaan.</p>
+                </div>
+                <button type="button" @click="openPetaRak = false" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-sm transition">
+                    &times;
                 </button>
             </div>
 
-            <div class="p-4 bg-brand-50/50 border border-brand-200 rounded-2xl flex items-start gap-3 text-xs">
-                <div class="w-3 h-3 rounded-full bg-brand-700 shrink-0 mt-0.5"></div>
-                <div class="space-y-1">
-                    <p class="font-bold text-gray-900">
-                        Buku ini berada di: <span class="text-brand-800 underline">{{ $buku->rak->nama_rak ?? 'Rak Terpilih' }} ({{ $buku->rak->kode_rak ?? '-' }})</span>
-                    </p>
-                    <p class="text-gray-600">
-                        Posisi laci target: <strong class="text-emerald-800 font-black">{{ $buku->laci->nama_laci ?? 'Laci 1' }}</strong> ({{ $buku->laci->keterangan ?? 'Tingkat penyimpanan aktif' }})
-                    </p>
+            <div class="space-y-4">
+                <div class="p-3 bg-brand-50/70 border border-brand-200 rounded-2xl flex items-center gap-3 text-xs text-brand-900">
+                    <span class="w-3 h-3 rounded-full bg-brand-700 shrink-0"></span>
+                    <span>Rak dengan sorotan warna merah adalah posisi rak target: <strong>{{ $buku->rak->nama_rak ?? '-' }} ({{ $buku->rak->kode_rak ?? '-' }})</strong> pada <strong>{{ $buku->laci->nama_laci ?? 'Laci Standar' }}</strong>.</span>
                 </div>
-            </div>
 
-            <div class="space-y-3">
-                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider block">Denah Posisi Lemari Rak di Ruangan</span>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[50vh] overflow-y-auto p-1">
                     @foreach($allRaks ?? [] as $rk)
                         @php
                             $isTargetRak = ($rk->id === $buku->rak_id);

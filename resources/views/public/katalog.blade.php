@@ -9,6 +9,20 @@
         showFilterBar: false,
         openDetailModal: false,
         modalData: {},
+        openLoanModal: false,
+        loanData: {
+            buku_id: '',
+            judul: '',
+            cover: '',
+            penulis: '',
+            rak: '',
+            nama_peminjam: '',
+            jurusan: '',
+            nomor_induk: '',
+            no_wa: '',
+            catatan: ''
+        },
+        submittingLoan: false,
         searchQuery: '{{ request('search') }}',
         suggestions: [],
         loadingSuggest: false,
@@ -28,9 +42,108 @@
                     this.loadingSuggest = false;
                 })
                 .catch(() => { this.loadingSuggest = false; });
+        },
+        selectSuggestion(item) {
+            this.searchQuery = item.judul;
+            this.showSuggest = false;
+            window.location.href = '{{ route('katalog') }}?search=' + encodeURIComponent(item.judul);
+        },
+        startLoan(book) {
+            if (book.available <= 0) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Stok Buku Habis',
+                        text: 'Seluruh eksemplar buku ini sedang dipinjam oleh murid lain.',
+                        confirmButtonColor: '#991b1b'
+                    });
+                } else {
+                    alert('Maaf, seluruh stok buku ini sedang habis dipinjam.');
+                }
+                return;
+            }
+            this.loanData.buku_id = book.id;
+            this.loanData.judul = book.judul;
+            this.loanData.cover = book.cover;
+            this.loanData.penulis = book.penulis;
+            this.loanData.rak = book.rak;
+            this.openDetailModal = false;
+            this.openLoanModal = true;
+        },
+        submitLoanRequest() {
+            if (!this.loanData.nama_peminjam || !this.loanData.jurusan || !this.loanData.nomor_induk) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Data Belum Lengkap',
+                        text: 'Mohon isi Nama Siswa, Kelas/Jurusan, dan NISN.',
+                        confirmButtonColor: '#991b1b'
+                    });
+                } else {
+                    alert('Mohon isi Nama Siswa, Kelas/Jurusan, dan NISN.');
+                }
+                return;
+            }
+            this.submittingLoan = true;
+            const token = document.querySelector('meta[name=csrf-token]') ? document.querySelector('meta[name=csrf-token]').content : '';
+            fetch('{{ route('katalog.ajukan') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': token
+                },
+                body: JSON.stringify(this.loanData)
+            })
+            .then(res => res.json().then(data => ({ status: res.status, body: data })))
+            .then(res => {
+                this.submittingLoan = false;
+                if (res.status === 200 && res.body.success) {
+                    this.openLoanModal = false;
+                    this.loanData.nama_peminjam = '';
+                    this.loanData.jurusan = '';
+                    this.loanData.nomor_induk = '';
+                    this.loanData.no_wa = '';
+                    this.loanData.catatan = '';
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Pengajuan Terkirim!',
+                            html: '<p class=\"text-xs text-gray-600 mb-2\">Pengajuan peminjaman buku <strong>' + res.body.judul_buku + '</strong> berhasil dikirim ke Admin Perpustakaan.</p><p class=\"text-sm font-mono font-bold text-brand-800 bg-gray-100 py-1.5 px-3 rounded-lg border border-gray-200\">Kode Ref: ' + res.body.kode + '</p><p class=\"text-[11px] text-gray-500 mt-2\">Silakan konfirmasi ke meja sirkulasi perpustakaan saat mengambil buku fisik.</p>',
+                            confirmButtonColor: '#991b1b'
+                        });
+                    } else {
+                        alert('Pengajuan peminjaman berhasil dikirim! Kode Referensi: ' + res.body.kode);
+                    }
+                } else {
+                    const msg = res.body.message || 'Gagal mengajukan peminjaman buku.';
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Pengajuan Gagal',
+                            text: msg,
+                            confirmButtonColor: '#991b1b'
+                        });
+                    } else {
+                        alert(msg);
+                    }
+                }
+            })
+            .catch(() => {
+                this.submittingLoan = false;
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Terjadi Kesalahan',
+                        text: 'Koneksi jaringan terputus atau server sedang sibuk.',
+                        confirmButtonColor: '#991b1b'
+                    });
+                } else {
+                    alert('Terjadi kesalahan jaringan.');
+                }
+            });
         }
-     }"
-     x-init="openDetailModal = false; modalData = {}">
+     }">
 
     <div class="relative bg-gradient-to-r from-brand-900 via-brand-800 to-red-950 text-white rounded-3xl p-6 sm:p-10 shadow-xl border-2 border-brand-700 z-20">
         <div class="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
@@ -41,14 +154,14 @@
         <div class="relative z-10 text-center space-y-4 max-w-3xl mx-auto">
             <div class="space-y-2">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-amber-300 text-[10px] font-black tracking-widest border border-white/10 uppercase">
-                    <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                    <i class="fa-solid fa-book-bookmark text-amber-400"></i>
                     <span>LAYANAN OPAC PERPUSTAKAAN DIGITAL</span>
                 </div>
                 <h1 class="text-xl sm:text-3xl font-black tracking-tight text-white leading-tight">
-                    Katalog Koleksi Buku &amp; Modul Kejuruan
+                    Katalog Koleksi Buku &amp; Modul Pembelajaran
                 </h1>
                 <p class="text-xs text-red-100 font-medium max-w-xl mx-auto leading-relaxed">
-                    Cari literatur modul pembelajaran kejuruan, referensi ujian, dan lokasi rak/laci buku secara instan.
+                    Cari literatur modul kejuruan, referensi umum, dan ajukan peminjaman buku secara mandiri
                 </p>
             </div>
 
@@ -62,33 +175,34 @@
 
                 <div class="flex items-center bg-white rounded-2xl p-1.5 shadow-lg border-2 border-amber-300 relative">
                     <div class="pl-3 pr-2 text-gray-400 shrink-0">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
                     </div>
                     <input type="text" name="search" x-model="searchQuery" @input.debounce.200ms="fetchSuggestions()" @focus="if(searchQuery.trim().length >= 2) showSuggest = true" autocomplete="off" placeholder="Cari judul buku, penulis, kata kunci, atau ISBN..."
                         class="w-full px-2 py-2 text-xs sm:text-sm font-bold text-gray-900 placeholder-gray-400 bg-transparent focus:outline-none text-left">
 
                     <div x-show="loadingSuggest" class="pr-2" x-cloak>
-                        <svg class="animate-spin w-4 h-4 text-brand-700" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <i class="fa-solid fa-spinner fa-spin text-brand-700 text-sm"></i>
                     </div>
 
                     @if(request('search'))
-                        <a href="{{ route('katalog', request()->except('search')) }}" class="px-2 text-gray-400 hover:text-gray-600 font-bold text-sm" title="Clear search">&times;</a>
+                        <a href="{{ route('katalog', request()->except('search')) }}" class="px-2 text-gray-400 hover:text-gray-600 font-bold text-sm" title="Hapus Pencarian">&times;</a>
                     @endif
 
-                    <button type="submit" class="px-5 py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-xs rounded-xl transition shadow-md hover:shadow-lg shrink-0">
-                        Cari Buku
+                    <button type="submit" class="px-5 py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-xs rounded-xl transition shadow-md hover:shadow-lg shrink-0 flex items-center gap-1.5">
+                        <i class="fa-solid fa-search text-xs"></i>
+                        <span>Cari Buku</span>
                     </button>
                 </div>
 
                 <div x-show="showSuggest && searchQuery.trim().length >= 2" x-cloak class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl border-2 border-gray-200 shadow-2xl z-50 max-h-80 overflow-y-auto p-2 space-y-1.5 text-left text-gray-900">
                     <div class="px-2.5 py-1 text-[10px] font-black text-gray-400 uppercase tracking-wider flex items-center justify-between border-b border-gray-100">
-                        <span>Rekomendasi Pencarian</span>
+                        <span>Rekomendasi Pencarian (Klik untuk Filter Grid)</span>
                         <span class="text-emerald-600 font-bold" x-text="suggestions.length + ' Ditemukan'"></span>
                     </div>
                     <template x-if="suggestions.length > 0">
                         <div class="space-y-1">
                             <template x-for="item in suggestions" :key="item.id">
-                                <a :href="item.detail_url" class="p-2.5 rounded-xl hover:bg-brand-50/80 transition flex items-center gap-3 group border border-transparent hover:border-brand-200">
+                                <button type="button" @click="selectSuggestion(item)" class="w-full p-2.5 rounded-xl hover:bg-brand-50/80 transition flex items-center gap-3 group border border-transparent hover:border-brand-200 text-left">
                                     <div class="w-10 h-14 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center shadow-xs">
                                         <template x-if="item.cover_url">
                                             <img :src="item.cover_url" class="w-full h-full object-cover">
@@ -105,8 +219,8 @@
                                             <span class="px-1.5 py-0.5 rounded font-black" :class="item.available_quantity > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'" x-text="'Stok: ' + item.available_quantity + ' Eks'"></span>
                                         </div>
                                     </div>
-                                    <svg class="w-4 h-4 text-gray-300 group-hover:text-brand-700 shrink-0 transform group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                                </a>
+                                    <i class="fa-solid fa-arrow-right text-gray-300 group-hover:text-brand-700 text-xs shrink-0 transform group-hover:translate-x-0.5 transition"></i>
+                                </button>
                             </template>
                         </div>
                     </template>
@@ -121,13 +235,13 @@
 
             <div class="pt-1 flex flex-wrap items-center justify-center gap-3 text-xs font-bold text-red-100">
                 <div class="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-xl border border-white/10 text-[11px]">
-                    <span class="text-amber-300 font-black">{{ $total_buku_count }}</span> Judul Ditemukan
+                    <span class="text-amber-300 font-black">{{ $total_buku_count }}</span> Judul Koleksi
                 </div>
                 <div class="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-xl border border-white/10 text-[11px]">
                     <span class="text-amber-300 font-black">{{ $total_kategori_count }}</span> Kategori
                 </div>
                 <div class="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-xl border border-white/10 text-[11px]">
-                    <span class="text-amber-300 font-black">{{ $total_rak_count }}</span> Rak Lokasi
+                    <span class="text-amber-300 font-black">{{ $total_rak_count }}</span> Rak Penempatan
                 </div>
             </div>
         </div>
@@ -147,12 +261,12 @@
             <button @click="showFilterBar = !showFilterBar"
                     :class="showFilterBar || {{ $activeFilterCount }} > 0 ? 'bg-brand-700 text-white border-brand-700 shadow-sm' : 'bg-gray-50 text-gray-800 border-gray-200 hover:bg-gray-100'"
                     class="px-4 py-2 rounded-xl font-extrabold text-xs border-2 transition flex items-center gap-2 shrink-0">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                <i class="fa-solid fa-sliders text-xs"></i>
                 <span>Filter Katalog</span>
                 @if($activeFilterCount > 0)
                     <span class="px-2 py-0.5 rounded-full bg-amber-400 text-brand-950 font-black text-[10px]">{{ $activeFilterCount }}</span>
                 @endif
-                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="showFilterBar ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200" :class="showFilterBar ? 'rotate-180' : ''"></i>
             </button>
 
             <div>
@@ -166,12 +280,12 @@
 
         <div class="flex items-center gap-3 w-full md:w-auto justify-end">
             <div class="flex items-center bg-gray-100 p-1 rounded-xl border border-gray-200 shrink-0">
-                <button @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'bg-white text-brand-700 shadow-2xs font-extrabold' : 'text-gray-500 font-medium'" class="px-2.5 py-1 rounded-lg transition text-[11px] flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                <button @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'bg-white text-brand-700 shadow-2xs font-extrabold' : 'text-gray-500 font-medium'" class="px-2.5 py-1 rounded-lg transition text-[11px] flex items-center gap-1.5">
+                    <i class="fa-solid fa-table-cells-large text-xs"></i>
                     <span>Grid</span>
                 </button>
-                <button @click="viewMode = 'list'" :class="viewMode === 'list' ? 'bg-white text-brand-700 shadow-2xs font-extrabold' : 'text-gray-500 font-medium'" class="px-2.5 py-1 rounded-lg transition text-[11px] flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                <button @click="viewMode = 'list'" :class="viewMode === 'list' ? 'bg-white text-brand-700 shadow-2xs font-extrabold' : 'text-gray-500 font-medium'" class="px-2.5 py-1 rounded-lg transition text-[11px] flex items-center gap-1.5">
+                    <i class="fa-solid fa-list text-xs"></i>
                     <span>List</span>
                 </button>
             </div>
@@ -318,23 +432,8 @@
         </div>
     @endif
 
-    <div class="space-y-5" x-data="{ isLoading: true }" x-init="setTimeout(() => isLoading = false, 150)">
-
-        <div x-show="isLoading" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-pulse" x-cloak>
-            @for($i=0; $i<8; $i++)
-                <div class="bg-white rounded-2xl border-2 border-gray-200 p-4 space-y-4">
-                    <div class="w-full h-56 bg-gray-200 rounded-xl"></div>
-                    <div class="space-y-2">
-                        <div class="h-3 w-16 bg-gray-200 rounded-lg"></div>
-                        <div class="h-4 w-full bg-gray-300 rounded-lg"></div>
-                        <div class="h-3 w-28 bg-gray-100 rounded-lg"></div>
-                    </div>
-                </div>
-            @endfor
-        </div>
-
-        <div x-show="!isLoading" x-transition.opacity.duration.300ms>
-
+    <div class="space-y-5">
+        <div>
             <div x-show="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 @forelse($buku as $item)
                     @php
@@ -342,11 +441,26 @@
                         $totalEx = $item->total_quantity;
                         $coverUrl = $item->cover_url;
                         $laciName = $item->laci->nama_laci ?? ($item->rak ? 'Laci 1' : 'Tanpa Laci');
+                        $bookPayload = [
+                            'id' => $item->id,
+                            'judul' => $item->judul,
+                            'penulis' => $item->penulis->nama ?? '-',
+                            'penerbit' => $item->penerbit->nama ?? '-',
+                            'tahun' => (string) $item->tahun_terbit,
+                            'isbn' => (string) ($item->isbn ?? 'Tanpa ISBN'),
+                            'kategori' => $item->kategori->nama ?? 'Umum',
+                            'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
+                            'laci' => $laciName,
+                            'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi SMK PGRI Pekanbaru.',
+                            'tersedia' => $item->available_quantity,
+                            'total' => $item->total_quantity,
+                            'cover' => $coverUrl ?? ''
+                        ];
                     @endphp
 
                     <div class="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden shadow-2xs hover:shadow-lg hover:border-brand-700 transition duration-300 flex flex-col justify-between group">
                         <div>
-                            <div class="relative w-full h-60 bg-gray-100 overflow-hidden flex items-center justify-center border-b-2 border-gray-100">
+                            <div class="relative w-full h-60 bg-gray-100 overflow-hidden flex items-center justify-center border-b-2 border-gray-100 cursor-pointer" @click="modalData = {{ json_encode($bookPayload) }}; openDetailModal = true">
                                 @if($coverUrl)
                                     <img src="{{ $coverUrl }}" alt="Cover {{ $item->judul }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                                 @else
@@ -383,21 +497,7 @@
                                 </span>
 
                                 <h3 class="text-xs font-bold text-gray-900 line-clamp-2 leading-snug group-hover:text-brand-700 transition">
-                                    <button type="button" @click="modalData = {{ json_encode([
-                                        'id' => $item->id,
-                                        'judul' => $item->judul,
-                                        'penulis' => $item->penulis->nama ?? '-',
-                                        'penerbit' => $item->penerbit->nama ?? '-',
-                                        'tahun' => (string) $item->tahun_terbit,
-                                        'isbn' => (string) ($item->isbn ?? 'Tanpa ISBN'),
-                                        'kategori' => $item->kategori->nama ?? 'Umum',
-                                        'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
-                                        'laci' => $laciName,
-                                        'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi SMK PGRI Pekanbaru.',
-                                        'tersedia' => $item->available_quantity,
-                                        'total' => $item->total_quantity,
-                                        'cover' => $coverUrl ?? ''
-                                    ]) }}; openDetailModal = true" class="text-left hover:underline">
+                                    <button type="button" @click="modalData = {{ json_encode($bookPayload) }}; openDetailModal = true" class="text-left hover:underline">
                                         {{ $item->judul }}
                                     </button>
                                 </h3>
@@ -417,31 +517,20 @@
                             </div>
                         </div>
 
-                        <div class="px-4 py-2.5 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-xs">
-                            <span class="text-[10px] text-gray-500 font-medium">{{ $available }} / {{ $totalEx }} eksemplar</span>
-                            <button type="button" @click="modalData = {{ json_encode([
-                                'id' => $item->id,
-                                'judul' => $item->judul,
-                                'penulis' => $item->penulis->nama ?? '-',
-                                'penerbit' => $item->penerbit->nama ?? '-',
-                                'tahun' => (string) $item->tahun_terbit,
-                                'isbn' => (string) ($item->isbn ?? 'Tanpa ISBN'),
-                                'kategori' => $item->kategori->nama ?? 'Umum',
-                                'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
-                                'laci' => $laciName,
-                                'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi SMK PGRI Pekanbaru.',
-                                'tersedia' => $item->available_quantity,
-                                'total' => $item->total_quantity,
-                                'cover' => $coverUrl ?? ''
-                            ]) }}; openDetailModal = true" class="px-3 py-1.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-[11px] rounded-lg transition shadow-2xs">
-                                Lihat Detail
+                        <div class="p-3 bg-gray-50 border-t border-gray-100 flex items-center gap-2 text-xs">
+                            <button type="button" @click="modalData = {{ json_encode($bookPayload) }}; openDetailModal = true" class="flex-1 py-2 bg-gray-200/80 hover:bg-gray-300 text-gray-800 font-bold text-[11px] rounded-xl transition text-center">
+                                Detail
+                            </button>
+                            <button type="button" @click="startLoan({ id: {{ $item->id }}, judul: '{{ addslashes($item->judul) }}', cover: '{{ $coverUrl ?? '' }}', penulis: '{{ addslashes($item->penulis->nama ?? '-') }}', rak: '{{ addslashes($item->rak->kode_rak ?? '-') }}', available: {{ $available }} })" class="flex-1 py-2 {{ $available > 0 ? 'bg-brand-700 hover:bg-brand-800 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed' }} font-extrabold text-[11px] rounded-xl transition shadow-xs text-center flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-hand-holding-hand text-xs"></i>
+                                <span>Ajukan Pinjam</span>
                             </button>
                         </div>
                     </div>
                 @empty
                     <div class="col-span-full py-16 px-6 text-center bg-white rounded-2xl border-2 border-gray-200 space-y-4">
                         <div class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-400 flex items-center justify-center mx-auto border border-gray-200 font-bold text-lg">
-                            ?
+                            <i class="fa-solid fa-book-open text-xl"></i>
                         </div>
                         <div>
                             <h3 class="text-base font-black text-gray-900">Tidak Ada Buku Ditemukan</h3>
@@ -451,11 +540,6 @@
                             <a href="{{ route('katalog') }}" class="px-4 py-2 bg-brand-700 text-white font-extrabold text-xs rounded-xl hover:bg-brand-800 transition shadow-sm">
                                 Hapus Semua Filter
                             </a>
-                            @if(request('search'))
-                                <a href="{{ route('katalog', request()->except('search')) }}" class="px-4 py-2 bg-gray-100 text-gray-700 font-bold text-xs rounded-xl hover:bg-gray-200 transition">
-                                    Ubah Kata Kunci
-                                </a>
-                            @endif
                         </div>
                     </div>
                 @endforelse
@@ -468,11 +552,26 @@
                         $totalEx = $item->total_quantity;
                         $coverUrl = $item->cover_url;
                         $laciName = $item->laci->nama_laci ?? ($item->rak ? 'Laci 1' : 'Tanpa Laci');
+                        $bookPayload = [
+                            'id' => $item->id,
+                            'judul' => $item->judul,
+                            'penulis' => $item->penulis->nama ?? '-',
+                            'penerbit' => $item->penerbit->nama ?? '-',
+                            'tahun' => (string) $item->tahun_terbit,
+                            'isbn' => (string) ($item->isbn ?? 'Tanpa ISBN'),
+                            'kategori' => $item->kategori->nama ?? 'Umum',
+                            'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
+                            'laci' => $laciName,
+                            'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi SMK PGRI Pekanbaru.',
+                            'tersedia' => $item->available_quantity,
+                            'total' => $item->total_quantity,
+                            'cover' => $coverUrl ?? ''
+                        ];
                     @endphp
 
                     <div class="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden p-4 shadow-2xs hover:border-brand-700 transition duration-300 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div class="flex items-center gap-4 w-full sm:w-auto">
-                            <div class="w-20 h-28 bg-gray-100 border border-gray-200 rounded-xl overflow-hidden shrink-0">
+                            <div class="w-20 h-28 bg-gray-100 border border-gray-200 rounded-xl overflow-hidden shrink-0 cursor-pointer" @click="modalData = {{ json_encode($bookPayload) }}; openDetailModal = true">
                                 @if($coverUrl)
                                     <img src="{{ $coverUrl }}" alt="Cover {{ $item->judul }}" loading="lazy" class="w-full h-full object-cover">
                                 @else
@@ -486,21 +585,7 @@
                                     {{ $item->kategori->nama ?? 'Umum' }}
                                 </span>
                                 <h3 class="text-sm font-bold text-gray-900 leading-snug">
-                                    <button type="button" @click="modalData = {{ json_encode([
-                                        'id' => $item->id,
-                                        'judul' => $item->judul,
-                                        'penulis' => $item->penulis->nama ?? '-',
-                                        'penerbit' => $item->penerbit->nama ?? '-',
-                                        'tahun' => (string) $item->tahun_terbit,
-                                        'isbn' => (string) ($item->isbn ?? 'Tanpa ISBN'),
-                                        'kategori' => $item->kategori->nama ?? 'Umum',
-                                        'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
-                                        'laci' => $laciName,
-                                        'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi SMK PGRI Pekanbaru.',
-                                        'tersedia' => $item->available_quantity,
-                                        'total' => $item->total_quantity,
-                                        'cover' => $coverUrl ?? ''
-                                    ]) }}; openDetailModal = true" class="text-left hover:text-brand-700 hover:underline">
+                                    <button type="button" @click="modalData = {{ json_encode($bookPayload) }}; openDetailModal = true" class="text-left hover:text-brand-700 hover:underline">
                                         {{ $item->judul }}
                                     </button>
                                 </h3>
@@ -509,27 +594,17 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-4 shrink-0 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-100">
-                            <div class="text-right">
-                                <span class="text-[10px] font-bold text-gray-400 block">Stok Eksemplar:</span>
-                                <span class="text-xs font-black text-emerald-600">{{ $available }} tersedia / {{ $totalEx }} total</span>
+                        <div class="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-100">
+                            <div class="text-right hidden md:block">
+                                <span class="text-[10px] font-bold text-gray-400 block">Stok:</span>
+                                <span class="text-xs font-black {{ $available > 0 ? 'text-emerald-600' : 'text-rose-600' }}">{{ $available }} / {{ $totalEx }} Eks</span>
                             </div>
-                            <button type="button" @click="modalData = {{ json_encode([
-                                'id' => $item->id,
-                                'judul' => $item->judul,
-                                'penulis' => $item->penulis->nama ?? '-',
-                                'penerbit' => $item->penerbit->nama ?? '-',
-                                'tahun' => (string) $item->tahun_terbit,
-                                'isbn' => (string) ($item->isbn ?? 'Tanpa ISBN'),
-                                'kategori' => $item->kategori->nama ?? 'Umum',
-                                'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
-                                'laci' => $laciName,
-                                'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi SMK PGRI Pekanbaru.',
-                                'tersedia' => $item->available_quantity,
-                                'total' => $item->total_quantity,
-                                'cover' => $coverUrl ?? ''
-                            ]) }}; openDetailModal = true" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-xs rounded-xl transition shadow-2xs">
-                                Lihat Detail
+                            <button type="button" @click="modalData = {{ json_encode($bookPayload) }}; openDetailModal = true" class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl transition">
+                                Detail
+                            </button>
+                            <button type="button" @click="startLoan({ id: {{ $item->id }}, judul: '{{ addslashes($item->judul) }}', cover: '{{ $coverUrl ?? '' }}', penulis: '{{ addslashes($item->penulis->nama ?? '-') }}', rak: '{{ addslashes($item->rak->kode_rak ?? '-') }}', available: {{ $available }} })" class="px-4 py-2 {{ $available > 0 ? 'bg-brand-700 hover:bg-brand-800 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed' }} font-extrabold text-xs rounded-xl transition shadow-2xs flex items-center gap-1.5">
+                                <i class="fa-solid fa-hand-holding-hand text-xs"></i>
+                                <span>Ajukan Pinjam</span>
                             </button>
                         </div>
                     </div>
@@ -548,14 +623,7 @@
         @endif
     </div>
 
-    <div x-show="openDetailModal" @click.self="openDetailModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 backdrop-blur-xs p-4 overflow-y-auto"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 scale-95"
-         x-transition:enter-end="opacity-100 scale-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100 scale-100"
-         x-transition:leave-end="opacity-0 scale-95"
-         x-cloak>
+    <div x-show="openDetailModal" @click.self="openDetailModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 backdrop-blur-xs p-4 overflow-y-auto" x-cloak>
         <div @click.stop class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border-2 border-gray-200 transform transition-all my-8 relative">
             <button @click="openDetailModal = false" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 flex items-center justify-center transition font-bold">&times;</button>
 
@@ -605,18 +673,94 @@
                         <p class="text-gray-600 font-medium text-xs leading-relaxed" x-text="modalData.sinopsis"></p>
                     </div>
 
-                    <div class="pt-4 border-t-2 border-gray-100 flex items-center justify-between gap-4">
+                    <div class="pt-4 border-t-2 border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3">
                         <div>
                             <span class="text-[10px] font-extrabold text-gray-500 block">Status Ketersediaan:</span>
                             <span class="text-xs font-black text-emerald-600" x-text="modalData.tersedia + ' Tersedia / ' + modalData.total + ' Eksemplar Total'"></span>
                         </div>
-                        <div class="p-3 bg-brand-50 border border-brand-200 rounded-xl text-[11px] text-brand-900 font-medium flex items-center gap-2">
-                            <svg class="w-4 h-4 text-brand-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <span>Peminjaman buku dilakukan langsung di meja pengelola Perpustakaan SMK PGRI Pekanbaru.</span>
-                        </div>
+                        <button type="button" @click="startLoan({ id: modalData.id, judul: modalData.judul, cover: modalData.cover, penulis: modalData.penulis, rak: modalData.rak, available: modalData.tersedia })" class="w-full sm:w-auto px-5 py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md">
+                            <i class="fa-solid fa-hand-holding-hand"></i>
+                            <span>Ajukan Peminjaman Ini</span>
+                        </button>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div x-show="openLoanModal" @click.self="openLoanModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 backdrop-blur-xs p-4 overflow-y-auto" x-cloak>
+        <div @click.stop class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 space-y-5 shadow-2xl border-2 border-gray-200 transform transition-all my-8 relative">
+            <button @click="openLoanModal = false" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 flex items-center justify-center transition font-bold">&times;</button>
+
+            <div class="space-y-1">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-brand-50 text-brand-800 text-[10px] font-black uppercase tracking-wider border border-brand-200">
+                    <i class="fa-solid fa-file-signature text-brand-700"></i>
+                    <span>Formulir Pengajuan Peminjaman</span>
+                </div>
+                <h3 class="text-base font-black text-gray-900">Form Pengajuan Peminjaman Buku</h3>
+                <p class="text-[11px] text-gray-500">Lengkapi data diri Anda untuk konfirmasi peminjaman buku ke petugas perpustakaan.</p>
+            </div>
+
+            <div class="p-3 bg-gray-50 rounded-2xl border border-gray-200 flex items-center gap-3">
+                <div class="w-12 h-16 bg-gray-200 rounded-lg overflow-hidden shrink-0 border border-gray-300 flex items-center justify-center shadow-2xs">
+                    <template x-if="loanData.cover">
+                        <img :src="loanData.cover" alt="Cover" class="w-full h-full object-cover">
+                    </template>
+                    <template x-if="!loanData.cover">
+                        <div class="w-full h-full bg-brand-800 text-white font-bold flex items-center justify-center text-xs">
+                            <i class="fa-solid fa-book"></i>
+                        </div>
+                    </template>
+                </div>
+                <div class="min-w-0 flex-1 text-xs">
+                    <p class="font-extrabold text-gray-900 line-clamp-1" x-text="loanData.judul"></p>
+                    <p class="text-[11px] text-gray-500 mt-0.5">Penulis: <span class="font-bold text-gray-700" x-text="loanData.penulis"></span></p>
+                    <p class="text-[10px] text-brand-700 font-mono font-bold mt-0.5">Lokasi Rak: <span x-text="loanData.rak"></span></p>
+                </div>
+            </div>
+
+            <form @submit.prevent="submitLoanRequest()" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">Nama Lengkap Siswa / Peminjam <span class="text-rose-600">*</span></label>
+                    <input type="text" x-model="loanData.nama_peminjam" required placeholder="Contoh: Muhammad Ihwal" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Kelas &amp; Jurusan <span class="text-rose-600">*</span></label>
+                        <input type="text" x-model="loanData.jurusan" required placeholder="Contoh: XII RPL 1 / XI TKJ 2" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">NISN / Nomor Induk <span class="text-rose-600">*</span></label>
+                        <input type="text" x-model="loanData.nomor_induk" required placeholder="Contoh: 0065123489" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">No. WhatsApp Aktif (Opsional)</label>
+                    <input type="text" x-model="loanData.no_wa" placeholder="Contoh: 081234567890" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                </div>
+
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">Catatan / Keterangan Tambahan</label>
+                    <textarea x-model="loanData.catatan" rows="2" placeholder="Contoh: Untuk keperluan tugas akhir / ujian kejuruan..." class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium"></textarea>
+                </div>
+
+                <div class="pt-3 border-t border-gray-100 flex items-center justify-end gap-2">
+                    <button type="button" @click="openLoanModal = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-xs">
+                        Batal
+                    </button>
+                    <button type="submit" :disabled="submittingLoan" class="px-6 py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold rounded-xl text-xs transition shadow-md flex items-center gap-1.5 disabled:opacity-50">
+                        <template x-if="submittingLoan">
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+                        </template>
+                        <template x-if="!submittingLoan">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </template>
+                        <span x-text="submittingLoan ? 'Mengirim...' : 'Kirim Pengajuan'"></span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
