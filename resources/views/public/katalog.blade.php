@@ -5,7 +5,7 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6" x-data="katalogPage()">
 
-    <div class="relative bg-gradient-to-br from-brand-900 via-brand-800 to-brand-950 text-white rounded-3xl p-6 sm:p-10 shadow-xl border-2 border-brand-700/80 z-20">
+    <div class="relative bg-gradient-to-br from-brand-800 via-brand-700 to-red-900 text-white rounded-3xl p-6 sm:p-10 shadow-xl border border-brand-600/40 z-20">
         <div class="relative z-10 text-center space-y-4 max-w-3xl mx-auto">
             <div class="space-y-2">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white text-[10px] font-black tracking-widest border border-white/20 uppercase">
@@ -15,7 +15,7 @@
                 <h1 class="text-xl sm:text-3xl font-black tracking-tight text-white leading-tight">
                     Katalog Koleksi Buku &amp; Modul Pembelajaran
                 </h1>
-                <p class="text-xs text-red-100 font-medium max-w-xl mx-auto leading-relaxed">
+                <p class="text-xs text-white/90 font-medium max-w-xl mx-auto leading-relaxed">
                     Cari literatur modul kejuruan, referensi umum, dan ajukan peminjaman buku secara mandiri
                 </p>
             </div>
@@ -28,7 +28,7 @@
                 @if(request('status')) <input type="hidden" name="status" value="{{ request('status') }}"> @endif
                 @if(request('sort')) <input type="hidden" name="sort" value="{{ request('sort') }}"> @endif
 
-                <div class="flex items-center bg-white rounded-2xl p-1.5 shadow-lg border-2 border-white/20 focus-within:border-brand-700 relative">
+                <div class="flex items-center bg-white rounded-2xl p-1.5 shadow-lg border border-brand-900/10 relative">
                     <div class="pl-3 pr-2 text-gray-400 shrink-0">
                         <i class="fa-solid fa-magnifying-glass text-xs"></i>
                     </div>
