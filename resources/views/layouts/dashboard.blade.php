@@ -76,37 +76,6 @@
           openAdmin: {{ request()->routeIs('admin.anggota*', 'admin.pengaturan*', 'admin.audit-log*') ? 'true' : 'false' }}
       }">
 
-    <div id="global-dashboard-skeleton" class="fixed inset-0 bg-gray-100 z-50 flex transition-opacity duration-300 pointer-events-auto">
-        <div class="w-72 bg-white border-r-2 border-gray-200 p-5 space-y-6 hidden lg:block shrink-0">
-            <div class="h-10 w-40 rounded-xl skeleton-shimmer"></div>
-            <div class="space-y-3 pt-4">
-                <div class="h-9 rounded-xl skeleton-shimmer"></div>
-                <div class="h-9 rounded-xl skeleton-shimmer"></div>
-                <div class="h-9 rounded-xl skeleton-shimmer"></div>
-                <div class="h-9 rounded-xl skeleton-shimmer"></div>
-                <div class="h-9 rounded-xl skeleton-shimmer"></div>
-            </div>
-        </div>
-        <div class="flex-1 flex flex-col min-w-0">
-            <div class="h-20 bg-white border-b-2 border-gray-200 px-6 flex items-center justify-between">
-                <div class="h-6 w-48 rounded-md skeleton-shimmer"></div>
-                <div class="flex items-center gap-3">
-                    <div class="h-9 w-36 rounded-xl skeleton-shimmer"></div>
-                    <div class="h-10 w-10 rounded-full skeleton-shimmer"></div>
-                </div>
-            </div>
-            <div class="p-6 sm:p-8 space-y-6 flex-1 overflow-hidden">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                    <div class="h-28 rounded-2xl bg-white border-2 border-gray-100 skeleton-shimmer"></div>
-                    <div class="h-28 rounded-2xl bg-white border-2 border-gray-100 skeleton-shimmer"></div>
-                    <div class="h-28 rounded-2xl bg-white border-2 border-gray-100 skeleton-shimmer"></div>
-                    <div class="h-28 rounded-2xl bg-white border-2 border-gray-100 skeleton-shimmer"></div>
-                </div>
-                <div class="h-80 rounded-2xl bg-white border-2 border-gray-100 skeleton-shimmer"></div>
-            </div>
-        </div>
-    </div>
-
     <div x-show="sidebarOpen" @click="sidebarOpen = false"
          x-transition:enter="transition-opacity ease-linear duration-300"
          x-transition:enter-start="opacity-0"
@@ -401,16 +370,6 @@
             });
             return false;
         }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const skeleton = document.getElementById('global-dashboard-skeleton');
-            if (skeleton) {
-                setTimeout(() => {
-                    skeleton.classList.add('opacity-0', 'pointer-events-none');
-                    setTimeout(() => skeleton.remove(), 350);
-                }, 120);
-            }
-        });
     </script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>

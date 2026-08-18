@@ -70,22 +70,6 @@
 </head>
 <body class="bg-gradient-to-br from-brand-950 via-brand-900 to-red-950 text-gray-900 antialiased selection:bg-brand-700 selection:text-white">
 
-    <div id="global-login-skeleton" class="fixed inset-0 z-[9999] bg-gradient-to-br from-brand-950 via-brand-900 to-red-950 flex items-center justify-center p-4 sm:p-6 transition-opacity duration-300 pointer-events-auto overflow-y-auto">
-        <div class="w-full max-w-4xl min-h-[460px] bg-white/95 rounded-3xl grid grid-cols-1 md:grid-cols-12 overflow-hidden shadow-2xl">
-            <div class="md:col-span-5 bg-brand-900 p-6 sm:p-8 space-y-4">
-                <div class="w-16 h-16 rounded-2xl skeleton-shimmer"></div>
-                <div class="h-6 w-3/4 rounded-md skeleton-shimmer"></div>
-                <div class="h-4 w-full rounded-md skeleton-shimmer"></div>
-            </div>
-            <div class="md:col-span-7 p-6 sm:p-8 space-y-5">
-                <div class="h-6 w-1/2 rounded-md skeleton-shimmer"></div>
-                <div class="h-10 w-full rounded-xl skeleton-shimmer"></div>
-                <div class="h-10 w-full rounded-xl skeleton-shimmer"></div>
-                <div class="h-12 w-full rounded-xl skeleton-shimmer"></div>
-            </div>
-        </div>
-    </div>
-
     <div class="fixed inset-0 pointer-events-none overflow-hidden -z-10" aria-hidden="true">
         <div class="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-35 transform scale-105 transition duration-1000" style="background-image: url('https://smkpgripekanbaru.sch.id/images/pgri.webp');"></div>
         <div class="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none animate-bounce" style="animation-duration: 8s;"></div>
@@ -184,17 +168,5 @@
         </div>
 
     </main>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const skeleton = document.getElementById('global-login-skeleton');
-            if (skeleton) {
-                setTimeout(() => {
-                    skeleton.classList.add('opacity-0', 'pointer-events-none');
-                    setTimeout(() => skeleton.remove(), 350);
-                }, 120);
-            }
-        });
-    </script>
 </body>
 </html>

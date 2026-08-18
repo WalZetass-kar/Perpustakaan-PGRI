@@ -62,36 +62,6 @@
 </head>
 <body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen font-sans relative selection:bg-brand-700 selection:text-white">
 
-    <div id="global-page-skeleton" class="fixed inset-0 z-[9999] bg-gray-50 flex flex-col transition-opacity duration-300 pointer-events-auto">
-        <div class="h-1 bg-brand-700 w-full animate-pulse"></div>
-
-        <div class="h-20 bg-white border-b border-gray-200 px-6 sm:px-8 flex items-center justify-between">
-            <div class="flex items-center gap-3.5">
-                <div class="w-12 h-12 rounded-xl skeleton-shimmer"></div>
-                <div class="space-y-1.5">
-                    <div class="w-36 h-4 rounded-md skeleton-shimmer"></div>
-                    <div class="w-24 h-3 rounded-md skeleton-shimmer"></div>
-                </div>
-            </div>
-            <div class="hidden md:flex gap-8">
-                <div class="w-20 h-4 rounded-md skeleton-shimmer"></div>
-                <div class="w-24 h-4 rounded-md skeleton-shimmer"></div>
-                <div class="w-20 h-4 rounded-md skeleton-shimmer"></div>
-            </div>
-            <div class="w-32 h-10 rounded-xl skeleton-shimmer"></div>
-        </div>
-
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-6 flex-1 overflow-hidden">
-            <div class="w-full h-64 rounded-3xl skeleton-shimmer"></div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 pt-2">
-                <div class="h-44 rounded-2xl skeleton-shimmer"></div>
-                <div class="h-44 rounded-2xl skeleton-shimmer"></div>
-                <div class="h-44 rounded-2xl skeleton-shimmer"></div>
-                <div class="h-44 rounded-2xl skeleton-shimmer"></div>
-            </div>
-        </div>
-    </div>
-
     <header class="bg-white/95 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 transition duration-300 shadow-xs">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
 
@@ -232,14 +202,6 @@
                     confirmButtonColor: '#b91c1c'
                 });
             @endif
-
-            const skeleton = document.getElementById('global-page-skeleton');
-            if (skeleton) {
-                setTimeout(() => {
-                    skeleton.classList.add('opacity-0', 'pointer-events-none');
-                    setTimeout(() => skeleton.remove(), 350);
-                }, 120);
-            }
         });
     </script>
 </body>
