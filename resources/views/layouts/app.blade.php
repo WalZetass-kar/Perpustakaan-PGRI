@@ -175,15 +175,16 @@
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            AOS.init({
-                duration: 800,
-                once: true,
-                offset: 100,
-                easing: 'ease-out-cubic',
-            });
+            if (typeof AOS !== 'undefined') {
+                AOS.init({
+                    duration: 800,
+                    once: true,
+                    offset: 100,
+                    easing: 'ease-out-cubic',
+                });
+            }
 
             @if(session('success'))
                 Swal.fire({
