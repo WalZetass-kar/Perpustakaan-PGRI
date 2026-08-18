@@ -12,8 +12,8 @@
             <p class="text-[11px] text-gray-500 mt-0.5">Kelola pengelompokan klasifikasi modul dan bidang keahlian di SMK PGRI Pekanbaru</p>
         </div>
         <button @click="openAddModal = true" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-300 shadow-md hover:shadow-lg transform active:scale-95 flex items-center gap-2">
-            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            <span>+ Tambah Kategori Baru</span>
+            <i class="fa-solid fa-plus text-emerald-400"></i>
+            <span>Tambah Kategori Baru</span>
         </button>
     </div>
 

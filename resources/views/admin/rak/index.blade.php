@@ -91,8 +91,8 @@
                     <span x-text="allExpanded ? 'Collapse Semua' : 'Expand Semua'"></span>
                 </button>
                 <button @click="openAddModal = true" class="px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white text-xs font-bold rounded-xl transition shadow-2xs flex items-center gap-1.5 shrink-0">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    <span>+ Tambah Rak</span>
+                    <i class="fa-solid fa-plus text-emerald-400"></i>
+                    <span>Tambah Rak</span>
                 </button>
             </div>
         </div>
@@ -166,9 +166,9 @@
                     </div>
 
                     <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
-                        <button type="button" @click="laciData = { rak_id: {{ $rak->id }}, rak_nama: '{{ $rak->nama_rak }}' }; openAddLaciModal = true" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition shadow-2xs flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                            <span>+ Tambah Laci</span>
+                        <button type="button" @click="laciData = { rak_id: {{ $rak->id }}, rak_nama: '{{ $rak->nama_rak }}' }; openAddLaciModal = true" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition shadow-2xs flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus text-white text-xs"></i>
+                            <span>Tambah Laci</span>
                         </button>
 
                         <button type="button" @click="editData = {{ json_encode([
@@ -295,9 +295,9 @@
                             <div class="col-span-full py-6 px-4 text-center bg-gray-50 rounded-xl border border-dashed border-gray-300 space-y-2">
                                 <p class="text-xs font-bold text-gray-700">Belum Ada Laci</p>
                                 <p class="text-xs text-gray-500 max-w-sm mx-auto">Rak ini belum memiliki laci. Tambahkan laci untuk mulai mengatur kategori buku.</p>
-                                <button type="button" @click="laciData = { rak_id: {{ $rak->id }}, rak_nama: '{{ $rak->nama_rak }}' }; openAddLaciModal = true" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition shadow-2xs inline-flex items-center gap-1">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                    <span>+ Tambah Laci</span>
+                                <button type="button" @click="laciData = { rak_id: {{ $rak->id }}, rak_nama: '{{ $rak->nama_rak }}' }; openAddLaciModal = true" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition shadow-2xs inline-flex items-center gap-1.5">
+                                    <i class="fa-solid fa-plus text-white text-xs"></i>
+                                    <span>Tambah Laci</span>
                                 </button>
                             </div>
                         @endforelse
@@ -326,8 +326,8 @@
                     </div>
                     <div class="pt-2">
                         <button type="button" @click="openAddModal = true" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white font-bold text-xs rounded-xl transition shadow-2xs inline-flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                            <span>+ Tambah Rak</span>
+                            <i class="fa-solid fa-plus text-emerald-400"></i>
+                            <span>Tambah Rak</span>
                         </button>
                     </div>
                 @endif
