@@ -140,13 +140,11 @@
 
         <div class="flex items-center gap-3 w-full md:w-auto justify-end">
             <div class="flex items-center bg-gray-100 p-1 rounded-xl border border-gray-200 shrink-0">
-                <button @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'bg-white text-brand-700 shadow-2xs font-extrabold' : 'text-gray-500 font-medium'" class="px-2.5 py-1 rounded-lg transition text-[11px] flex items-center gap-1.5">
+                <button type="button" @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'bg-white text-brand-700 shadow-2xs font-extrabold' : 'text-gray-400 hover:text-gray-700'" class="w-8 h-8 rounded-lg transition flex items-center justify-center" title="Tampilan Grid" aria-label="Tampilan Grid">
                     <i class="fa-solid fa-table-cells-large text-xs"></i>
-                    <span>Grid</span>
                 </button>
-                <button @click="viewMode = 'list'" :class="viewMode === 'list' ? 'bg-white text-brand-700 shadow-2xs font-extrabold' : 'text-gray-500 font-medium'" class="px-2.5 py-1 rounded-lg transition text-[11px] flex items-center gap-1.5">
+                <button type="button" @click="viewMode = 'list'" :class="viewMode === 'list' ? 'bg-white text-brand-700 shadow-2xs font-extrabold' : 'text-gray-400 hover:text-gray-700'" class="w-8 h-8 rounded-lg transition flex items-center justify-center" title="Tampilan List" aria-label="Tampilan List">
                     <i class="fa-solid fa-list text-xs"></i>
-                    <span>List</span>
                 </button>
             </div>
 
