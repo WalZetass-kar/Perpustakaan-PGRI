@@ -107,8 +107,8 @@
         </div>
     </div>
 
-    <div class="bg-white p-4 rounded-2xl border-2 border-gray-200 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
-        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+    <div class="bg-white p-3.5 sm:p-4 rounded-2xl border-2 border-gray-200 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+        <div class="flex items-center justify-between md:justify-start gap-3 w-full md:w-auto">
             @php
                 $activeFilterCount = 0;
                 if(request('kategori_id')) $activeFilterCount++;
@@ -120,7 +120,7 @@
 
             <button @click="showFilterBar = !showFilterBar"
                     :class="showFilterBar || {{ $activeFilterCount }} > 0 ? 'bg-brand-700 text-white border-brand-700 shadow-sm' : 'bg-gray-50 text-gray-800 border-gray-200 hover:bg-gray-100'"
-                    class="px-4 py-2 rounded-xl font-extrabold text-xs border-2 transition flex items-center gap-2 shrink-0">
+                    class="px-3.5 py-2 rounded-xl font-extrabold text-xs border-2 transition flex items-center gap-2 shrink-0">
                 <i class="fa-solid fa-sliders text-xs"></i>
                 <span>Filter Katalog</span>
                 @if($activeFilterCount > 0)
@@ -129,16 +129,16 @@
                 <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200" :class="showFilterBar ? 'rotate-180' : ''"></i>
             </button>
 
-            <div>
+            <div class="text-right md:text-left">
                 @if(request('search'))
-                    <h3 class="font-extrabold text-gray-900 text-xs">Pencarian "<span class="text-brand-700">{{ request('search') }}</span>" — {{ $buku->total() }} buku</h3>
+                    <h3 class="font-extrabold text-gray-900 text-xs line-clamp-1">Pencarian "<span class="text-brand-700">{{ request('search') }}</span>" — {{ $buku->total() }} buku</h3>
                 @else
-                    <h3 class="font-extrabold text-gray-900 text-xs">{{ $buku->total() }} Buku Ditemukan</h3>
+                    <h3 class="font-extrabold text-gray-900 text-xs"><span class="text-brand-700 font-black">{{ $buku->total() }}</span> Buku Ditemukan</h3>
                 @endif
             </div>
         </div>
 
-        <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+        <div class="flex items-center justify-between md:justify-end gap-2.5 w-full md:w-auto pt-2.5 md:pt-0 border-t border-gray-100 md:border-t-0">
             <div class="flex items-center bg-gray-100 p-1 rounded-xl border border-gray-200 shrink-0">
                 <button type="button" @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'bg-white text-brand-700 shadow-2xs font-extrabold' : 'text-gray-400 hover:text-gray-700'" class="w-8 h-8 rounded-lg transition flex items-center justify-center" title="Tampilan Grid" aria-label="Tampilan Grid">
                     <i class="fa-solid fa-table-cells-large text-xs"></i>
@@ -148,7 +148,7 @@
                 </button>
             </div>
 
-            <form action="{{ route('katalog') }}" method="GET" class="inline flex items-center gap-1.5">
+            <form action="{{ route('katalog') }}" method="GET" class="flex items-center gap-1.5 shrink-0">
                 @if(request('search')) <input type="hidden" name="search" value="{{ request('search') }}"> @endif
                 @if(request('kategori_id')) <input type="hidden" name="kategori_id" value="{{ request('kategori_id') }}"> @endif
                 @if(request('penulis_id')) <input type="hidden" name="penulis_id" value="{{ request('penulis_id') }}"> @endif
@@ -156,8 +156,8 @@
                 @if(request('tahun')) <input type="hidden" name="tahun" value="{{ request('tahun') }}"> @endif
                 @if(request('status')) <input type="hidden" name="status" value="{{ request('status') }}"> @endif
 
-                <span class="text-gray-400 font-medium text-[11px]">Urutkan:</span>
-                <select name="sort" onchange="this.form.submit()" class="bg-gray-50 border border-gray-200 text-gray-800 text-[11px] font-bold rounded-xl px-2.5 py-1.5 focus:ring-1 focus:ring-brand-700 focus:outline-none">
+                <span class="text-gray-400 font-medium text-[11px] hidden sm:inline">Urutkan:</span>
+                <select name="sort" onchange="this.form.submit()" class="bg-gray-50 border border-gray-200 text-gray-800 text-xs font-bold rounded-xl px-3 py-1.5 focus:ring-1 focus:ring-brand-700 focus:outline-none">
                     <option value="terbaru" {{ request('sort') === 'terbaru' ? 'selected' : '' }}>Terbaru</option>
                     <option value="populer" {{ request('sort') === 'populer' ? 'selected' : '' }}>Paling Populer</option>
                     <option value="judul_asc" {{ request('sort') === 'judul_asc' ? 'selected' : '' }}>Judul A-Z</option>
