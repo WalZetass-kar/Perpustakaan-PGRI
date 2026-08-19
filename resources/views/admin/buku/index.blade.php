@@ -185,7 +185,7 @@
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Penulis Buku</label>
                         <select name="penulis_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                            <option value="">-- Pilih Penulis ▼ --</option>
+                            <option value="">-- Pilih Penulis --</option>
                             @foreach($penulisList as $pn)
                                 <option value="{{ $pn->id }}">{{ $pn->nama }}</option>
                             @endforeach
@@ -194,7 +194,7 @@
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Penerbit Buku</label>
                         <select name="penerbit_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                            <option value="">-- Pilih Penerbit ▼ --</option>
+                            <option value="">-- Pilih Penerbit --</option>
                             @foreach($penerbitList as $pb)
                                 <option value="{{ $pb->id }}">{{ $pb->nama }}</option>
                             @endforeach
@@ -206,7 +206,7 @@
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Kategori Buku</label>
                         <select name="kategori_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                            <option value="">-- Pilih Kategori ▼ --</option>
+                            <option value="">-- Pilih Kategori --</option>
                             @foreach($kategoriList as $kt)
                                 <option value="{{ $kt->id }}">{{ $kt->nama }}</option>
                             @endforeach
@@ -215,7 +215,7 @@
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Lokasi Rak</label>
                         <select name="rak_id" x-model="addRakId" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                            <option value="">-- Pilih Rak ▼ --</option>
+                            <option value="">-- Pilih Rak --</option>
                             @foreach($rakList as $rk)
                                 <option value="{{ $rk->id }}">{{ $rk->kode_rak }} - {{ $rk->nama_rak }}</option>
                             @endforeach
@@ -224,7 +224,7 @@
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Tingkat / Laci</label>
                         <select name="rak_laci_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                            <option value="">-- Pilih Laci ▼ --</option>
+                            <option value="">-- Pilih Laci --</option>
                             <template x-for="laci in addAvailableLacis" :key="laci.id">
                                 <option :value="laci.id" x-text="laci.nama_laci"></option>
                             </template>
@@ -314,7 +314,7 @@
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Penulis Buku</label>
                         <select name="penulis_id" x-model="editData.penulis_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                            <option value="">-- Pilih Penulis ▼ --</option>
+                            <option value="">-- Pilih Penulis --</option>
                             @foreach($penulisList as $pn)
                                 <option value="{{ $pn->id }}">{{ $pn->nama }}</option>
                             @endforeach
@@ -323,7 +323,7 @@
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Penerbit Buku</label>
                         <select name="penerbit_id" x-model="editData.penerbit_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                            <option value="">-- Pilih Penerbit ▼ --</option>
+                            <option value="">-- Pilih Penerbit --</option>
                             @foreach($penerbitList as $pb)
                                 <option value="{{ $pb->id }}">{{ $pb->nama }}</option>
                             @endforeach
@@ -335,7 +335,7 @@
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Kategori Buku</label>
                         <select name="kategori_id" x-model="editData.kategori_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                            <option value="">-- Pilih Kategori ▼ --</option>
+                            <option value="">-- Pilih Kategori --</option>
                             @foreach($kategoriList as $kt)
                                 <option value="{{ $kt->id }}">{{ $kt->nama }}</option>
                             @endforeach
@@ -344,7 +344,7 @@
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Lokasi Rak</label>
                         <select name="rak_id" x-model="editRakId" @change="editData.rak_id = editRakId" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                            <option value="">-- Pilih Rak ▼ --</option>
+                            <option value="">-- Pilih Rak --</option>
                             @foreach($rakList as $rk)
                                 <option value="{{ $rk->id }}">{{ $rk->kode_rak }} - {{ $rk->nama_rak }}</option>
                             @endforeach
@@ -353,7 +353,7 @@
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Tingkat / Laci</label>
                         <select name="rak_laci_id" x-model="editData.rak_laci_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                            <option value="">-- Pilih Laci ▼ --</option>
+                            <option value="">-- Pilih Laci --</option>
                             <template x-for="laci in editAvailableLacis" :key="laci.id">
                                 <option :value="laci.id" x-text="laci.nama_laci" :selected="laci.id == editData.rak_laci_id"></option>
                             </template>

@@ -38,8 +38,6 @@
         </div>
     </div>
 
-
-
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         @forelse($bukuList as $buku)
             <div @click="detailData = {{ json_encode([
@@ -59,7 +57,7 @@
                 'sinopsis' => $buku->sinopsis ?? 'Tidak ada ringkasan sinopsis untuk buku ini.',
                 'cover_url' => $buku->cover_url
             ]) }}; openDetailModal = true" class="bg-white rounded-2xl border-2 border-gray-200 hover:border-brand-300 hover:shadow-md transition duration-200 overflow-hidden flex flex-col cursor-pointer group">
-                {{-- Cover — fixed height + object-cover, kompatibel landscape & portrait --}}
+                
                 <div class="relative w-full h-48 bg-gray-100 overflow-hidden">
                     @if($buku->cover_url)
                         <img src="{{ $buku->cover_url }}"
@@ -73,14 +71,14 @@
                         </div>
                     @endif
 
-                    {{-- Badge kategori (kiri atas) --}}
+                    
                     <div class="absolute top-2.5 left-2.5">
                         <span class="px-2 py-0.5 rounded-md text-[10px] font-black bg-white/95 text-gray-800 shadow-xs border border-gray-200">
                             {{ $buku->kategori->nama ?? 'Umum' }}
                         </span>
                     </div>
 
-                    {{-- Badge stok (kanan bawah) --}}
+                    
                     <div class="absolute bottom-2.5 right-2.5">
                         <span class="px-2 py-0.5 rounded-md text-[10px] font-black {{ $buku->available_quantity > 0 ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white' }} shadow-xs">
                             {{ $buku->available_quantity }} / {{ $buku->total_quantity }} Eks

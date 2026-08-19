@@ -6,7 +6,7 @@
 @section('content')
 <div class="space-y-5">
 
-    {{-- METRIC CARDS --}}
+    
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-2xs flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-brand-50 border border-brand-200 text-brand-700 flex items-center justify-center shrink-0">
@@ -49,7 +49,7 @@
         </div>
     </div>
 
-    {{-- SEARCH & FILTER --}}
+    
     <div class="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200 shadow-2xs space-y-3.5">
         <div>
             <h2 class="text-sm font-bold text-gray-900">Pencarian & Pelacak Lokasi Buku</h2>
@@ -102,7 +102,7 @@
         </form>
     </div>
 
-    {{-- BOOK CARDS GRID --}}
+    
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5">
         @forelse($bukuList as $buku)
             @php
@@ -110,7 +110,6 @@
                 $isFull       = $buku->available_quantity === $buku->total_quantity && $buku->total_quantity > 0;
                 $borrowedCount = max(0, $buku->total_quantity - $buku->available_quantity);
 
-                // Badge status
                 if ($isFull) {
                     $badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
                     $dotClass   = 'bg-emerald-500';
@@ -125,7 +124,6 @@
                     $badgeText  = 'Habis';
                 }
 
-                // Data detail untuk modal (JSON)
                 $modalData = json_encode([
                     'id'                 => $buku->id,
                     'judul'              => $buku->judul,
@@ -152,12 +150,10 @@
                 ]);
             @endphp
 
-            {{-- CARD --}}
+            
             <div class="bg-white rounded-2xl border border-gray-200 shadow-2xs hover:shadow-md hover:border-gray-300 transition-all duration-200 flex flex-col overflow-hidden group">
 
-                {{-- Cover — sama persis dengan logika OPAC katalog:
-                     fixed height container + object-cover.
-                     Terbukti kompatibel dengan landscape maupun portrait. --}}
+                
                 <div class="relative w-full h-48 bg-gray-100 overflow-hidden">
                     @if($buku->cover_url)
                         <img src="{{ $buku->cover_url }}"
@@ -177,7 +173,7 @@
                         </div>
                     @endif
 
-                    {{-- Status badge overlay --}}
+                    
                     <div class="absolute top-2 left-2 z-10">
                         <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold border {{ $badgeClass }} shadow-sm backdrop-blur-sm">
                             <span class="w-1.5 h-1.5 rounded-full {{ $dotClass }} shrink-0"></span>
@@ -186,7 +182,7 @@
                     </div>
                 </div>
 
-                {{-- Info minimal --}}
+                
                 <div class="p-3 flex flex-col gap-2 flex-1">
                     <div class="flex-1 min-w-0">
                         <p class="text-[11px] font-black text-gray-900 line-clamp-2 leading-snug">{{ $buku->judul }}</p>
@@ -202,7 +198,7 @@
                         </span>
                     </div>
 
-                    {{-- Tombol detail --}}
+                    
                     <button
                         type="button"
                         onclick="openBookDetail({{ $modalData }})"
@@ -229,7 +225,7 @@
         @endforelse
     </div>
 
-    {{-- PAGINATION --}}
+    
     @if($bukuList->hasPages())
         <div class="p-3 bg-white rounded-2xl border border-gray-200 shadow-2xs">
             {{ $bukuList->links() }}
@@ -238,17 +234,14 @@
 
 </div>
 
-{{-- ============================================================
-     MODAL DETAIL BUKU
-     ============================================================ --}}
 <div id="bookDetailModal" class="fixed inset-0 z-[100] !mt-0 hidden items-center justify-center p-4" role="dialog" aria-modal="true">
-    {{-- Backdrop --}}
+    
     <div id="modalBackdrop" onclick="closeBookDetail()" class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"></div>
 
-    {{-- Modal panel --}}
+    
     <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
 
-        {{-- Header modal --}}
+        
         <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
             <div class="flex items-center gap-2">
                 <div class="w-7 h-7 rounded-lg bg-brand-50 border border-brand-200 text-brand-700 flex items-center justify-center">
@@ -261,10 +254,10 @@
             </button>
         </div>
 
-        {{-- Scrollable body --}}
+        
         <div class="overflow-y-auto flex-1 p-5 space-y-4">
 
-            {{-- Cover + info utama --}}
+            
             <div class="flex items-start gap-4">
                 <div id="modal-cover-wrap" class="w-20 h-28 rounded-xl overflow-hidden border border-gray-200 shrink-0 bg-gray-100 flex items-center justify-center shadow-sm">
                     <img id="modal-cover" src="" alt="" class="w-full h-full object-cover hidden">
@@ -290,7 +283,7 @@
                 </div>
             </div>
 
-            {{-- ISBN --}}
+            
             <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 flex items-center gap-2">
                 <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
                 <div>
@@ -299,7 +292,7 @@
                 </div>
             </div>
 
-            {{-- Stok --}}
+            
             <div>
                 <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-2">Informasi Stok</span>
                 <div class="grid grid-cols-3 gap-2 text-center">
@@ -318,7 +311,7 @@
                 </div>
             </div>
 
-            {{-- Lokasi rak --}}
+            
             <div>
                 <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-2">Panduan Lokasi Rak</span>
                 <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 space-y-2">
@@ -342,7 +335,7 @@
                 </div>
             </div>
 
-            {{-- Catatan Posisi Buku --}}
+            
             <div id="modal-posisi-wrap" class="hidden">
                 <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-2">Catatan Posisi Buku</span>
                 <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 flex items-start gap-2">
@@ -353,7 +346,7 @@
 
         </div>
 
-        {{-- Footer modal dengan aksi --}}
+        
         <div class="px-5 py-3.5 border-t border-gray-100 shrink-0 flex items-center justify-end gap-1.5">
             <a id="modal-katalog-link" href="#" class="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold rounded-xl border border-gray-200 transition text-[11px]">Katalog</a>
             <a id="modal-pinjam-link" href="#" class="px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white font-bold rounded-xl transition shadow-2xs text-[11px] flex items-center gap-1">
@@ -369,7 +362,6 @@
     function openBookDetail(data) {
         const modal = document.getElementById('bookDetailModal');
 
-        // Cover
         const cover      = document.getElementById('modal-cover');
         const placeholder = document.getElementById('modal-cover-placeholder');
         if (data.cover_url) {
@@ -384,14 +376,12 @@
             placeholder.classList.remove('hidden');
         }
 
-        // Status badge
         const badge = document.getElementById('modal-status-badge');
         const dot   = document.getElementById('modal-dot');
         badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border ' + data.badge_class;
         dot.className   = 'w-1.5 h-1.5 rounded-full shrink-0 ' + data.dot_class;
         document.getElementById('modal-badge-text').textContent = data.badge_text;
 
-        // Info utama
         document.getElementById('modal-judul').textContent            = data.judul;
         document.getElementById('modal-penulis').textContent          = 'Penulis: ' + data.penulis;
         document.getElementById('modal-penerbit').textContent         = 'Penerbit: ' + data.penerbit;
@@ -399,12 +389,10 @@
         document.getElementById('modal-tahun').textContent            = 'Tahun ' + data.tahun_terbit;
         document.getElementById('modal-isbn').textContent             = data.isbn;
 
-        // Stok
         document.getElementById('modal-total').textContent     = data.total_quantity + ' Eks';
         document.getElementById('modal-available').textContent = data.available + ' Eks';
         document.getElementById('modal-dipinjam').textContent  = data.dipinjam + ' Eks';
 
-        // Lokasi
         document.getElementById('modal-lokasi-text').textContent = data.lokasi;
         document.getElementById('modal-rak-text').textContent    = data.nama_rak + ' (' + data.kode_rak + ')';
         document.getElementById('modal-laci-text').textContent   = data.nama_laci;
@@ -416,7 +404,6 @@
             ketLaci.classList.add('hidden');
         }
 
-        // Catatan posisi buku — tampil hanya jika ada isinya
         const posisiWrap = document.getElementById('modal-posisi-wrap');
         const posisiText = document.getElementById('modal-keterangan-posisi');
         if (data.keterangan_posisi && data.keterangan_posisi.trim() !== '') {
@@ -426,12 +413,9 @@
             posisiWrap.classList.add('hidden');
         }
 
-        // Link aksi
-
         document.getElementById('modal-katalog-link').href = data.katalog_url;
         document.getElementById('modal-pinjam-link').href  = data.pinjam_url;
 
-        // Tampilkan modal
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         document.body.style.overflow = 'hidden';
@@ -444,7 +428,6 @@
         document.body.style.overflow = '';
     }
 
-    // Tutup modal dengan tombol Escape
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') closeBookDetail();
     });

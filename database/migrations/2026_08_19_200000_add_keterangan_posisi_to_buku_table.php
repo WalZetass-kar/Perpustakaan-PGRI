@@ -6,11 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Tambahkan kolom keterangan_posisi ke tabel buku.
-     * Kolom ini menyimpan informasi posisi fisik spesifik buku di dalam laci/rak,
-     * misalnya: "Baris ke-2 dari depan, urutan ke-5 dari kiri".
-     */
+
     public function up(): void
     {
         Schema::table('buku', function (Blueprint $table) {

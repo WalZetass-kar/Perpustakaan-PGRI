@@ -6,12 +6,10 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+
     public function up(): void
     {
-        // 1. Roles
+
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
@@ -19,7 +17,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 2. Permissions
         Schema::create('permissions', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
@@ -27,7 +24,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 3. Role Permissions
         Schema::create('role_permissions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('role_id')->constrained('roles')->onDelete('cascade');
@@ -35,14 +31,12 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Update Users Table
         Schema::table('users', function (Blueprint $table) {
             $table->foreignId('role_id')->nullable()->after('id')->constrained('roles')->onDelete('set null');
             $table->string('phone')->nullable()->after('email');
             $table->enum('status', ['active', 'inactive'])->default('active')->after('password');
         });
 
-        // 4. Anggota
         Schema::create('anggota', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
@@ -54,7 +48,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 5. Penulis
         Schema::create('penulis', function (Blueprint $table) {
             $table->id();
             $table->string('nama');
@@ -62,7 +55,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 6. Penerbit
         Schema::create('penerbit', function (Blueprint $table) {
             $table->id();
             $table->string('nama');
@@ -70,7 +62,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 7. Kategori
         Schema::create('kategori', function (Blueprint $table) {
             $table->id();
             $table->string('nama')->unique();
@@ -79,7 +70,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 8. Rak
         Schema::create('rak', function (Blueprint $table) {
             $table->id();
             $table->string('kode_rak')->unique();
@@ -91,7 +81,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 9. Buku
         Schema::create('buku', function (Blueprint $table) {
             $table->id();
             $table->string('isbn')->unique();
@@ -108,7 +97,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 10. Eksemplar
         Schema::create('eksemplar', function (Blueprint $table) {
             $table->id();
             $table->foreignId('buku_id')->constrained('buku')->onDelete('cascade');
@@ -121,7 +109,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 11. Peminjaman
         Schema::create('peminjaman', function (Blueprint $table) {
             $table->id();
             $table->string('kode_peminjaman')->unique();
@@ -136,7 +123,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 12. Detail Peminjaman
         Schema::create('detail_peminjaman', function (Blueprint $table) {
             $table->id();
             $table->foreignId('peminjaman_id')->constrained('peminjaman')->onDelete('cascade');
@@ -144,7 +130,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 13. Pengembalian
         Schema::create('pengembalian', function (Blueprint $table) {
             $table->id();
             $table->foreignId('peminjaman_id')->constrained('peminjaman')->onDelete('cascade');
@@ -157,7 +142,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 14. Denda
         Schema::create('denda', function (Blueprint $table) {
             $table->id();
             $table->foreignId('peminjaman_id')->nullable()->constrained('peminjaman')->onDelete('cascade');
@@ -168,7 +152,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 15. Pembayaran Denda
         Schema::create('pembayaran_denda', function (Blueprint $table) {
             $table->id();
             $table->foreignId('denda_id')->constrained('denda')->onDelete('cascade');
@@ -179,7 +162,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 16. Reservasi
         Schema::create('reservasi', function (Blueprint $table) {
             $table->id();
             $table->string('kode_reservasi')->unique();
@@ -192,7 +174,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 17. Notifikasi
         Schema::create('notifikasi', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
@@ -203,7 +184,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 18. Audit Logs
         Schema::create('audit_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
@@ -214,7 +194,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 19. Pengaturan
         Schema::create('pengaturan', function (Blueprint $table) {
             $table->id();
             $table->string('key')->unique();
@@ -225,9 +204,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('pengaturan');

@@ -7,12 +7,10 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+
     public function up(): void
     {
-        // 1. Update Tabel Buku
+
         Schema::table('buku', function (Blueprint $table) {
             $table->string('isbn')->nullable()->change();
             if (!Schema::hasColumn('buku', 'total_quantity')) {
@@ -23,12 +21,10 @@ return new class extends Migration
             }
         });
 
-        // 2. Update Tabel Rak (lokasi nullable)
         Schema::table('rak', function (Blueprint $table) {
             $table->string('lokasi')->nullable()->change();
         });
 
-        // 3. Update Tabel Peminjaman (tambah quantity & make eksemplar_id nullable)
         Schema::table('peminjaman', function (Blueprint $table) {
             if (Schema::hasColumn('peminjaman', 'eksemplar_id')) {
                 $table->foreignId('eksemplar_id')->nullable()->change();
@@ -41,7 +37,6 @@ return new class extends Migration
             }
         });
 
-        // 4. Data Migration: Sinkronisasi jumlah eksemplar existing ke total_quantity & available_quantity
         $bukuList = DB::table('buku')->get();
         foreach ($bukuList as $buku) {
             $countEksemplar = DB::table('eksemplar')->where('buku_id', $buku->id)->count();
@@ -61,9 +56,6 @@ return new class extends Migration
         }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('peminjaman', function (Blueprint $table) {
