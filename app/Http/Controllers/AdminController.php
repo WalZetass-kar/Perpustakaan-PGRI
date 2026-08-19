@@ -188,50 +188,7 @@ class AdminController extends Controller
             'laci.rak'
         ]);
 
-        if ($request->filled('search')) {
-            $search = substr(trim($request->search), 0, 100);
-            $query->where(function($q) use ($search) {
-                $q->where('judul', 'like', "%{$search}%")
-                  ->orWhere('isbn', 'like', "%{$search}%")
-                  ->orWhereHas('penulis', function($qp) use ($search) {
-                      $qp->where('nama', 'like', "%{$search}%");
-                  })
-                  ->orWhereHas('penerbit', function($qpb) use ($search) {
-                      $qpb->where('nama', 'like', "%{$search}%");
-                  })
-                  ->orWhereHas('kategori', function($qk) use ($search) {
-                      $qk->where('nama', 'like', "%{$search}%");
-                  })
-                  ->orWhereHas('rak', function($qr) use ($search) {
-                      $qr->where('kode_rak', 'like', "%{$search}%")
-                         ->orWhere('nama_rak', 'like', "%{$search}%");
-                  })
-                  ->orWhereHas('laci', function($ql) use ($search) {
-                      $ql->where('nama_laci', 'like', "%{$search}%");
-                  });
-            });
-        }
-
-        if ($request->filled('kategori_id') && is_numeric($request->kategori_id)) {
-            $query->where('kategori_id', (int) $request->kategori_id);
-        }
-
-        if ($request->filled('rak_id') && is_numeric($request->rak_id)) {
-            $query->where('rak_id', (int) $request->rak_id);
-        }
-
-        if ($request->filled('status')) {
-            $status = strtolower(trim($request->status));
-            if ($status === 'tersedia') {
-                $query->where('available_quantity', '>', 0);
-            } elseif ($status === 'habis') {
-                $query->where('available_quantity', '<=', 0);
-            }
-        }
-
-        $bukuList = $query->orderBy('judul', 'asc')->paginate(12)->withQueryString();
-        $kategoriList = Kategori::orderBy('nama', 'asc')->get();
-        $rakList = Rak::with('laci')->orderBy('kode_rak', 'asc')->get();
+        $bukuList = $query->orderBy('judul', 'asc')->paginate(12);
 
         $stats = [
             'total_judul'   => Buku::count(),
@@ -240,7 +197,7 @@ class AdminController extends Controller
             'buku_dipinjam' => (int) Peminjaman::where('status', 'dipinjam')->sum('jumlah'),
         ];
 
-        return view('admin.data-buku.index', compact('bukuList', 'kategoriList', 'rakList', 'stats'));
+        return view('admin.data-buku.index', compact('bukuList', 'stats'));
     }
 
     public function bukuIndex(Request $request)
@@ -347,18 +304,19 @@ class AdminController extends Controller
                 </div>';
 
                 $jsonData = htmlspecialchars(json_encode([
-                    'id' => $buku->id,
-                    'isbn' => $buku->isbn ?? '',
-                    'judul' => $buku->judul,
-                    'tahun_terbit' => $buku->tahun_terbit,
-                    'total_quantity' => $buku->total_quantity,
-                    'penulis_id' => $buku->penulis_id,
-                    'penerbit_id' => $buku->penerbit_id,
-                    'kategori_id' => $buku->kategori_id,
-                    'rak_id' => $buku->rak_id,
-                    'rak_laci_id' => $buku->rak_laci_id,
-                    'sinopsis' => $buku->sinopsis ?? '',
-                    'cover_url' => $coverUrl
+                    'id'                 => $buku->id,
+                    'isbn'               => $buku->isbn ?? '',
+                    'judul'              => $buku->judul,
+                    'tahun_terbit'       => $buku->tahun_terbit,
+                    'total_quantity'     => $buku->total_quantity,
+                    'penulis_id'         => $buku->penulis_id,
+                    'penerbit_id'        => $buku->penerbit_id,
+                    'kategori_id'        => $buku->kategori_id,
+                    'rak_id'             => $buku->rak_id,
+                    'rak_laci_id'        => $buku->rak_laci_id,
+                    'sinopsis'           => $buku->sinopsis ?? '',
+                    'keterangan_posisi'  => $buku->keterangan_posisi ?? '',
+                    'cover_url'          => $coverUrl
                 ]), ENT_QUOTES, 'UTF-8');
 
                 $deleteUrl = route('admin.buku.delete', $buku->id);
@@ -457,17 +415,18 @@ class AdminController extends Controller
     public function bukuStore(Request $request)
     {
         $request->validate([
-            'isbn'           => 'nullable|string|max:50',
-            'judul'          => 'required|string|max:255',
-            'tahun_terbit'   => 'required|integer|min:1900|max:' . (date('Y') + 1),
-            'total_quantity' => 'required|integer|min:1|max:10000',
-            'penulis_id'     => 'nullable|exists:penulis,id',
-            'penerbit_id'    => 'nullable|exists:penerbit,id',
-            'kategori_id'    => 'nullable|exists:kategori,id',
-            'rak_id'         => 'nullable|exists:rak,id',
-            'rak_laci_id'    => 'nullable|exists:rak_laci,id',
-            'sinopsis'       => 'nullable|string',
-            'cover'          => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
+            'isbn'                => 'nullable|string|max:50',
+            'judul'               => 'required|string|max:255',
+            'tahun_terbit'        => 'required|integer|min:1900|max:' . (date('Y') + 1),
+            'total_quantity'      => 'required|integer|min:1|max:10000',
+            'penulis_id'          => 'nullable|exists:penulis,id',
+            'penerbit_id'         => 'nullable|exists:penerbit,id',
+            'kategori_id'         => 'nullable|exists:kategori,id',
+            'rak_id'              => 'nullable|exists:rak,id',
+            'rak_laci_id'         => 'nullable|exists:rak_laci,id',
+            'sinopsis'            => 'nullable|string',
+            'keterangan_posisi'   => 'nullable|string|max:500',
+            'cover'               => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
         ]);
 
         $coverPath = null;
@@ -487,6 +446,7 @@ class AdminController extends Controller
             'rak_id'             => $request->rak_id,
             'rak_laci_id'        => $request->rak_laci_id,
             'sinopsis'           => $request->sinopsis,
+            'keterangan_posisi'  => $request->keterangan_posisi,
             'cover'              => $coverPath,
             'status'             => 'tersedia',
         ]);
@@ -507,17 +467,18 @@ class AdminController extends Controller
         $buku = Buku::findOrFail($id);
 
         $request->validate([
-            'isbn'           => 'nullable|string|max:50',
-            'judul'          => 'required|string|max:255',
-            'tahun_terbit'   => 'required|integer|min:1900|max:' . (date('Y') + 1),
-            'total_quantity' => 'required|integer|min:1|max:10000',
-            'penulis_id'     => 'nullable|exists:penulis,id',
-            'penerbit_id'    => 'nullable|exists:penerbit,id',
-            'kategori_id'    => 'nullable|exists:kategori,id',
-            'rak_id'         => 'nullable|exists:rak,id',
-            'rak_laci_id'    => 'nullable|exists:rak_laci,id',
-            'sinopsis'       => 'nullable|string',
-            'cover'          => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
+            'isbn'              => 'nullable|string|max:50',
+            'judul'             => 'required|string|max:255',
+            'tahun_terbit'      => 'required|integer|min:1900|max:' . (date('Y') + 1),
+            'total_quantity'    => 'required|integer|min:1|max:10000',
+            'penulis_id'        => 'nullable|exists:penulis,id',
+            'penerbit_id'       => 'nullable|exists:penerbit,id',
+            'kategori_id'       => 'nullable|exists:kategori,id',
+            'rak_id'            => 'nullable|exists:rak,id',
+            'rak_laci_id'       => 'nullable|exists:rak_laci,id',
+            'sinopsis'          => 'nullable|string',
+            'keterangan_posisi' => 'nullable|string|max:500',
+            'cover'             => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
         ]);
 
         $coverPath = $buku->cover;
@@ -532,18 +493,19 @@ class AdminController extends Controller
         $newAvailable = max(0, $buku->available_quantity + $qtyDiff);
 
         $buku->update([
-            'isbn'               => $request->isbn,
-            'judul'              => $request->judul,
-            'tahun_terbit'       => $request->tahun_terbit,
-            'total_quantity'     => $request->total_quantity,
-            'available_quantity' => $newAvailable,
-            'penulis_id'         => $request->penulis_id,
-            'penerbit_id'        => $request->penerbit_id,
-            'kategori_id'        => $request->kategori_id,
-            'rak_id'             => $request->rak_id,
-            'rak_laci_id'        => $request->rak_laci_id,
-            'sinopsis'           => $request->sinopsis,
-            'cover'              => $coverPath,
+            'isbn'              => $request->isbn,
+            'judul'             => $request->judul,
+            'tahun_terbit'      => $request->tahun_terbit,
+            'total_quantity'    => $request->total_quantity,
+            'available_quantity'=> $newAvailable,
+            'penulis_id'        => $request->penulis_id,
+            'penerbit_id'       => $request->penerbit_id,
+            'kategori_id'       => $request->kategori_id,
+            'rak_id'            => $request->rak_id,
+            'rak_laci_id'       => $request->rak_laci_id,
+            'sinopsis'          => $request->sinopsis,
+            'keterangan_posisi' => $request->keterangan_posisi,
+            'cover'             => $coverPath,
         ]);
 
         AuditLog::create([

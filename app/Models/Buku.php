@@ -22,6 +22,7 @@ class Buku extends Model
         'total_quantity',
         'available_quantity',
         'sinopsis',
+        'keterangan_posisi',
         'cover',
         'view_count',
         'status',

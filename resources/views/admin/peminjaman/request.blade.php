@@ -201,7 +201,13 @@
         @endif
     </div>
 
-    <div x-show="openRejectModal" @click.self="openRejectModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm p-4 overflow-y-auto" x-cloak>
+    <div x-show="openRejectModal" @click.self="openRejectModal = false" class="fixed inset-0 z-[100] !mt-0 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm p-4 overflow-y-auto"          x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         x-cloak>
         <div @click.stop class="bg-white rounded-2xl max-w-md w-full shadow-2xl border-2 border-gray-200 overflow-hidden transform transition-all my-auto">
             <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-rose-50/70">
                 <div class="flex items-center gap-2">

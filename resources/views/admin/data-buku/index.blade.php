@@ -38,42 +38,7 @@
         </div>
     </div>
 
-    <div class="bg-white p-4 rounded-2xl border-2 border-gray-200 shadow-sm">
-        <form action="{{ route('admin.data-buku') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 text-xs">
-            <div class="lg:col-span-2 relative">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul, ISBN, penulis, penerbit, rak..." class="w-full pl-8 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-gray-400 text-xs"></i>
-            </div>
-            <div>
-                <select name="kategori_id" onchange="this.form.submit()" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                    <option value="">Semua Kategori</option>
-                    @foreach($kategoriList as $k)
-                        <option value="{{ $k->id }}" {{ request('kategori_id') == $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
-                <select name="rak_id" onchange="this.form.submit()" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                    <option value="">Semua Lokasi Rak</option>
-                    @foreach($rakList as $r)
-                        <option value="{{ $r->id }}" {{ request('rak_id') == $r->id ? 'selected' : '' }}>{{ $r->kode_rak }} - {{ $r->nama_rak }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="flex items-center gap-1.5">
-                <select name="status" onchange="this.form.submit()" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                    <option value="">Semua Status</option>
-                    <option value="tersedia" {{ request('status') === 'tersedia' ? 'selected' : '' }}>Tersedia</option>
-                    <option value="habis" {{ request('status') === 'habis' ? 'selected' : '' }}>Habis Dipinjam</option>
-                </select>
-                @if(request()->hasAny(['search', 'kategori_id', 'rak_id', 'status']))
-                    <a href="{{ route('admin.data-buku') }}" class="px-2.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-bold transition shrink-0" title="Reset Filter">
-                        <i class="fa-solid fa-rotate-left"></i>
-                    </a>
-                @endif
-            </div>
-        </form>
-    </div>
+
 
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         @forelse($bukuList as $buku)
@@ -94,20 +59,28 @@
                 'sinopsis' => $buku->sinopsis ?? 'Tidak ada ringkasan sinopsis untuk buku ini.',
                 'cover_url' => $buku->cover_url
             ]) }}; openDetailModal = true" class="bg-white rounded-2xl border-2 border-gray-200 hover:border-brand-300 hover:shadow-md transition duration-200 overflow-hidden flex flex-col cursor-pointer group">
-                <div class="relative aspect-3/4 bg-gray-100 overflow-hidden">
+                {{-- Cover — fixed height + object-cover, kompatibel landscape & portrait --}}
+                <div class="relative w-full h-48 bg-gray-100 overflow-hidden">
                     @if($buku->cover_url)
-                        <img src="{{ $buku->cover_url }}" alt="{{ $buku->judul }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                        <img src="{{ $buku->cover_url }}"
+                             alt="{{ $buku->judul }}"
+                             loading="lazy"
+                             class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                     @else
                         <div class="w-full h-full bg-gradient-to-br from-brand-800 to-red-900 flex flex-col items-center justify-center p-4 text-center text-white">
                             <i class="fa-solid fa-book text-3xl opacity-30 mb-2"></i>
                             <span class="text-xs font-bold line-clamp-3 leading-tight">{{ $buku->judul }}</span>
                         </div>
                     @endif
+
+                    {{-- Badge kategori (kiri atas) --}}
                     <div class="absolute top-2.5 left-2.5">
                         <span class="px-2 py-0.5 rounded-md text-[10px] font-black bg-white/95 text-gray-800 shadow-xs border border-gray-200">
                             {{ $buku->kategori->nama ?? 'Umum' }}
                         </span>
                     </div>
+
+                    {{-- Badge stok (kanan bawah) --}}
                     <div class="absolute bottom-2.5 right-2.5">
                         <span class="px-2 py-0.5 rounded-md text-[10px] font-black {{ $buku->available_quantity > 0 ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white' }} shadow-xs">
                             {{ $buku->available_quantity }} / {{ $buku->total_quantity }} Eks
@@ -154,7 +127,13 @@
         </div>
     @endif
 
-    <div x-show="openDetailModal" @click.self="openDetailModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto" x-cloak>
+    <div x-show="openDetailModal" @click.self="openDetailModal = false" class="fixed inset-0 z-[100] !mt-0 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto"          x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         x-cloak>
         <div @click.stop class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl border-2 border-gray-200 overflow-hidden transform transition-all my-auto">
             <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-gray-50">
                 <div class="flex items-center gap-2">
