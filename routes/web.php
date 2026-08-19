@@ -40,6 +40,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/temukan-buku', [AdminController::class, 'temukanBukuIndex'])->name('temukan-buku');
 
         Route::get('/buku', [AdminController::class, 'bukuIndex'])->name('buku');
+        Route::get('/buku/export/excel', [AdminController::class, 'bukuExportExcel'])->name('buku.export.excel');
+        Route::get('/buku/export/pdf', [AdminController::class, 'bukuExportPdf'])->name('buku.export.pdf');
         Route::post('/buku', [AdminController::class, 'bukuStore'])->name('buku.store');
         Route::post('/buku/update/{id}', [AdminController::class, 'bukuUpdate'])->name('buku.update')->whereNumber('id');
         Route::post('/buku/delete/{id}', [AdminController::class, 'bukuDestroy'])->name('buku.delete')->whereNumber('id');

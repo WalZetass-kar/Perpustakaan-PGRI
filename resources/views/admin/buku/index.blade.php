@@ -112,7 +112,15 @@
             <h2 class="text-sm font-black text-gray-900">Katalog Judul Buku & Stok Fisik</h2>
             <p class="text-[11px] text-gray-500 mt-0.5">Kelola data buku, jumlah stok fisik, serta nomor rak dan laci penyimpanan</p>
         </div>
-        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+            <a href="{{ route('admin.buku.export.excel') }}" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Export seluruh data buku ke format Excel">
+                <i class="fa-solid fa-file-excel"></i>
+                <span>Export Excel</span>
+            </a>
+            <a href="{{ route('admin.buku.export.pdf') }}" target="_blank" class="px-3.5 py-2 bg-rose-700 hover:bg-rose-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Cetak / Simpan Laporan PDF Resmi">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span>Cetak / PDF</span>
+            </a>
             <button @click="addRakId = ''; addLaciId = ''; openAddModal = true" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-2 shrink-0">
                 <i class="fa-solid fa-plus text-emerald-300"></i>
                 <span>Tambah Buku</span>
