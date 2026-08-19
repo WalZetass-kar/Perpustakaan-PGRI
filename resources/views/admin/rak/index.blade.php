@@ -341,7 +341,13 @@
         @endif
     </div>
 
-    <div x-show="openAddModal" @click.self="openAddModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 p-4 overflow-y-auto" x-cloak>
+    <div x-show="openAddModal" @click.self="openAddModal = false" class="fixed inset-0 z-[100] !mt-0 flex items-center justify-center bg-gray-950/60 p-4 overflow-y-auto"          x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         x-cloak>
         <div @click.stop class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] flex flex-col shadow-xl border border-gray-200 overflow-hidden my-auto">
             <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between shrink-0 bg-gray-50/80">
                 <h3 class="text-sm font-bold text-gray-900">Tambah Rak Buku Baru</h3>
@@ -375,7 +381,13 @@
         </div>
     </div>
 
-    <div x-show="openEditModal" @click.self="openEditModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 p-4 overflow-y-auto" x-cloak>
+    <div x-show="openEditModal" @click.self="openEditModal = false" class="fixed inset-0 z-[100] !mt-0 flex items-center justify-center bg-gray-950/60 p-4 overflow-y-auto"          x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         x-cloak>
         <div @click.stop class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] flex flex-col shadow-xl border border-gray-200 overflow-hidden my-auto">
             <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between shrink-0 bg-gray-50/80">
                 <h3 class="text-sm font-bold text-gray-900">Edit Rak Lokasi</h3>
@@ -404,7 +416,13 @@
         </div>
     </div>
 
-    <div x-show="openAddLaciModal" @click.self="openAddLaciModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 p-4 overflow-y-auto" x-cloak>
+    <div x-show="openAddLaciModal" @click.self="openAddLaciModal = false" class="fixed inset-0 z-[100] !mt-0 flex items-center justify-center bg-gray-950/60 p-4 overflow-y-auto"          x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         x-cloak>
         <div @click.stop class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] flex flex-col shadow-xl border border-gray-200 overflow-hidden my-auto">
             <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between shrink-0 bg-gray-50/80">
                 <div>
@@ -436,7 +454,13 @@
         </div>
     </div>
 
-    <div x-show="openEditLaciModal" @click.self="openEditLaciModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 p-4 overflow-y-auto" x-cloak>
+    <div x-show="openEditLaciModal" @click.self="openEditLaciModal = false" class="fixed inset-0 z-[100] !mt-0 flex items-center justify-center bg-gray-950/60 p-4 overflow-y-auto"          x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         x-cloak>
         <div @click.stop class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] flex flex-col shadow-xl border border-gray-200 overflow-hidden my-auto">
             <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between shrink-0 bg-gray-50/80">
                 <h3 class="text-sm font-bold text-gray-900">Edit Data Laci Rak</h3>

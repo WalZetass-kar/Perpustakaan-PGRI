@@ -138,7 +138,13 @@
         </div>
     </div>
 
-    <div x-show="openAddModal" @click.self="openAddModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto" x-cloak>
+    <div x-show="openAddModal" @click.self="openAddModal = false" class="fixed inset-0 z-[100] !mt-0 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto"          x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         x-cloak>
         <div @click.stop class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl border-2 border-gray-200 overflow-hidden transform transition-all my-auto">
             <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-gray-50/70">
                 <div class="flex items-center gap-2">
@@ -233,7 +239,21 @@
 
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">Sinopsis / Ringkasan (Opsional)</label>
-                    <textarea name="sinopsis" rows="2" placeholder="Ringkasan materi atau buku..." class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium"></textarea>
+                    <textarea name="sinopsis" rows="2" placeholder="Ringkasan materi atau buku..." class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium resize-none"></textarea>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">
+                        Keterangan Posisi Buku (Opsional)
+                        <span class="text-[10px] font-normal text-gray-400 ml-1">— posisi fisik buku di dalam laci/rak</span>
+                    </label>
+                    <textarea name="keterangan_posisi" rows="2"
+                              placeholder="Contoh: Baris ke-2 dari depan, urutan ke-5 dari kiri. Atau: Di pojok kanan laci bagian bawah."
+                              class="w-full px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg focus:ring-1.5 focus:ring-amber-500 focus:bg-white focus:outline-none font-medium text-gray-700 placeholder-gray-400 resize-none"></textarea>
+                    <p class="text-[10px] text-amber-700 mt-0.5 font-medium">
+                        <i class="fa-solid fa-circle-info mr-0.5"></i>
+                        Membantu petugas menemukan buku secara lebih presisi di dalam laci.
+                    </p>
                 </div>
 
                 <div class="pt-3 border-t border-gray-100 flex justify-end gap-2 shrink-0">
@@ -247,7 +267,13 @@
         </div>
     </div>
 
-    <div x-show="openEditModal" @click.self="openEditModal = false" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto" x-cloak>
+    <div x-show="openEditModal" @click.self="openEditModal = false" class="fixed inset-0 z-[100] !mt-0 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto"          x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         x-cloak>
         <div @click.stop class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl border-2 border-gray-200 overflow-hidden transform transition-all my-auto">
             <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-amber-50/50">
                 <div class="flex items-center gap-2">
@@ -342,7 +368,21 @@
 
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">Sinopsis / Ringkasan (Opsional)</label>
-                    <textarea name="sinopsis" x-model="editData.sinopsis" rows="2" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium"></textarea>
+                    <textarea name="sinopsis" x-model="editData.sinopsis" rows="2" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium resize-none"></textarea>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">
+                        Keterangan Posisi Buku (Opsional)
+                        <span class="text-[10px] font-normal text-gray-400 ml-1">— posisi fisik buku di dalam laci/rak</span>
+                    </label>
+                    <textarea name="keterangan_posisi" x-model="editData.keterangan_posisi" rows="2"
+                              placeholder="Contoh: Baris ke-2 dari depan, urutan ke-5 dari kiri. Atau: Di pojok kanan laci bagian bawah."
+                              class="w-full px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg focus:ring-1.5 focus:ring-amber-500 focus:bg-white focus:outline-none font-medium text-gray-700 placeholder-gray-400 resize-none"></textarea>
+                    <p class="text-[10px] text-amber-700 mt-0.5 font-medium">
+                        <i class="fa-solid fa-circle-info mr-0.5"></i>
+                        Membantu petugas menemukan buku secara lebih presisi di dalam laci.
+                    </p>
                 </div>
 
                 <div class="pt-3 border-t border-gray-100 flex justify-end gap-2 shrink-0">

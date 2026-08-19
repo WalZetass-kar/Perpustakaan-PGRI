@@ -6,7 +6,22 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Http\\Controllers\\AdminController' => $baseDir . '/app/Http/Controllers/AdminController.php',
+    'App\\Http\\Controllers\\AuthController' => $baseDir . '/app/Http/Controllers/AuthController.php',
     'App\\Http\\Controllers\\Controller' => $baseDir . '/app/Http/Controllers/Controller.php',
+    'App\\Http\\Controllers\\PublicController' => $baseDir . '/app/Http/Controllers/PublicController.php',
+    'App\\Http\\Middleware\\CheckRole' => $baseDir . '/app/Http/Middleware/CheckRole.php',
+    'App\\Http\\Middleware\\SecurityHeaders' => $baseDir . '/app/Http/Middleware/SecurityHeaders.php',
+    'App\\Models\\AuditLog' => $baseDir . '/app/Models/AuditLog.php',
+    'App\\Models\\Buku' => $baseDir . '/app/Models/Buku.php',
+    'App\\Models\\Kategori' => $baseDir . '/app/Models/Kategori.php',
+    'App\\Models\\Peminjaman' => $baseDir . '/app/Models/Peminjaman.php',
+    'App\\Models\\Penerbit' => $baseDir . '/app/Models/Penerbit.php',
+    'App\\Models\\Pengaturan' => $baseDir . '/app/Models/Pengaturan.php',
+    'App\\Models\\Penulis' => $baseDir . '/app/Models/Penulis.php',
+    'App\\Models\\Rak' => $baseDir . '/app/Models/Rak.php',
+    'App\\Models\\RakLaci' => $baseDir . '/app/Models/RakLaci.php',
+    'App\\Models\\Role' => $baseDir . '/app/Models/Role.php',
     'App\\Models\\User' => $baseDir . '/app/Models/User.php',
     'App\\Providers\\AppServiceProvider' => $baseDir . '/app/Providers/AppServiceProvider.php',
     'Attribute' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',

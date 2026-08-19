@@ -523,7 +523,22 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
     );
 
     public static $classMap = array (
+        'App\\Http\\Controllers\\AdminController' => __DIR__ . '/../..' . '/app/Http/Controllers/AdminController.php',
+        'App\\Http\\Controllers\\AuthController' => __DIR__ . '/../..' . '/app/Http/Controllers/AuthController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
+        'App\\Http\\Controllers\\PublicController' => __DIR__ . '/../..' . '/app/Http/Controllers/PublicController.php',
+        'App\\Http\\Middleware\\CheckRole' => __DIR__ . '/../..' . '/app/Http/Middleware/CheckRole.php',
+        'App\\Http\\Middleware\\SecurityHeaders' => __DIR__ . '/../..' . '/app/Http/Middleware/SecurityHeaders.php',
+        'App\\Models\\AuditLog' => __DIR__ . '/../..' . '/app/Models/AuditLog.php',
+        'App\\Models\\Buku' => __DIR__ . '/../..' . '/app/Models/Buku.php',
+        'App\\Models\\Kategori' => __DIR__ . '/../..' . '/app/Models/Kategori.php',
+        'App\\Models\\Peminjaman' => __DIR__ . '/../..' . '/app/Models/Peminjaman.php',
+        'App\\Models\\Penerbit' => __DIR__ . '/../..' . '/app/Models/Penerbit.php',
+        'App\\Models\\Pengaturan' => __DIR__ . '/../..' . '/app/Models/Pengaturan.php',
+        'App\\Models\\Penulis' => __DIR__ . '/../..' . '/app/Models/Penulis.php',
+        'App\\Models\\Rak' => __DIR__ . '/../..' . '/app/Models/Rak.php',
+        'App\\Models\\RakLaci' => __DIR__ . '/../..' . '/app/Models/RakLaci.php',
+        'App\\Models\\Role' => __DIR__ . '/../..' . '/app/Models/Role.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
