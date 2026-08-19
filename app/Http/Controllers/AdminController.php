@@ -261,7 +261,7 @@ class AdminController extends Controller
                 $coverUrl = $buku->cover_url;
                 $coverHtml = $coverUrl 
                     ? '<img src="' . e($coverUrl) . '" alt="Cover" class="w-full h-full object-cover">'
-                    : '<div class="w-full h-full flex flex-col items-center justify-center bg-brand-700 text-white font-black text-xs">' . e(substr($buku->judul, 0, 1)) . '</div>';
+                    : '<div class="w-full h-full bg-gradient-to-br from-brand-900 via-brand-800 to-red-950 text-white font-black text-xs flex flex-col items-center justify-center p-1 border-l-2 border-amber-400/50 shadow-inner"><i class="fa-solid fa-book text-[11px] opacity-40"></i><span class="text-[7.5px] mt-0.5">' . e(substr($buku->judul, 0, 1)) . '</span></div>';
 
                 $bukuHtml = '<div class="flex items-center gap-3">
                     <div class="w-10 h-14 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center">

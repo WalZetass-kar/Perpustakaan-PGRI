@@ -65,9 +65,20 @@
                              loading="lazy"
                              class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                     @else
-                        <div class="w-full h-full bg-gradient-to-br from-brand-800 to-red-900 flex flex-col items-center justify-center p-4 text-center text-white">
-                            <i class="fa-solid fa-book text-3xl opacity-30 mb-2"></i>
-                            <span class="text-xs font-bold line-clamp-3 leading-tight">{{ $buku->judul }}</span>
+                        <div class="w-full h-full bg-gradient-to-br from-brand-900 via-brand-800 to-red-950 text-white p-3.5 border-l-[5px] border-amber-400/50 flex flex-col justify-between select-none relative overflow-hidden shadow-inner">
+                            <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
+                            <div class="flex items-center justify-end">
+                                <span class="text-[8px] font-black uppercase tracking-widest text-amber-300/90 bg-black/30 px-2 py-0.5 rounded-md border border-white/10 backdrop-blur-xs">{{ substr($buku->kategori->nama ?? 'Buku', 0, 15) }}</span>
+                            </div>
+                            <div class="flex flex-col items-center justify-center my-auto text-center px-1">
+                                <i class="fa-solid fa-book-bookmark text-white/25 text-2xl mb-1.5 drop-shadow-xs"></i>
+                                <p class="text-[11px] font-black text-white leading-tight line-clamp-3 drop-shadow-sm">{{ $buku->judul }}</p>
+                                <p class="text-[9px] text-white/70 font-medium truncate max-w-full mt-1">{{ $buku->penulis->nama ?? 'SMK PGRI' }}</p>
+                            </div>
+                            <div class="flex items-center justify-between border-t border-white/10 pt-1 text-[7px] font-bold text-white/60 tracking-wider uppercase">
+                                <span>PERPUSTAKAAN</span>
+                                <span>SMK PGRI</span>
+                            </div>
                         </div>
                     @endif
 
@@ -153,9 +164,13 @@
                             <img :src="detailData.cover_url" alt="Cover" class="w-full h-full object-cover">
                         </template>
                         <template x-if="!detailData.cover_url">
-                            <div class="w-full h-full bg-brand-700 text-white font-bold flex flex-col items-center justify-center p-2 text-center">
-                                <i class="fa-solid fa-book text-2xl opacity-40 mb-1"></i>
-                                <span class="text-[10px] line-clamp-2" x-text="detailData.judul"></span>
+                            <div class="w-full h-full bg-gradient-to-br from-brand-900 via-brand-800 to-red-950 text-white p-2.5 border-l-[4px] border-amber-400/50 flex flex-col justify-between select-none relative overflow-hidden shadow-inner">
+                                <span class="text-[7.5px] font-black text-amber-300/90 uppercase tracking-wider text-right" x-text="detailData.kategori"></span>
+                                <div class="text-center my-auto px-1">
+                                    <i class="fa-solid fa-book-bookmark text-white/25 text-xl mb-1"></i>
+                                    <p class="text-[9.5px] font-black text-white line-clamp-3 leading-tight drop-shadow-sm" x-text="detailData.judul"></p>
+                                </div>
+                                <span class="text-[6.5px] font-bold text-white/60 tracking-widest text-center uppercase border-t border-white/10 pt-0.5">SMK PGRI</span>
                             </div>
                         </template>
                     </div>

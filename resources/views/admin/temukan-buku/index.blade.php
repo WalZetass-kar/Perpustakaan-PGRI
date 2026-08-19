@@ -161,21 +161,25 @@
                              loading="lazy"
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                     @else
-                        <div class="w-full h-full p-3 bg-gradient-to-b from-stone-50 to-gray-100 border-l-4 border-brand-700 flex flex-col justify-between select-none">
-                            <span class="text-[8px] font-bold text-brand-800 uppercase leading-tight">{{ substr($buku->kategori->nama ?? 'Buku', 0, 12) }}</span>
-                            <div class="flex flex-col items-center justify-center flex-1 py-2">
-                                <div class="w-10 h-10 rounded-xl bg-brand-700 text-white flex items-center justify-center font-black text-lg shadow-sm">
-                                    {{ substr($buku->judul, 0, 1) }}
-                                </div>
-                                <p class="text-[9px] font-black text-gray-700 line-clamp-3 leading-snug text-center mt-2">{{ $buku->judul }}</p>
+                        <div class="w-full h-full bg-gradient-to-br from-brand-900 via-brand-800 to-red-950 text-white p-3.5 border-l-[5px] border-amber-400/50 flex flex-col justify-between select-none relative overflow-hidden shadow-inner">
+                            <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
+                            <div class="flex items-center justify-end">
+                                <span class="text-[8px] font-black uppercase tracking-widest text-amber-300/90 bg-black/30 px-2 py-0.5 rounded-md border border-white/10 backdrop-blur-xs">{{ substr($buku->kategori->nama ?? 'Buku', 0, 15) }}</span>
                             </div>
-                            <span class="text-[7px] font-mono text-gray-400">SMK PGRI</span>
+                            <div class="flex flex-col items-center justify-center my-auto text-center px-1">
+                                <i class="fa-solid fa-book-bookmark text-white/25 text-2xl mb-1.5 drop-shadow-xs"></i>
+                                <p class="text-[11px] font-black text-white leading-tight line-clamp-3 drop-shadow-sm">{{ $buku->judul }}</p>
+                                <p class="text-[9px] text-white/70 font-medium truncate max-w-full mt-1">{{ $buku->penulis->nama ?? 'SMK PGRI' }}</p>
+                            </div>
+                            <div class="flex items-center justify-between border-t border-white/10 pt-1 text-[7px] font-bold text-white/60 tracking-wider uppercase">
+                                <span>PERPUSTAKAAN</span>
+                                <span>SMK PGRI</span>
+                            </div>
                         </div>
                     @endif
 
-                    
                     <div class="absolute top-2 left-2 z-10">
-                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold border {{ $badgeClass }} shadow-sm backdrop-blur-sm">
+                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold border {{ $badgeClass }} shadow-xs backdrop-blur-md">
                             <span class="w-1.5 h-1.5 rounded-full {{ $dotClass }} shrink-0"></span>
                             {{ $badgeText }}
                         </span>
@@ -259,12 +263,15 @@
 
             
             <div class="flex items-start gap-4">
-                <div id="modal-cover-wrap" class="w-20 h-28 rounded-xl overflow-hidden border border-gray-200 shrink-0 bg-gray-100 flex items-center justify-center shadow-sm">
+                <div id="modal-cover-wrap" class="w-24 h-36 rounded-xl overflow-hidden border border-gray-200 shrink-0 bg-gray-100 flex items-center justify-center shadow-md">
                     <img id="modal-cover" src="" alt="" class="w-full h-full object-cover hidden">
-                    <div id="modal-cover-placeholder" class="w-full h-full p-2 bg-stone-50 border-l-4 border-brand-700 flex flex-col justify-between select-none hidden">
-                        <span id="modal-cover-kategori" class="text-[7px] font-bold text-brand-800 uppercase"></span>
-                        <p id="modal-cover-judul" class="text-[8px] font-black text-gray-900 line-clamp-4 leading-snug"></p>
-                        <span class="text-[6px] font-mono text-gray-400">SMK PGRI</span>
+                    <div id="modal-cover-placeholder" class="w-full h-full bg-gradient-to-br from-brand-900 via-brand-800 to-red-950 text-white p-2.5 border-l-[4px] border-amber-400/50 flex flex-col justify-between select-none relative overflow-hidden shadow-inner hidden">
+                        <span id="modal-cover-kategori" class="text-[7.5px] font-black text-amber-300/90 uppercase tracking-wider text-right"></span>
+                        <div class="text-center my-auto px-1">
+                            <i class="fa-solid fa-book-bookmark text-white/25 text-xl mb-1"></i>
+                            <p id="modal-cover-judul" class="text-[9.5px] font-black text-white line-clamp-3 leading-tight drop-shadow-sm"></p>
+                        </div>
+                        <span class="text-[6.5px] font-bold text-white/60 tracking-widest text-center uppercase border-t border-white/10 pt-0.5">SMK PGRI</span>
                     </div>
                 </div>
 
