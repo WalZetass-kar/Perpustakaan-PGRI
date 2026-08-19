@@ -76,8 +76,8 @@
                             <td class="py-3 px-4 text-right whitespace-nowrap">
                                 <form action="{{ route('admin.peminjaman.kembali', $loan->id) }}" method="POST" class="inline" onsubmit="return confirmDelete(event, 'Proses Pengembalian?', 'Buku akan dikembalikan ke stok fisik perpustakaan.')">
                                     @csrf
-                                    <button type="submit" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-lg text-[11px] transition shadow-2xs flex items-center gap-1 ml-auto">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    <button type="submit" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-lg text-[11px] transition shadow-2xs flex items-center gap-1.5 ml-auto">
+                                        <i class="fa-solid fa-arrow-rotate-left text-xs"></i>
                                         <span>Pengembalian</span>
                                     </button>
                                 </form>

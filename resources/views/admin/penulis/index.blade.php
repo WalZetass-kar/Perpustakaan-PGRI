@@ -50,13 +50,15 @@
                                     'id' => $p->id,
                                     'nama' => $p->nama,
                                     'biografi' => $p->biografi ?? ''
-                                ]) }}; openEditModal = true" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs">
-                                    Edit
+                                ]) }}; openEditModal = true" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    <span>Edit</span>
                                 </button>
                                 <form action="{{ route('admin.penulis.delete', $p->id) }}" method="POST" class="inline" onsubmit="return confirmDelete(event, 'Hapus Penulis?', 'Data penulis ini akan dihapus.')">
                                     @csrf
-                                    <button type="submit" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs">
-                                        Hapus
+                                    <button type="submit" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs inline-flex items-center gap-1">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                        <span>Hapus</span>
                                     </button>
                                 </form>
                             </td>
