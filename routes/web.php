@@ -71,6 +71,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/rak/{rakId}/lacis', [AdminController::class, 'getLacisByRak'])->name('rak.lacis')->whereNumber('rakId');
 
         Route::get('/peminjaman', [AdminController::class, 'peminjamanIndex'])->name('peminjaman');
+        Route::get('/peminjaman/export/excel', [AdminController::class, 'peminjamanExportExcel'])->name('peminjaman.export.excel');
+        Route::get('/peminjaman/export/pdf', [AdminController::class, 'peminjamanExportPdf'])->name('peminjaman.export.pdf');
         Route::post('/peminjaman', [AdminController::class, 'peminjamanStore'])->name('peminjaman.store');
         Route::post('/peminjaman/kembali/{id}', [AdminController::class, 'peminjamanKembali'])->name('peminjaman.kembali')->whereNumber('id');
         Route::get('/peminjaman/request', [AdminController::class, 'peminjamanRequestIndex'])->name('peminjaman.request');

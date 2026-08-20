@@ -6,6 +6,23 @@
 @section('content')
 <div class="space-y-5">
 
+    <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+        <div>
+            <h2 class="text-sm font-black text-gray-900">Rekapitulasi Sirkulasi Peminjaman</h2>
+            <p class="text-[11px] text-gray-500 mt-0.5">Arsip seluruh riwayat transaksi peminjaman dan pengembalian buku</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('admin.peminjaman.export.excel', request()->all()) }}" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Export Seluruh Riwayat ke Excel">
+                <i class="fa-solid fa-file-excel"></i>
+                <span>Export Excel</span>
+            </a>
+            <a href="{{ route('admin.peminjaman.export.pdf', request()->all()) }}" target="_blank" class="px-3.5 py-2 bg-rose-700 hover:bg-rose-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Cetak / Simpan Laporan PDF Resmi">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span>Cetak / PDF</span>
+            </a>
+        </div>
+    </div>
+
     <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm">
         <form action="{{ route('admin.riwayat') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
             <div>

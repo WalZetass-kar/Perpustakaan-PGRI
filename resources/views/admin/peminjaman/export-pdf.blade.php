@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Inventaris Buku - {{ $pengaturan['nama_sekolah'] ?? 'SMK PGRI PEKANBARU' }}</title>
+    <title>Laporan Sirkulasi Peminjaman - {{ $pengaturan['nama_sekolah'] ?? 'SMK PGRI PEKANBARU' }}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         @page {
@@ -215,15 +215,15 @@
             font-weight: 800;
             text-transform: uppercase;
         }
-        .badge-tersedia {
+        .badge-dipinjam {
+            background-color: #fffbeb;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+        .badge-kembali {
             background-color: #ecfdf5;
             color: #065f46;
             border: 1px solid #a7f3d0;
-        }
-        .badge-habis {
-            background-color: #fff1f2;
-            color: #9f1239;
-            border: 1px solid #fecdd3;
         }
 
         .signature-section {
@@ -281,14 +281,14 @@
 
     <div class="no-print-bar">
         <div style="display: flex; align-items: center; gap: 8px;">
-            <a href="{{ route('admin.buku') }}" class="btn-action btn-back">
+            <a href="{{ route('admin.peminjaman') }}" class="btn-action btn-back">
                 <i class="fa-solid fa-arrow-left"></i>
-                <span>Kembali ke Master Buku</span>
+                <span>Kembali ke Sirkulasi</span>
             </a>
             <span style="font-size: 11px; color: #64748b; font-weight: 600;">| Format Dokumen: A4 Portrait</span>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
-            <a href="{{ route('admin.buku.export.excel', request()->all()) }}" class="btn-action btn-excel">
+            <a href="{{ route('admin.peminjaman.export.excel', request()->all()) }}" class="btn-action btn-excel">
                 <i class="fa-solid fa-file-excel"></i>
                 <span>Download Excel</span>
             </a>
@@ -310,26 +310,26 @@
         </div>
 
         <div class="report-title-box">
-            <h3>Laporan Rekapitulasi Inventaris Koleksi Buku</h3>
+            <h3>Laporan Rekapitulasi Sirkulasi &amp; Peminjaman Buku</h3>
             <span>Dicetak pada: {{ \Carbon\Carbon::now()->translatedFormat('d F Y, H:i') }} WIB | Oleh Petugas: {{ auth()->user()->name ?? 'Administrator' }}</span>
         </div>
 
         <div class="stat-grid">
             <div class="stat-card">
-                <div class="label">Total Judul Buku</div>
-                <div class="value">{{ number_format($totalJudul, 0, ',', '.') }}</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">Total Eksemplar Fisik</div>
-                <div class="value">{{ number_format($totalEksemplar, 0, ',', '.') }}</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">Eksemplar Tersedia</div>
-                <div class="value" style="color: #059669;">{{ number_format($totalTersedia, 0, ',', '.') }}</div>
+                <div class="label">Total Transaksi</div>
+                <div class="value">{{ number_format($totalTransaksi, 0, ',', '.') }}</div>
             </div>
             <div class="stat-card">
                 <div class="label">Sedang Dipinjam</div>
                 <div class="value" style="color: #d97706;">{{ number_format($totalDipinjam, 0, ',', '.') }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Sudah Kembali</div>
+                <div class="value" style="color: #059669;">{{ number_format($totalKembali, 0, ',', '.') }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Total Buku Terlibat</div>
+                <div class="value" style="color: #4338ca;">{{ number_format($totalBukuPinjam, 0, ',', '.') }}</div>
             </div>
         </div>
 
@@ -337,53 +337,57 @@
             <thead>
                 <tr>
                     <th style="width: 25px;">No</th>
-                    <th style="text-align: left;">Judul Buku &amp; Penulis</th>
-                    <th style="width: 80px;">ISBN</th>
-                    <th style="width: 100px; text-align: left;">Penerbit / Thn</th>
-                    <th style="width: 80px; text-align: left;">Kategori</th>
-                    <th style="width: 85px; text-align: left;">Lokasi Rak/Laci</th>
-                    <th style="width: 35px;">Tot</th>
-                    <th style="width: 35px;">Ada</th>
+                    <th style="width: 70px;">Kode</th>
+                    <th style="text-align: left;">Nama Peminjam / Jurusan</th>
+                    <th style="text-align: left;">Judul Buku &amp; Lokasi</th>
+                    <th style="width: 30px;">Jml</th>
+                    <th style="width: 70px;">Tgl Pinjam</th>
+                    <th style="width: 75px;">Tgl Kembali</th>
                     <th style="width: 65px;">Status</th>
+                    <th style="width: 75px; text-align: left;">Petugas</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($bukuItems as $idx => $buku)
+                @forelse($loanItems as $idx => $loan)
                     @php
-                        $tersedia = (int) $buku->available_quantity;
-                        $total = (int) $buku->total_quantity;
-                        $rakName = $buku->rak ? ($buku->rak->kode_rak) : '-';
-                        $laciName = $buku->laci ? $buku->laci->nama_laci : ($buku->rak ? 'Laci 1' : '-');
+                        $isReturned = ($loan->status === 'dikembalikan');
+                        $rakInfo = $loan->buku && $loan->buku->rak ? $loan->buku->rak->kode_rak : '-';
                     @endphp
                     <tr>
                         <td style="text-align: center; font-weight: bold;">{{ $idx + 1 }}</td>
+                        <td style="text-align: center; font-family: monospace; font-size: 7.5pt; font-weight: bold;">{{ $loan->kode_peminjaman }}</td>
                         <td>
-                            <div style="font-weight: bold; color: #0f172a; line-height: 1.2;">{{ $buku->judul }}</div>
-                            <div style="font-size: 7.5pt; color: #64748b; margin-top: 1px;">Penulis: {{ $buku->penulis->nama ?? '-' }}</div>
+                            <div style="font-weight: bold; color: #0f172a;">{{ $loan->nama_peminjam }}</div>
+                            <div style="font-size: 7.5pt; color: #64748b;">{{ $loan->jurusan }} {{ $loan->nomor_induk ? '• NISN: ' . $loan->nomor_induk : '' }}</div>
                         </td>
-                        <td style="text-align: center; font-family: monospace; font-size: 7.5pt;">{{ $buku->isbn ?? '-' }}</td>
                         <td>
-                            <div>{{ $buku->penerbit->nama ?? '-' }}</div>
-                            <div style="font-size: 7.5pt; color: #64748b;">Thn: {{ $buku->tahun_terbit ?? '-' }}</div>
+                            <div style="font-weight: bold; color: #0f172a;">{{ $loan->buku->judul ?? '-' }}</div>
+                            <div style="font-size: 7.5pt; color: #881337;">Rak: {{ $rakInfo }}</div>
                         </td>
-                        <td>{{ $buku->kategori->nama ?? 'Umum' }}</td>
-                        <td>
-                            <strong style="color: #881337;">{{ $rakName }}</strong>
-                            <div style="font-size: 7pt; color: #64748b;">{{ $laciName }}</div>
-                        </td>
-                        <td style="text-align: center; font-weight: bold;">{{ $total }}</td>
-                        <td style="text-align: center; font-weight: bold; color: {{ $tersedia > 0 ? '#059669' : '#dc2626' }};">{{ $tersedia }}</td>
+                        <td style="text-align: center; font-weight: bold;">{{ $loan->jumlah }}</td>
                         <td style="text-align: center;">
-                            @if($tersedia > 0)
-                                <span class="badge-status badge-tersedia">Tersedia</span>
+                            <div>{{ \Carbon\Carbon::parse($loan->tanggal_pinjam)->format('d/m/Y') }}</div>
+                        </td>
+                        <td style="text-align: center;">
+                            @if($loan->waktu_kembali)
+                                <div>{{ \Carbon\Carbon::parse($loan->waktu_kembali)->format('d/m/Y') }}</div>
+                                <div style="font-size: 7pt; color: #64748b;">{{ \Carbon\Carbon::parse($loan->waktu_kembali)->format('H:i') }} WIB</div>
                             @else
-                                <span class="badge-status badge-habis">Dipinjam</span>
+                                <span style="color: #94a3b8;">-</span>
                             @endif
                         </td>
+                        <td style="text-align: center;">
+                            @if($isReturned)
+                                <span class="badge-status badge-kembali">Kembali</span>
+                            @else
+                                <span class="badge-status badge-dipinjam">Dipinjam</span>
+                            @endif
+                        </td>
+                        <td>{{ $loan->petugas->name ?? '-' }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9" style="text-align: center; padding: 20px; color: #94a3b8;">Tidak ada data buku yang terdaftar di sistem.</td>
+                        <td colspan="9" style="text-align: center; padding: 20px; color: #94a3b8;">Tidak ada data sirkulasi peminjaman yang tercatat.</td>
                     </tr>
                 @endforelse
             </tbody>
