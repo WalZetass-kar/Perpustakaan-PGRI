@@ -281,16 +281,9 @@ class AdminController extends Controller
                     <p class="text-[10.5px] text-gray-500">' . e($buku->penerbit->nama ?? '-') . '</p>';
 
                 $laciName = $buku->laci->nama_laci ?? ($buku->rak ? 'Laci 1' : 'Tanpa Laci');
-                $kategoriHtml = '<div class="space-y-1">
-                    <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-brand-50 text-brand-700 border border-brand-200 inline-block">
-                        ' . e($buku->kategori->nama ?? 'Umum') . '
-                    </span>
-                    <div class="flex items-center gap-1 text-[10px] font-bold text-gray-700">
-                        <span class="px-1.5 py-0.5 rounded bg-gray-100 border border-gray-200 font-mono text-gray-800">' . e($buku->rak->kode_rak ?? '-') . '</span>
-                        <span>•</span>
-                        <span class="text-amber-700">' . e($laciName) . '</span>
-                    </div>
-                </div>';
+                $kategoriHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-brand-50 text-brand-700 border border-brand-200 inline-block">'
+                    . e($buku->kategori->nama ?? 'Umum')
+                    . '</span>';
 
                 $stokClass = $buku->available_quantity > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200';
                 $stokText = $buku->available_quantity > 0 ? 'Tersedia' : 'Habis Dipinjam';
@@ -322,18 +315,30 @@ class AdminController extends Controller
                 $deleteUrl = route('admin.buku.delete', $buku->id);
                 $csrfToken = csrf_token();
 
-                $aksiHtml = '<div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
-                    <button type="button" data-buku=\'' . $jsonData . '\' class="btn-edit-buku px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-extrabold rounded-lg text-[11px] transition shadow-xs flex items-center gap-1">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                        <span>Edit</span>
+                $aksiHtml = '<div class="relative flex items-center justify-end" x-data="{ open: false }">
+                    <button @click.stop="open = !open" @click.outside="open = false" type="button" class="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition">
+                        <i class="fa-solid fa-ellipsis-vertical text-xs"></i>
                     </button>
-                    <form action="' . $deleteUrl . '" method="POST" class="inline" onsubmit="return confirmDelete(event, \'Hapus Judul Buku?\', \'Master buku ini akan dihapus dari katalog.\')">
-                        <input type="hidden" name="_token" value="' . $csrfToken . '">
-                        <button type="submit" class="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-extrabold rounded-lg text-[11px] transition shadow-xs flex items-center gap-1">
-                            <i class="fa-solid fa-trash-can"></i>
-                            <span>Hapus</span>
+                    <div x-show="open" x-cloak @click.outside="open = false"
+                         x-transition:enter="transition ease-out duration-150"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-100"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         class="absolute right-0 top-8 z-50 w-36 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                        <button type="button" data-buku=\'' . $jsonData . '\' class="btn-edit-buku w-full flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-amber-700 hover:bg-amber-50 transition">
+                            <i class="fa-solid fa-pen-to-square w-3.5 text-center"></i>
+                            <span>Edit Buku</span>
                         </button>
-                    </form>
+                        <form action="' . $deleteUrl . '" method="POST" onsubmit="return confirmDelete(event, \'Hapus Judul Buku?\', \'Master buku ini akan dihapus dari katalog.\')">
+                            <input type="hidden" name="_token" value="' . $csrfToken . '">
+                            <button type="submit" class="w-full flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-rose-600 hover:bg-rose-50 transition">
+                                <i class="fa-solid fa-trash-can w-3.5 text-center"></i>
+                                <span>Hapus Buku</span>
+                            </button>
+                        </form>
+                    </div>
                 </div>';
 
                 $data[] = [

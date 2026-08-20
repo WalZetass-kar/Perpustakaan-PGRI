@@ -6,88 +6,40 @@
 @section('content')
 <div class="space-y-5">
 
-    
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-2xs flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-brand-50 border border-brand-200 text-brand-700 flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-            </div>
-            <div class="min-w-0">
-                <span class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider block">Judul Koleksi</span>
-                <span class="text-base sm:text-lg font-bold text-gray-900">{{ number_format($metrics['total_koleksi']) }} Judul</span>
-            </div>
-        </div>
+    <div class="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200 shadow-2xs">
+        <form action="{{ route('admin.temukan-buku') }}" method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 text-xs">
 
-        <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-2xs flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-            <div class="min-w-0">
-                <span class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider block">Buku Siap Pinjam</span>
-                <span class="text-base sm:text-lg font-bold text-emerald-700">{{ number_format($metrics['buku_tersedia']) }} Eks</span>
-            </div>
-        </div>
-
-        <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-2xs flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
-            </div>
-            <div class="min-w-0">
-                <span class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider block">Sedang Dipinjam</span>
-                <span class="text-base sm:text-lg font-bold text-amber-900">{{ number_format($metrics['sedang_pinjam']) }} Eks</span>
-            </div>
-        </div>
-
-        <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-2xs flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gray-100 border border-gray-200 text-gray-700 flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-            </div>
-            <div class="min-w-0">
-                <span class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider block">Struktur Rak</span>
-                <span class="text-base sm:text-lg font-bold text-gray-900">{{ $metrics['total_rak'] }} Rak ({{ $metrics['total_laci'] }} Laci)</span>
-            </div>
-        </div>
-    </div>
-
-    
-    <div class="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200 shadow-2xs space-y-3.5">
-        <div>
-            <h2 class="text-sm font-bold text-gray-900">Pencarian & Pelacak Lokasi Buku</h2>
-            <p class="text-xs text-gray-500 mt-0.5">Cari letak nomor rak, nomor laci, tingkat penyimpanan, dan status sirkulasi buku secara lengkap.</p>
-        </div>
-
-        <form action="{{ route('admin.temukan-buku') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-12 gap-2 text-xs">
-            <div class="sm:col-span-5 relative">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul buku, ISBN, penulis, kode rak..."
-                       class="w-full pl-8 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-900 focus:ring-1 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            </div>
-
-            <div class="sm:col-span-3">
-                <select name="kategori_id" onchange="this.form.submit()" class="w-full px-2.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:ring-1 focus:ring-brand-700 focus:outline-none font-medium">
+            {{-- KIRI: 3 filter --}}
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-1">
+                <select name="kategori_id" onchange="this.form.submit()" class="px-2.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:ring-1 focus:ring-brand-700 focus:outline-none font-medium">
                     <option value="">Semua Kategori</option>
                     @foreach($kategoriList as $kat)
                         <option value="{{ $kat->id }}" {{ request('kategori_id') == $kat->id ? 'selected' : '' }}>{{ $kat->nama }}</option>
                     @endforeach
                 </select>
-            </div>
 
-            <div class="sm:col-span-2">
-                <select name="rak_id" onchange="this.form.submit()" class="w-full px-2.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:ring-1 focus:ring-brand-700 focus:outline-none font-medium">
+                <select name="rak_id" onchange="this.form.submit()" class="px-2.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:ring-1 focus:ring-brand-700 focus:outline-none font-medium">
                     <option value="">Semua Rak</option>
                     @foreach($rakList as $rk)
                         <option value="{{ $rk->id }}" {{ request('rak_id') == $rk->id ? 'selected' : '' }}>{{ $rk->kode_rak }} - {{ $rk->nama_rak }}</option>
                     @endforeach
                 </select>
-            </div>
 
-            <div class="sm:col-span-2 flex items-center gap-1.5">
-                <select name="status_stok" onchange="this.form.submit()" class="w-full px-2.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:ring-1 focus:ring-brand-700 focus:outline-none font-medium">
+                <select name="status_stok" onchange="this.form.submit()" class="px-2.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:ring-1 focus:ring-brand-700 focus:outline-none font-medium">
                     <option value="">Status Stok</option>
                     <option value="tersedia" {{ request('status_stok') === 'tersedia' ? 'selected' : '' }}>Tersedia</option>
                     <option value="penuh" {{ request('status_stok') === 'penuh' ? 'selected' : '' }}>Stok Penuh</option>
                     <option value="habis" {{ request('status_stok') === 'habis' ? 'selected' : '' }}>Stok Habis</option>
                 </select>
+            </div>
+
+            {{-- KANAN: input search + tombol cari + reset --}}
+            <div class="flex items-center gap-1.5">
+                <div class="relative flex-1 sm:w-64">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul, ISBN, penulis, kode rak..."
+                           class="w-full pl-8 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-900 focus:ring-1 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                    <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
 
                 <button type="submit" class="p-2 bg-brand-700 hover:bg-brand-800 text-white rounded-xl font-bold transition flex items-center justify-center shrink-0" title="Cari">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -99,6 +51,7 @@
                     </a>
                 @endif
             </div>
+
         </form>
     </div>
 
@@ -142,7 +95,7 @@
                     'ket_laci'           => optional($buku->laci)->keterangan ?? '',
                     'keterangan_posisi'  => $buku->keterangan_posisi ?? '',
                     'cover_url'          => $buku->cover_url ?? '',
-                    'katalog_url'        => route('admin.buku', ['search' => $buku->isbn ?? $buku->judul]),
+                    'katalog_url'        => route('admin.buku', ['search' => $buku->judul]),
                     'pinjam_url'         => route('admin.peminjaman'),
                     'badge_class'        => $badgeClass,
                     'dot_class'          => $dotClass,

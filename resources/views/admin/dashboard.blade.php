@@ -163,7 +163,7 @@
             <div class="p-4 sm:p-5 rounded-2xl bg-white border-2 border-gray-200 shadow-sm flex items-center justify-between">
                 <div>
                     <span class="text-[11px] font-bold text-gray-500 block">Peminjaman Hari Ini</span>
-                    <span class="text-2xl font-black text-amber-600 mt-1 block">{{ $stats['peminjaman_hari_ini'] }} Transaksi</span>
+                    <span class="text-2xl font-black text-amber-600 mt-1 block">{{ $stats['peminjaman_hari_ini'] }} Peminjaman</span>
                     <span class="text-[10px] text-gray-400 font-medium">Buku dipinjam hari ini</span>
                 </div>
                 <div class="w-11 h-11 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center font-bold">
@@ -185,7 +185,7 @@
             <div class="p-4 sm:p-5 rounded-2xl bg-white border-2 border-gray-200 shadow-sm flex items-center justify-between">
                 <div>
                     <span class="text-[11px] font-bold text-gray-500 block">Pengembalian Hari Ini</span>
-                    <span class="text-2xl font-black text-emerald-600 mt-1 block">{{ $stats['pengembalian_hari_ini'] }} Transaksi</span>
+                    <span class="text-2xl font-black text-emerald-600 mt-1 block">{{ $stats['pengembalian_hari_ini'] }} Pengembalian</span>
                     <span class="text-[10px] text-gray-400 font-medium">Sudah kembali ke rak</span>
                 </div>
                 <div class="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center font-bold">

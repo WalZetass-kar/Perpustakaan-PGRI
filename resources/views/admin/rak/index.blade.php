@@ -166,21 +166,6 @@
                     </div>
 
                     <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
-                        <button type="button" @click="laciData = { rak_id: {{ $rak->id }}, rak_nama: '{{ $rak->nama_rak }}' }; openAddLaciModal = true" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition shadow-2xs flex items-center gap-1.5">
-                            <i class="fa-solid fa-plus text-white text-xs"></i>
-                            <span>Tambah Laci</span>
-                        </button>
-
-                        <button type="button" @click="editData = {{ json_encode([
-                            'id' => $rak->id,
-                            'kode_rak' => $rak->kode_rak,
-                            'nama_rak' => $rak->nama_rak,
-                            'lokasi' => $rak->lokasi ?? '',
-                            'kategori_id' => $rak->kategori_id
-                        ]) }}; openEditModal = true" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl border border-gray-200 transition">
-                            Edit
-                        </button>
-
                         <div class="relative" x-data="{ menuOpen: false }">
                             <button type="button" @click="menuOpen = !menuOpen; activeMenuId = menuOpen ? {{ $rak->id }} : null" class="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-sm border border-gray-200 transition cursor-pointer" aria-label="Menu Opsi Rak">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
