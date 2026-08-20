@@ -48,7 +48,7 @@ class PublicController extends Controller
 
     public function katalog(Request $request)
     {
-        $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci']);
+        $query = Buku::with(['penulis', 'penerbit', 'kategori', 'kelas', 'rak', 'laci']);
 
         if ($request->filled('search')) {
             $search = substr(trim($request->search), 0, 100);
@@ -132,7 +132,7 @@ class PublicController extends Controller
 
     public function detailBuku($id)
     {
-        $buku = Buku::with(['penulis', 'penerbit', 'kategori', 'rak.laci', 'laci'])->findOrFail((int) $id);
+        $buku = Buku::with(['penulis', 'penerbit', 'kategori', 'kelas', 'rak.laci', 'laci'])->findOrFail((int) $id);
         $buku->increment('view_count');
 
         $userLoan = null;
@@ -202,7 +202,8 @@ class PublicController extends Controller
                     'total_quantity'     => $buku->total_quantity,
                     'available_quantity' => $buku->available_quantity,
                     'status'             => $buku->available_quantity > 0 ? 'Tersedia' : 'Dipinjam',
-                    'cover_url'          => $buku->cover_url,
+                    // Saran pencarian dirender kecil (w-10 h-14), cukup varian thumb.
+                    'cover_url'          => $buku->cover_thumb_url,
                     'detail_url'         => route('buku.detail', $buku->id),
                 ];
             });

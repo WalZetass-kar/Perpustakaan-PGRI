@@ -84,6 +84,7 @@
                     'penulis'            => $buku->penulis->nama ?? '-',
                     'penerbit'           => $buku->penerbit->nama ?? '-',
                     'kategori'           => $buku->kategori->nama ?? '-',
+                    'kelas'              => $buku->kelas->nama_kelas ?? '',
                     'tahun_terbit'       => $buku->tahun_terbit ?? '-',
                     'total_quantity'     => $buku->total_quantity,
                     'available'          => $buku->available_quantity,
@@ -94,7 +95,7 @@
                     'nama_laci'          => optional($buku->laci)->nama_laci ?? ($buku->rak ? 'Laci 1' : 'Tingkat Standar'),
                     'ket_laci'           => optional($buku->laci)->keterangan ?? '',
                     'keterangan_posisi'  => $buku->keterangan_posisi ?? '',
-                    'cover_url'          => $buku->cover_url ?? '',
+                    'cover_url'          => $buku->cover_card_url ?? '',
                     'katalog_url'        => route('admin.buku', ['search' => $buku->judul]),
                     'pinjam_url'         => route('admin.peminjaman'),
                     'badge_class'        => $badgeClass,
@@ -109,8 +110,9 @@
                 
                 <div class="relative w-full h-48 bg-gray-100 overflow-hidden">
                     @if($buku->cover_url)
-                        <img src="{{ $buku->cover_url }}"
+                        <img src="{{ $buku->cover_card_url }}"
                              alt="{{ $buku->judul }}"
+                             width="300" height="192"
                              loading="lazy"
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                     @else
@@ -147,10 +149,17 @@
                     </div>
 
                     <div class="flex items-center justify-between gap-1">
-                        <span class="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-brand-50 text-brand-700 border border-brand-200 truncate max-w-[70%]">
-                            {{ $buku->kategori->nama ?? 'Umum' }}
-                        </span>
-                        <span class="text-[9px] font-mono font-semibold text-gray-400">
+                        <div class="flex items-center gap-1 min-w-0">
+                            <span class="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-brand-50 text-brand-700 border border-brand-200 truncate max-w-[70px]">
+                                {{ $buku->kategori->nama ?? 'Umum' }}
+                            </span>
+                            @if($buku->kelas)
+                                <span class="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200 truncate max-w-[60px]" title="Kelas {{ $buku->kelas->nama_kelas }}">
+                                    {{ $buku->kelas->nama_kelas }}
+                                </span>
+                            @endif
+                        </div>
+                        <span class="text-[9px] font-mono font-semibold text-gray-400 shrink-0">
                             {{ $buku->available_quantity }}/{{ $buku->total_quantity }} Eks
                         </span>
                     </div>
@@ -238,6 +247,7 @@
                     <p id="modal-penerbit" class="text-[11px] text-gray-500"></p>
                     <div class="flex flex-wrap gap-1.5 pt-0.5">
                         <span id="modal-kategori-badge" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-50 text-brand-700 border border-brand-200"></span>
+                        <span id="modal-kelas-badge" class="hidden px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200"></span>
                         <span id="modal-tahun" class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-gray-100 text-gray-600 border border-gray-200"></span>
                     </div>
                 </div>
@@ -346,6 +356,13 @@
         document.getElementById('modal-penulis').textContent          = 'Penulis: ' + data.penulis;
         document.getElementById('modal-penerbit').textContent         = 'Penerbit: ' + data.penerbit;
         document.getElementById('modal-kategori-badge').textContent   = data.kategori;
+        const kelasBadge = document.getElementById('modal-kelas-badge');
+        if (data.kelas) {
+            kelasBadge.textContent = 'Kelas ' + data.kelas;
+            kelasBadge.classList.remove('hidden');
+        } else {
+            kelasBadge.classList.add('hidden');
+        }
         document.getElementById('modal-tahun').textContent            = 'Tahun ' + data.tahun_terbit;
         document.getElementById('modal-isbn').textContent             = data.isbn;
 

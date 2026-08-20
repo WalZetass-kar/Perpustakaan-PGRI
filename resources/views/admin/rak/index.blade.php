@@ -4,10 +4,28 @@
 @section('page_heading', 'Manajemen Lokasi Rak & Laci Buku')
 
 @section('content')
+@php
+    $catPalette = [
+        ['bg-blue-50', 'text-blue-700', 'border-blue-200'],
+        ['bg-purple-50', 'text-purple-700', 'border-purple-200'],
+        ['bg-emerald-50', 'text-emerald-700', 'border-emerald-200'],
+        ['bg-amber-50', 'text-amber-700', 'border-amber-200'],
+        ['bg-rose-50', 'text-rose-700', 'border-rose-200'],
+        ['bg-cyan-50', 'text-cyan-700', 'border-cyan-200'],
+        ['bg-indigo-50', 'text-indigo-700', 'border-indigo-200'],
+        ['bg-fuchsia-50', 'text-fuchsia-700', 'border-fuchsia-200'],
+        ['bg-teal-50', 'text-teal-700', 'border-teal-200'],
+        ['bg-orange-50', 'text-orange-700', 'border-orange-200'],
+    ];
+    $catColorClass = function ($name) use ($catPalette) {
+        $idx = crc32($name) % count($catPalette);
+        return implode(' ', $catPalette[$idx]);
+    };
+@endphp
 <div class="space-y-5"
      x-data="{
-        expandedRaks: {{ json_encode($rakList->pluck('id')->all()) }},
-        allExpanded: true,
+        expandedRaks: [],
+        allExpanded: false,
         openAddModal: false,
         openEditModal: false,
         openAddLaciModal: false,
@@ -15,6 +33,11 @@
         activeMenuId: null,
         editData: {},
         laciData: {},
+        showFilter: localStorage.getItem('rakFilterOpen') !== 'false',
+        toggleFilter() {
+            this.showFilter = !this.showFilter;
+            localStorage.setItem('rakFilterOpen', this.showFilter);
+        },
         toggleRak(id) {
             if (this.expandedRaks.includes(id)) {
                 this.expandedRaks = this.expandedRaks.filter(item => item !== id);
@@ -39,7 +62,7 @@
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-2xs flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gray-100 border border-gray-200 text-gray-700 flex items-center justify-center font-bold shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center font-bold shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
             </div>
             <div class="min-w-0">
@@ -49,7 +72,7 @@
         </div>
 
         <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-2xs flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gray-100 border border-gray-200 text-gray-700 flex items-center justify-center font-bold shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200 text-purple-600 flex items-center justify-center font-bold shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
             </div>
             <div class="min-w-0">
@@ -59,7 +82,7 @@
         </div>
 
         <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-2xs flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gray-100 border border-gray-200 text-gray-700 flex items-center justify-center font-bold shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center font-bold shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
             </div>
             <div class="min-w-0">
@@ -69,7 +92,7 @@
         </div>
 
         <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-2xs flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gray-100 border border-gray-200 text-gray-700 flex items-center justify-center font-bold shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center font-bold shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
             </div>
             <div class="min-w-0">
@@ -81,10 +104,10 @@
 
     <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-2xs space-y-3">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <div>
-                <h2 class="text-sm font-bold text-gray-900">Manajemen Lokasi Rak & Laci Buku</h2>
-                <p class="text-xs text-gray-500 mt-0.5">Kelola lokasi rak, laci, tingkat, dan pembagian kategori buku.</p>
-            </div>
+            <button type="button" @click="toggleFilter()" class="w-8 h-8 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-600 flex items-center justify-center border border-gray-200 transition shrink-0 self-start md:self-auto" :title="showFilter ? 'Sembunyikan Pencarian & Filter' : 'Tampilkan Pencarian & Filter'" aria-label="Toggle Pencarian & Filter">
+                <svg class="w-3.5 h-3.5 transform transition-transform duration-200" :class="showFilter ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+
             <div class="flex items-center gap-2 self-start md:self-auto">
                 <button type="button" @click="toggleAll()" class="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs font-semibold rounded-xl border border-gray-200 transition flex items-center gap-1.5" :title="allExpanded ? 'Tutup Seluruh Laci' : 'Buka Seluruh Laci'">
                     <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
@@ -97,7 +120,7 @@
             </div>
         </div>
 
-        <form action="{{ route('admin.rak') }}" method="GET" class="pt-2 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-12 gap-2 text-xs">
+        <form x-show="showFilter" x-collapse action="{{ route('admin.rak') }}" method="GET" class="pt-2 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-12 gap-2 text-xs">
             <div class="sm:col-span-6 relative">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari kode rak, nama rak, lokasi, atau kategori buku..."
                        class="w-full pl-8 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-900 focus:ring-1 focus:ring-brand-700 focus:bg-white focus:outline-none">
@@ -147,7 +170,7 @@
                 <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-50/50 rounded-2xl"
                      :class="expandedRaks.includes({{ $rak->id }}) ? 'rounded-b-none' : ''">
                     <div class="flex items-start sm:items-center gap-3 min-w-0">
-                        <span class="px-2.5 py-1 rounded-lg bg-gray-100 border border-gray-200 text-gray-700 font-mono font-bold text-xs shrink-0 tracking-wide">
+                        <span class="px-2.5 py-1 rounded-lg bg-brand-50 border border-brand-200 text-brand-700 font-mono font-bold text-xs shrink-0 tracking-wide">
                             {{ $rak->kode_rak }}
                         </span>
                         <div class="min-w-0 space-y-1">
@@ -214,7 +237,7 @@
                                 <span>Kategori di Rak ini:</span>
                                 <div class="flex flex-wrap gap-1">
                                     @foreach($distinctCategoriesRak as $catRak)
-                                        <span class="px-2 py-0.5 bg-gray-100 text-gray-700 rounded-md font-semibold text-[10px]">{{ $catRak }}</span>
+                                        <span class="px-2 py-0.5 rounded-md font-semibold text-[10px] border {{ $catColorClass($catRak) }}">{{ $catRak }}</span>
                                     @endforeach
                                 </div>
                             </div>
@@ -255,15 +278,20 @@
                                         </div>
                                     </div>
 
-                                    <div class="text-xs space-y-1">
+                                    <div class="text-xs space-y-1" x-data="{ showAllCat: false }">
                                         <span class="text-[11px] font-medium text-gray-400 block">Kategori Buku:</span>
                                         <div class="flex flex-wrap gap-1">
                                             @if($categoriesInLaci->isNotEmpty())
-                                                @foreach($categoriesInLaci as $cName)
-                                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-gray-100 text-gray-800 border border-gray-200">
+                                                @foreach($categoriesInLaci as $i => $cName)
+                                                    <span @if($i >= 3) x-show="showAllCat" x-cloak @endif class="px-2 py-0.5 rounded-md text-[10px] font-semibold border {{ $catColorClass($cName) }}">
                                                         {{ $cName }}
                                                     </span>
                                                 @endforeach
+                                                @if($categoriesInLaci->count() > 3)
+                                                    <button type="button" @click="showAllCat = !showAllCat"
+                                                            class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100 transition"
+                                                            x-text="showAllCat ? 'Tutup' : '+{{ $categoriesInLaci->count() - 3 }} lainnya'"></button>
+                                                @endif
                                             @else
                                                 <span class="text-[11px] text-gray-400 italic">Belum ada buku di laci ini</span>
                                             @endif
