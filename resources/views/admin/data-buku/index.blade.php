@@ -250,9 +250,13 @@
                             <img :src="detailData.cover_url" alt="Cover" class="w-full h-full object-cover">
                         </template>
                         <template x-if="!detailData.cover_url">
-                            <div class="w-full h-full bg-brand-700 text-white font-bold flex flex-col items-center justify-center p-2 text-center">
-                                <i class="fa-solid fa-book text-2xl opacity-40 mb-1"></i>
-                                <span class="text-[10px] line-clamp-2" x-text="detailData.judul"></span>
+                            <div class="w-full h-full bg-gradient-to-br from-brand-900 via-brand-800 to-red-950 text-white p-2.5 border-l-[4px] border-amber-400/50 flex flex-col justify-between select-none relative overflow-hidden shadow-inner">
+                                <span class="text-[7.5px] font-black text-amber-300/90 uppercase tracking-wider text-right" x-text="detailData.kategori"></span>
+                                <div class="text-center my-auto px-1">
+                                    <i class="fa-solid fa-book-bookmark text-white/25 text-xl mb-1"></i>
+                                    <p class="text-[9.5px] font-black text-white line-clamp-3 leading-tight drop-shadow-sm" x-text="detailData.judul"></p>
+                                </div>
+                                <span class="text-[6.5px] font-bold text-white/60 tracking-widest text-center uppercase border-t border-white/10 pt-0.5">SMK PGRI</span>
                             </div>
                         </template>
                     </div>

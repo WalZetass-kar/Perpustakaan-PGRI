@@ -63,7 +63,10 @@
                                             <img :src="item.cover_url" class="w-full h-full object-cover">
                                         </template>
                                         <template x-if="!item.cover_url">
-                                            <div class="w-full h-full bg-brand-700 text-white font-black text-xs flex items-center justify-center" x-text="item.judul.substr(0, 1)"></div>
+                                            <div class="w-full h-full bg-gradient-to-br from-brand-900 to-red-950 text-white font-black text-xs flex flex-col items-center justify-center p-1 border-l-2 border-amber-400/50">
+                                                <i class="fa-solid fa-book text-[11px] opacity-40"></i>
+                                                <span class="text-[7.5px] mt-0.5" x-text="item.judul.substr(0, 1)"></span>
+                                            </div>
                                         </template>
                                     </div>
                                     <div class="min-w-0 flex-1 text-xs">
@@ -317,9 +320,19 @@
                                 @if($coverUrl)
                                     <img src="{{ $coverUrl }}" alt="Cover {{ $item->judul }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                                 @else
-                                    <div class="w-full h-full bg-gray-100 p-4 flex flex-col items-center justify-center text-center space-y-2">
-                                        <div class="w-12 h-12 rounded-2xl bg-brand-700 text-white flex items-center justify-center font-black text-lg shadow-sm">
-                                            {{ substr($item->judul, 0, 1) }}
+                                    <div class="w-full h-full bg-gradient-to-br from-brand-900 via-brand-800 to-red-950 text-white p-4 border-l-[6px] border-amber-400/50 flex flex-col justify-between select-none relative overflow-hidden shadow-inner">
+                                        <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
+                                        <div class="flex items-center justify-end">
+                                            <span class="text-[8.5px] font-black uppercase tracking-widest text-amber-300/90 bg-black/30 px-2.5 py-0.5 rounded-md border border-white/10 backdrop-blur-xs">{{ substr($item->kategori->nama ?? 'Buku', 0, 15) }}</span>
+                                        </div>
+                                        <div class="flex flex-col items-center justify-center my-auto text-center px-2">
+                                            <i class="fa-solid fa-book-bookmark text-white/25 text-3xl mb-2 drop-shadow-xs"></i>
+                                            <p class="text-xs sm:text-sm font-black text-white leading-snug line-clamp-3 drop-shadow-sm">{{ $item->judul }}</p>
+                                            <p class="text-[10px] text-white/70 font-medium truncate max-w-full mt-1">{{ $item->penulis->nama ?? 'SMK PGRI' }}</p>
+                                        </div>
+                                        <div class="flex items-center justify-between border-t border-white/10 pt-1.5 text-[8px] font-bold text-white/60 tracking-wider uppercase">
+                                            <span>PERPUSTAKAAN</span>
+                                            <span>SMK PGRI</span>
                                         </div>
                                     </div>
                                 @endif
@@ -424,12 +437,17 @@
 
                     <div class="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden p-4 shadow-2xs hover:border-brand-700 transition duration-300 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div class="flex items-center gap-4 w-full sm:w-auto">
-                            <div class="w-20 h-28 bg-gray-100 border border-gray-200 rounded-xl overflow-hidden shrink-0 cursor-pointer" @click="modalData = {{ json_encode($bookPayload) }}; openDetailModal = true">
+                            <div class="w-20 h-28 bg-gray-100 border border-gray-200 rounded-xl overflow-hidden shrink-0 cursor-pointer shadow-xs" @click="modalData = {{ json_encode($bookPayload) }}; openDetailModal = true">
                                 @if($coverUrl)
                                     <img src="{{ $coverUrl }}" alt="Cover {{ $item->judul }}" loading="lazy" class="w-full h-full object-cover">
                                 @else
-                                    <div class="w-full h-full flex flex-col items-center justify-center bg-brand-700 text-white font-black text-lg p-2 text-center">
-                                        {{ substr($item->judul, 0, 1) }}
+                                    <div class="w-full h-full bg-gradient-to-br from-brand-900 via-brand-800 to-red-950 text-white p-2 border-l-[3px] border-amber-400/50 flex flex-col justify-between select-none relative overflow-hidden text-center">
+                                        <span class="text-[6.5px] font-black text-amber-300/90 uppercase tracking-wider">{{ substr($item->kategori->nama ?? 'Buku', 0, 8) }}</span>
+                                        <div class="my-auto">
+                                            <i class="fa-solid fa-book text-white/30 text-xs mb-0.5"></i>
+                                            <p class="text-[8px] font-bold text-white line-clamp-2 leading-tight">{{ $item->judul }}</p>
+                                        </div>
+                                        <span class="text-[6px] font-bold text-white/50 uppercase">SMK PGRI</span>
                                     </div>
                                 @endif
                             </div>
@@ -492,11 +510,18 @@
                         <img :src="modalData.cover" class="w-full h-full object-cover">
                     </template>
                     <template x-if="!modalData.cover">
-                        <div class="w-full h-full bg-gradient-to-br from-brand-900 via-brand-700 to-red-950 p-4 flex flex-col justify-between text-white">
-                            <span class="px-2 py-0.5 bg-amber-400 text-brand-950 text-[9px] font-black uppercase rounded self-start" x-text="modalData.kategori"></span>
-                            <div>
-                                <h4 class="text-xs font-black text-white" x-text="modalData.judul"></h4>
-                                <p class="text-[9px] text-red-200 font-bold mt-1">SMK PGRI Pekanbaru</p>
+                        <div class="w-full h-full bg-gradient-to-br from-brand-900 via-brand-800 to-red-950 p-4 border-l-[5px] border-amber-400/50 flex flex-col justify-between text-white relative overflow-hidden select-none">
+                            <div class="flex items-center justify-end">
+                                <span class="px-2 py-0.5 bg-black/30 text-amber-300/90 text-[9px] font-black uppercase rounded-md border border-white/10" x-text="modalData.kategori"></span>
+                            </div>
+                            <div class="text-center my-auto px-2">
+                                <i class="fa-solid fa-book-bookmark text-white/25 text-3xl mb-2"></i>
+                                <h4 class="text-xs sm:text-sm font-black text-white leading-snug drop-shadow-sm" x-text="modalData.judul"></h4>
+                                <p class="text-[10px] text-white/70 font-medium mt-1 truncate" x-text="modalData.penulis"></p>
+                            </div>
+                            <div class="flex items-center justify-between border-t border-white/10 pt-1.5 text-[8px] font-bold text-white/60 tracking-wider uppercase">
+                                <span>PERPUSTAKAAN</span>
+                                <span>SMK PGRI</span>
                             </div>
                         </div>
                     </template>

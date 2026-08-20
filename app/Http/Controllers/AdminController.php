@@ -261,7 +261,7 @@ class AdminController extends Controller
                 $coverUrl = $buku->cover_url;
                 $coverHtml = $coverUrl 
                     ? '<img src="' . e($coverUrl) . '" alt="Cover" class="w-full h-full object-cover">'
-                    : '<div class="w-full h-full flex flex-col items-center justify-center bg-brand-700 text-white font-black text-xs">' . e(substr($buku->judul, 0, 1)) . '</div>';
+                    : '<div class="w-full h-full bg-gradient-to-br from-brand-900 via-brand-800 to-red-950 text-white font-black text-xs flex flex-col items-center justify-center p-1 border-l-2 border-amber-400/50 shadow-inner"><i class="fa-solid fa-book text-[11px] opacity-40"></i><span class="text-[7.5px] mt-0.5">' . e(substr($buku->judul, 0, 1)) . '</span></div>';
 
                 $bukuHtml = '<div class="flex items-center gap-3">
                     <div class="w-10 h-14 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center">
@@ -549,6 +549,226 @@ class AdminController extends Controller
         ]);
 
         return back()->with('success', 'Buku berhasil dihapus dari katalog.');
+    }
+
+    public function bukuExportExcel(Request $request)
+    {
+        $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci']);
+
+        if ($request->filled('kategori_id')) {
+            $query->where('kategori_id', $request->kategori_id);
+        }
+        if ($request->filled('rak_id')) {
+            $query->where('rak_id', $request->rak_id);
+        }
+
+        $bukuItems = $query->orderBy('judul', 'asc')->get();
+        $pengaturan = Pengaturan::all()->pluck('value', 'key');
+
+        $totalJudul = $bukuItems->count();
+        $totalEksemplar = (int) $bukuItems->sum('total_quantity');
+        $totalTersedia = (int) $bukuItems->sum('available_quantity');
+        $totalDipinjam = $totalEksemplar - $totalTersedia;
+
+        $namaSekolah = $pengaturan['nama_sekolah'] ?? 'SMK PGRI PEKANBARU';
+        $namaPerpus = $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI Pekanbaru';
+        $alamat = $pengaturan['alamat'] ?? 'Jl. Bangau No. 16 Sukajadi, Pekanbaru, Riau';
+        $npsn = $pengaturan['npsn'] ?? '10404457';
+        $kepalaPerpus = $pengaturan['kepala_perpustakaan'] ?? 'Dra. Hj. Perpustakaan';
+        $nipKepala = $pengaturan['nip_kepala_perpustakaan'] ?? '-';
+        $tanggalCetak = date('d/m/Y H:i');
+        $namaPetugas = auth()->user()->name ?? 'Petugas Perpustakaan';
+
+        $filename = 'Laporan_Data_Buku_' . preg_replace('/[^A-Za-z0-9]/', '_', $namaSekolah) . '_' . date('Ymd_His') . '.xls';
+
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'EXPORT_BUKU_EXCEL',
+            'deskripsi'  => "Mengekspor {$totalJudul} data buku ke format Excel",
+            'ip_address' => $request->ip(),
+        ]);
+
+        $html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <!--[if gte mso 9]>
+    <xml>
+        <x:ExcelWorkbook>
+            <x:ExcelWorksheets>
+                <x:ExcelWorksheet>
+                    <x:Name>Data Buku Perpustakaan</x:Name>
+                    <x:WorksheetOptions>
+                        <x:DisplayGridlines/>
+                    </x:WorksheetOptions>
+                </x:ExcelWorksheet>
+            </x:ExcelWorksheets>
+        </x:ExcelWorkbook>
+    </xml>
+    <![endif]-->
+    <style>
+        body { font-family: "Calibri", "Segoe UI", Arial, sans-serif; font-size: 11pt; color: #1e293b; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .text-left { text-align: left; }
+        .font-bold { font-weight: bold; }
+        .title-main { font-size: 16pt; font-weight: bold; color: #881337; }
+        .title-sub { font-size: 11pt; color: #475569; }
+        .stat-label { background-color: #f1f5f9; font-weight: bold; }
+        .stat-value { font-weight: bold; color: #0f172a; }
+        .table-data { border-collapse: collapse; width: 100%; }
+        .table-data th { background-color: #881337; color: #ffffff; font-weight: bold; text-align: center; border: 1px solid #6b0c2a; padding: 8px 6px; font-size: 10pt; }
+        .table-data td { border: 1px solid #cbd5e1; padding: 6px; font-size: 10pt; vertical-align: top; }
+        .row-even { background-color: #f8fafc; }
+        .badge-tersedia { background-color: #ecfdf5; color: #065f46; font-weight: bold; }
+        .badge-habis { background-color: #fff1f2; color: #9f1239; font-weight: bold; }
+        .mso-text { mso-number-format:"\@"; }
+        .mso-num { mso-number-format:"\#\,\#\#0"; }
+    </style>
+</head>
+<body>
+    <table>
+        <tr>
+            <td colspan="12" class="text-center title-main">' . strtoupper(e($namaPerpus)) . '</td>
+        </tr>
+        <tr>
+            <td colspan="12" class="text-center title-sub">' . e($namaSekolah) . ' | NPSN: ' . e($npsn) . ' | ' . e($alamat) . '</td>
+        </tr>
+        <tr>
+            <td colspan="12" class="text-center" style="font-size: 13pt; font-weight: bold; color: #0f172a; padding-top: 8px; padding-bottom: 12px;">
+                LAPORAN INVENTARIS DATA BUKU &amp; KOLEKSI PERPUSTAKAAN
+            </td>
+        </tr>
+        <tr><td colspan="12"></td></tr>
+        <tr>
+            <td colspan="2" class="stat-label">Tanggal Cetak</td>
+            <td colspan="3" class="stat-value">' . $tanggalCetak . ' WIB</td>
+            <td colspan="2" class="stat-label">Total Judul Buku</td>
+            <td colspan="5" class="stat-value mso-num">' . number_format($totalJudul, 0, ',', '.') . ' Judul</td>
+        </tr>
+        <tr>
+            <td colspan="2" class="stat-label">Petugas Pencetak</td>
+            <td colspan="3" class="stat-value">' . e($namaPetugas) . '</td>
+            <td colspan="2" class="stat-label">Total Eksemplar Fisik</td>
+            <td colspan="5" class="stat-value mso-num">' . number_format($totalEksemplar, 0, ',', '.') . ' Eksemplar</td>
+        </tr>
+        <tr>
+            <td colspan="2" class="stat-label">Status Koleksi</td>
+            <td colspan="3" class="stat-value">Resmi Terverifikasi Sistem</td>
+            <td colspan="2" class="stat-label">Tersedia / Dipinjam</td>
+            <td colspan="5" class="stat-value">' . number_format($totalTersedia, 0, ',', '.') . ' Tersedia / ' . number_format($totalDipinjam, 0, ',', '.') . ' Dipinjam</td>
+        </tr>
+        <tr><td colspan="12"></td></tr>
+    </table>
+
+    <table class="table-data">
+        <thead>
+            <tr>
+                <th style="width: 35px;">No</th>
+                <th style="width: 250px;">Judul Buku</th>
+                <th style="width: 120px;">ISBN</th>
+                <th style="width: 150px;">Penulis / Pengarang</th>
+                <th style="width: 140px;">Penerbit</th>
+                <th style="width: 60px;">Tahun</th>
+                <th style="width: 120px;">Kategori</th>
+                <th style="width: 120px;">Lokasi Rak</th>
+                <th style="width: 100px;">Laci Rak</th>
+                <th style="width: 70px;">Total</th>
+                <th style="width: 70px;">Tersedia</th>
+                <th style="width: 90px;">Status</th>
+            </tr>
+        </thead>
+        <tbody>';
+
+        foreach ($bukuItems as $idx => $buku) {
+            $rowClass = ($idx % 2 === 1) ? ' class="row-even"' : '';
+            $tersedia = (int) $buku->available_quantity;
+            $total = (int) $buku->total_quantity;
+            $statusText = ($tersedia > 0) ? 'Tersedia' : 'Habis Dipinjam';
+            $statusClass = ($tersedia > 0) ? 'badge-tersedia' : 'badge-habis';
+            $rakName = $buku->rak ? ($buku->rak->kode_rak . ' - ' . $buku->rak->nama_rak) : 'Tanpa Rak';
+            $laciName = $buku->laci ? $buku->laci->nama_laci : ($buku->rak ? 'Laci 1' : '-');
+
+            $html .= '<tr' . $rowClass . '>
+                <td class="text-center">' . ($idx + 1) . '</td>
+                <td class="text-left font-bold">' . e($buku->judul) . '</td>
+                <td class="text-center mso-text">' . e($buku->isbn ?? '-') . '</td>
+                <td class="text-left">' . e($buku->penulis->nama ?? '-') . '</td>
+                <td class="text-left">' . e($buku->penerbit->nama ?? '-') . '</td>
+                <td class="text-center mso-text">' . e($buku->tahun_terbit ?? '-') . '</td>
+                <td class="text-left">' . e($buku->kategori->nama ?? 'Umum') . '</td>
+                <td class="text-left">' . e($rakName) . '</td>
+                <td class="text-left">' . e($laciName) . '</td>
+                <td class="text-center font-bold mso-num">' . $total . '</td>
+                <td class="text-center font-bold mso-num" style="color: ' . ($tersedia > 0 ? '#059669' : '#dc2626') . ';">' . $tersedia . '</td>
+                <td class="text-center ' . $statusClass . '">' . $statusText . '</td>
+            </tr>';
+        }
+
+        $html .= '</tbody>
+    </table>
+
+    <table>
+        <tr><td colspan="12"></td></tr>
+        <tr><td colspan="12"></td></tr>
+        <tr>
+            <td colspan="7"></td>
+            <td colspan="5" class="text-center" style="font-size: 10pt;">
+                Pekanbaru, ' . date('d F Y') . '<br/>
+                Mengetahui,<br/>
+                <strong>Kepala Perpustakaan</strong><br/><br/><br/><br/>
+                <strong><u>' . e($kepalaPerpus) . '</u></strong><br/>
+                NIP. ' . e($nipKepala) . '
+            </td>
+        </tr>
+    </table>
+</body>
+</html>';
+
+        return response($html, 200, [
+            'Content-Type'        => 'application/vnd.ms-excel; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Pragma'              => 'no-cache',
+            'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires'             => '0',
+        ]);
+    }
+
+    public function bukuExportPdf(Request $request)
+    {
+        $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci']);
+
+        if ($request->filled('kategori_id')) {
+            $query->where('kategori_id', $request->kategori_id);
+        }
+        if ($request->filled('rak_id')) {
+            $query->where('rak_id', $request->rak_id);
+        }
+
+        $bukuItems = $query->orderBy('judul', 'asc')->get();
+        $pengaturan = Pengaturan::all()->pluck('value', 'key');
+
+        $totalJudul = $bukuItems->count();
+        $totalEksemplar = (int) $bukuItems->sum('total_quantity');
+        $totalTersedia = (int) $bukuItems->sum('available_quantity');
+        $totalDipinjam = $totalEksemplar - $totalTersedia;
+
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'EXPORT_BUKU_PDF',
+            'deskripsi'  => "Membuka dan mencetak laporan inventaris PDF ({$totalJudul} buku)",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return view('admin.buku.export-pdf', compact(
+            'bukuItems',
+            'pengaturan',
+            'totalJudul',
+            'totalEksemplar',
+            'totalTersedia',
+            'totalDipinjam'
+        ));
     }
 
     public function kategoriIndex()
@@ -1050,6 +1270,244 @@ class AdminController extends Controller
         ]);
 
         return back()->with('success', "Pengembalian buku berhasil diproses.");
+    }
+
+    public function peminjamanExportExcel(Request $request)
+    {
+        $query = Peminjaman::with(['user', 'buku.rak', 'buku.laci', 'petugas']);
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('tanggal')) {
+            $query->whereDate('tanggal_pinjam', $request->tanggal);
+        }
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function($q) use ($search) {
+                $q->where('kode_peminjaman', 'like', "%{$search}%")
+                  ->orWhere('nama_peminjam', 'like', "%{$search}%")
+                  ->orWhere('jurusan', 'like', "%{$search}%")
+                  ->orWhere('nomor_induk', 'like', "%{$search}%")
+                  ->orWhereHas('buku', function($qb) use ($search) {
+                      $qb->where('judul', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $loanItems = $query->latest('tanggal_pinjam')->get();
+        $pengaturan = Pengaturan::all()->pluck('value', 'key');
+
+        $totalTransaksi = $loanItems->count();
+        $totalDipinjam = $loanItems->where('status', 'dipinjam')->count();
+        $totalKembali = $loanItems->where('status', 'dikembalikan')->count();
+        $totalBukuPinjam = (int) $loanItems->sum('jumlah');
+
+        $namaSekolah = $pengaturan['nama_sekolah'] ?? 'SMK PGRI PEKANBARU';
+        $namaPerpus = $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI Pekanbaru';
+        $alamat = $pengaturan['alamat'] ?? 'Jl. Bangau No. 16 Sukajadi, Pekanbaru, Riau';
+        $npsn = $pengaturan['npsn'] ?? '10404457';
+        $kepalaPerpus = $pengaturan['kepala_perpustakaan'] ?? 'Dra. Hj. Perpustakaan';
+        $nipKepala = $pengaturan['nip_kepala_perpustakaan'] ?? '-';
+        $tanggalCetak = date('d/m/Y H:i');
+        $namaPetugas = auth()->user()->name ?? 'Petugas Perpustakaan';
+
+        $filename = 'Laporan_Sirkulasi_Peminjaman_' . preg_replace('/[^A-Za-z0-9]/', '_', $namaSekolah) . '_' . date('Ymd_His') . '.xls';
+
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'EXPORT_PINJAM_EXCEL',
+            'deskripsi'  => "Mengekspor {$totalTransaksi} data sirkulasi peminjaman ke format Excel",
+            'ip_address' => $request->ip(),
+        ]);
+
+        $html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <!--[if gte mso 9]>
+    <xml>
+        <x:ExcelWorkbook>
+            <x:ExcelWorksheets>
+                <x:ExcelWorksheet>
+                    <x:Name>Sirkulasi Peminjaman</x:Name>
+                    <x:WorksheetOptions>
+                        <x:DisplayGridlines/>
+                    </x:WorksheetOptions>
+                </x:ExcelWorksheet>
+            </x:ExcelWorksheets>
+        </x:ExcelWorkbook>
+    </xml>
+    <![endif]-->
+    <style>
+        body { font-family: "Calibri", "Segoe UI", Arial, sans-serif; font-size: 10pt; color: #1e293b; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .text-left { text-align: left; }
+        .font-bold { font-weight: bold; }
+        .title-main { font-size: 15pt; font-weight: bold; color: #881337; }
+        .title-sub { font-size: 10pt; color: #475569; }
+        .stat-label { background-color: #f1f5f9; font-weight: bold; }
+        .stat-value { font-weight: bold; color: #0f172a; }
+        .table-data { border-collapse: collapse; width: 100%; }
+        .table-data th { background-color: #881337; color: #ffffff; font-weight: bold; text-align: center; border: 1px solid #6b0c2a; padding: 7px 5px; font-size: 9pt; }
+        .table-data td { border: 1px solid #cbd5e1; padding: 5px; font-size: 9pt; vertical-align: middle; }
+        .row-even { background-color: #f8fafc; }
+        .badge-kembali { background-color: #ecfdf5; color: #065f46; font-weight: bold; }
+        .badge-dipinjam { background-color: #fffbeb; color: #92400e; font-weight: bold; }
+        .mso-text { mso-number-format:"\@"; }
+        .mso-num { mso-number-format:"\#\,\#\#0"; }
+    </style>
+</head>
+<body>
+    <table>
+        <tr>
+            <td colspan="10" class="text-center title-main">' . strtoupper(e($namaPerpus)) . '</td>
+        </tr>
+        <tr>
+            <td colspan="10" class="text-center title-sub">' . e($namaSekolah) . ' | NPSN: ' . e($npsn) . ' | ' . e($alamat) . '</td>
+        </tr>
+        <tr>
+            <td colspan="10" class="text-center" style="font-size: 12pt; font-weight: bold; color: #0f172a; padding-top: 6px; padding-bottom: 10px;">
+                LAPORAN REKAPITULASI SIRKULASI PEMINJAMAN &amp; PENGEMBALIAN BUKU
+            </td>
+        </tr>
+        <tr><td colspan="10"></td></tr>
+        <tr>
+            <td colspan="2" class="stat-label">Tanggal Cetak</td>
+            <td colspan="3" class="stat-value">' . $tanggalCetak . ' WIB</td>
+            <td colspan="2" class="stat-label">Total Transaksi</td>
+            <td colspan="3" class="stat-value mso-num">' . number_format($totalTransaksi, 0, ',', '.') . ' Transaksi</td>
+        </tr>
+        <tr>
+            <td colspan="2" class="stat-label">Petugas Pencetak</td>
+            <td colspan="3" class="stat-value">' . e($namaPetugas) . '</td>
+            <td colspan="2" class="stat-label">Sedang Dipinjam</td>
+            <td colspan="3" class="stat-value mso-num">' . number_format($totalDipinjam, 0, ',', '.') . ' Transaksi (' . $totalBukuPinjam . ' Buku)</td>
+        </tr>
+        <tr>
+            <td colspan="2" class="stat-label">Status Arsip</td>
+            <td colspan="3" class="stat-value">Resmi Terverifikasi Sistem</td>
+            <td colspan="2" class="stat-label">Sudah Dikembalikan</td>
+            <td colspan="3" class="stat-value mso-num">' . number_format($totalKembali, 0, ',', '.') . ' Transaksi</td>
+        </tr>
+        <tr><td colspan="10"></td></tr>
+    </table>
+
+    <table class="table-data">
+        <thead>
+            <tr>
+                <th style="width: 30px;">No</th>
+                <th style="width: 100px;">Kode Pinjam</th>
+                <th style="width: 150px;">Nama Peminjam</th>
+                <th style="width: 110px;">Jurusan / NISN</th>
+                <th style="width: 220px;">Judul Buku</th>
+                <th style="width: 45px;">Jml</th>
+                <th style="width: 80px;">Tgl Pinjam</th>
+                <th style="width: 90px;">Tgl Kembali</th>
+                <th style="width: 80px;">Status</th>
+                <th style="width: 100px;">Petugas</th>
+            </tr>
+        </thead>
+        <tbody>';
+
+        foreach ($loanItems as $idx => $loan) {
+            $rowClass = ($idx % 2 === 1) ? ' class="row-even"' : '';
+            $isReturned = ($loan->status === 'dikembalikan');
+            $statusText = $isReturned ? 'Dikembalikan' : 'Sedang Dipinjam';
+            $statusClass = $isReturned ? 'badge-kembali' : 'badge-dipinjam';
+            $tglKembaliText = $loan->waktu_kembali ? \Carbon\Carbon::parse($loan->waktu_kembali)->format('d/m/Y H:i') : '-';
+
+            $html .= '<tr' . $rowClass . '>
+                <td class="text-center">' . ($idx + 1) . '</td>
+                <td class="text-center font-bold mso-text">' . e($loan->kode_peminjaman) . '</td>
+                <td class="text-left font-bold">' . e($loan->nama_peminjam) . '</td>
+                <td class="text-left">' . e($loan->jurusan) . ($loan->nomor_induk ? ' (' . e($loan->nomor_induk) . ')' : '') . '</td>
+                <td class="text-left font-bold">' . e($loan->buku->judul ?? '-') . '</td>
+                <td class="text-center font-bold mso-num">' . (int)$loan->jumlah . '</td>
+                <td class="text-center mso-text">' . \Carbon\Carbon::parse($loan->tanggal_pinjam)->format('d/m/Y') . '</td>
+                <td class="text-center mso-text">' . $tglKembaliText . '</td>
+                <td class="text-center ' . $statusClass . '">' . $statusText . '</td>
+                <td class="text-left">' . e($loan->petugas->name ?? '-') . '</td>
+            </tr>';
+        }
+
+        $html .= '</tbody>
+    </table>
+
+    <table>
+        <tr><td colspan="10"></td></tr>
+        <tr><td colspan="10"></td></tr>
+        <tr>
+            <td colspan="6"></td>
+            <td colspan="4" class="text-center" style="font-size: 9.5pt;">
+                Pekanbaru, ' . date('d F Y') . '<br/>
+                Mengetahui,<br/>
+                <strong>Kepala Perpustakaan</strong><br/><br/><br/><br/>
+                <strong><u>' . e($kepalaPerpus) . '</u></strong><br/>
+                NIP. ' . e($nipKepala) . '
+            </td>
+        </tr>
+    </table>
+</body>
+</html>';
+
+        return response($html, 200, [
+            'Content-Type'        => 'application/vnd.ms-excel; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Pragma'              => 'no-cache',
+            'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires'             => '0',
+        ]);
+    }
+
+    public function peminjamanExportPdf(Request $request)
+    {
+        $query = Peminjaman::with(['user', 'buku.rak', 'buku.laci', 'petugas']);
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('tanggal')) {
+            $query->whereDate('tanggal_pinjam', $request->tanggal);
+        }
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function($q) use ($search) {
+                $q->where('kode_peminjaman', 'like', "%{$search}%")
+                  ->orWhere('nama_peminjam', 'like', "%{$search}%")
+                  ->orWhere('jurusan', 'like', "%{$search}%")
+                  ->orWhere('nomor_induk', 'like', "%{$search}%")
+                  ->orWhereHas('buku', function($qb) use ($search) {
+                      $qb->where('judul', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $loanItems = $query->latest('tanggal_pinjam')->get();
+        $pengaturan = Pengaturan::all()->pluck('value', 'key');
+
+        $totalTransaksi = $loanItems->count();
+        $totalDipinjam = $loanItems->where('status', 'dipinjam')->count();
+        $totalKembali = $loanItems->where('status', 'dikembalikan')->count();
+        $totalBukuPinjam = (int) $loanItems->sum('jumlah');
+
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'EXPORT_PINJAM_PDF',
+            'deskripsi'  => "Membuka dan mencetak laporan sirkulasi peminjaman PDF ({$totalTransaksi} transaksi)",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return view('admin.peminjaman.export-pdf', compact(
+            'loanItems',
+            'pengaturan',
+            'totalTransaksi',
+            'totalDipinjam',
+            'totalKembali',
+            'totalBukuPinjam'
+        ));
     }
 
     public function riwayatIndex(Request $request)

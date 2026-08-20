@@ -137,8 +137,9 @@
                                         'phone' => $user->phone ?? '',
                                         'role_id' => $user->role_id,
                                         'status' => $user->status
-                                    ]) }}; openEditModal = true" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs">
-                                        Edit
+                                    ]) }}; openEditModal = true" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs inline-flex items-center gap-1">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                        <span>Edit</span>
                                     </button>
                                 @endif
 
@@ -147,28 +148,32 @@
                                         'id' => $user->id,
                                         'name' => $user->name,
                                         'email' => $user->email
-                                    ]) }}; openPasswordModal = true" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs" title="Reset Password Akun">
-                                        Ubah Password
+                                    ]) }}; openPasswordModal = true" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs inline-flex items-center gap-1" title="Reset Password Akun">
+                                        <i class="fa-solid fa-key"></i>
+                                        <span>Password</span>
                                     </button>
 
                                     @if($user->id !== 1 && $user->id !== auth()->id())
                                         <form action="{{ route('admin.anggota.toggle-status', $user->id) }}" method="POST" class="inline" onsubmit="return confirmDelete(event, 'Ubah Status Akun?', 'Status akses login akun ini akan dialihkan.')">
                                             @csrf
                                             @if($user->status === 'active')
-                                                <button type="submit" class="px-2.5 py-1 bg-gray-600 hover:bg-gray-700 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs" title="Blokir / Nonaktifkan">
-                                                    Blokir
+                                                <button type="submit" class="px-2.5 py-1 bg-gray-600 hover:bg-gray-700 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs inline-flex items-center gap-1" title="Blokir / Nonaktifkan">
+                                                    <i class="fa-solid fa-user-slash"></i>
+                                                    <span>Blokir</span>
                                                 </button>
                                             @else
-                                                <button type="submit" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs" title="Aktifkan Kembali">
-                                                    Aktifkan
+                                                <button type="submit" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs inline-flex items-center gap-1" title="Aktifkan Kembali">
+                                                    <i class="fa-solid fa-user-check"></i>
+                                                    <span>Aktifkan</span>
                                                 </button>
                                             @endif
                                         </form>
 
                                         <form action="{{ route('admin.anggota.delete', $user->id) }}" method="POST" class="inline" onsubmit="return confirmDelete(event, 'Hapus Akun Pengelola?', 'Akun admin ini akan dihapus permanen dari sistem.')">
                                             @csrf
-                                            <button type="submit" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs">
-                                                Hapus
+                                            <button type="submit" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs inline-flex items-center gap-1">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                                <span>Hapus</span>
                                             </button>
                                         </form>
                                     @endif

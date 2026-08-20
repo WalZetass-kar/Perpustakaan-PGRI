@@ -26,18 +26,23 @@
                     @if($buku->cover_url)
                         <img src="{{ $buku->cover_url }}" alt="Cover {{ $buku->judul }}" class="w-full h-full object-cover">
                     @else
-                        <div class="w-full h-full p-5 bg-stone-50 border-l-4 border-brand-700 flex flex-col justify-between text-left select-none">
-                            <div class="space-y-1.5">
-                                <span class="px-2 py-0.5 rounded bg-brand-50 text-brand-800 text-[10px] font-bold uppercase tracking-wider border border-brand-200 inline-block">
+                        <div class="w-full h-full p-5 bg-gradient-to-br from-brand-900 via-brand-800 to-red-950 text-white border-l-[6px] border-amber-400/50 flex flex-col justify-between text-left select-none relative overflow-hidden shadow-inner">
+                            <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
+                            <div class="flex items-center justify-end">
+                                <span class="px-2.5 py-0.5 rounded-md bg-black/30 text-amber-300/90 text-[10px] font-black uppercase tracking-wider border border-white/10">
                                     {{ $buku->kategori->nama ?? 'Modul Sekolah' }}
                                 </span>
-                                <h2 class="text-xs sm:text-sm font-black text-gray-900 line-clamp-4 leading-snug mt-1">
+                            </div>
+                            <div class="my-auto text-center px-1">
+                                <i class="fa-solid fa-book-bookmark text-white/25 text-4xl mb-2.5"></i>
+                                <h2 class="text-sm sm:text-base font-black text-white line-clamp-4 leading-snug drop-shadow-sm">
                                     {{ $buku->judul }}
                                 </h2>
+                                <p class="text-xs text-white/70 font-medium mt-1.5 truncate">{{ $buku->penulis->nama ?? 'Penulis' }}</p>
                             </div>
-                            <div class="pt-3 border-t border-gray-200/80 space-y-1">
-                                <p class="text-[11px] text-gray-600 font-semibold truncate">{{ $buku->penulis->nama ?? 'Perpustakaan' }}</p>
-                                <span class="text-[9px] font-mono text-gray-400 font-bold uppercase block">{{ $pengaturan['nama_sekolah'] ?? 'SMK PGRI PEKANBARU' }}</span>
+                            <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[8px] font-bold text-white/60 tracking-wider uppercase">
+                                <span>PERPUSTAKAAN</span>
+                                <span>SMK PGRI</span>
                             </div>
                         </div>
                     @endif
@@ -271,8 +276,13 @@
                                 @if($rb->cover_url)
                                     <img src="{{ $rb->cover_url }}" alt="{{ $rb->judul }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
                                 @else
-                                    <div class="w-full h-full bg-brand-800 text-white flex items-center justify-center font-bold text-xs p-2 text-center">
-                                        {{ substr($rb->judul, 0, 1) }}
+                                    <div class="w-full h-full bg-gradient-to-br from-brand-900 via-brand-800 to-red-950 text-white p-2 border-l-[3px] border-amber-400/50 flex flex-col justify-between select-none relative overflow-hidden text-center">
+                                        <span class="text-[6.5px] font-black text-amber-300/90 uppercase tracking-wider">{{ substr($rb->kategori->nama ?? 'Buku', 0, 8) }}</span>
+                                        <div class="my-auto">
+                                            <i class="fa-solid fa-book text-white/30 text-xs mb-0.5"></i>
+                                            <p class="text-[8px] font-bold text-white line-clamp-2 leading-tight">{{ $rb->judul }}</p>
+                                        </div>
+                                        <span class="text-[6px] font-bold text-white/50 uppercase">SMK PGRI</span>
                                     </div>
                                 @endif
                             </div>

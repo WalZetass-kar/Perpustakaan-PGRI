@@ -239,11 +239,18 @@
                         </div>
 
                         <div class="flex gap-4 items-start">
-                            <div class="w-20 h-28 bg-gradient-to-br from-brand-800 to-brand-900 text-white font-black text-2xl rounded-2xl flex items-center justify-center shrink-0 shadow-md group-hover:scale-105 transition duration-300 border border-brand-700 overflow-hidden relative">
+                            <div class="w-20 h-28 bg-gradient-to-br from-brand-900 via-brand-800 to-red-950 text-white font-black rounded-2xl flex items-center justify-center shrink-0 shadow-md group-hover:scale-105 transition duration-300 border border-brand-700 overflow-hidden relative">
                                 @if($buku->cover_url)
                                     <img src="{{ $buku->cover_url }}" alt="{{ $buku->judul }}" class="w-full h-full object-cover">
                                 @else
-                                    <span class="drop-shadow-md">{{ strtoupper(substr($buku->judul, 0, 1)) }}</span>
+                                    <div class="w-full h-full p-2 border-l-[3px] border-amber-400/50 flex flex-col justify-between select-none relative overflow-hidden text-center">
+                                        <span class="text-[6.5px] font-black text-amber-300/90 uppercase tracking-wider">{{ substr($buku->kategori->nama ?? 'Buku', 0, 8) }}</span>
+                                        <div class="my-auto">
+                                            <i class="fa-solid fa-book text-white/30 text-xs mb-0.5"></i>
+                                            <p class="text-[8px] font-bold text-white line-clamp-2 leading-tight">{{ $buku->judul }}</p>
+                                        </div>
+                                        <span class="text-[6px] font-bold text-white/50 uppercase">SMK PGRI</span>
+                                    </div>
                                 @endif
                             </div>
 

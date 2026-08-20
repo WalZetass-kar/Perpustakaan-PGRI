@@ -168,7 +168,7 @@
                     <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
                         <div class="relative" x-data="{ menuOpen: false }">
                             <button type="button" @click="menuOpen = !menuOpen; activeMenuId = menuOpen ? {{ $rak->id }} : null" class="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-sm border border-gray-200 transition cursor-pointer" aria-label="Menu Opsi Rak">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
                             </button>
 
                             <div x-show="menuOpen" @click.outside="menuOpen = false; if(activeMenuId === {{ $rak->id }}) activeMenuId = null" x-cloak class="absolute right-0 top-full mt-1.5 w-44 bg-white rounded-xl border border-gray-200 shadow-xl py-1 z-50 text-xs font-semibold">
@@ -179,18 +179,18 @@
                                     'lokasi' => $rak->lokasi ?? '',
                                     'kategori_id' => $rak->kategori_id
                                 ]) }}; openEditModal = true" class="w-full px-3 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2">
-                                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    <i class="fa-solid fa-pen-to-square text-amber-600 w-4 text-center"></i>
                                     <span>Edit Info Rak</span>
                                 </button>
                                 <button type="button" @click="menuOpen = false; activeMenuId = null; laciData = { rak_id: {{ $rak->id }}, rak_nama: '{{ $rak->nama_rak }}' }; openAddLaciModal = true" class="w-full px-3 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2">
-                                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                    <i class="fa-solid fa-plus text-emerald-600 w-4 text-center"></i>
                                     <span>Tambah Laci Baru</span>
                                 </button>
                                 <div class="border-t border-gray-100 my-1"></div>
                                 <form action="{{ route('admin.rak.delete', $rak->id) }}" method="POST" onsubmit="return confirmDelete(event, 'Hapus Rak {{ $rak->nama_rak }}?', '{{ $totalJudulRak > 0 ? 'Peringatan: Rak ini masih menampung ' . $totalJudulRak . ' judul buku! Pindahkan buku terlebih dahulu.' : 'Rak beserta susunan lacinya akan dihapus permanen.' }}')">
                                     @csrf
                                     <button type="submit" class="w-full px-3 py-2 text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2">
-                                        <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        <i class="fa-solid fa-trash-can text-rose-500 w-4 text-center"></i>
                                         <span>Hapus Rak</span>
                                     </button>
                                 </form>
@@ -244,12 +244,12 @@
                                                 'nama_laci' => $laci->nama_laci,
                                                 'keterangan' => $laci->keterangan ?? ''
                                             ]) }}; openEditLaciModal = true" class="w-8 h-8 rounded-lg text-gray-500 hover:text-amber-600 hover:bg-amber-50 flex items-center justify-center transition" title="Edit Laci" aria-label="Edit Laci">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                                <i class="fa-solid fa-pen-to-square text-xs"></i>
                                             </button>
                                             <form action="{{ route('admin.rak.laci.delete', $laci->id) }}" method="POST" class="inline" onsubmit="return confirmDelete(event, 'Hapus Laci {{ $laci->nama_laci }}?', 'Data laci ini akan dihapus dari rak.')">
                                                 @csrf
                                                 <button type="submit" class="w-8 h-8 rounded-lg text-gray-500 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition" title="Hapus Laci" aria-label="Hapus Laci">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                    <i class="fa-solid fa-trash-can text-xs"></i>
                                                 </button>
                                             </form>
                                         </div>

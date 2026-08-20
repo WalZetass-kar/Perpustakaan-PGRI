@@ -11,12 +11,20 @@
             <h2 class="text-sm font-black text-gray-900">Daftar Peminjaman Sedang Berlangsung</h2>
             <p class="text-[11px] text-gray-500 mt-0.5">Catatan buku yang sedang dipinjam dan belum dikembalikan hari ini</p>
         </div>
-        <div class="flex items-center gap-2 w-full sm:w-auto">
-            <form action="{{ route('admin.peminjaman') }}" method="GET" class="relative flex-1 sm:w-72">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari kode, nama siswa, jurusan, NIS..."
+        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <form action="{{ route('admin.peminjaman') }}" method="GET" class="relative flex-1 sm:w-60">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari kode, siswa, NIS..."
                        class="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:outline-none font-medium">
                 <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </form>
+            <a href="{{ route('admin.peminjaman.export.excel', array_merge(request()->all(), ['status' => 'dipinjam'])) }}" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Export Excel">
+                <i class="fa-solid fa-file-excel"></i>
+                <span>Excel</span>
+            </a>
+            <a href="{{ route('admin.peminjaman.export.pdf', array_merge(request()->all(), ['status' => 'dipinjam'])) }}" target="_blank" class="px-3 py-1.5 bg-rose-700 hover:bg-rose-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Cetak / PDF">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span>Cetak / PDF</span>
+            </a>
             <button @click="openAddModal = true" class="px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0">
                 <i class="fa-solid fa-plus text-emerald-300"></i>
                 <span>Peminjaman Baru</span>
@@ -76,8 +84,8 @@
                             <td class="py-3 px-4 text-right whitespace-nowrap">
                                 <form action="{{ route('admin.peminjaman.kembali', $loan->id) }}" method="POST" class="inline" onsubmit="return confirmDelete(event, 'Proses Pengembalian?', 'Buku akan dikembalikan ke stok fisik perpustakaan.')">
                                     @csrf
-                                    <button type="submit" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-lg text-[11px] transition shadow-2xs flex items-center gap-1 ml-auto">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    <button type="submit" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-lg text-[11px] transition shadow-2xs flex items-center gap-1.5 ml-auto">
+                                        <i class="fa-solid fa-arrow-rotate-left text-xs"></i>
                                         <span>Pengembalian</span>
                                     </button>
                                 </form>
