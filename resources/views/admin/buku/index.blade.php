@@ -128,6 +128,18 @@
         </div>
     </div>
 
+    {{-- Banner: ditampilkan via JS saat ada ?search= di URL --}}
+    <div id="search-filter-banner" class="hidden bg-blue-50 border border-blue-200 rounded-2xl px-4 py-3 flex items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2 text-blue-800">
+            <i class="fa-solid fa-filter text-blue-500"></i>
+            <span id="search-filter-text" class="font-semibold"></span>
+            <span class="text-blue-500 font-normal">— klik tombol aksi ⋮ pada buku untuk edit data</span>
+        </div>
+        <button id="btn-reset-search-filter" type="button" class="shrink-0 px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold rounded-xl transition text-[11px]">
+            Tampilkan Semua Buku
+        </button>
+    </div>
+
     <div class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table id="tabel-buku" class="w-full text-left border-collapse text-xs">
@@ -135,7 +147,7 @@
                     <tr class="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase tracking-wider font-extrabold">
                         <th class="py-3 px-4 font-bold">Buku & Cover</th>
                         <th class="py-3 px-4 font-bold">Penulis / Penerbit</th>
-                        <th class="py-3 px-4 font-bold">Kategori & Lokasi Rak/Laci</th>
+                        <th class="py-3 px-4 font-bold">Kategori</th>
                         <th class="py-3 px-4 font-bold text-center">Stok Fisik</th>
                         <th class="py-3 px-4 font-bold text-right">Aksi</th>
                     </tr>
@@ -443,6 +455,31 @@
                     last: '<i class="fa-solid fa-angles-right"></i>'
                 }
             }
+        });
+
+        // Baca ?search= dari URL dan langsung filter DataTable
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchQuery = urlParams.get('search');
+        if (searchQuery && searchQuery.trim() !== '') {
+            tabelBuku.search(searchQuery.trim()).draw();
+
+            // Tampilkan banner notifikasi filter aktif
+            const banner = document.getElementById('search-filter-banner');
+            const bannerText = document.getElementById('search-filter-text');
+            if (banner && bannerText) {
+                bannerText.textContent = 'Menampilkan hasil untuk: "' + searchQuery.trim() + '"';
+                banner.classList.remove('hidden');
+            }
+        }
+
+        // Tombol reset filter banner
+        $(document).on('click', '#btn-reset-search-filter', function() {
+            tabelBuku.search('').draw();
+            document.getElementById('search-filter-banner').classList.add('hidden');
+            // Bersihkan ?search= dari URL tanpa reload halaman
+            const url = new URL(window.location);
+            url.searchParams.delete('search');
+            window.history.replaceState({}, '', url);
         });
 
         $(document).on('click', '.btn-edit-buku', function() {

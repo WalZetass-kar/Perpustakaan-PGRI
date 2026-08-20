@@ -45,22 +45,36 @@
                                     {{ $p->buku_count ?? 0 }} Judul
                                 </span>
                             </td>
-                            <td class="py-3 px-4 text-right space-x-1 whitespace-nowrap">
-                                <button type="button" @click="editData = {{ json_encode([
-                                    'id' => $p->id,
-                                    'nama' => $p->nama,
-                                    'kota' => $p->kota ?? ''
-                                ]) }}; openEditModal = true" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs inline-flex items-center gap-1">
-                                    <i class="fa-solid fa-pen-to-square"></i>
-                                    <span>Edit</span>
-                                </button>
-                                <form action="{{ route('admin.penerbit.delete', $p->id) }}" method="POST" class="inline" onsubmit="return confirmDelete(event, 'Hapus Penerbit?', 'Data penerbit ini akan dihapus.')">
-                                    @csrf
-                                    <button type="submit" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white font-extrabold rounded-lg text-[10px] transition shadow-2xs inline-flex items-center gap-1">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                        <span>Hapus</span>
+                            <td class="py-3 px-4 text-right">
+                                <div class="relative flex items-center justify-end" x-data="{ open: false }">
+                                    <button @click.stop="open = !open" type="button" class="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition">
+                                        <i class="fa-solid fa-ellipsis-vertical text-xs"></i>
                                     </button>
-                                </form>
+                                    <div x-show="open" x-cloak @click.outside="open = false"
+                                         x-transition:enter="transition ease-out duration-150"
+                                         x-transition:enter-start="opacity-0 scale-95"
+                                         x-transition:enter-end="opacity-100 scale-100"
+                                         x-transition:leave="transition ease-in duration-100"
+                                         x-transition:leave-start="opacity-100 scale-100"
+                                         x-transition:leave-end="opacity-0 scale-95"
+                                         class="absolute right-0 top-8 z-50 w-36 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                                        <button type="button" @click="editData = {{ json_encode([
+                                            'id' => $p->id,
+                                            'nama' => $p->nama,
+                                            'kota' => $p->kota ?? ''
+                                        ]) }}; openEditModal = true; open = false" class="w-full flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-amber-700 hover:bg-amber-50 transition">
+                                            <i class="fa-solid fa-pen-to-square w-3.5 text-center"></i>
+                                            <span>Edit</span>
+                                        </button>
+                                        <form action="{{ route('admin.penerbit.delete', $p->id) }}" method="POST" onsubmit="return confirmDelete(event, 'Hapus Penerbit?', 'Data penerbit ini akan dihapus.')">
+                                            @csrf
+                                            <button type="submit" class="w-full flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-rose-600 hover:bg-rose-50 transition">
+                                                <i class="fa-solid fa-trash-can w-3.5 text-center"></i>
+                                                <span>Hapus</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     @empty
