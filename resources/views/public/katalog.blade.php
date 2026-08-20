@@ -60,7 +60,7 @@
                                 <button type="button" @click="selectSuggestion(item)" class="w-full p-2.5 rounded-xl hover:bg-brand-50/80 transition flex items-center gap-3 group border border-transparent hover:border-brand-200 text-left">
                                     <div class="w-10 h-14 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center shadow-xs">
                                         <template x-if="item.cover_url">
-                                            <img :src="item.cover_url" class="w-full h-full object-cover">
+                                            <img :src="item.cover_url" width="40" height="56" loading="lazy" class="w-full h-full object-cover">
                                         </template>
                                         <template x-if="!item.cover_url">
                                             <div class="w-full h-full bg-gradient-to-br from-brand-900 to-red-950 text-white font-black text-xs flex flex-col items-center justify-center p-1 border-l-2 border-amber-400/50">
@@ -305,12 +305,13 @@
                             'tahun' => (string) $item->tahun_terbit,
                             'isbn' => (string) ($item->isbn ?? 'Tanpa ISBN'),
                             'kategori' => $item->kategori->nama ?? 'Umum',
+                            'kelas' => $item->kelas->nama_kelas ?? '',
                             'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
                             'laci' => $laciName,
                             'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi SMK PGRI Pekanbaru.',
                             'tersedia' => $item->available_quantity,
                             'total' => $item->total_quantity,
-                            'cover' => $coverUrl ?? ''
+                            'cover' => $item->cover_card_url ?? ''
                         ];
                     @endphp
 
@@ -318,7 +319,7 @@
                         <div>
                             <div class="relative w-full h-60 bg-gray-100 overflow-hidden flex items-center justify-center border-b-2 border-gray-100 cursor-pointer" @click="modalData = {{ json_encode($bookPayload) }}; openDetailModal = true">
                                 @if($coverUrl)
-                                    <img src="{{ $coverUrl }}" alt="Cover {{ $item->judul }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                                    <img src="{{ $item->cover_card_url }}" alt="Cover {{ $item->judul }}" width="300" height="240" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                                 @else
                                     <div class="w-full h-full bg-gradient-to-br from-brand-900 via-brand-800 to-red-950 text-white p-4 border-l-[6px] border-amber-400/50 flex flex-col justify-between select-none relative overflow-hidden shadow-inner">
                                         <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
@@ -361,6 +362,11 @@
                                 <span class="px-2 py-0.5 rounded text-[9.5px] font-extrabold bg-gray-100 text-gray-700 border border-gray-200 uppercase inline-block">
                                     {{ $item->kategori->nama ?? 'Umum' }}
                                 </span>
+                                @if($item->kelas)
+                                    <span class="px-2 py-0.5 rounded text-[9.5px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200 uppercase inline-block">
+                                        Kelas {{ $item->kelas->nama_kelas }}
+                                    </span>
+                                @endif
 
                                 <h3 class="text-xs font-bold text-gray-900 line-clamp-2 leading-snug group-hover:text-brand-700 transition">
                                     <button type="button" @click="modalData = {{ json_encode($bookPayload) }}; openDetailModal = true" class="text-left hover:underline">
@@ -387,7 +393,7 @@
                             <button type="button" @click="modalData = {{ json_encode($bookPayload) }}; openDetailModal = true" class="flex-1 py-2 bg-gray-200/80 hover:bg-gray-300 text-gray-800 font-bold text-[11px] rounded-xl transition text-center">
                                 Detail
                             </button>
-                            <button type="button" @click="startLoan({ id: {{ $item->id }}, judul: '{{ addslashes($item->judul) }}', cover: '{{ $coverUrl ?? '' }}', penulis: '{{ addslashes($item->penulis->nama ?? '-') }}', rak: '{{ addslashes($item->rak->kode_rak ?? '-') }}', available: {{ $available }} })" class="flex-1 py-2 {{ $available > 0 ? 'bg-brand-700 hover:bg-brand-800 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed' }} font-extrabold text-[11px] rounded-xl transition shadow-xs text-center flex items-center justify-center gap-1">
+                            <button type="button" @click="startLoan({ id: {{ $item->id }}, judul: '{{ addslashes($item->judul) }}', cover: '{{ $item->cover_thumb_url ?? '' }}', penulis: '{{ addslashes($item->penulis->nama ?? '-') }}', rak: '{{ addslashes($item->rak->kode_rak ?? '-') }}', available: {{ $available }} })" class="flex-1 py-2 {{ $available > 0 ? 'bg-brand-700 hover:bg-brand-800 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed' }} font-extrabold text-[11px] rounded-xl transition shadow-xs text-center flex items-center justify-center gap-1">
                                 <i class="fa-solid fa-hand-holding-hand text-xs"></i>
                                 <span>Ajukan Pinjam</span>
                             </button>
@@ -426,12 +432,13 @@
                             'tahun' => (string) $item->tahun_terbit,
                             'isbn' => (string) ($item->isbn ?? 'Tanpa ISBN'),
                             'kategori' => $item->kategori->nama ?? 'Umum',
+                            'kelas' => $item->kelas->nama_kelas ?? '',
                             'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
                             'laci' => $laciName,
                             'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi SMK PGRI Pekanbaru.',
                             'tersedia' => $item->available_quantity,
                             'total' => $item->total_quantity,
-                            'cover' => $coverUrl ?? ''
+                            'cover' => $item->cover_card_url ?? ''
                         ];
                     @endphp
 
@@ -439,7 +446,7 @@
                         <div class="flex items-center gap-4 w-full sm:w-auto">
                             <div class="w-20 h-28 bg-gray-100 border border-gray-200 rounded-xl overflow-hidden shrink-0 cursor-pointer shadow-xs" @click="modalData = {{ json_encode($bookPayload) }}; openDetailModal = true">
                                 @if($coverUrl)
-                                    <img src="{{ $coverUrl }}" alt="Cover {{ $item->judul }}" loading="lazy" class="w-full h-full object-cover">
+                                    <img src="{{ $item->cover_thumb_url }}" alt="Cover {{ $item->judul }}" width="80" height="112" loading="lazy" class="w-full h-full object-cover">
                                 @else
                                     <div class="w-full h-full bg-gradient-to-br from-brand-900 via-brand-800 to-red-950 text-white p-2 border-l-[3px] border-amber-400/50 flex flex-col justify-between select-none relative overflow-hidden text-center">
                                         <span class="text-[6.5px] font-black text-amber-300/90 uppercase tracking-wider">{{ substr($item->kategori->nama ?? 'Buku', 0, 8) }}</span>
@@ -455,6 +462,11 @@
                                 <span class="px-2 py-0.5 rounded text-[9.5px] font-extrabold bg-gray-100 text-gray-700 border border-gray-200 uppercase inline-block">
                                     {{ $item->kategori->nama ?? 'Umum' }}
                                 </span>
+                                @if($item->kelas)
+                                    <span class="px-2 py-0.5 rounded text-[9.5px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200 uppercase inline-block">
+                                        Kelas {{ $item->kelas->nama_kelas }}
+                                    </span>
+                                @endif
                                 <h3 class="text-sm font-bold text-gray-900 leading-snug">
                                     <button type="button" @click="modalData = {{ json_encode($bookPayload) }}; openDetailModal = true" class="text-left hover:text-brand-700 hover:underline">
                                         {{ $item->judul }}
@@ -473,7 +485,7 @@
                             <button type="button" @click="modalData = {{ json_encode($bookPayload) }}; openDetailModal = true" class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl transition">
                                 Detail
                             </button>
-                            <button type="button" @click="startLoan({ id: {{ $item->id }}, judul: '{{ addslashes($item->judul) }}', cover: '{{ $coverUrl ?? '' }}', penulis: '{{ addslashes($item->penulis->nama ?? '-') }}', rak: '{{ addslashes($item->rak->kode_rak ?? '-') }}', available: {{ $available }} })" class="px-4 py-2 {{ $available > 0 ? 'bg-brand-700 hover:bg-brand-800 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed' }} font-extrabold text-xs rounded-xl transition shadow-2xs flex items-center gap-1.5">
+                            <button type="button" @click="startLoan({ id: {{ $item->id }}, judul: '{{ addslashes($item->judul) }}', cover: '{{ $item->cover_thumb_url ?? '' }}', penulis: '{{ addslashes($item->penulis->nama ?? '-') }}', rak: '{{ addslashes($item->rak->kode_rak ?? '-') }}', available: {{ $available }} })" class="px-4 py-2 {{ $available > 0 ? 'bg-brand-700 hover:bg-brand-800 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed' }} font-extrabold text-xs rounded-xl transition shadow-2xs flex items-center gap-1.5">
                                 <i class="fa-solid fa-hand-holding-hand text-xs"></i>
                                 <span>Ajukan Pinjam</span>
                             </button>
@@ -529,7 +541,10 @@
 
                 <div class="flex-1 space-y-4 text-xs">
                     <div class="space-y-1">
-                        <span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-brand-50 text-brand-700 border border-brand-200 uppercase inline-block" x-text="modalData.kategori"></span>
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-brand-50 text-brand-700 border border-brand-200 uppercase inline-block" x-text="modalData.kategori"></span>
+                            <span x-show="modalData.kelas" x-cloak class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200 uppercase inline-block" x-text="'Kelas ' + modalData.kelas"></span>
+                        </div>
                         <h2 class="text-lg font-black text-gray-900 leading-snug" x-text="modalData.judul"></h2>
                     </div>
 

@@ -24,7 +24,7 @@
             <div class="lg:col-span-4 flex flex-col items-center text-center space-y-4">
                 <div class="w-full max-w-[260px] sm:max-w-[280px] aspect-3/4 bg-gray-100 rounded-2xl border border-gray-200 overflow-hidden shadow-sm relative flex flex-col justify-between">
                     @if($buku->cover_url)
-                        <img src="{{ $buku->cover_url }}" alt="Cover {{ $buku->judul }}" class="w-full h-full object-cover">
+                        <img src="{{ $buku->cover_url }}" alt="Cover {{ $buku->judul }}" width="280" height="373" class="w-full h-full object-cover">
                     @else
                         <div class="w-full h-full p-5 bg-gradient-to-br from-brand-900 via-brand-800 to-red-950 text-white border-l-[6px] border-amber-400/50 flex flex-col justify-between text-left select-none relative overflow-hidden shadow-inner">
                             <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
@@ -70,6 +70,13 @@
                         <span class="px-3 py-1 rounded-lg text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200 uppercase tracking-wide">
                             {{ $buku->kategori->nama ?? 'Koleksi Umum' }}
                         </span>
+
+                        @if($buku->kelas)
+                            <span class="px-3 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 uppercase tracking-wide flex items-center gap-1.5">
+                                <i class="fa-solid fa-graduation-cap text-[11px]"></i>
+                                <span>Kelas {{ $buku->kelas->nama_kelas }}</span>
+                            </span>
+                        @endif
 
                         @if($buku->available_quantity == $buku->total_quantity && $buku->total_quantity > 0)
                             <span class="px-3 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
@@ -248,6 +255,10 @@
                             <td class="px-4 py-2.5 text-gray-900 font-medium">{{ $buku->kategori->nama ?? '-' }}</td>
                         </tr>
                         <tr class="bg-gray-50/50">
+                            <td class="px-4 py-2.5 font-bold text-gray-500">Peruntukan Kelas</td>
+                            <td class="px-4 py-2.5 text-gray-900 font-medium">{{ $buku->kelas->nama_kelas ?? '-' }}</td>
+                        </tr>
+                        <tr>
                             <td class="px-4 py-2.5 font-bold text-gray-500">Lokasi Penempatan</td>
                             <td class="px-4 py-2.5 text-gray-900 font-medium">{{ $buku->lokasi_lengkap }}</td>
                         </tr>
@@ -274,7 +285,7 @@
                         <a href="{{ route('buku.detail', $rb->id) }}" class="group p-3 bg-gray-50 hover:bg-brand-50/40 border border-gray-200 hover:border-brand-200 rounded-2xl transition space-y-2.5 flex flex-col justify-between">
                             <div class="aspect-3/4 bg-gray-200 rounded-xl overflow-hidden shadow-2xs relative">
                                 @if($rb->cover_url)
-                                    <img src="{{ $rb->cover_url }}" alt="{{ $rb->judul }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                                    <img src="{{ $rb->cover_card_url }}" alt="{{ $rb->judul }}" width="200" height="267" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
                                 @else
                                     <div class="w-full h-full bg-gradient-to-br from-brand-900 via-brand-800 to-red-950 text-white p-2 border-l-[3px] border-amber-400/50 flex flex-col justify-between select-none relative overflow-hidden text-center">
                                         <span class="text-[6.5px] font-black text-amber-300/90 uppercase tracking-wider">{{ substr($rb->kategori->nama ?? 'Buku', 0, 8) }}</span>
@@ -321,7 +332,7 @@
             <div class="p-3 bg-gray-50 rounded-2xl border border-gray-200 flex items-center gap-3">
                 <div class="w-12 h-16 bg-gray-200 rounded-lg overflow-hidden shrink-0 border border-gray-300 flex items-center justify-center shadow-2xs">
                     @if($buku->cover_url)
-                        <img src="{{ $buku->cover_url }}" alt="Cover" class="w-full h-full object-cover">
+                        <img src="{{ $buku->cover_thumb_url }}" alt="Cover" width="48" height="64" loading="lazy" class="w-full h-full object-cover">
                     @else
                         <div class="w-full h-full bg-brand-800 text-white font-bold flex items-center justify-center text-xs">
                             <i class="fa-solid fa-book"></i>

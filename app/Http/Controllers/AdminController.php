@@ -9,11 +9,13 @@ use App\Models\Buku;
 use App\Models\Kategori;
 use App\Models\Rak;
 use App\Models\RakLaci;
+use App\Models\Kelas;
 use App\Models\Penulis;
 use App\Models\Penerbit;
 use App\Models\Peminjaman;
 use App\Models\AuditLog;
 use App\Models\Pengaturan;
+use App\Services\CoverImageService;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
@@ -114,6 +116,7 @@ class AdminController extends Controller
             'penulis',
             'penerbit',
             'kategori',
+            'kelas',
             'rak.laci',
             'laci.rak'
         ]);
@@ -180,31 +183,63 @@ class AdminController extends Controller
 
     public function dataBukuIndex(Request $request)
     {
+        $query = Rak::with('kategori')
+            ->withCount('buku')
+            ->withSum('buku', 'total_quantity')
+            ->withSum('buku', 'available_quantity');
+
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_rak', 'like', "%{$search}%")
+                  ->orWhere('kode_rak', 'like', "%{$search}%")
+                  ->orWhere('lokasi', 'like', "%{$search}%");
+            });
+        }
+
+        $rakList = $query->orderBy('kode_rak', 'asc')->paginate(12)->withQueryString();
+
+        $stats = [
+            'total_rak'     => Rak::count(),
+            'total_judul'   => Buku::count(),
+            'total_stok'    => (int) Buku::sum('total_quantity'),
+            'buku_tersedia' => (int) Buku::sum('available_quantity'),
+        ];
+
+        return view('admin.data-buku.index', compact('rakList', 'stats'));
+    }
+
+    public function dataBukuByRak(Request $request, $rakId)
+    {
+        $rak = Rak::with('kategori')->findOrFail($rakId);
+
         $query = Buku::with([
             'penulis',
             'penerbit',
             'kategori',
+            'kelas',
             'rak.laci',
             'laci.rak'
-        ]);
+        ])->where('rak_id', $rakId);
 
-        $bukuList = $query->orderBy('judul', 'asc')->paginate(12);
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                  ->orWhere('isbn', 'like', "%{$search}%");
+            });
+        }
 
-        $stats = [
-            'total_judul'   => Buku::count(),
-            'total_stok'    => (int) Buku::sum('total_quantity'),
-            'buku_tersedia' => (int) Buku::sum('available_quantity'),
-            'buku_dipinjam' => (int) Peminjaman::where('status', 'dipinjam')->sum('jumlah'),
-        ];
+        $bukuList = $query->orderBy('judul', 'asc')->paginate(12)->withQueryString();
 
-        return view('admin.data-buku.index', compact('bukuList', 'stats'));
+        return view('admin.data-buku.rak', compact('bukuList', 'rak'));
     }
 
     public function bukuIndex(Request $request)
     {
         if ($request->ajax() || $request->wantsJson() || $request->has('draw')) {
             $totalData = Buku::count();
-            $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci']);
+            $query = Buku::with(['penulis', 'penerbit', 'kategori', 'kelas', 'rak', 'laci']);
 
             $searchValue = $request->input('search.value');
             if (!empty($searchValue)) {
@@ -230,6 +265,23 @@ class AdminController extends Controller
                           $ql->where('nama_laci', 'like', "%{$search}%");
                       });
                 });
+            }
+
+            if ($request->filled('kategori_id')) {
+                $query->where('kategori_id', $request->kategori_id);
+            }
+            if ($request->filled('rak_id')) {
+                $query->where('rak_id', $request->rak_id);
+            }
+            if ($request->filled('kelas_id')) {
+                $query->where('kelas_id', $request->kelas_id);
+            }
+            if ($request->filled('status_stok')) {
+                if ($request->status_stok === 'tersedia') {
+                    $query->where('available_quantity', '>', 0);
+                } elseif ($request->status_stok === 'habis') {
+                    $query->where('available_quantity', '<=', 0);
+                }
             }
 
             $totalFiltered = (clone $query)->count();
@@ -259,8 +311,8 @@ class AdminController extends Controller
             $data = [];
             foreach ($bukuItems as $buku) {
                 $coverUrl = $buku->cover_url;
-                $coverHtml = $coverUrl 
-                    ? '<img src="' . e($coverUrl) . '" alt="Cover" class="w-full h-full object-cover">'
+                $coverHtml = $coverUrl
+                    ? '<img src="' . e($buku->cover_thumb_url) . '" alt="Cover" width="40" height="56" loading="lazy" class="w-full h-full object-cover">'
                     : '<div class="w-full h-full bg-gradient-to-br from-brand-900 via-brand-800 to-red-950 text-white font-black text-xs flex flex-col items-center justify-center p-1 border-l-2 border-amber-400/50 shadow-inner"><i class="fa-solid fa-book text-[11px] opacity-40"></i><span class="text-[7.5px] mt-0.5">' . e(substr($buku->judul, 0, 1)) . '</span></div>';
 
                 $bukuHtml = '<div class="flex items-center gap-3">
@@ -305,6 +357,7 @@ class AdminController extends Controller
                     'penulis_id'         => $buku->penulis_id,
                     'penerbit_id'        => $buku->penerbit_id,
                     'kategori_id'        => $buku->kategori_id,
+                    'kelas_id'           => $buku->kelas_id,
                     'rak_id'             => $buku->rak_id,
                     'rak_laci_id'        => $buku->rak_laci_id,
                     'sinopsis'           => $buku->sinopsis ?? '',
@@ -347,6 +400,16 @@ class AdminController extends Controller
                     'kategori' => $kategoriHtml,
                     'stok' => $stokHtml,
                     'aksi' => $aksiHtml,
+                    // field mentah untuk mode tampilan Grid
+                    'judul_raw' => $buku->judul,
+                    'cover_url' => $buku->cover_card_url,
+                    'penulis_nama' => $buku->penulis->nama ?? '-',
+                    'kategori_nama' => $buku->kategori->nama ?? 'Umum',
+                    'kelas_nama' => $buku->kelas->nama_kelas ?? '',
+                    'rak_text' => $buku->rak ? trim($buku->rak->kode_rak . ' - ' . $buku->rak->nama_rak) : 'Belum Ditentukan',
+                    'laci_nama' => $laciName,
+                    'total_quantity' => $buku->total_quantity,
+                    'available_quantity' => $buku->available_quantity,
                 ];
             }
 
@@ -361,60 +424,18 @@ class AdminController extends Controller
         $penulisList = Penulis::orderBy('nama', 'asc')->get();
         $penerbitList = Penerbit::orderBy('nama', 'asc')->get();
         $kategoriList = Kategori::orderBy('nama', 'asc')->get();
+        $kelasList = Kelas::orderBy('nama_kelas', 'asc')->get();
         $rakList = Rak::with('laci')->orderBy('kode_rak', 'asc')->get();
 
-        return view('admin.buku.index', compact('penulisList', 'penerbitList', 'kategoriList', 'rakList'));
+        return view('admin.buku.index', compact('penulisList', 'penerbitList', 'kategoriList', 'kelasList', 'rakList'));
     }
 
+    /**
+     * Simpan cover beserta varian ukurannya (thumb/card) lewat CoverImageService.
+     */
     private function compressAndStoreCover($file)
     {
-        $filename = 'covers/' . Str::random(40) . '.jpg';
-        $fullPath = storage_path('app/public/' . $filename);
-        $directory = dirname($fullPath);
-
-        if (!is_dir($directory)) {
-            mkdir($directory, 0755, true);
-        }
-
-        $imagePath = $file->getRealPath();
-        $mime = $file->getMimeType();
-
-        $source = null;
-        if ($mime === 'image/jpeg' || $mime === 'image/jpg') {
-            $source = @imagecreatefromjpeg($imagePath);
-        } elseif ($mime === 'image/png') {
-            $source = @imagecreatefrompng($imagePath);
-        } elseif ($mime === 'image/webp') {
-            $source = @imagecreatefromwebp($imagePath);
-        }
-
-        if (!$source) {
-            return $file->store('covers', 'public');
-        }
-
-        $origWidth = imagesx($source);
-        $origHeight = imagesy($source);
-
-        $maxWidth = 600;
-        if ($origWidth > $maxWidth) {
-            $newWidth = $maxWidth;
-            $newHeight = (int) round(($origHeight * $maxWidth) / $origWidth);
-        } else {
-            $newWidth = $origWidth;
-            $newHeight = $origHeight;
-        }
-
-        $canvas = imagecreatetruecolor($newWidth, $newHeight);
-        $white = imagecolorallocate($canvas, 255, 255, 255);
-        imagefilledrectangle($canvas, 0, 0, $newWidth, $newHeight, $white);
-        imagecopyresampled($canvas, $source, 0, 0, 0, 0, $newWidth, $newHeight, $origWidth, $origHeight);
-
-        imagejpeg($canvas, $fullPath, 80);
-
-        imagedestroy($source);
-        imagedestroy($canvas);
-
-        return $filename;
+        return app(CoverImageService::class)->store($file);
     }
 
     public function bukuStore(Request $request)
@@ -427,6 +448,7 @@ class AdminController extends Controller
             'penulis_id'          => 'nullable|exists:penulis,id',
             'penerbit_id'         => 'nullable|exists:penerbit,id',
             'kategori_id'         => 'nullable|exists:kategori,id',
+            'kelas_id'            => 'nullable|exists:kelas,id',
             'rak_id'              => 'nullable|exists:rak,id',
             'rak_laci_id'         => 'nullable|exists:rak_laci,id',
             'sinopsis'            => 'nullable|string',
@@ -448,6 +470,7 @@ class AdminController extends Controller
             'penulis_id'         => $request->penulis_id,
             'penerbit_id'        => $request->penerbit_id,
             'kategori_id'        => $request->kategori_id,
+            'kelas_id'           => $request->kelas_id,
             'rak_id'             => $request->rak_id,
             'rak_laci_id'        => $request->rak_laci_id,
             'sinopsis'           => $request->sinopsis,
@@ -479,6 +502,7 @@ class AdminController extends Controller
             'penulis_id'        => 'nullable|exists:penulis,id',
             'penerbit_id'       => 'nullable|exists:penerbit,id',
             'kategori_id'       => 'nullable|exists:kategori,id',
+            'kelas_id'          => 'nullable|exists:kelas,id',
             'rak_id'            => 'nullable|exists:rak,id',
             'rak_laci_id'       => 'nullable|exists:rak_laci,id',
             'sinopsis'          => 'nullable|string',
@@ -488,9 +512,8 @@ class AdminController extends Controller
 
         $coverPath = $buku->cover;
         if ($request->hasFile('cover')) {
-            if ($buku->cover && Storage::disk('public')->exists($buku->cover)) {
-                Storage::disk('public')->delete($buku->cover);
-            }
+            // Hapus berikut variannya, jangan hanya file aslinya.
+            app(CoverImageService::class)->delete($buku->cover);
             $coverPath = $this->compressAndStoreCover($request->file('cover'));
         }
 
@@ -506,6 +529,7 @@ class AdminController extends Controller
             'penulis_id'        => $request->penulis_id,
             'penerbit_id'       => $request->penerbit_id,
             'kategori_id'       => $request->kategori_id,
+            'kelas_id'          => $request->kelas_id,
             'rak_id'            => $request->rak_id,
             'rak_laci_id'       => $request->rak_laci_id,
             'sinopsis'          => $request->sinopsis,
@@ -533,9 +557,8 @@ class AdminController extends Controller
             return back()->with('error', "Buku tidak dapat dihapus karena masih memiliki {$activeLoans} transaksi peminjaman aktif.");
         }
 
-        if ($buku->cover && Storage::disk('public')->exists($buku->cover)) {
-            Storage::disk('public')->delete($buku->cover);
-        }
+        // Hapus berikut variannya, jangan hanya file aslinya.
+        app(CoverImageService::class)->delete($buku->cover);
 
         $bukuTitle = $buku->judul;
         $buku->delete();
@@ -896,6 +919,52 @@ class AdminController extends Controller
         }
         $penerbit->delete();
         return back()->with('success', 'Penerbit berhasil dihapus.');
+    }
+
+    public function kelasIndex(Request $request)
+    {
+        $query = Kelas::withCount('buku');
+
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where('nama_kelas', 'like', "%{$search}%");
+        }
+
+        $kelasList = $query->orderBy('nama_kelas', 'asc')->paginate(10)->withQueryString();
+        return view('admin.kelas.index', compact('kelasList'));
+    }
+
+    public function kelasStore(Request $request)
+    {
+        $request->validate([
+            'nama_kelas' => 'required|string|max:255',
+            'keterangan' => 'nullable|string|max:255',
+        ]);
+
+        Kelas::create($request->only('nama_kelas', 'keterangan'));
+        return back()->with('success', 'Kelas baru berhasil ditambahkan.');
+    }
+
+    public function kelasUpdate(Request $request, $id)
+    {
+        $kelas = Kelas::findOrFail($id);
+        $request->validate([
+            'nama_kelas' => 'required|string|max:255',
+            'keterangan' => 'nullable|string|max:255',
+        ]);
+
+        $kelas->update($request->only('nama_kelas', 'keterangan'));
+        return back()->with('success', 'Data kelas berhasil diperbarui.');
+    }
+
+    public function kelasDestroy($id)
+    {
+        $kelas = Kelas::withCount('buku')->findOrFail($id);
+        if ($kelas->buku_count > 0) {
+            return back()->with('error', 'Kelas tidak dapat dihapus karena masih terkait dengan ' . $kelas->buku_count . ' buku.');
+        }
+        $kelas->delete();
+        return back()->with('success', 'Kelas berhasil dihapus.');
     }
 
     public function rakIndex(Request $request)

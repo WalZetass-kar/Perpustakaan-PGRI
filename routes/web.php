@@ -37,6 +37,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         Route::get('/data-buku', [AdminController::class, 'dataBukuIndex'])->name('data-buku');
+        Route::get('/data-buku/rak/{rakId}', [AdminController::class, 'dataBukuByRak'])->name('data-buku.rak')->whereNumber('rakId');
         Route::get('/temukan-buku', [AdminController::class, 'temukanBukuIndex'])->name('temukan-buku');
 
         Route::get('/buku', [AdminController::class, 'bukuIndex'])->name('buku');
@@ -60,6 +61,11 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/penerbit', [AdminController::class, 'penerbitStore'])->name('penerbit.store');
         Route::post('/penerbit/update/{id}', [AdminController::class, 'penerbitUpdate'])->name('penerbit.update')->whereNumber('id');
         Route::post('/penerbit/delete/{id}', [AdminController::class, 'penerbitDestroy'])->name('penerbit.delete')->whereNumber('id');
+
+        Route::get('/kelas', [AdminController::class, 'kelasIndex'])->name('kelas');
+        Route::post('/kelas', [AdminController::class, 'kelasStore'])->name('kelas.store');
+        Route::post('/kelas/update/{id}', [AdminController::class, 'kelasUpdate'])->name('kelas.update')->whereNumber('id');
+        Route::post('/kelas/delete/{id}', [AdminController::class, 'kelasDestroy'])->name('kelas.delete')->whereNumber('id');
 
         Route::get('/rak', [AdminController::class, 'rakIndex'])->name('rak');
         Route::post('/rak', [AdminController::class, 'rakStore'])->name('rak.store');

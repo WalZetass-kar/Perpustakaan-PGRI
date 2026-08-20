@@ -23,3 +23,26 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# Simpan gambar & aset di cache browser supaya kunjungan berikutnya tidak
+# mengunduh ulang. Nama file cover dibuat acak dan isinya tidak pernah berubah
+# (mengganti cover menghasilkan nama baru), jadi aman disimpan lama.
+#
+# Catatan: blok ini hanya aktif di server Apache. Saat menjalankan
+# `php artisan serve` di komputer sendiri, file ini diabaikan -- jadi tidak
+# ada efek apa pun selama pengembangan.
+<IfModule mod_expires.c>
+    ExpiresActive On
+
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png  "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/gif  "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+
+    # CSS & JS disimpan lebih singkat karena bisa berubah saat aplikasi
+    # diperbarui, sedangkan namanya belum tentu ikut berganti.
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+</IfModule>

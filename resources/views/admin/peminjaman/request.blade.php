@@ -106,7 +106,7 @@
                                     <div class="flex items-center gap-2.5">
                                         <div class="w-9 h-12 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center">
                                             @if($req->buku->cover_url)
-                                                <img src="{{ $req->buku->cover_url }}" alt="Cover" class="w-full h-full object-cover">
+                                                <img src="{{ $req->buku->cover_thumb_url }}" alt="Cover" width="36" height="48" loading="lazy" class="w-full h-full object-cover">
                                             @else
                                                 <div class="w-full h-full bg-brand-700 text-white font-bold flex items-center justify-center text-xs">
                                                     {{ substr($req->buku->judul, 0, 1) }}

@@ -107,24 +107,73 @@
     }
 }" x-init="openAddModal = false; openEditModal = false; editData = {}" id="buku-container">
 
-    <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div>
-            <h2 class="text-sm font-black text-gray-900">Katalog Judul Buku & Stok Fisik</h2>
-            <p class="text-[11px] text-gray-500 mt-0.5">Kelola data buku, jumlah stok fisik, serta nomor rak dan laci penyimpanan</p>
+    <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm space-y-3">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-2 self-start sm:self-auto">
+                <button type="button" id="btn-toggle-filter-buku" onclick="toggleKoleksiBukuFilter()" class="w-9 h-9 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-600 flex items-center justify-center border border-gray-200 transition shrink-0" title="Sembunyikan/Tampilkan Pencarian & Filter" aria-label="Toggle Pencarian & Filter">
+                    <svg id="icon-toggle-filter-buku" class="w-3.5 h-3.5 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="flex items-center bg-gray-100 rounded-xl p-0.5 border border-gray-200 shrink-0">
+                    <button type="button" id="btn-view-grid-buku" onclick="setKoleksiBukuView('grid')"
+                            class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-gray-500 hover:text-gray-700" title="Tampilan Grid">
+                        <i class="fa-solid fa-grip text-[11px]"></i>
+                        <span class="hidden sm:inline">Grid</span>
+                    </button>
+                    <button type="button" id="btn-view-list-buku" onclick="setKoleksiBukuView('list')"
+                            class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white text-brand-700 shadow-xs border border-gray-200" title="Tampilan List">
+                        <i class="fa-solid fa-list text-[11px]"></i>
+                        <span class="hidden sm:inline">List</span>
+                    </button>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+                <a href="{{ route('admin.buku.export.excel') }}" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Export seluruh data buku ke format Excel">
+                    <i class="fa-solid fa-file-excel"></i>
+                    <span>Export Excel</span>
+                </a>
+                <a href="{{ route('admin.buku.export.pdf') }}" target="_blank" class="px-3.5 py-2 bg-rose-700 hover:bg-rose-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Cetak / Simpan Laporan PDF Resmi">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span>Cetak / PDF</span>
+                </a>
+                <button @click="addRakId = ''; addLaciId = ''; openAddModal = true" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-2 shrink-0">
+                    <i class="fa-solid fa-plus text-emerald-300"></i>
+                    <span>Tambah Buku</span>
+                </button>
+            </div>
         </div>
-        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
-            <a href="{{ route('admin.buku.export.excel') }}" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Export seluruh data buku ke format Excel">
-                <i class="fa-solid fa-file-excel"></i>
-                <span>Export Excel</span>
-            </a>
-            <a href="{{ route('admin.buku.export.pdf') }}" target="_blank" class="px-3.5 py-2 bg-rose-700 hover:bg-rose-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Cetak / Simpan Laporan PDF Resmi">
-                <i class="fa-solid fa-file-pdf"></i>
-                <span>Cetak / PDF</span>
-            </a>
-            <button @click="addRakId = ''; addLaciId = ''; openAddModal = true" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-2 shrink-0">
-                <i class="fa-solid fa-plus text-emerald-300"></i>
-                <span>Tambah Buku</span>
-            </button>
+
+        {{-- Pencarian & Filter Cepat (bisa disembunyikan) --}}
+        <div id="koleksi-buku-filter-wrap" class="pt-3 border-t border-gray-100">
+            <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 text-xs">
+                <div class="relative sm:col-span-1">
+                    <input type="text" id="search-buku" placeholder="Cari judul, ISBN, penulis..."
+                           class="w-full pl-8 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-900 focus:ring-1 focus:ring-brand-700 focus:bg-white focus:outline-none">
+                    <i class="fa-solid fa-magnifying-glass text-gray-400 text-xs absolute left-3 top-1/2 -translate-y-1/2"></i>
+                </div>
+                <select id="filter-kategori-buku" class="px-2.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:ring-1 focus:ring-brand-700 focus:outline-none font-medium">
+                    <option value="">Semua Kategori</option>
+                    @foreach($kategoriList as $kt)
+                        <option value="{{ $kt->id }}">{{ $kt->nama }}</option>
+                    @endforeach
+                </select>
+                <select id="filter-rak-buku" class="px-2.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:ring-1 focus:ring-brand-700 focus:outline-none font-medium">
+                    <option value="">Semua Rak</option>
+                    @foreach($rakList as $rk)
+                        <option value="{{ $rk->id }}">{{ $rk->kode_rak }} - {{ $rk->nama_rak }}</option>
+                    @endforeach
+                </select>
+                <select id="filter-kelas-buku" class="px-2.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:ring-1 focus:ring-brand-700 focus:outline-none font-medium">
+                    <option value="">Semua Kelas</option>
+                    @foreach($kelasList as $kl)
+                        <option value="{{ $kl->id }}">{{ $kl->nama_kelas }}</option>
+                    @endforeach
+                </select>
+                <select id="filter-status-buku" class="px-2.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:ring-1 focus:ring-brand-700 focus:outline-none font-medium">
+                    <option value="">Semua Status Stok</option>
+                    <option value="tersedia">Tersedia</option>
+                    <option value="habis">Stok Habis</option>
+                </select>
+            </div>
         </div>
     </div>
 
@@ -222,7 +271,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-2.5">
+                <div class="grid grid-cols-2 gap-2.5">
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Kategori Buku</label>
                         <select name="kategori_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
@@ -232,6 +281,18 @@
                             @endforeach
                         </select>
                     </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Kelas</label>
+                        <select name="kelas_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                            <option value="">-- Pilih Kelas --</option>
+                            @foreach($kelasList as $kl)
+                                <option value="{{ $kl->id }}">{{ $kl->nama_kelas }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Lokasi Rak</label>
                         <select name="rak_id" x-model="addRakId" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
@@ -351,7 +412,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-2.5">
+                <div class="grid grid-cols-2 gap-2.5">
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Kategori Buku</label>
                         <select name="kategori_id" x-model="editData.kategori_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
@@ -361,6 +422,18 @@
                             @endforeach
                         </select>
                     </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Kelas</label>
+                        <select name="kelas_id" x-model="editData.kelas_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                            <option value="">-- Pilih Kelas --</option>
+                            @foreach($kelasList as $kl)
+                                <option value="{{ $kl->id }}">{{ $kl->nama_kelas }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Lokasi Rak</label>
                         <select name="rak_id" x-model="editRakId" @change="editData.rak_id = editRakId" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
@@ -427,7 +500,13 @@
             serverSide: true,
             ajax: {
                 url: "{{ route('admin.buku') }}",
-                type: "GET"
+                type: "GET",
+                data: function(d) {
+                    d.kategori_id = $('#filter-kategori-buku').val();
+                    d.rak_id = $('#filter-rak-buku').val();
+                    d.kelas_id = $('#filter-kelas-buku').val();
+                    d.status_stok = $('#filter-status-buku').val();
+                }
             },
             columns: [
                 { data: 'buku', name: 'judul', orderable: true, searchable: true },
@@ -439,10 +518,9 @@
             order: [[0, 'asc']],
             pageLength: 10,
             lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+            dom: 'lrtip',
             language: {
                 processing: '<div class="py-4 text-center text-xs font-bold text-brand-700 flex items-center justify-center gap-2"><i class="fa-solid fa-spinner fa-spin text-sm"></i> Memuat data koleksi...</div>',
-                search: '',
-                searchPlaceholder: 'Cari judul, ISBN, penulis...',
                 lengthMenu: 'Tampilkan _MENU_ data',
                 info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ buku',
                 infoEmpty: 'Menampilkan 0 sampai 0 dari 0 buku',
@@ -457,10 +535,122 @@
             }
         });
 
+        // Sisipkan container Grid tepat setelah <table> (di dalam wrapper DataTables)
+        // supaya length/search/info/pagination bawaan DataTables tetap terlihat di mode Grid.
+        $('#tabel-buku').after('<div id="grid-buku-container" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4"></div>');
+
+        function escapeHtml(str) {
+            return $('<div>').text(str ?? '').html();
+        }
+
+        function buildBookCard(row) {
+            const stokOk = row.available_quantity > 0;
+            const stokClass = stokOk ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200';
+            const coverInner = row.cover_url
+                ? '<img src="' + row.cover_url + '" alt="' + escapeHtml(row.judul_raw) + '" width="300" height="176" loading="lazy" class="w-full h-full object-cover">'
+                : '<div class="w-full h-full bg-gradient-to-br from-brand-900 via-brand-800 to-red-950 text-white flex items-center justify-center"><i class="fa-solid fa-book text-3xl opacity-30"></i></div>';
+            const kelasBadge = row.kelas_nama
+                ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-black bg-amber-50 text-amber-700 border border-amber-200">' + escapeHtml(row.kelas_nama) + '</span>'
+                : '';
+
+            return '<div class="bg-white rounded-2xl border-2 border-gray-200 hover:border-brand-300 hover:shadow-md transition duration-200 overflow-hidden flex flex-col">'
+                + '<div class="relative w-full h-44 bg-gray-100 overflow-hidden">'
+                +     coverInner
+                +     '<div class="absolute top-2 right-2 bg-white/95 rounded-lg shadow-sm">' + row.aksi + '</div>'
+                + '</div>'
+                + '<div class="p-3.5 flex-1 flex flex-col justify-between gap-2.5 text-xs">'
+                +   '<div>'
+                +     '<h3 class="font-extrabold text-gray-900 line-clamp-2 leading-snug">' + escapeHtml(row.judul_raw) + '</h3>'
+                +     '<p class="text-[11px] text-gray-500 truncate mt-0.5">' + escapeHtml(row.penulis_nama) + '</p>'
+                +   '</div>'
+                +   '<div class="flex flex-wrap gap-1">'
+                +     '<span class="px-2 py-0.5 rounded-md text-[10px] font-black bg-brand-50 text-brand-700 border border-brand-200">' + escapeHtml(row.kategori_nama) + '</span>'
+                +     kelasBadge
+                +   '</div>'
+                +   '<div class="pt-2 border-t border-gray-100 flex items-center justify-between text-[10.5px]">'
+                +     '<span class="font-mono font-bold text-gray-600 truncate max-w-[60%]">' + escapeHtml(row.rak_text) + '</span>'
+                +     '<span class="px-2 py-0.5 rounded-md text-[10px] font-black border ' + stokClass + '">' + row.available_quantity + '/' + row.total_quantity + ' Eks</span>'
+                +   '</div>'
+                + '</div>'
+            + '</div>';
+        }
+
+        // Setiap DataTables selesai fetch data, rebuild kartu Grid dari data yang sama (tanpa request tambahan)
+        $('#tabel-buku').on('xhr.dt', function(e, settings, json) {
+            if (!json || !Array.isArray(json.data)) return;
+            const $grid = $('#grid-buku-container');
+            if (json.data.length === 0) {
+                $grid.html('<div class="col-span-full py-14 text-center text-gray-400"><i class="fa-solid fa-book-open text-2xl mb-2 block"></i><p class="text-xs font-bold text-gray-700">Tidak ditemukan data buku yang sesuai</p></div>');
+                return;
+            }
+            $grid.html(json.data.map(buildBookCard).join(''));
+            if (window.Alpine) {
+                window.Alpine.initTree($grid.get(0));
+            }
+        });
+
+        // Filter cepat: Kategori / Rak / Kelas / Status Stok
+        $('#filter-kategori-buku, #filter-rak-buku, #filter-kelas-buku, #filter-status-buku').on('change', function() {
+            tabelBuku.draw();
+        });
+
+        // Kotak pencarian kustom (menggantikan search box bawaan DataTables)
+        let searchDebounce;
+        $('#search-buku').on('input', function() {
+            clearTimeout(searchDebounce);
+            const val = $(this).val();
+            searchDebounce = setTimeout(function() {
+                tabelBuku.search(val).draw();
+            }, 350);
+        });
+
+        // Toggle sembunyikan/tampilkan seluruh kotak Pencarian & Filter
+        window.toggleKoleksiBukuFilter = function() {
+            const wrap = document.getElementById('koleksi-buku-filter-wrap');
+            const isHidden = wrap.classList.toggle('hidden');
+            localStorage.setItem('bukuFilterOpen', isHidden ? 'false' : 'true');
+            document.getElementById('icon-toggle-filter-buku').classList.toggle('rotate-180', isHidden);
+        };
+
+        const filterOpen = localStorage.getItem('bukuFilterOpen') !== 'false';
+        if (!filterOpen) {
+            document.getElementById('koleksi-buku-filter-wrap').classList.add('hidden');
+            document.getElementById('icon-toggle-filter-buku').classList.add('rotate-180');
+        }
+
+        // Toggle tampilan Grid / List
+        window.setKoleksiBukuView = function(mode) {
+            localStorage.setItem('koleksiBukuView', mode);
+            const btnGrid = document.getElementById('btn-view-grid-buku');
+            const btnList = document.getElementById('btn-view-list-buku');
+            const activeClass = ['bg-white', 'text-brand-700', 'shadow-xs', 'border', 'border-gray-200'];
+            const inactiveClass = ['text-gray-500'];
+
+            if (mode === 'grid') {
+                $('#tabel-buku').addClass('hidden');
+                $('#grid-buku-container').removeClass('hidden');
+                btnGrid.classList.add(...activeClass);
+                btnGrid.classList.remove(...inactiveClass);
+                btnList.classList.remove(...activeClass);
+                btnList.classList.add(...inactiveClass);
+            } else {
+                $('#tabel-buku').removeClass('hidden');
+                $('#grid-buku-container').addClass('hidden');
+                btnList.classList.add(...activeClass);
+                btnList.classList.remove(...inactiveClass);
+                btnGrid.classList.remove(...activeClass);
+                btnGrid.classList.add(...inactiveClass);
+            }
+        };
+
+        const savedView = localStorage.getItem('koleksiBukuView') || 'list';
+        setKoleksiBukuView(savedView);
+
         // Baca ?search= dari URL dan langsung filter DataTable
         const urlParams = new URLSearchParams(window.location.search);
         const searchQuery = urlParams.get('search');
         if (searchQuery && searchQuery.trim() !== '') {
+            $('#search-buku').val(searchQuery.trim());
             tabelBuku.search(searchQuery.trim()).draw();
 
             // Tampilkan banner notifikasi filter aktif
@@ -474,6 +664,7 @@
 
         // Tombol reset filter banner
         $(document).on('click', '#btn-reset-search-filter', function() {
+            $('#search-buku').val('');
             tabelBuku.search('').draw();
             document.getElementById('search-filter-banner').classList.add('hidden');
             // Bersihkan ?search= dari URL tanpa reload halaman

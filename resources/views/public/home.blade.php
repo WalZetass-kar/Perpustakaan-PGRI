@@ -96,7 +96,7 @@
                                                 <a :href="item.detail_url" class="p-2.5 rounded-xl hover:bg-brand-50/70 transition flex items-center gap-3 group border border-transparent hover:border-brand-200">
                                                     <div class="w-10 h-14 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center shadow-xs">
                                                         <template x-if="item.cover_url">
-                                                            <img :src="item.cover_url" class="w-full h-full object-cover">
+                                                            <img :src="item.cover_url" width="40" height="56" loading="lazy" class="w-full h-full object-cover">
                                                         </template>
                                                         <template x-if="!item.cover_url">
                                                             <div class="w-full h-full bg-brand-700 text-white font-black text-xs flex items-center justify-center" x-text="item.judul.substr(0, 1)"></div>
@@ -241,7 +241,7 @@
                         <div class="flex gap-4 items-start">
                             <div class="w-20 h-28 bg-gradient-to-br from-brand-900 via-brand-800 to-red-950 text-white font-black rounded-2xl flex items-center justify-center shrink-0 shadow-md group-hover:scale-105 transition duration-300 border border-brand-700 overflow-hidden relative">
                                 @if($buku->cover_url)
-                                    <img src="{{ $buku->cover_url }}" alt="{{ $buku->judul }}" class="w-full h-full object-cover">
+                                    <img src="{{ $buku->cover_thumb_url }}" alt="{{ $buku->judul }}" width="80" height="112" loading="lazy" class="w-full h-full object-cover">
                                 @else
                                     <div class="w-full h-full p-2 border-l-[3px] border-amber-400/50 flex flex-col justify-between select-none relative overflow-hidden text-center">
                                         <span class="text-[6.5px] font-black text-amber-300/90 uppercase tracking-wider">{{ substr($buku->kategori->nama ?? 'Buku', 0, 8) }}</span>

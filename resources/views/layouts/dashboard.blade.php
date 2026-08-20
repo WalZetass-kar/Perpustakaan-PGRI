@@ -72,7 +72,7 @@
                   localStorage.setItem('sidebar_collapsed', this.sidebarCollapsed);
               }
           },
-          openManageBuku: {{ request()->routeIs('admin.buku*', 'admin.data-buku*', 'admin.kategori*', 'admin.penulis*', 'admin.penerbit*', 'admin.rak*') ? 'true' : 'false' }},
+          openManageBuku: {{ request()->routeIs('admin.buku*', 'admin.data-buku*', 'admin.kategori*', 'admin.penulis*', 'admin.penerbit*', 'admin.kelas*', 'admin.rak*') ? 'true' : 'false' }},
           openSirkulasi: {{ request()->routeIs('admin.peminjaman*', 'admin.riwayat*') ? 'true' : 'false' }},
           openAdmin: {{ request()->routeIs('admin.anggota*', 'admin.pengaturan*', 'admin.audit-log*') ? 'true' : 'false' }}
       }">
@@ -223,6 +223,12 @@
                                :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
                                 <svg class="w-4 h-4 text-brand-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                                 <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Penerbit</span>
+                            </a>
+                            <a href="{{ route('admin.kelas') }}" title="Kelas"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.kelas*') ? 'bg-brand-50 text-brand-700 border-brand-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"
+                               :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
+                                <svg class="w-4 h-4 text-brand-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422A12.083 12.083 0 0121 13c0 3.866-3.582 7-8 7s-8-3.134-8-7a12.083 12.083 0 012.84-2.422L12 14z"/></svg>
+                                <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Kelas</span>
                             </a>
                             <a href="{{ route('admin.rak') }}" title="Rak &amp; Laci Buku"
                                class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.rak*') ? 'bg-brand-50 text-brand-700 border-brand-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"
