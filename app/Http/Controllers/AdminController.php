@@ -576,13 +576,16 @@ class AdminController extends Controller
 
     public function bukuExportExcel(Request $request)
     {
-        $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci']);
+        $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci', 'kelas']);
 
         if ($request->filled('kategori_id')) {
             $query->where('kategori_id', $request->kategori_id);
         }
         if ($request->filled('rak_id')) {
             $query->where('rak_id', $request->rak_id);
+        }
+        if ($request->filled('kelas_id')) {
+            $query->where('kelas_id', $request->kelas_id);
         }
 
         $bukuItems = $query->orderBy('judul', 'asc')->get();
@@ -620,7 +623,7 @@ class AdminController extends Controller
         <x:ExcelWorkbook>
             <x:ExcelWorksheets>
                 <x:ExcelWorksheet>
-                    <x:Name>Data Buku Perpustakaan</x:Name>
+                    <x:Name>Data Koleksi Buku</x:Name>
                     <x:WorksheetOptions>
                         <x:DisplayGridlines/>
                     </x:WorksheetOptions>
@@ -630,21 +633,42 @@ class AdminController extends Controller
     </xml>
     <![endif]-->
     <style>
-        body { font-family: "Calibri", "Segoe UI", Arial, sans-serif; font-size: 11pt; color: #1e293b; }
+        body { font-family: "Segoe UI", Calibri, Arial, sans-serif; font-size: 10pt; color: #0f172a; margin: 0; padding: 0; }
         .text-center { text-align: center; }
         .text-right { text-align: right; }
         .text-left { text-align: left; }
         .font-bold { font-weight: bold; }
-        .title-main { font-size: 16pt; font-weight: bold; color: #881337; }
-        .title-sub { font-size: 11pt; color: #475569; }
-        .stat-label { background-color: #f1f5f9; font-weight: bold; }
-        .stat-value { font-weight: bold; color: #0f172a; }
+        
+        .banner-top { background-color: #881337; color: #ffffff; font-size: 15pt; font-weight: bold; text-align: center; height: 38px; vertical-align: middle; border: 2pt solid #4c0519; }
+        .banner-sub { background-color: #9f1239; color: #ffe4e6; font-size: 9.5pt; font-weight: bold; text-align: center; height: 22px; vertical-align: middle; }
+        .banner-ribbon { background-color: #b45309; height: 4px; }
+        .banner-title { background-color: #f8fafc; color: #0f172a; font-size: 12.5pt; font-weight: bold; text-align: center; height: 32px; vertical-align: middle; border-bottom: 2pt solid #881337; }
+        
+        .kpi-head-blue { background-color: #eff6ff; color: #1e40af; border: 1pt solid #93c5fd; font-size: 8pt; font-weight: bold; text-align: center; height: 20px; }
+        .kpi-val-blue { background-color: #ffffff; color: #1e3a8a; border: 1pt solid #93c5fd; font-size: 13pt; font-weight: bold; text-align: center; height: 28px; }
+        
+        .kpi-head-purple { background-color: #f5f3ff; color: #5b21b6; border: 1pt solid #c4b5fd; font-size: 8pt; font-weight: bold; text-align: center; height: 20px; }
+        .kpi-val-purple { background-color: #ffffff; color: #4c1d95; border: 1pt solid #c4b5fd; font-size: 13pt; font-weight: bold; text-align: center; height: 28px; }
+        
+        .kpi-head-green { background-color: #ecfdf5; color: #065f46; border: 1pt solid #a7f3d0; font-size: 8pt; font-weight: bold; text-align: center; height: 20px; }
+        .kpi-val-green { background-color: #f0fdf4; color: #047857; border: 1pt solid #a7f3d0; font-size: 13pt; font-weight: bold; text-align: center; height: 28px; }
+        
+        .kpi-head-amber { background-color: #fffbeb; color: #92400e; border: 1pt solid #fde68a; font-size: 8pt; font-weight: bold; text-align: center; height: 20px; }
+        .kpi-val-amber { background-color: #fefce8; color: #b45309; border: 1pt solid #fde68a; font-size: 13pt; font-weight: bold; text-align: center; height: 28px; }
+        
+        .meta-strip { background-color: #f1f5f9; color: #475569; font-size: 8.5pt; padding: 6px 10px; border: 0.5pt solid #cbd5e1; height: 24px; vertical-align: middle; }
+        
         .table-data { border-collapse: collapse; width: 100%; }
-        .table-data th { background-color: #881337; color: #ffffff; font-weight: bold; text-align: center; border: 1px solid #6b0c2a; padding: 8px 6px; font-size: 10pt; }
-        .table-data td { border: 1px solid #cbd5e1; padding: 6px; font-size: 10pt; vertical-align: top; }
+        .table-data th { background-color: #881337; color: #ffffff; font-weight: bold; text-align: center; border: 1.5pt solid #4c0519; padding: 8px 5px; font-size: 9pt; height: 28px; vertical-align: middle; text-transform: uppercase; }
+        .table-data td { border: 0.5pt solid #cbd5e1; padding: 6px 5px; font-size: 9pt; vertical-align: middle; }
         .row-even { background-color: #f8fafc; }
-        .badge-tersedia { background-color: #ecfdf5; color: #065f46; font-weight: bold; }
-        .badge-habis { background-color: #fff1f2; color: #9f1239; font-weight: bold; }
+        
+        .badge-tersedia { background-color: #ecfdf5; color: #065f46; font-weight: bold; border: 1pt solid #a7f3d0; text-align: center; }
+        .badge-habis { background-color: #fff1f2; color: #9f1239; font-weight: bold; border: 1pt solid #fecdd3; text-align: center; }
+        .badge-tag { background-color: #f1f5f9; color: #334155; font-weight: 600; border: 0.5pt solid #cbd5e1; text-align: center; }
+        
+        .row-total { background-color: #e2e8f0; font-weight: bold; border-top: 2pt solid #881337; border-bottom: 2pt solid #881337; height: 26px; vertical-align: middle; }
+        
         .mso-text { mso-number-format:"\@"; }
         .mso-num { mso-number-format:"\#\,\#\#0"; }
     </style>
@@ -652,34 +676,37 @@ class AdminController extends Controller
 <body>
     <table>
         <tr>
-            <td colspan="12" class="text-center title-main">' . strtoupper(e($namaPerpus)) . '</td>
+            <td colspan="12" class="banner-top">' . strtoupper(e($namaPerpus)) . '</td>
         </tr>
         <tr>
-            <td colspan="12" class="text-center title-sub">' . e($namaSekolah) . ' | NPSN: ' . e($npsn) . ' | ' . e($alamat) . '</td>
+            <td colspan="12" class="banner-sub">' . strtoupper(e($namaSekolah)) . ' &bull; NPSN: ' . e($npsn) . ' &bull; ' . e($alamat) . '</td>
         </tr>
         <tr>
-            <td colspan="12" class="text-center" style="font-size: 13pt; font-weight: bold; color: #0f172a; padding-top: 8px; padding-bottom: 12px;">
-                LAPORAN INVENTARIS DATA BUKU &amp; KOLEKSI PERPUSTAKAAN
+            <td colspan="12" class="banner-ribbon"></td>
+        </tr>
+        <tr>
+            <td colspan="12" class="banner-title">
+                LAPORAN DATA INVENTARIS BUKU &amp; KOLEKSI PERPUSTAKAAN
             </td>
         </tr>
         <tr><td colspan="12"></td></tr>
+        
         <tr>
-            <td colspan="2" class="stat-label">Tanggal Cetak</td>
-            <td colspan="3" class="stat-value">' . $tanggalCetak . ' WIB</td>
-            <td colspan="2" class="stat-label">Total Judul Buku</td>
-            <td colspan="5" class="stat-value mso-num">' . number_format($totalJudul, 0, ',', '.') . ' Judul</td>
+            <td colspan="3" class="kpi-head-blue">TOTAL JUDUL BUKU</td>
+            <td colspan="3" class="kpi-head-purple">TOTAL EKSEMPLAR FISIK</td>
+            <td colspan="3" class="kpi-head-green">TERSEDIA DI RAK</td>
+            <td colspan="3" class="kpi-head-amber">SEDANG DIPINJAM</td>
         </tr>
         <tr>
-            <td colspan="2" class="stat-label">Petugas Pencetak</td>
-            <td colspan="3" class="stat-value">' . e($namaPetugas) . '</td>
-            <td colspan="2" class="stat-label">Total Eksemplar Fisik</td>
-            <td colspan="5" class="stat-value mso-num">' . number_format($totalEksemplar, 0, ',', '.') . ' Eksemplar</td>
+            <td colspan="3" class="kpi-val-blue mso-num">' . number_format($totalJudul, 0, ',', '.') . ' Judul</td>
+            <td colspan="3" class="kpi-val-purple mso-num">' . number_format($totalEksemplar, 0, ',', '.') . ' Eksemplar</td>
+            <td colspan="3" class="kpi-val-green mso-num">' . number_format($totalTersedia, 0, ',', '.') . ' Eksemplar</td>
+            <td colspan="3" class="kpi-val-amber mso-num">' . number_format($totalDipinjam, 0, ',', '.') . ' Eksemplar</td>
         </tr>
         <tr>
-            <td colspan="2" class="stat-label">Status Koleksi</td>
-            <td colspan="3" class="stat-value">Resmi Terverifikasi Sistem</td>
-            <td colspan="2" class="stat-label">Tersedia / Dipinjam</td>
-            <td colspan="5" class="stat-value">' . number_format($totalTersedia, 0, ',', '.') . ' Tersedia / ' . number_format($totalDipinjam, 0, ',', '.') . ' Dipinjam</td>
+            <td colspan="12" class="meta-strip">
+                <strong>Informasi Ekspor:</strong> Dicetak pada ' . $tanggalCetak . ' WIB | Petugas Pencetak: <strong>' . e($namaPetugas) . '</strong> | Status: <strong>Resmi Terverifikasi Sistem Perpustakaan</strong>
+            </td>
         </tr>
         <tr><td colspan="12"></td></tr>
     </table>
@@ -687,18 +714,18 @@ class AdminController extends Controller
     <table class="table-data">
         <thead>
             <tr>
-                <th style="width: 35px;">No</th>
-                <th style="width: 250px;">Judul Buku</th>
-                <th style="width: 120px;">ISBN</th>
-                <th style="width: 150px;">Penulis / Pengarang</th>
-                <th style="width: 140px;">Penerbit</th>
-                <th style="width: 60px;">Tahun</th>
-                <th style="width: 120px;">Kategori</th>
-                <th style="width: 120px;">Lokasi Rak</th>
-                <th style="width: 100px;">Laci Rak</th>
+                <th style="width: 32px;">No</th>
+                <th style="width: 260px;">Judul Buku</th>
+                <th style="width: 110px;">ISBN</th>
+                <th style="width: 140px;">Penulis</th>
+                <th style="width: 130px;">Penerbit</th>
+                <th style="width: 50px;">Thn</th>
+                <th style="width: 100px;">Kategori</th>
+                <th style="width: 80px;">Kelas</th>
+                <th style="width: 130px;">Lokasi Rak &amp; Laci</th>
                 <th style="width: 70px;">Total</th>
-                <th style="width: 70px;">Tersedia</th>
-                <th style="width: 90px;">Status</th>
+                <th style="width: 70px;">Ada</th>
+                <th style="width: 95px;">Status</th>
             </tr>
         </thead>
         <tbody>';
@@ -709,24 +736,38 @@ class AdminController extends Controller
             $total = (int) $buku->total_quantity;
             $statusText = ($tersedia > 0) ? 'Tersedia' : 'Habis Dipinjam';
             $statusClass = ($tersedia > 0) ? 'badge-tersedia' : 'badge-habis';
-            $rakName = $buku->rak ? ($buku->rak->kode_rak . ' - ' . $buku->rak->nama_rak) : 'Tanpa Rak';
+            $rakName = $buku->rak ? ($buku->rak->kode_rak) : '-';
             $laciName = $buku->laci ? $buku->laci->nama_laci : ($buku->rak ? 'Laci 1' : '-');
+            $kelasName = $buku->kelas ? $buku->kelas->nama_kelas : '-';
 
             $html .= '<tr' . $rowClass . '>
-                <td class="text-center">' . ($idx + 1) . '</td>
-                <td class="text-left font-bold">' . e($buku->judul) . '</td>
-                <td class="text-center mso-text">' . e($buku->isbn ?? '-') . '</td>
+                <td class="text-center font-bold" style="color: #64748b;">' . ($idx + 1) . '</td>
+                <td class="text-left font-bold" style="color: #0f172a;">' . e($buku->judul) . '</td>
+                <td class="text-center mso-text" style="font-family: monospace; font-size: 8.5pt;">' . e($buku->isbn ?? '-') . '</td>
                 <td class="text-left">' . e($buku->penulis->nama ?? '-') . '</td>
                 <td class="text-left">' . e($buku->penerbit->nama ?? '-') . '</td>
                 <td class="text-center mso-text">' . e($buku->tahun_terbit ?? '-') . '</td>
-                <td class="text-left">' . e($buku->kategori->nama ?? 'Umum') . '</td>
-                <td class="text-left">' . e($rakName) . '</td>
-                <td class="text-left">' . e($laciName) . '</td>
+                <td class="badge-tag">' . e($buku->kategori->nama ?? 'Umum') . '</td>
+                <td class="text-center">' . e($kelasName) . '</td>
+                <td class="text-left">
+                    <strong style="color: #881337;">' . e($rakName) . '</strong> (' . e($laciName) . ')
+                </td>
                 <td class="text-center font-bold mso-num">' . $total . '</td>
-                <td class="text-center font-bold mso-num" style="color: ' . ($tersedia > 0 ? '#059669' : '#dc2626') . ';">' . $tersedia . '</td>
-                <td class="text-center ' . $statusClass . '">' . $statusText . '</td>
+                <td class="text-center font-bold mso-num" style="color: ' . ($tersedia > 0 ? '#047857' : '#dc2626') . ';">' . $tersedia . '</td>
+                <td class="' . $statusClass . '">' . $statusText . '</td>
             </tr>';
         }
+
+        $readyPercent = ($totalEksemplar > 0) ? round(($totalTersedia / $totalEksemplar) * 100) : 100;
+
+        $html .= '<tr class="row-total">
+            <td colspan="9" class="text-center font-bold" style="font-size: 9.5pt; color: #0f172a;">
+                TOTAL REKAPITULASI INVENTARIS PERPUSTAKAAN (' . $totalJudul . ' JUDUL)
+            </td>
+            <td class="text-center font-bold mso-num" style="font-size: 10pt;">' . $totalEksemplar . '</td>
+            <td class="text-center font-bold mso-num" style="font-size: 10pt; color: #047857;">' . $totalTersedia . '</td>
+            <td class="text-center font-bold" style="color: #065f46; font-size: 8.5pt;">' . $readyPercent . '% Tersedia</td>
+        </tr>';
 
         $html .= '</tbody>
     </table>
@@ -735,8 +776,14 @@ class AdminController extends Controller
         <tr><td colspan="12"></td></tr>
         <tr><td colspan="12"></td></tr>
         <tr>
-            <td colspan="7"></td>
-            <td colspan="5" class="text-center" style="font-size: 10pt;">
+            <td colspan="1"></td>
+            <td colspan="4" class="text-center" style="font-size: 9.5pt; vertical-align: top;">
+                Petugas Administrasi Perpustakaan,<br/><br/><br/><br/>
+                <strong><u>' . e($namaPetugas) . '</u></strong><br/>
+                Admin Sirkulasi
+            </td>
+            <td colspan="2"></td>
+            <td colspan="5" class="text-center" style="font-size: 9.5pt; vertical-align: top;">
                 Pekanbaru, ' . date('d F Y') . '<br/>
                 Mengetahui,<br/>
                 <strong>Kepala Perpustakaan</strong><br/><br/><br/><br/>
@@ -1409,21 +1456,41 @@ class AdminController extends Controller
     </xml>
     <![endif]-->
     <style>
-        body { font-family: "Calibri", "Segoe UI", Arial, sans-serif; font-size: 10pt; color: #1e293b; }
+        body { font-family: "Segoe UI", Calibri, Arial, sans-serif; font-size: 10pt; color: #0f172a; margin: 0; padding: 0; }
         .text-center { text-align: center; }
         .text-right { text-align: right; }
         .text-left { text-align: left; }
         .font-bold { font-weight: bold; }
-        .title-main { font-size: 15pt; font-weight: bold; color: #881337; }
-        .title-sub { font-size: 10pt; color: #475569; }
-        .stat-label { background-color: #f1f5f9; font-weight: bold; }
-        .stat-value { font-weight: bold; color: #0f172a; }
+        
+        .banner-top { background-color: #881337; color: #ffffff; font-size: 15pt; font-weight: bold; text-align: center; height: 38px; vertical-align: middle; border: 2pt solid #4c0519; }
+        .banner-sub { background-color: #9f1239; color: #ffe4e6; font-size: 9.5pt; font-weight: bold; text-align: center; height: 22px; vertical-align: middle; }
+        .banner-ribbon { background-color: #b45309; height: 4px; }
+        .banner-title { background-color: #f8fafc; color: #0f172a; font-size: 12.5pt; font-weight: bold; text-align: center; height: 32px; vertical-align: middle; border-bottom: 2pt solid #881337; }
+        
+        .kpi-head-blue { background-color: #eff6ff; color: #1e40af; border: 1pt solid #93c5fd; font-size: 8pt; font-weight: bold; text-align: center; height: 20px; }
+        .kpi-val-blue { background-color: #ffffff; color: #1e3a8a; border: 1pt solid #93c5fd; font-size: 13pt; font-weight: bold; text-align: center; height: 28px; }
+        
+        .kpi-head-amber { background-color: #fffbeb; color: #92400e; border: 1pt solid #fde68a; font-size: 8pt; font-weight: bold; text-align: center; height: 20px; }
+        .kpi-val-amber { background-color: #fefce8; color: #b45309; border: 1pt solid #fde68a; font-size: 13pt; font-weight: bold; text-align: center; height: 28px; }
+        
+        .kpi-head-green { background-color: #ecfdf5; color: #065f46; border: 1pt solid #a7f3d0; font-size: 8pt; font-weight: bold; text-align: center; height: 20px; }
+        .kpi-val-green { background-color: #f0fdf4; color: #047857; border: 1pt solid #a7f3d0; font-size: 13pt; font-weight: bold; text-align: center; height: 28px; }
+        
+        .kpi-head-purple { background-color: #f5f3ff; color: #5b21b6; border: 1pt solid #c4b5fd; font-size: 8pt; font-weight: bold; text-align: center; height: 20px; }
+        .kpi-val-purple { background-color: #ffffff; color: #4c1d95; border: 1pt solid #c4b5fd; font-size: 13pt; font-weight: bold; text-align: center; height: 28px; }
+        
+        .meta-strip { background-color: #f1f5f9; color: #475569; font-size: 8.5pt; padding: 6px 10px; border: 0.5pt solid #cbd5e1; height: 24px; vertical-align: middle; }
+        
         .table-data { border-collapse: collapse; width: 100%; }
-        .table-data th { background-color: #881337; color: #ffffff; font-weight: bold; text-align: center; border: 1px solid #6b0c2a; padding: 7px 5px; font-size: 9pt; }
-        .table-data td { border: 1px solid #cbd5e1; padding: 5px; font-size: 9pt; vertical-align: middle; }
+        .table-data th { background-color: #881337; color: #ffffff; font-weight: bold; text-align: center; border: 1.5pt solid #4c0519; padding: 8px 5px; font-size: 9pt; height: 28px; vertical-align: middle; text-transform: uppercase; }
+        .table-data td { border: 0.5pt solid #cbd5e1; padding: 6px 5px; font-size: 9pt; vertical-align: middle; }
         .row-even { background-color: #f8fafc; }
-        .badge-kembali { background-color: #ecfdf5; color: #065f46; font-weight: bold; }
-        .badge-dipinjam { background-color: #fffbeb; color: #92400e; font-weight: bold; }
+        
+        .badge-kembali { background-color: #ecfdf5; color: #065f46; font-weight: bold; border: 1pt solid #a7f3d0; text-align: center; }
+        .badge-dipinjam { background-color: #fffbeb; color: #92400e; font-weight: bold; border: 1pt solid #fde68a; text-align: center; }
+        
+        .row-total { background-color: #e2e8f0; font-weight: bold; border-top: 2pt solid #881337; border-bottom: 2pt solid #881337; height: 26px; vertical-align: middle; }
+        
         .mso-text { mso-number-format:"\@"; }
         .mso-num { mso-number-format:"\#\,\#\#0"; }
     </style>
@@ -1431,34 +1498,37 @@ class AdminController extends Controller
 <body>
     <table>
         <tr>
-            <td colspan="10" class="text-center title-main">' . strtoupper(e($namaPerpus)) . '</td>
+            <td colspan="10" class="banner-top">' . strtoupper(e($namaPerpus)) . '</td>
         </tr>
         <tr>
-            <td colspan="10" class="text-center title-sub">' . e($namaSekolah) . ' | NPSN: ' . e($npsn) . ' | ' . e($alamat) . '</td>
+            <td colspan="10" class="banner-sub">' . strtoupper(e($namaSekolah)) . ' &bull; NPSN: ' . e($npsn) . ' &bull; ' . e($alamat) . '</td>
         </tr>
         <tr>
-            <td colspan="10" class="text-center" style="font-size: 12pt; font-weight: bold; color: #0f172a; padding-top: 6px; padding-bottom: 10px;">
+            <td colspan="10" class="banner-ribbon"></td>
+        </tr>
+        <tr>
+            <td colspan="10" class="banner-title">
                 LAPORAN REKAPITULASI SIRKULASI PEMINJAMAN &amp; PENGEMBALIAN BUKU
             </td>
         </tr>
         <tr><td colspan="10"></td></tr>
+        
         <tr>
-            <td colspan="2" class="stat-label">Tanggal Cetak</td>
-            <td colspan="3" class="stat-value">' . $tanggalCetak . ' WIB</td>
-            <td colspan="2" class="stat-label">Total Transaksi</td>
-            <td colspan="3" class="stat-value mso-num">' . number_format($totalTransaksi, 0, ',', '.') . ' Transaksi</td>
+            <td colspan="3" class="kpi-head-blue">TOTAL TRANSAKSI SIRKULASI</td>
+            <td colspan="2" class="kpi-head-amber">SEDANG DIPINJAM</td>
+            <td colspan="2" class="kpi-head-green">SUDAH DIKEMBALIKAN</td>
+            <td colspan="3" class="kpi-head-purple">TOTAL BUKU TERLIBAT</td>
         </tr>
         <tr>
-            <td colspan="2" class="stat-label">Petugas Pencetak</td>
-            <td colspan="3" class="stat-value">' . e($namaPetugas) . '</td>
-            <td colspan="2" class="stat-label">Sedang Dipinjam</td>
-            <td colspan="3" class="stat-value mso-num">' . number_format($totalDipinjam, 0, ',', '.') . ' Transaksi (' . $totalBukuPinjam . ' Buku)</td>
+            <td colspan="3" class="kpi-val-blue mso-num">' . number_format($totalTransaksi, 0, ',', '.') . ' Transaksi</td>
+            <td colspan="2" class="kpi-val-amber mso-num">' . number_format($totalDipinjam, 0, ',', '.') . ' Transaksi</td>
+            <td colspan="2" class="kpi-val-green mso-num">' . number_format($totalKembali, 0, ',', '.') . ' Transaksi</td>
+            <td colspan="3" class="kpi-val-purple mso-num">' . number_format($totalBukuPinjam, 0, ',', '.') . ' Buku</td>
         </tr>
         <tr>
-            <td colspan="2" class="stat-label">Status Arsip</td>
-            <td colspan="3" class="stat-value">Resmi Terverifikasi Sistem</td>
-            <td colspan="2" class="stat-label">Sudah Dikembalikan</td>
-            <td colspan="3" class="stat-value mso-num">' . number_format($totalKembali, 0, ',', '.') . ' Transaksi</td>
+            <td colspan="10" class="meta-strip">
+                <strong>Informasi Ekspor:</strong> Dicetak pada ' . $tanggalCetak . ' WIB | Petugas Pencetak: <strong>' . e($namaPetugas) . '</strong> | Status: <strong>Resmi Terverifikasi Sistem Perpustakaan</strong>
+            </td>
         </tr>
         <tr><td colspan="10"></td></tr>
     </table>
@@ -1466,16 +1536,16 @@ class AdminController extends Controller
     <table class="table-data">
         <thead>
             <tr>
-                <th style="width: 30px;">No</th>
+                <th style="width: 32px;">No</th>
                 <th style="width: 100px;">Kode Pinjam</th>
-                <th style="width: 150px;">Nama Peminjam</th>
-                <th style="width: 110px;">Jurusan / NISN</th>
-                <th style="width: 220px;">Judul Buku</th>
+                <th style="width: 160px;">Nama Peminjam</th>
+                <th style="width: 130px;">Jurusan / NISN</th>
+                <th style="width: 240px;">Judul Buku &amp; Lokasi</th>
                 <th style="width: 45px;">Jml</th>
-                <th style="width: 80px;">Tgl Pinjam</th>
-                <th style="width: 90px;">Tgl Kembali</th>
-                <th style="width: 80px;">Status</th>
-                <th style="width: 100px;">Petugas</th>
+                <th style="width: 85px;">Tgl Pinjam</th>
+                <th style="width: 95px;">Tgl Kembali</th>
+                <th style="width: 85px;">Status</th>
+                <th style="width: 110px;">Petugas</th>
             </tr>
         </thead>
         <tbody>';
@@ -1486,20 +1556,33 @@ class AdminController extends Controller
             $statusText = $isReturned ? 'Dikembalikan' : 'Sedang Dipinjam';
             $statusClass = $isReturned ? 'badge-kembali' : 'badge-dipinjam';
             $tglKembaliText = $loan->waktu_kembali ? \Carbon\Carbon::parse($loan->waktu_kembali)->format('d/m/Y H:i') : '-';
+            $rakInfo = $loan->buku && $loan->buku->rak ? ($loan->buku->rak->kode_rak) : '-';
 
             $html .= '<tr' . $rowClass . '>
-                <td class="text-center">' . ($idx + 1) . '</td>
-                <td class="text-center font-bold mso-text">' . e($loan->kode_peminjaman) . '</td>
-                <td class="text-left font-bold">' . e($loan->nama_peminjam) . '</td>
+                <td class="text-center font-bold" style="color: #64748b;">' . ($idx + 1) . '</td>
+                <td class="text-center font-bold mso-text" style="font-family: monospace; font-size: 8.5pt;">' . e($loan->kode_peminjaman) . '</td>
+                <td class="text-left font-bold" style="color: #0f172a;">' . e($loan->nama_peminjam) . '</td>
                 <td class="text-left">' . e($loan->jurusan) . ($loan->nomor_induk ? ' (' . e($loan->nomor_induk) . ')' : '') . '</td>
-                <td class="text-left font-bold">' . e($loan->buku->judul ?? '-') . '</td>
+                <td class="text-left">
+                    <div style="font-weight: bold; color: #0f172a;">' . e($loan->buku->judul ?? '-') . '</div>
+                    <div style="font-size: 8pt; color: #881337;">Rak: ' . e($rakInfo) . '</div>
+                </td>
                 <td class="text-center font-bold mso-num">' . (int)$loan->jumlah . '</td>
                 <td class="text-center mso-text">' . \Carbon\Carbon::parse($loan->tanggal_pinjam)->format('d/m/Y') . '</td>
                 <td class="text-center mso-text">' . $tglKembaliText . '</td>
-                <td class="text-center ' . $statusClass . '">' . $statusText . '</td>
+                <td class="' . $statusClass . '">' . $statusText . '</td>
                 <td class="text-left">' . e($loan->petugas->name ?? '-') . '</td>
             </tr>';
         }
+
+        $html .= '<tr class="row-total">
+            <td colspan="5" class="text-center font-bold" style="font-size: 9.5pt; color: #0f172a;">
+                TOTAL REKAPITULASI SIRKULASI (' . $totalTransaksi . ' TRANSAKSI)
+            </td>
+            <td class="text-center font-bold mso-num" style="font-size: 10pt;">' . $totalBukuPinjam . '</td>
+            <td colspan="2" class="text-center font-bold" style="color: #065f46; font-size: 8.5pt;">' . $totalKembali . ' Selesai / ' . $totalDipinjam . ' Aktif</td>
+            <td colspan="2" class="text-center font-bold" style="color: #475569; font-size: 8.5pt;">Terverifikasi</td>
+        </tr>';
 
         $html .= '</tbody>
     </table>
@@ -1508,8 +1591,14 @@ class AdminController extends Controller
         <tr><td colspan="10"></td></tr>
         <tr><td colspan="10"></td></tr>
         <tr>
-            <td colspan="6"></td>
-            <td colspan="4" class="text-center" style="font-size: 9.5pt;">
+            <td colspan="1"></td>
+            <td colspan="4" class="text-center" style="font-size: 9.5pt; vertical-align: top;">
+                Petugas Administrasi Perpustakaan,<br/><br/><br/><br/>
+                <strong><u>' . e($namaPetugas) . '</u></strong><br/>
+                Admin Sirkulasi
+            </td>
+            <td colspan="1"></td>
+            <td colspan="4" class="text-center" style="font-size: 9.5pt; vertical-align: top;">
                 Pekanbaru, ' . date('d F Y') . '<br/>
                 Mengetahui,<br/>
                 <strong>Kepala Perpustakaan</strong><br/><br/><br/><br/>
