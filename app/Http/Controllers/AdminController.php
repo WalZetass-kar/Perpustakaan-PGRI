@@ -663,10 +663,6 @@ class AdminController extends Controller
         .table-data td { border: 0.5pt solid #cbd5e1; padding: 6px 5px; font-size: 9pt; vertical-align: middle; }
         .row-even { background-color: #f8fafc; }
         
-        .badge-tersedia { background-color: #ecfdf5; color: #065f46; font-weight: bold; border: 1pt solid #a7f3d0; text-align: center; }
-        .badge-habis { background-color: #fff1f2; color: #9f1239; font-weight: bold; border: 1pt solid #fecdd3; text-align: center; }
-        .badge-tag { background-color: #f1f5f9; color: #334155; font-weight: 600; border: 0.5pt solid #cbd5e1; text-align: center; }
-        
         .row-total { background-color: #e2e8f0; font-weight: bold; border-top: 2pt solid #881337; border-bottom: 2pt solid #881337; height: 26px; vertical-align: middle; }
         
         .mso-text { mso-number-format:"\@"; }
@@ -676,114 +672,94 @@ class AdminController extends Controller
 <body>
     <table>
         <tr>
-            <td colspan="12" class="banner-top">' . strtoupper(e($namaPerpus)) . '</td>
+            <td colspan="8" class="banner-top">' . strtoupper(e($namaPerpus)) . '</td>
         </tr>
         <tr>
-            <td colspan="12" class="banner-sub">' . strtoupper(e($namaSekolah)) . ' &bull; NPSN: ' . e($npsn) . ' &bull; ' . e($alamat) . '</td>
+            <td colspan="8" class="banner-sub">' . strtoupper(e($namaSekolah)) . ' &bull; NPSN: ' . e($npsn) . ' &bull; ' . e($alamat) . '</td>
         </tr>
         <tr>
-            <td colspan="12" class="banner-ribbon"></td>
+            <td colspan="8" class="banner-ribbon"></td>
         </tr>
         <tr>
-            <td colspan="12" class="banner-title">
+            <td colspan="8" class="banner-title">
                 LAPORAN DATA INVENTARIS BUKU &amp; KOLEKSI PERPUSTAKAAN
             </td>
         </tr>
-        <tr><td colspan="12"></td></tr>
+        <tr><td colspan="8"></td></tr>
         
         <tr>
-            <td colspan="3" class="kpi-head-blue">TOTAL JUDUL BUKU</td>
-            <td colspan="3" class="kpi-head-purple">TOTAL EKSEMPLAR FISIK</td>
-            <td colspan="3" class="kpi-head-green">TERSEDIA DI RAK</td>
-            <td colspan="3" class="kpi-head-amber">SEDANG DIPINJAM</td>
+            <td colspan="2" class="kpi-head-blue">TOTAL JUDUL BUKU</td>
+            <td colspan="2" class="kpi-head-purple">TOTAL EKSEMPLAR FISIK</td>
+            <td colspan="2" class="kpi-head-green">TERSEDIA DI RAK</td>
+            <td colspan="2" class="kpi-head-amber">SEDANG DIPINJAM</td>
         </tr>
         <tr>
-            <td colspan="3" class="kpi-val-blue mso-num">' . number_format($totalJudul, 0, ',', '.') . ' Judul</td>
-            <td colspan="3" class="kpi-val-purple mso-num">' . number_format($totalEksemplar, 0, ',', '.') . ' Eksemplar</td>
-            <td colspan="3" class="kpi-val-green mso-num">' . number_format($totalTersedia, 0, ',', '.') . ' Eksemplar</td>
-            <td colspan="3" class="kpi-val-amber mso-num">' . number_format($totalDipinjam, 0, ',', '.') . ' Eksemplar</td>
+            <td colspan="2" class="kpi-val-blue mso-num">' . number_format($totalJudul, 0, ',', '.') . ' Judul</td>
+            <td colspan="2" class="kpi-val-purple mso-num">' . number_format($totalEksemplar, 0, ',', '.') . ' Eksemplar</td>
+            <td colspan="2" class="kpi-val-green mso-num">' . number_format($totalTersedia, 0, ',', '.') . ' Eksemplar</td>
+            <td colspan="2" class="kpi-val-amber mso-num">' . number_format($totalDipinjam, 0, ',', '.') . ' Eksemplar</td>
         </tr>
         <tr>
-            <td colspan="12" class="meta-strip">
+            <td colspan="8" class="meta-strip">
                 <strong>Informasi Ekspor:</strong> Dicetak pada ' . $tanggalCetak . ' WIB | Petugas Pencetak: <strong>' . e($namaPetugas) . '</strong> | Status: <strong>Resmi Terverifikasi Sistem Perpustakaan</strong>
             </td>
         </tr>
-        <tr><td colspan="12"></td></tr>
+        <tr><td colspan="8"></td></tr>
     </table>
 
     <table class="table-data">
         <thead>
             <tr>
-                <th style="width: 32px;">No</th>
-                <th style="width: 260px;">Judul Buku</th>
-                <th style="width: 110px;">ISBN</th>
-                <th style="width: 140px;">Penulis</th>
-                <th style="width: 130px;">Penerbit</th>
-                <th style="width: 50px;">Thn</th>
-                <th style="width: 100px;">Kategori</th>
-                <th style="width: 80px;">Kelas</th>
-                <th style="width: 130px;">Lokasi Rak &amp; Laci</th>
-                <th style="width: 70px;">Total</th>
-                <th style="width: 70px;">Ada</th>
-                <th style="width: 95px;">Status</th>
+                <th style="width: 35px;">No</th>
+                <th style="width: 300px;">Judul Buku</th>
+                <th style="width: 120px;">ISBN</th>
+                <th style="width: 100px;">Untuk Kelas</th>
+                <th style="width: 160px;">Penulis</th>
+                <th style="width: 150px;">Penerbit</th>
+                <th style="width: 60px;">Tahun</th>
+                <th style="width: 80px;">Total</th>
             </tr>
         </thead>
         <tbody>';
 
         foreach ($bukuItems as $idx => $buku) {
             $rowClass = ($idx % 2 === 1) ? ' class="row-even"' : '';
-            $tersedia = (int) $buku->available_quantity;
             $total = (int) $buku->total_quantity;
-            $statusText = ($tersedia > 0) ? 'Tersedia' : 'Habis Dipinjam';
-            $statusClass = ($tersedia > 0) ? 'badge-tersedia' : 'badge-habis';
-            $rakName = $buku->rak ? ($buku->rak->kode_rak) : '-';
-            $laciName = $buku->laci ? $buku->laci->nama_laci : ($buku->rak ? 'Laci 1' : '-');
             $kelasName = $buku->kelas ? $buku->kelas->nama_kelas : '-';
 
             $html .= '<tr' . $rowClass . '>
                 <td class="text-center font-bold" style="color: #64748b;">' . ($idx + 1) . '</td>
                 <td class="text-left font-bold" style="color: #0f172a;">' . e($buku->judul) . '</td>
                 <td class="text-center mso-text" style="font-family: monospace; font-size: 8.5pt;">' . e($buku->isbn ?? '-') . '</td>
+                <td class="text-center font-bold" style="color: #475569;">' . e($kelasName) . '</td>
                 <td class="text-left">' . e($buku->penulis->nama ?? '-') . '</td>
                 <td class="text-left">' . e($buku->penerbit->nama ?? '-') . '</td>
                 <td class="text-center mso-text">' . e($buku->tahun_terbit ?? '-') . '</td>
-                <td class="badge-tag">' . e($buku->kategori->nama ?? 'Umum') . '</td>
-                <td class="text-center">' . e($kelasName) . '</td>
-                <td class="text-left">
-                    <strong style="color: #881337;">' . e($rakName) . '</strong> (' . e($laciName) . ')
-                </td>
-                <td class="text-center font-bold mso-num">' . $total . '</td>
-                <td class="text-center font-bold mso-num" style="color: ' . ($tersedia > 0 ? '#047857' : '#dc2626') . ';">' . $tersedia . '</td>
-                <td class="' . $statusClass . '">' . $statusText . '</td>
+                <td class="text-center font-bold mso-num" style="color: #0f172a;">' . $total . '</td>
             </tr>';
         }
 
-        $readyPercent = ($totalEksemplar > 0) ? round(($totalTersedia / $totalEksemplar) * 100) : 100;
-
         $html .= '<tr class="row-total">
-            <td colspan="9" class="text-center font-bold" style="font-size: 9.5pt; color: #0f172a;">
-                TOTAL REKAPITULASI INVENTARIS PERPUSTAKAAN (' . $totalJudul . ' JUDUL)
+            <td colspan="7" class="text-center font-bold" style="font-size: 9.5pt; color: #0f172a;">
+                TOTAL REKAPITULASI KOLEKSI BUKU (' . $totalJudul . ' JUDUL)
             </td>
-            <td class="text-center font-bold mso-num" style="font-size: 10pt;">' . $totalEksemplar . '</td>
-            <td class="text-center font-bold mso-num" style="font-size: 10pt; color: #047857;">' . $totalTersedia . '</td>
-            <td class="text-center font-bold" style="color: #065f46; font-size: 8.5pt;">' . $readyPercent . '% Tersedia</td>
+            <td class="text-center font-bold mso-num" style="font-size: 10pt; color: #881337;">' . $totalEksemplar . '</td>
         </tr>';
 
         $html .= '</tbody>
     </table>
 
     <table>
-        <tr><td colspan="12"></td></tr>
-        <tr><td colspan="12"></td></tr>
+        <tr><td colspan="8"></td></tr>
+        <tr><td colspan="8"></td></tr>
         <tr>
-            <td colspan="1"></td>
-            <td colspan="4" class="text-center" style="font-size: 9.5pt; vertical-align: top;">
+            <td colspan="3" class="text-center" style="font-size: 9.5pt; vertical-align: top;">
                 Petugas Administrasi Perpustakaan,<br/><br/><br/><br/>
                 <strong><u>' . e($namaPetugas) . '</u></strong><br/>
                 Admin Sirkulasi
             </td>
             <td colspan="2"></td>
-            <td colspan="5" class="text-center" style="font-size: 9.5pt; vertical-align: top;">
+            <td colspan="3" class="text-center" style="font-size: 9.5pt; vertical-align: top;">
                 Pekanbaru, ' . date('d F Y') . '<br/>
                 Mengetahui,<br/>
                 <strong>Kepala Perpustakaan</strong><br/><br/><br/><br/>
