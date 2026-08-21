@@ -6,7 +6,7 @@
 @section('content')
 <div class="space-y-5" x-data="{ openAddModal: false, openEditModal: false, openPasswordModal: false, editData: {}, passwordData: {} }" x-init="openAddModal = false; openEditModal = false; openPasswordModal = false; editData = {}; passwordData = {}">
 
-    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         <div class="bg-white p-4 rounded-2xl border-2 border-gray-200 shadow-xs flex items-center gap-3.5">
             <div class="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center font-bold">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
@@ -48,19 +48,15 @@
         </div>
     </div>
 
-    <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div>
-            <h2 class="text-sm font-black text-gray-900">Daftar Akun Pengelola & Staf Perpustakaan</h2>
-            <p class="text-[11px] text-gray-500 mt-0.5">Kelola data login, hak akses Super Admin vs Admin, dan reset password</p>
-        </div>
-        <div class="flex items-center gap-2 w-full sm:w-auto">
-            <form action="{{ route('admin.anggota') }}" method="GET" class="relative flex-1 sm:w-72">
+    <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm flex items-center gap-3">
+        <div class="flex items-center gap-2 w-full">
+            <form action="{{ route('admin.anggota') }}" method="GET" class="relative flex-1 sm:w-72 sm:flex-none">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama pengelola, email..."
                        class="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:outline-none">
                 <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </form>
             @if(auth()->user()->isSuperAdmin())
-                <button @click="openAddModal = true" class="px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0">
+                <button @click="openAddModal = true" class="ml-auto px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0">
                     <i class="fa-solid fa-plus text-emerald-300"></i>
                     <span>Tambah Admin</span>
                 </button>
@@ -69,7 +65,7 @@
     </div>
 
     <div class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
+        <div class="hidden lg:block overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase tracking-wider font-extrabold">
@@ -213,6 +209,139 @@
                 </tbody>
             </table>
         </div>
+
+        <div class="lg:hidden divide-y divide-gray-100">
+            @forelse($anggotaList as $user)
+                @php
+                    $canEdit = auth()->user()->isSuperAdmin() || auth()->id() === $user->id;
+                    $canPassword = auth()->user()->isSuperAdmin();
+                    $canToggleDelete = auth()->user()->isSuperAdmin() && $user->id !== 1 && $user->id !== auth()->id();
+                @endphp
+                <div class="p-4" x-data="{ open: false, menuStyle: '' }" @scroll.window="open = false">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-xl {{ $user->isSuperAdmin() ? 'bg-amber-100 border border-amber-300 text-amber-800' : 'bg-brand-50 border border-brand-200 text-brand-700' }} font-black flex items-center justify-center text-xs shrink-0 shadow-2xs">
+                            {{ strtoupper(substr($user->name, 0, 1)) }}
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        <p class="font-bold text-gray-900 text-xs truncate">{{ $user->name }}</p>
+                                        @if($user->id === auth()->id())
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-black bg-blue-50 text-blue-700 border border-blue-200 shrink-0">Akun Anda</span>
+                                        @endif
+                                    </div>
+                                    <p class="text-[10.5px] text-gray-500 font-mono truncate">{{ $user->email }}</p>
+                                </div>
+
+                                @if($canEdit || $canPassword || $canToggleDelete)
+                                    <button @click.stop="open = !open; $nextTick(() => { const r = $el.getBoundingClientRect(); menuStyle = `top:${r.bottom + 6}px; left:${r.right - 176}px;` })" type="button" class="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition shrink-0">
+                                        <i class="fa-solid fa-ellipsis-vertical text-xs"></i>
+                                    </button>
+                                    <template x-teleport="body">
+                                        <div x-show="open" x-cloak @click.outside="open = false" :style="menuStyle"
+                                             x-transition:enter="transition ease-out duration-150"
+                                             x-transition:enter-start="opacity-0 scale-95"
+                                             x-transition:enter-end="opacity-100 scale-100"
+                                             x-transition:leave="transition ease-in duration-100"
+                                             x-transition:leave-start="opacity-100 scale-100"
+                                             x-transition:leave-end="opacity-0 scale-95"
+                                             class="fixed z-[100] w-44 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                                            @if($canEdit)
+                                                <button type="button" @click="open = false; editData = {{ json_encode([
+                                                    'id' => $user->id,
+                                                    'name' => $user->name,
+                                                    'email' => $user->email,
+                                                    'phone' => $user->phone ?? '',
+                                                    'role_id' => $user->role_id,
+                                                    'status' => $user->status
+                                                ]) }}; openEditModal = true" class="w-full flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-amber-700 hover:bg-amber-50 transition">
+                                                    <i class="fa-solid fa-pen-to-square w-3.5 text-center"></i>
+                                                    <span>Edit Akun</span>
+                                                </button>
+                                            @endif
+
+                                            @if($canPassword)
+                                                <button type="button" @click="open = false; passwordData = {{ json_encode([
+                                                    'id' => $user->id,
+                                                    'name' => $user->name,
+                                                    'email' => $user->email
+                                                ]) }}; openPasswordModal = true" class="w-full flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-blue-700 hover:bg-blue-50 transition">
+                                                    <i class="fa-solid fa-key w-3.5 text-center"></i>
+                                                    <span>Reset Password</span>
+                                                </button>
+                                            @endif
+
+                                            @if($canToggleDelete)
+                                                <form action="{{ route('admin.anggota.toggle-status', $user->id) }}" method="POST" onsubmit="return confirmDelete(event, 'Ubah Status Akun?', 'Status akses login akun ini akan dialihkan.')">
+                                                    @csrf
+                                                    @if($user->status === 'active')
+                                                        <button type="submit" class="w-full flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-gray-700 hover:bg-gray-50 transition">
+                                                            <i class="fa-solid fa-user-slash w-3.5 text-center"></i>
+                                                            <span>Blokir Akun</span>
+                                                        </button>
+                                                    @else
+                                                        <button type="submit" class="w-full flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-emerald-700 hover:bg-emerald-50 transition">
+                                                            <i class="fa-solid fa-user-check w-3.5 text-center"></i>
+                                                            <span>Aktifkan Akun</span>
+                                                        </button>
+                                                    @endif
+                                                </form>
+
+                                                <div class="border-t border-gray-100 my-1"></div>
+
+                                                <form action="{{ route('admin.anggota.delete', $user->id) }}" method="POST" onsubmit="return confirmDelete(event, 'Hapus Akun Pengelola?', 'Akun admin ini akan dihapus permanen dari sistem.')">
+                                                    @csrf
+                                                    <button type="submit" class="w-full flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-rose-600 hover:bg-rose-50 transition">
+                                                        <i class="fa-solid fa-trash-can w-3.5 text-center"></i>
+                                                        <span>Hapus Akun</span>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </template>
+                                @endif
+                            </div>
+
+                            <div class="flex items-center flex-wrap gap-1.5 mt-2">
+                                @if($user->isSuperAdmin())
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-black bg-amber-50 text-amber-800 border border-amber-300 shadow-2xs">
+                                        <svg class="w-3 h-3 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                        <span>Super Administrator</span>
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-black bg-brand-50 text-brand-700 border border-brand-200">
+                                        <svg class="w-3 h-3 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                        <span>Admin Perpustakaan</span>
+                                    </span>
+                                @endif
+                                @if($user->status === 'active')
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        <span>Aktif</span>
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                        <span>Dinonaktifkan</span>
+                                    </span>
+                                @endif
+                            </div>
+
+                            @if($user->phone)
+                                <p class="text-[10.5px] text-gray-500 font-mono mt-1.5 flex items-center gap-1">
+                                    <i class="fa-solid fa-phone text-gray-300 text-[10px]"></i>
+                                    {{ $user->phone }}
+                                </p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="py-10 text-center text-gray-400 font-medium text-xs px-4">Belum ada akun pengelola terdaftar.</div>
+            @endforelse
+        </div>
+
         <div class="p-3 border-t border-gray-100">
             {{ $anggotaList->links() }}
         </div>
