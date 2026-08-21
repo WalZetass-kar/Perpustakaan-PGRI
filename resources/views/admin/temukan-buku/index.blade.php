@@ -7,10 +7,42 @@
 <div class="space-y-5">
 
     <div class="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200 shadow-2xs">
-        <form action="{{ route('admin.temukan-buku') }}" method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 text-xs">
+        <form action="{{ route('admin.temukan-buku') }}" method="GET"
+              x-data="{ filterOpen: {{ request()->anyFilled(['kategori_id', 'rak_id', 'status_stok']) ? 'true' : 'false' }} }"
+              class="flex flex-wrap lg:flex-nowrap items-stretch lg:items-center gap-2 text-xs">
 
-            {{-- KIRI: 3 filter --}}
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-1">
+            {{-- Tombol toggle filter: mobile/tablet saja --}}
+            <button type="button" @click="filterOpen = !filterOpen"
+                    class="lg:hidden order-1 relative w-10 shrink-0 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-600 flex items-center justify-center transition"
+                    title="Tampilkan/Sembunyikan Filter" aria-label="Toggle Filter">
+                <svg class="w-4 h-4 transition-transform duration-200" :class="filterOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                @if(request()->anyFilled(['kategori_id', 'rak_id', 'status_stok']))
+                    <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-brand-700 rounded-full border-2 border-white"></span>
+                @endif
+            </button>
+
+            {{-- Search + tombol cari + reset: selalu tampil --}}
+            <div class="order-2 lg:order-3 flex items-center gap-1.5 flex-1 lg:flex-none">
+                <div class="relative flex-1 lg:w-64">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul, ISBN, penulis, kode rak..."
+                           class="w-full pl-8 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-900 focus:ring-1 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                    <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+
+                <button type="submit" class="p-2 bg-brand-700 hover:bg-brand-800 text-white rounded-xl font-bold transition flex items-center justify-center shrink-0" title="Cari">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </button>
+
+                @if(request()->anyFilled(['search', 'kategori_id', 'rak_id', 'status_stok']))
+                    <a href="{{ route('admin.temukan-buku') }}" class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-bold transition flex items-center justify-center shrink-0" title="Reset Filter">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </a>
+                @endif
+            </div>
+
+            {{-- 3 filter: collapsible di mobile/tablet, selalu tampil di desktop --}}
+            <div :class="filterOpen ? 'flex' : 'hidden lg:flex'"
+                 class="order-3 lg:order-1 w-full lg:w-auto flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-1">
                 <select name="kategori_id" onchange="this.form.submit()" class="px-2.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:ring-1 focus:ring-brand-700 focus:outline-none font-medium">
                     <option value="">Semua Kategori</option>
                     @foreach($kategoriList as $kat)
@@ -31,25 +63,6 @@
                     <option value="penuh" {{ request('status_stok') === 'penuh' ? 'selected' : '' }}>Stok Penuh</option>
                     <option value="habis" {{ request('status_stok') === 'habis' ? 'selected' : '' }}>Stok Habis</option>
                 </select>
-            </div>
-
-            {{-- KANAN: input search + tombol cari + reset --}}
-            <div class="flex items-center gap-1.5">
-                <div class="relative flex-1 sm:w-64">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul, ISBN, penulis, kode rak..."
-                           class="w-full pl-8 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-900 focus:ring-1 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                    <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                </div>
-
-                <button type="submit" class="p-2 bg-brand-700 hover:bg-brand-800 text-white rounded-xl font-bold transition flex items-center justify-center shrink-0" title="Cari">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                </button>
-
-                @if(request()->anyFilled(['search', 'kategori_id', 'rak_id', 'status_stok']))
-                    <a href="{{ route('admin.temukan-buku') }}" class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-bold transition flex items-center justify-center shrink-0" title="Reset Filter">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </a>
-                @endif
             </div>
 
         </form>

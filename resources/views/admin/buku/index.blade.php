@@ -84,6 +84,16 @@
     table.dataTable no-footer {
         border-bottom: 1px solid #e5e7eb;
     }
+
+    /* Mode List: tabel penuh khusus desktop, kartu ringkas khusus mobile/tablet.
+       Ditulis sebagai media query biasa (bukan varian Tailwind) agar tidak
+       bergantung pada CSS yang di-generate Tailwind CDN di sisi browser. */
+    @media (max-width: 1023px) {
+        #tabel-buku { display: none !important; }
+    }
+    @media (min-width: 1024px) {
+        #list-buku-mobile-container { display: none !important; }
+    }
 </style>
 @endpush
 
@@ -108,8 +118,8 @@
 }" x-init="openAddModal = false; openEditModal = false; editData = {}" id="buku-container">
 
     <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm space-y-3">
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div class="flex items-center gap-2 self-start sm:self-auto">
+        <div class="flex items-center justify-between gap-2 sm:gap-3">
+            <div class="flex items-center gap-2 shrink-0">
                 <button type="button" id="btn-toggle-filter-buku" onclick="toggleKoleksiBukuFilter()" class="w-9 h-9 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-600 flex items-center justify-center border border-gray-200 transition shrink-0" title="Sembunyikan/Tampilkan Pencarian & Filter" aria-label="Toggle Pencarian & Filter">
                     <svg id="icon-toggle-filter-buku" class="w-3.5 h-3.5 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </button>
@@ -126,12 +136,12 @@
                     </button>
                 </div>
             </div>
-            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
-                <a href="{{ route('admin.buku.export.excel') }}" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Export seluruh data buku ke format Excel">
+            <div class="flex flex-wrap items-center gap-2 justify-end shrink-0">
+                <a href="{{ route('admin.buku.export.excel') }}" class="hidden lg:flex px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm items-center gap-1.5 shrink-0" title="Export seluruh data buku ke format Excel">
                     <i class="fa-solid fa-file-excel"></i>
                     <span>Export Excel</span>
                 </a>
-                <a href="{{ route('admin.buku.export.pdf') }}" target="_blank" class="px-3.5 py-2 bg-rose-700 hover:bg-rose-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Cetak / Simpan Laporan PDF Resmi">
+                <a href="{{ route('admin.buku.export.pdf') }}" target="_blank" class="hidden lg:flex px-3.5 py-2 bg-rose-700 hover:bg-rose-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm items-center gap-1.5 shrink-0" title="Cetak / Simpan Laporan PDF Resmi">
                     <i class="fa-solid fa-file-pdf"></i>
                     <span>Cetak / PDF</span>
                 </a>
@@ -174,6 +184,18 @@
                     <option value="habis">Stok Habis</option>
                 </select>
             </div>
+
+            {{-- Export Excel / PDF: mobile & tablet saja, taruh paling bawah panel filter --}}
+            <div class="lg:hidden grid grid-cols-2 gap-2 mt-2 text-xs">
+                <a href="{{ route('admin.buku.export.excel') }}" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center justify-center gap-1.5" title="Export seluruh data buku ke format Excel">
+                    <i class="fa-solid fa-file-excel"></i>
+                    <span>Export Excel</span>
+                </a>
+                <a href="{{ route('admin.buku.export.pdf') }}" target="_blank" class="px-3.5 py-2 bg-rose-700 hover:bg-rose-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center justify-center gap-1.5" title="Cetak / Simpan Laporan PDF Resmi">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span>Cetak / PDF</span>
+                </a>
+            </div>
         </div>
     </div>
 
@@ -198,7 +220,7 @@
                         <th class="py-3 px-4 font-bold">Penulis / Penerbit</th>
                         <th class="py-3 px-4 font-bold">Kategori</th>
                         <th class="py-3 px-4 font-bold text-center">Stok Fisik</th>
-                        <th class="py-3 px-4 font-bold text-right">Aksi</th>
+                        <th class="py-3 px-4 lg:pr-8 font-bold text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 text-gray-700 font-medium">
@@ -513,7 +535,7 @@
                 { data: 'penulis', name: 'penulis_id', orderable: true, searchable: true },
                 { data: 'kategori', name: 'kategori_id', orderable: true, searchable: true },
                 { data: 'stok', name: 'available_quantity', orderable: true, searchable: false, className: 'text-center' },
-                { data: 'aksi', name: 'aksi', orderable: false, searchable: false, className: 'text-right' }
+                { data: 'aksi', name: 'aksi', orderable: false, searchable: false, className: 'text-right px-4 lg:pr-8' }
             ],
             order: [[0, 'asc']],
             pageLength: 10,
@@ -535,9 +557,10 @@
             }
         });
 
-        // Sisipkan container Grid tepat setelah <table> (di dalam wrapper DataTables)
-        // supaya length/search/info/pagination bawaan DataTables tetap terlihat di mode Grid.
+        // Sisipkan container Grid & List-mobile tepat setelah <table> (di dalam wrapper DataTables)
+        // supaya length/search/info/pagination bawaan DataTables tetap terlihat di semua mode.
         $('#tabel-buku').after('<div id="grid-buku-container" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4"></div>');
+        $('#grid-buku-container').after('<div id="list-buku-mobile-container" class="hidden divide-y divide-gray-100"></div>');
 
         function escapeHtml(str) {
             return $('<div>').text(str ?? '').html();
@@ -575,17 +598,51 @@
             + '</div>';
         }
 
-        // Setiap DataTables selesai fetch data, rebuild kartu Grid dari data yang sama (tanpa request tambahan)
+        // Versi ringkas buildBookCard, khusus baris List di layar mobile/tablet (<1024px)
+        function buildListCardMobile(row) {
+            const stokOk = row.available_quantity > 0;
+            const stokClass = stokOk ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200';
+            const coverInner = row.cover_url
+                ? '<img src="' + row.cover_url + '" alt="' + escapeHtml(row.judul_raw) + '" width="40" height="56" loading="lazy" class="w-full h-full object-cover">'
+                : '<div class="w-full h-full bg-gradient-to-br from-brand-900 via-brand-800 to-red-950 text-white flex items-center justify-center"><i class="fa-solid fa-book text-xs opacity-40"></i></div>';
+            const kelasBadge = row.kelas_nama
+                ? '<span class="px-1.5 py-0.5 rounded text-[9px] font-black bg-amber-50 text-amber-700 border border-amber-200">' + escapeHtml(row.kelas_nama) + '</span>'
+                : '';
+
+            return '<div class="p-3 flex items-start gap-3 hover:bg-gray-50/70 transition">'
+                +   '<div class="w-10 h-14 rounded-lg overflow-hidden shrink-0 bg-gray-100 border border-gray-200">' + coverInner + '</div>'
+                +   '<div class="flex-1 min-w-0">'
+                +     '<div class="flex items-start justify-between gap-2">'
+                +       '<h3 class="font-extrabold text-gray-900 text-xs line-clamp-2 leading-snug">' + escapeHtml(row.judul_raw) + '</h3>'
+                +       '<div class="shrink-0">' + row.aksi + '</div>'
+                +     '</div>'
+                +     '<p class="text-[10.5px] text-gray-500 truncate mt-0.5">' + escapeHtml(row.penulis_nama) + '</p>'
+                +     '<div class="flex flex-wrap items-center gap-1 mt-1.5">'
+                +       '<span class="px-1.5 py-0.5 rounded text-[9px] font-black bg-brand-50 text-brand-700 border border-brand-200">' + escapeHtml(row.kategori_nama) + '</span>'
+                +       kelasBadge
+                +       '<span class="px-1.5 py-0.5 rounded text-[9px] font-black border ' + stokClass + '">' + row.available_quantity + '/' + row.total_quantity + ' Eks</span>'
+                +     '</div>'
+                +     '<p class="text-[9.5px] text-gray-400 font-mono mt-1.5 truncate">' + escapeHtml(row.rak_text) + '</p>'
+                +   '</div>'
+                + '</div>';
+        }
+
+        // Setiap DataTables selesai fetch data, rebuild kartu Grid & List-mobile dari data yang sama (tanpa request tambahan)
         $('#tabel-buku').on('xhr.dt', function(e, settings, json) {
             if (!json || !Array.isArray(json.data)) return;
             const $grid = $('#grid-buku-container');
+            const $listMobile = $('#list-buku-mobile-container');
             if (json.data.length === 0) {
-                $grid.html('<div class="col-span-full py-14 text-center text-gray-400"><i class="fa-solid fa-book-open text-2xl mb-2 block"></i><p class="text-xs font-bold text-gray-700">Tidak ditemukan data buku yang sesuai</p></div>');
+                const emptyHtml = '<div class="py-14 text-center text-gray-400"><i class="fa-solid fa-book-open text-2xl mb-2 block"></i><p class="text-xs font-bold text-gray-700">Tidak ditemukan data buku yang sesuai</p></div>';
+                $grid.html('<div class="col-span-full">' + emptyHtml + '</div>');
+                $listMobile.html(emptyHtml);
                 return;
             }
             $grid.html(json.data.map(buildBookCard).join(''));
+            $listMobile.html(json.data.map(buildListCardMobile).join(''));
             if (window.Alpine) {
                 window.Alpine.initTree($grid.get(0));
+                window.Alpine.initTree($listMobile.get(0));
             }
         });
 
@@ -612,13 +669,19 @@
             document.getElementById('icon-toggle-filter-buku').classList.toggle('rotate-180', isHidden);
         };
 
-        const filterOpen = localStorage.getItem('bukuFilterOpen') !== 'false';
+        // Di mobile/tablet (<1024px), panel filter selalu default tertutup tiap halaman dimuat.
+        // Di desktop, ikuti preferensi terakhir yang tersimpan (perilaku lama, tidak berubah).
+        const isMobileFilterView = window.matchMedia('(max-width: 1023px)').matches;
+        const filterOpen = isMobileFilterView ? false : (localStorage.getItem('bukuFilterOpen') !== 'false');
         if (!filterOpen) {
             document.getElementById('koleksi-buku-filter-wrap').classList.add('hidden');
             document.getElementById('icon-toggle-filter-buku').classList.add('rotate-180');
         }
 
-        // Toggle tampilan Grid / List
+        // Toggle tampilan Grid / List.
+        // Catatan: di dalam mode List, pemilihan tabel (desktop) vs kartu (mobile)
+        // sepenuhnya ditentukan media query di blok <style> halaman ini — JS cukup
+        // menoggle class "hidden" untuk memilih mode Grid vs List saja.
         window.setKoleksiBukuView = function(mode) {
             localStorage.setItem('koleksiBukuView', mode);
             const btnGrid = document.getElementById('btn-view-grid-buku');
@@ -628,6 +691,7 @@
 
             if (mode === 'grid') {
                 $('#tabel-buku').addClass('hidden');
+                $('#list-buku-mobile-container').addClass('hidden');
                 $('#grid-buku-container').removeClass('hidden');
                 btnGrid.classList.add(...activeClass);
                 btnGrid.classList.remove(...inactiveClass);
@@ -635,6 +699,7 @@
                 btnList.classList.add(...inactiveClass);
             } else {
                 $('#tabel-buku').removeClass('hidden');
+                $('#list-buku-mobile-container').removeClass('hidden');
                 $('#grid-buku-container').addClass('hidden');
                 btnList.classList.add(...activeClass);
                 btnList.classList.remove(...inactiveClass);

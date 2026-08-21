@@ -298,7 +298,7 @@
                 </div>
                 <a href="{{ route('admin.peminjaman') }}" class="text-[11px] font-extrabold text-brand-700 hover:underline">Lihat Semua &rarr;</a>
             </div>
-            <div class="overflow-x-auto">
+            <div class="hidden lg:block overflow-x-auto">
                 <table class="w-full text-left border-collapse text-xs">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200 text-gray-500 font-bold">
@@ -337,6 +337,36 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="lg:hidden divide-y divide-gray-100">
+                @forelse($recentLoans as $loan)
+                    <div class="p-4 hover:bg-gray-50/70 transition">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <p class="font-bold text-gray-900 text-xs truncate">{{ $loan->nama_peminjam ?: ($loan->user->name ?? '-') }}</p>
+                                @if($loan->jurusan)
+                                    <p class="text-[10px] text-gray-400 font-medium mt-0.5">{{ $loan->jurusan }}</p>
+                                @endif
+                            </div>
+                            @if($loan->status === 'dikembalikan')
+                                <span class="shrink-0 px-2 py-0.5 rounded text-[9.5px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">KEMBALI</span>
+                            @else
+                                <span class="shrink-0 px-2 py-0.5 rounded text-[9.5px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200">DIPINJAM</span>
+                            @endif
+                        </div>
+                        <p class="flex items-start gap-1.5 text-[11px] text-gray-600 font-semibold mt-2">
+                            <i class="fa-solid fa-book text-gray-300 text-[10px] mt-0.5 shrink-0"></i>
+                            <span class="line-clamp-2">{{ $loan->buku->judul ?? '-' }}</span>
+                        </p>
+                        <div class="flex items-center gap-3 mt-2 text-[10px] text-gray-400 font-mono">
+                            <span class="flex items-center gap-1"><i class="fa-solid fa-layer-group text-gray-300"></i>{{ $loan->jumlah }} eks</span>
+                            <span class="flex items-center gap-1"><i class="fa-regular fa-clock text-gray-300"></i>{{ $loan->created_at->format('d M H:i') }}</span>
+                        </div>
+                    </div>
+                @empty
+                    <p class="py-6 text-center text-gray-400 font-medium text-xs">Belum ada transaksi peminjaman.</p>
+                @endforelse
+            </div>
         </div>
 
         <div class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm p-4 flex flex-col justify-between">
@@ -345,7 +375,7 @@
                     <h3 class="text-xs font-black text-gray-900 uppercase">Log Aktivitas Sistem</h3>
                     <a href="{{ route('admin.audit-log') }}" class="text-[10px] font-extrabold text-brand-700 hover:underline">Semua</a>
                 </div>
-                <div class="divide-y divide-gray-100 mt-2 space-y-2">
+                <div class="hidden lg:block divide-y divide-gray-100 mt-2 space-y-2">
                     @forelse($recentAuditLogs as $log)
                         <div class="pt-2 text-xs">
                             <div class="flex items-center justify-between">
@@ -353,6 +383,43 @@
                                 <span class="text-[9.5px] text-gray-400 font-mono">{{ $log->created_at->diffForHumans() }}</span>
                             </div>
                             <p class="text-[10.5px] text-gray-600 mt-0.5 line-clamp-1">{{ $log->deskripsi ?? $log->aktivitas }}</p>
+                        </div>
+                    @empty
+                        <p class="text-xs text-gray-400 text-center py-6">Belum ada aktivitas tercatat.</p>
+                    @endforelse
+                </div>
+
+                <div class="lg:hidden divide-y divide-gray-100 mt-2">
+                    @forelse($recentAuditLogs as $log)
+                        @php
+                            $aksi = $log->aktivitas ?? '';
+                            if (str_contains($aksi, 'HAPUS')) {
+                                [$dotColor, $icon] = ['bg-rose-50 text-rose-600 border-rose-200', 'fa-trash-can'];
+                            } elseif (str_contains($aksi, 'TAMBAH')) {
+                                [$dotColor, $icon] = ['bg-emerald-50 text-emerald-600 border-emerald-200', 'fa-plus'];
+                            } elseif (str_contains($aksi, 'UPDATE')) {
+                                [$dotColor, $icon] = ['bg-amber-50 text-amber-600 border-amber-200', 'fa-pen'];
+                            } elseif (str_contains($aksi, 'GAGAL')) {
+                                [$dotColor, $icon] = ['bg-rose-50 text-rose-600 border-rose-200', 'fa-triangle-exclamation'];
+                            } elseif (str_contains($aksi, 'LOGIN') || str_contains($aksi, 'LOGOUT')) {
+                                [$dotColor, $icon] = ['bg-blue-50 text-blue-600 border-blue-200', 'fa-right-to-bracket'];
+                            } elseif (str_contains($aksi, 'TRANSAKSI') || str_contains($aksi, 'APPROVE') || str_contains($aksi, 'PENGAJUAN')) {
+                                [$dotColor, $icon] = ['bg-blue-50 text-blue-600 border-blue-200', 'fa-arrows-rotate'];
+                            } else {
+                                [$dotColor, $icon] = ['bg-gray-100 text-gray-500 border-gray-200', 'fa-circle-info'];
+                            }
+                        @endphp
+                        <div class="py-2.5 flex items-start gap-2.5 text-xs">
+                            <div class="w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 {{ $dotColor }}">
+                                <i class="fa-solid {{ $icon }} text-[10px]"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="font-bold text-gray-900 text-[11px] truncate">{{ $log->user_name ?? 'Sistem' }}</span>
+                                    <span class="text-[9.5px] text-gray-400 font-mono shrink-0">{{ $log->created_at->diffForHumans() }}</span>
+                                </div>
+                                <p class="text-[10.5px] text-gray-600 mt-0.5 line-clamp-2">{{ $log->deskripsi ?? $log->aktivitas }}</p>
+                            </div>
                         </div>
                     @empty
                         <p class="text-xs text-gray-400 text-center py-6">Belum ada aktivitas tercatat.</p>
