@@ -135,18 +135,19 @@
                             @endphp
                             <td class="py-3.5 px-4 text-right">
                                 @if($canEdit || $canPassword || $canToggleDelete)
-                                    <div class="relative flex items-center justify-end" x-data="{ open: false }">
-                                        <button @click.stop="open = !open" type="button" class="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition">
+                                    <div class="flex items-center justify-end" x-data="{ open: false, menuStyle: '' }" @scroll.window="open = false">
+                                        <button @click.stop="open = !open; $nextTick(() => { const r = $el.getBoundingClientRect(); menuStyle = `top:${r.bottom + 6}px; left:${r.right - 176}px;` })" type="button" class="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition">
                                             <i class="fa-solid fa-ellipsis-vertical text-xs"></i>
                                         </button>
-                                        <div x-show="open" x-cloak @click.outside="open = false"
+                                        <template x-teleport="body">
+                                        <div x-show="open" x-cloak @click.outside="open = false" :style="menuStyle"
                                              x-transition:enter="transition ease-out duration-150"
                                              x-transition:enter-start="opacity-0 scale-95"
                                              x-transition:enter-end="opacity-100 scale-100"
                                              x-transition:leave="transition ease-in duration-100"
                                              x-transition:leave-start="opacity-100 scale-100"
                                              x-transition:leave-end="opacity-0 scale-95"
-                                             class="absolute right-0 top-8 z-50 w-44 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                                             class="fixed z-[100] w-44 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
                                             @if($canEdit)
                                                 <button type="button" @click="open = false; editData = {{ json_encode([
                                                     'id' => $user->id,
@@ -199,6 +200,7 @@
                                                 </form>
                                             @endif
                                         </div>
+                                        </template>
                                     </div>
                                 @endif
                             </td>

@@ -29,15 +29,15 @@
                     </p>
                 </div>
             </div>
-            <button type="button" onclick="window.close()" class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-extrabold rounded-xl transition flex items-center gap-1.5 border border-gray-200 shrink-0 self-start sm:self-center">
+            <button type="button" onclick="window.close()" class="hidden sm:flex px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-extrabold rounded-xl transition items-center gap-1.5 border border-gray-200 shrink-0 self-center">
                 <i class="fa-solid fa-xmark text-gray-500"></i>
                 <span>Tutup Tab</span>
             </button>
         </div>
 
-        <div class="pt-3 border-t border-gray-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+        <div class="pt-3 border-t border-gray-100 flex flex-wrap sm:flex-nowrap items-stretch sm:items-center gap-2">
             {{-- Toggle Grid / List --}}
-            <div class="flex items-center bg-gray-100 rounded-xl p-0.5 border border-gray-200 self-start">
+            <div class="order-1 flex items-center bg-gray-100 rounded-xl p-0.5 border border-gray-200 self-start">
                 <button type="button" @click="setView('grid')"
                     :class="viewMode === 'grid' ? 'bg-white text-brand-700 shadow-xs border border-gray-200' : 'text-gray-500 hover:text-gray-700'"
                     class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5" title="Tampilan Grid">
@@ -52,8 +52,14 @@
                 </button>
             </div>
 
+            {{-- Tutup Tab: mobile saja, sejajar dengan toggle Grid/List --}}
+            <button type="button" onclick="window.close()" class="order-2 ml-auto sm:hidden px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-extrabold rounded-xl transition flex items-center gap-1.5 border border-gray-200 shrink-0 self-start">
+                <i class="fa-solid fa-xmark text-gray-500"></i>
+                <span>Tutup Tab</span>
+            </button>
+
             {{-- Pencarian buku dalam rak ini --}}
-            <form action="{{ route('admin.data-buku.rak', $rak->id) }}" method="GET" class="flex items-center gap-2 flex-1">
+            <form action="{{ route('admin.data-buku.rak', $rak->id) }}" method="GET" class="order-3 basis-full sm:basis-auto flex items-center gap-2 sm:flex-1">
                 <div class="relative flex-1">
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul atau ISBN di rak ini..."
                            class="w-full pl-8 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-900 focus:ring-1 focus:ring-brand-700 focus:bg-white focus:outline-none">
