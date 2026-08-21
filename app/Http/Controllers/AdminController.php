@@ -819,9 +819,16 @@ class AdminController extends Controller
         ));
     }
 
-    public function kategoriIndex()
+    public function kategoriIndex(Request $request)
     {
-        $kategoriList = Kategori::withCount('buku')->latest()->paginate(10);
+        $query = Kategori::withCount('buku');
+
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where('nama', 'like', "%{$search}%");
+        }
+
+        $kategoriList = $query->latest()->paginate(10)->withQueryString();
         return view('admin.kategori.index', compact('kategoriList'));
     }
 
@@ -907,9 +914,19 @@ class AdminController extends Controller
         return back()->with('success', 'Penulis berhasil dihapus.');
     }
 
-    public function penerbitIndex()
+    public function penerbitIndex(Request $request)
     {
-        $penerbitList = Penerbit::withCount('buku')->latest()->paginate(10);
+        $query = Penerbit::withCount('buku');
+
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('kota', 'like', "%{$search}%");
+            });
+        }
+
+        $penerbitList = $query->latest()->paginate(10)->withQueryString();
         return view('admin.penerbit.index', compact('penerbitList'));
     }
 

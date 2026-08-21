@@ -679,6 +679,13 @@ function katalogPage() {
         openDetailModal: false,
         modalData: {},
         openLoanModal: false,
+        init() {
+            this.$watch('openLoanModal', (val) => this.syncBodyScrollLock());
+            this.$watch('openDetailModal', (val) => this.syncBodyScrollLock());
+        },
+        syncBodyScrollLock() {
+            document.body.style.overflow = (this.openLoanModal || this.openDetailModal) ? 'hidden' : '';
+        },
         loanData: {
             buku_id: '',
             judul: '',

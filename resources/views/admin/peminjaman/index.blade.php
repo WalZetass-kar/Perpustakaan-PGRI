@@ -6,34 +6,80 @@
 @section('content')
 <div class="space-y-5" x-data="{ openAddModal: false, selectedBookQty: 1 }" x-init="openAddModal = false">
 
-    <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div>
-            <h2 class="text-sm font-black text-gray-900">Daftar Peminjaman Sedang Berlangsung</h2>
-            <p class="text-[11px] text-gray-500 mt-0.5">Catatan buku yang sedang dipinjam dan belum dikembalikan hari ini</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            <form action="{{ route('admin.peminjaman') }}" method="GET" class="relative flex-1 sm:w-60">
+    <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm"
+         x-data="{ toolOpen: {{ request()->filled('search') ? 'true' : 'false' }} }">
+
+        {{-- Desktop/tablet: search kiri, Export & Peminjaman Baru kanan --}}
+        <div class="hidden sm:flex sm:flex-row items-center justify-between gap-3">
+            <form action="{{ route('admin.peminjaman') }}" method="GET" class="relative w-64">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari kode, siswa, NIS..."
                        class="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:outline-none font-medium">
                 <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </form>
-            <a href="{{ route('admin.peminjaman.export.excel', array_merge(request()->all(), ['status' => 'dipinjam'])) }}" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Export Excel">
-                <i class="fa-solid fa-file-excel"></i>
-                <span>Excel</span>
-            </a>
-            <a href="{{ route('admin.peminjaman.export.pdf', array_merge(request()->all(), ['status' => 'dipinjam'])) }}" target="_blank" class="px-3 py-1.5 bg-rose-700 hover:bg-rose-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Cetak / PDF">
-                <i class="fa-solid fa-file-pdf"></i>
-                <span>Cetak / PDF</span>
-            </a>
-            <button @click="openAddModal = true" class="px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0">
-                <i class="fa-solid fa-plus text-emerald-300"></i>
-                <span>Peminjaman Baru</span>
-            </button>
+            <div class="flex flex-wrap items-center justify-end gap-2 shrink-0">
+                <a href="{{ route('admin.peminjaman.export.excel', array_merge(request()->all(), ['status' => 'dipinjam'])) }}" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Export Excel">
+                    <i class="fa-solid fa-file-excel"></i>
+                    <span>Excel</span>
+                </a>
+                <a href="{{ route('admin.peminjaman.export.pdf', array_merge(request()->all(), ['status' => 'dipinjam'])) }}" target="_blank" class="px-3 py-1.5 bg-rose-700 hover:bg-rose-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Cetak / PDF">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span>Cetak / PDF</span>
+                </a>
+                <button @click="openAddModal = true" class="px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0">
+                    <i class="fa-solid fa-plus text-emerald-300"></i>
+                    <span>Peminjaman Baru</span>
+                </button>
+            </div>
+        </div>
+
+        {{-- Mobile: panah kiri (toggle search & export) — tombol Peminjaman Baru kanan --}}
+        <div class="sm:hidden">
+            <div class="flex items-center justify-between gap-2">
+                <button type="button" @click="toolOpen = !toolOpen"
+                        class="relative w-9 h-9 shrink-0 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-600 flex items-center justify-center transition"
+                        title="Tampilkan/Sembunyikan Pencarian & Export" aria-label="Toggle Pencarian & Export">
+                    <svg class="w-4 h-4 transition-transform duration-200" :class="toolOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    @if(request()->filled('search'))
+                        <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-brand-700 rounded-full border-2 border-white"></span>
+                    @endif
+                </button>
+
+                <button @click="openAddModal = true" class="px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0">
+                    <i class="fa-solid fa-plus text-emerald-300"></i>
+                    <span>Peminjaman Baru</span>
+                </button>
+            </div>
+
+            {{-- Panel collapsible: search di atas, Export Excel/PDF di bawahnya --}}
+            <div x-show="toolOpen" x-cloak
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 -translate-y-1"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 -translate-y-1"
+                 class="mt-3 space-y-2">
+                <form action="{{ route('admin.peminjaman') }}" method="GET" class="relative">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari kode, siswa, NIS..."
+                           class="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:outline-none font-medium">
+                    <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </form>
+                <div class="grid grid-cols-2 gap-2">
+                    <a href="{{ route('admin.peminjaman.export.excel', array_merge(request()->all(), ['status' => 'dipinjam'])) }}" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center justify-center gap-1.5" title="Export Excel">
+                        <i class="fa-solid fa-file-excel"></i>
+                        <span>Excel</span>
+                    </a>
+                    <a href="{{ route('admin.peminjaman.export.pdf', array_merge(request()->all(), ['status' => 'dipinjam'])) }}" target="_blank" class="px-3 py-2 bg-rose-700 hover:bg-rose-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center justify-center gap-1.5" title="Cetak / PDF">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <span>Cetak / PDF</span>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
+        <div class="hidden lg:block overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase tracking-wider font-extrabold">
@@ -99,6 +145,53 @@
                 </tbody>
             </table>
         </div>
+
+        <div class="lg:hidden divide-y divide-gray-100">
+            @forelse($activeLoans as $loan)
+                <div class="p-4">
+                    <div class="flex items-start justify-between gap-2">
+                        <span class="px-2 py-0.5 rounded bg-gray-100 text-brand-700 font-mono font-black text-[11px] border border-gray-200">
+                            {{ $loan->kode_peminjaman }}
+                        </span>
+                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                            {{ $loan->jumlah }} Buku
+                        </span>
+                    </div>
+
+                    <div class="mt-2.5">
+                        <p class="font-bold text-gray-900 text-xs">{{ $loan->nama_peminjam ?: ($loan->user->name ?? '-') }}</p>
+                        <div class="flex items-center gap-1.5 text-[10.5px] text-gray-500 font-medium mt-0.5">
+                            <span class="px-1.5 py-0.5 rounded bg-gray-100 text-gray-800 border border-gray-200 font-bold">{{ $loan->jurusan ?: '-' }}</span>
+                            @if($loan->nomor_induk)
+                                <span>&bull;</span>
+                                <span class="font-mono">NIS: {{ $loan->nomor_induk }}</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <p class="flex items-start gap-1.5 text-[11px] text-gray-700 font-bold mt-2">
+                        <i class="fa-solid fa-book text-gray-300 text-[10px] mt-0.5 shrink-0"></i>
+                        <span class="line-clamp-2">{{ $loan->buku->judul ?? '-' }}</span>
+                    </p>
+
+                    <div class="flex items-center gap-3 mt-2 text-[10px] text-gray-400 font-mono">
+                        <span class="flex items-center gap-1"><i class="fa-regular fa-clock text-gray-300"></i>{{ \Carbon\Carbon::parse($loan->tanggal_pinjam)->format('d M Y') }}, {{ $loan->created_at->format('H:i') }}</span>
+                        <span class="flex items-center gap-1"><i class="fa-solid fa-user-tie text-gray-300"></i>{{ $loan->petugas->name ?? 'Admin' }}</span>
+                    </div>
+
+                    <form action="{{ route('admin.peminjaman.kembali', $loan->id) }}" method="POST" class="mt-3 pt-3 border-t border-gray-100" onsubmit="return confirmDelete(event, 'Proses Pengembalian?', 'Buku akan dikembalikan ke stok fisik perpustakaan.')">
+                        @csrf
+                        <button type="submit" class="w-full px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-lg text-xs transition shadow-2xs flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-arrow-rotate-left text-xs"></i>
+                            <span>Proses Pengembalian</span>
+                        </button>
+                    </form>
+                </div>
+            @empty
+                <div class="py-10 text-center text-gray-400 font-medium text-xs px-4">Tidak ada buku yang sedang dipinjam saat ini. Semua buku berada di rak.</div>
+            @endforelse
+        </div>
+
         <div class="p-3 border-t border-gray-100">
             {{ $activeLoans->links() }}
         </div>

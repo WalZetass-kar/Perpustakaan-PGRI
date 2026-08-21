@@ -11,7 +11,9 @@
             <h2 class="text-base font-black text-gray-900">Pusat Konfigurasi & Kebijakan Perpustakaan</h2>
             <p class="text-xs text-gray-500 mt-0.5">Sesuaikan identitas resmi sekolah, jam layanan, batasan peminjaman, dan preferensi portal OPAC</p>
         </div>
-        <div class="flex items-center gap-1.5 p-1 bg-gray-100 rounded-xl border border-gray-200 text-xs font-bold w-full sm:w-auto overflow-x-auto">
+
+        {{-- Desktop/tablet: pill tab bar, tidak berubah --}}
+        <div class="hidden sm:flex items-center gap-1.5 p-1 bg-gray-100 rounded-xl border border-gray-200 text-xs font-bold w-full sm:w-auto overflow-x-auto">
             <button type="button" @click="activeTab = 'identitas'" :class="activeTab === 'identitas' ? 'bg-white text-brand-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'" class="px-3 py-1.5 rounded-lg transition shrink-0">
                 Identitas Lembaga
             </button>
@@ -28,12 +30,51 @@
                 Info Sistem
             </button>
         </div>
+
+        {{-- Mobile: menu vertikal full-width, tanpa scroll samping --}}
+        <div class="sm:hidden w-full grid grid-cols-1 gap-1.5 text-xs font-bold">
+            <button type="button" @click="activeTab = 'identitas'" :class="activeTab === 'identitas' ? 'bg-brand-50 border-brand-300 text-brand-700' : 'bg-gray-50 border-gray-200 text-gray-600'" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border transition">
+                <span class="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center shrink-0" :class="activeTab === 'identitas' ? 'text-brand-700 border-brand-200' : 'text-gray-400'">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                </span>
+                <span class="flex-1 text-left">Identitas Lembaga</span>
+                <svg class="w-3.5 h-3.5 shrink-0" :class="activeTab === 'identitas' ? 'text-brand-600' : 'text-gray-300'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+            <button type="button" @click="activeTab = 'kontak'" :class="activeTab === 'kontak' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-gray-50 border-gray-200 text-gray-600'" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border transition">
+                <span class="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center shrink-0" :class="activeTab === 'kontak' ? 'text-blue-700 border-blue-200' : 'text-gray-400'">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                </span>
+                <span class="flex-1 text-left">Kontak & Lokasi</span>
+                <svg class="w-3.5 h-3.5 shrink-0" :class="activeTab === 'kontak' ? 'text-blue-600' : 'text-gray-300'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+            <button type="button" @click="activeTab = 'sirkulasi'" :class="activeTab === 'sirkulasi' ? 'bg-amber-50 border-amber-300 text-amber-800' : 'bg-gray-50 border-gray-200 text-gray-600'" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border transition">
+                <span class="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center shrink-0" :class="activeTab === 'sirkulasi' ? 'text-amber-700 border-amber-200' : 'text-gray-400'">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </span>
+                <span class="flex-1 text-left">Jam & Sirkulasi</span>
+                <svg class="w-3.5 h-3.5 shrink-0" :class="activeTab === 'sirkulasi' ? 'text-amber-600' : 'text-gray-300'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+            <button type="button" @click="activeTab = 'tampilan'" :class="activeTab === 'tampilan' ? 'bg-purple-50 border-purple-300 text-purple-700' : 'bg-gray-50 border-gray-200 text-gray-600'" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border transition">
+                <span class="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center shrink-0" :class="activeTab === 'tampilan' ? 'text-purple-700 border-purple-200' : 'text-gray-400'">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </span>
+                <span class="flex-1 text-left">Tampilan OPAC</span>
+                <svg class="w-3.5 h-3.5 shrink-0" :class="activeTab === 'tampilan' ? 'text-purple-600' : 'text-gray-300'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+            <button type="button" @click="activeTab = 'server'" :class="activeTab === 'server' ? 'bg-emerald-50 border-emerald-300 text-emerald-700' : 'bg-gray-50 border-gray-200 text-gray-600'" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border transition">
+                <span class="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center shrink-0" :class="activeTab === 'server' ? 'text-emerald-700 border-emerald-200' : 'text-gray-400'">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+                </span>
+                <span class="flex-1 text-left">Info Sistem</span>
+                <svg class="w-3.5 h-3.5 shrink-0" :class="activeTab === 'server' ? 'text-emerald-600' : 'text-gray-300'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+        </div>
     </div>
 
     <form action="{{ route('admin.pengaturan.update') }}" method="POST" class="space-y-6 text-xs">
         @csrf
 
-        <div x-show="activeTab === 'identitas'" class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm p-6 sm:p-8 space-y-6">
+        <div x-show="activeTab === 'identitas'" class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm p-4 sm:p-8 space-y-6">
             <div class="border-b border-gray-100 pb-3 flex items-center gap-2">
                 <div class="w-8 h-8 rounded-xl bg-brand-50 border border-brand-200 text-brand-700 flex items-center justify-center font-bold">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
@@ -82,7 +123,7 @@
             </div>
         </div>
 
-        <div x-show="activeTab === 'kontak'" x-cloak class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm p-6 sm:p-8 space-y-6">
+        <div x-show="activeTab === 'kontak'" x-cloak class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm p-4 sm:p-8 space-y-6">
             <div class="border-b border-gray-100 pb-3 flex items-center gap-2">
                 <div class="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center font-bold">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -123,7 +164,7 @@
             </div>
         </div>
 
-        <div x-show="activeTab === 'sirkulasi'" x-cloak class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm p-6 sm:p-8 space-y-6">
+        <div x-show="activeTab === 'sirkulasi'" x-cloak class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm p-4 sm:p-8 space-y-6">
             <div class="border-b border-gray-100 pb-3 flex items-center gap-2">
                 <div class="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center font-bold">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -184,7 +225,7 @@
             </div>
         </div>
 
-        <div x-show="activeTab === 'tampilan'" x-cloak class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm p-6 sm:p-8 space-y-6">
+        <div x-show="activeTab === 'tampilan'" x-cloak class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm p-4 sm:p-8 space-y-6">
             <div class="border-b border-gray-100 pb-3 flex items-center gap-2">
                 <div class="w-8 h-8 rounded-xl bg-purple-50 border border-purple-200 text-purple-700 flex items-center justify-center font-bold">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -217,7 +258,7 @@
             </div>
         </div>
 
-        <div x-show="activeTab === 'server'" x-cloak class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm p-6 sm:p-8 space-y-6">
+        <div x-show="activeTab === 'server'" x-cloak class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm p-4 sm:p-8 space-y-6">
             <div class="border-b border-gray-100 pb-3 flex items-center gap-2">
                 <div class="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center font-bold">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
@@ -266,9 +307,9 @@
             </div>
         </div>
 
-        <div class="bg-white p-4 rounded-2xl border-2 border-gray-200 shadow-sm flex items-center justify-between">
+        <div class="bg-white p-4 rounded-2xl border-2 border-gray-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <p class="text-[11px] text-gray-500 font-medium">Pastikan data identitas dan kebijakan sirkulasi sudah benar sebelum disimpan.</p>
-            <button type="submit" class="px-7 py-2.5 bg-brand-700 text-white font-extrabold text-xs rounded-xl hover:bg-brand-800 transition shadow-sm flex items-center gap-2">
+            <button type="submit" class="w-full sm:w-auto px-7 py-2.5 bg-brand-700 text-white font-extrabold text-xs rounded-xl hover:bg-brand-800 transition shadow-sm flex items-center justify-center gap-2 shrink-0">
                 <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                 <span>Simpan Perubahan Pengaturan</span>
             </button>

@@ -471,6 +471,13 @@ function detailBukuPage() {
     return {
         openPetaRak: false,
         openLoanModal: false,
+        init() {
+            this.$watch('openLoanModal', (val) => this.syncBodyScrollLock());
+            this.$watch('openPetaRak', (val) => this.syncBodyScrollLock());
+        },
+        syncBodyScrollLock() {
+            document.body.style.overflow = (this.openLoanModal || this.openPetaRak) ? 'hidden' : '';
+        },
         loanData: {
             buku_id: '{{ $buku->id }}',
             nama_peminjam: '',
