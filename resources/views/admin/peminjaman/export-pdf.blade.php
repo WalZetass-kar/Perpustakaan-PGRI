@@ -8,7 +8,7 @@
     <style>
         @page {
             size: A4 portrait;
-            margin: 12mm 12mm;
+            margin: 12mm 15mm 28mm 15mm;
         }
 
         * {
@@ -227,7 +227,7 @@
         }
 
         .signature-section {
-            margin-top: 24px;
+            margin-top: 36px;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
@@ -236,26 +236,39 @@
             font-size: 9.5pt;
         }
 
-        .sig-box {
+        .sig-col {
             text-align: center;
-            width: 220px;
+            width: 260px;
+        }
+
+        .sig-header {
+            height: 54px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            line-height: 1.35;
         }
 
         .sig-space {
-            height: 55px;
+            height: 60px;
+        }
+
+        .sig-footer {
+            line-height: 1.3;
         }
 
         .sig-name {
             font-weight: bold;
             text-decoration: underline;
             display: block;
+            font-size: 9.5pt;
         }
 
         .sig-nip {
             font-size: 8.5pt;
             color: #334155;
             display: block;
-            margin-top: 1px;
+            margin-top: 2px;
         }
 
         @media print {
@@ -394,20 +407,28 @@
         </table>
 
         <div class="signature-section">
-            <div class="sig-box">
-                <span>Petugas Administrasi Perpustakaan,</span>
+            <div class="sig-col">
+                <div class="sig-header">
+                    <div>Petugas Administrasi Perpustakaan,</div>
+                </div>
                 <div class="sig-space"></div>
-                <span class="sig-name">{{ auth()->user()->name ?? 'Petugas Perpustakaan' }}</span>
-                <span class="sig-nip">Admin Sirkulasi</span>
+                <div class="sig-footer">
+                    <span class="sig-name">{{ auth()->user()->name ?? 'Administrator Sekolah' }}</span>
+                    <span class="sig-nip">Admin Sirkulasi</span>
+                </div>
             </div>
 
-            <div class="sig-box">
-                <span>Pekanbaru, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
-                <span style="display: block; margin-top: 2px;">Mengetahui,</span>
-                <strong style="display: block; margin-top: 2px;">Kepala Perpustakaan</strong>
+            <div class="sig-col">
+                <div class="sig-header">
+                    <div>Pekanbaru, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</div>
+                    <div>Mengetahui,</div>
+                    <div style="font-weight: bold;">Kepala Perpustakaan</div>
+                </div>
                 <div class="sig-space"></div>
-                <span class="sig-name">{{ $pengaturan['kepala_perpustakaan'] ?? 'Dra. Hj. Perpustakaan' }}</span>
-                <span class="sig-nip">NIP. {{ $pengaturan['nip_kepala_perpustakaan'] ?? '-' }}</span>
+                <div class="sig-footer">
+                    <span class="sig-name">{{ $pengaturan['kepala_perpustakaan'] ?? 'Dra. Hj. Nurhayati, M.Pd' }}</span>
+                    <span class="sig-nip">NIP. {{ $pengaturan['nip_kepala_perpustakaan'] ?? '19750812 200212 2 003' }}</span>
+                </div>
             </div>
         </div>
     </div>

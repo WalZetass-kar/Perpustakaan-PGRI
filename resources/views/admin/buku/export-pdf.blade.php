@@ -8,7 +8,7 @@
     <style>
         @page {
             size: A4 portrait;
-            margin: 12mm 12mm;
+            margin: 12mm 15mm 28mm 15mm;
         }
 
         * {
@@ -208,7 +208,7 @@
         }
 
         .signature-section {
-            margin-top: 24px;
+            margin-top: 36px;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
@@ -217,26 +217,39 @@
             font-size: 9.5pt;
         }
 
-        .sig-box {
+        .sig-col {
             text-align: center;
-            width: 220px;
+            width: 260px;
+        }
+
+        .sig-header {
+            height: 54px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            line-height: 1.35;
         }
 
         .sig-space {
-            height: 55px;
+            height: 60px;
+        }
+
+        .sig-footer {
+            line-height: 1.3;
         }
 
         .sig-name {
             font-weight: bold;
             text-decoration: underline;
             display: block;
+            font-size: 9.5pt;
         }
 
         .sig-nip {
             font-size: 8.5pt;
             color: #334155;
             display: block;
-            margin-top: 1px;
+            margin-top: 2px;
         }
 
         @media print {
@@ -319,12 +332,12 @@
                 <tr>
                     <th style="width: 25px;">No</th>
                     <th style="text-align: left;">Judul Buku</th>
-                    <th style="width: 80px;">ISBN</th>
-                    <th style="width: 110px; text-align: left;">Penulis</th>
-                    <th style="width: 100px; text-align: left;">Penerbit</th>
-                    <th style="width: 45px;">Tahun</th>
-                    <th style="width: 85px; text-align: left;">Kategori</th>
-                    <th style="width: 40px;">Total</th>
+                    <th style="width: 85px;">ISBN</th>
+                    <th style="width: 120px; text-align: left;">Penulis</th>
+                    <th style="width: 110px; text-align: left;">Penerbit</th>
+                    <th style="width: 40px;">Thn</th>
+                    <th style="width: 95px; text-align: left;">Kategori</th>
+                    <th style="width: 45px;">Total</th>
                 </tr>
             </thead>
             <tbody>
@@ -333,38 +346,56 @@
                         $total = (int) $buku->total_quantity;
                     @endphp
                     <tr>
-                        <td style="text-align: center; font-weight: bold;">{{ $idx + 1 }}</td>
+                        <td style="text-align: center; font-weight: bold; color: #64748b;">{{ $idx + 1 }}</td>
                         <td style="font-weight: bold; color: #0f172a;">{{ $buku->judul }}</td>
                         <td style="text-align: center; font-family: monospace; font-size: 7.5pt;">{{ $buku->isbn ?? '-' }}</td>
                         <td>{{ $buku->penulis->nama ?? '-' }}</td>
                         <td>{{ $buku->penerbit->nama ?? '-' }}</td>
                         <td style="text-align: center;">{{ $buku->tahun_terbit ?? '-' }}</td>
                         <td>{{ $buku->kategori->nama ?? 'Umum' }}</td>
-                        <td style="text-align: center; font-weight: bold;">{{ $total }}</td>
+                        <td style="text-align: center; font-weight: bold; color: #0f172a;">{{ $total }}</td>
                     </tr>
                 @empty
                     <tr>
                         <td colspan="8" style="text-align: center; padding: 20px; color: #94a3b8;">Tidak ada data buku yang terdaftar di sistem.</td>
                     </tr>
                 @endforelse
+                @if($bukuItems->count() > 0)
+                    <tr style="background-color: #e2e8f0; font-weight: bold; border-top: 2px solid #881337;">
+                        <td colspan="7" style="text-align: center; font-weight: 800; text-transform: uppercase; font-size: 8pt; color: #0f172a;">
+                            Total Rekapitulasi Koleksi Buku ({{ number_format($totalJudul, 0, ',', '.') }} Judul)
+                        </td>
+                        <td style="text-align: center; font-weight: 900; color: #881337; font-size: 8.5pt;">
+                            {{ number_format($totalEksemplar, 0, ',', '.') }}
+                        </td>
+                    </tr>
+                @endif
             </tbody>
         </table>
 
         <div class="signature-section">
-            <div class="sig-box">
-                <span>Petugas Administrasi Perpustakaan,</span>
+            <div class="sig-col">
+                <div class="sig-header">
+                    <div>Petugas Administrasi Perpustakaan,</div>
+                </div>
                 <div class="sig-space"></div>
-                <span class="sig-name">{{ auth()->user()->name ?? 'Petugas Perpustakaan' }}</span>
-                <span class="sig-nip">Admin Sirkulasi</span>
+                <div class="sig-footer">
+                    <span class="sig-name">{{ auth()->user()->name ?? 'Administrator Sekolah' }}</span>
+                    <span class="sig-nip">Admin Sirkulasi</span>
+                </div>
             </div>
 
-            <div class="sig-box">
-                <span>Pekanbaru, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
-                <span style="display: block; margin-top: 2px;">Mengetahui,</span>
-                <strong style="display: block; margin-top: 2px;">Kepala Perpustakaan</strong>
+            <div class="sig-col">
+                <div class="sig-header">
+                    <div>Pekanbaru, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</div>
+                    <div>Mengetahui,</div>
+                    <div style="font-weight: bold;">Kepala Perpustakaan</div>
+                </div>
                 <div class="sig-space"></div>
-                <span class="sig-name">{{ $pengaturan['kepala_perpustakaan'] ?? 'Dra. Hj. Perpustakaan' }}</span>
-                <span class="sig-nip">NIP. {{ $pengaturan['nip_kepala_perpustakaan'] ?? '-' }}</span>
+                <div class="sig-footer">
+                    <span class="sig-name">{{ $pengaturan['kepala_perpustakaan'] ?? 'Dra. Hj. Nurhayati, M.Pd' }}</span>
+                    <span class="sig-nip">NIP. {{ $pengaturan['nip_kepala_perpustakaan'] ?? '19750812 200212 2 003' }}</span>
+                </div>
             </div>
         </div>
     </div>

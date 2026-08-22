@@ -137,13 +137,13 @@
                 </div>
             </div>
             <div class="flex flex-wrap items-center gap-2 justify-end shrink-0">
-                <a href="{{ route('admin.buku.export.excel') }}" class="hidden lg:flex px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm items-center gap-1.5 shrink-0" title="Export seluruh data buku ke format Excel">
+                <a href="{{ route('admin.buku.export.excel') }}" class="px-3 sm:px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Export seluruh data buku ke format Excel">
                     <i class="fa-solid fa-file-excel"></i>
-                    <span>Export Excel</span>
+                    <span class="hidden sm:inline">Export Excel</span>
                 </a>
-                <a href="{{ route('admin.buku.export.pdf') }}" target="_blank" class="hidden lg:flex px-3.5 py-2 bg-rose-700 hover:bg-rose-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm items-center gap-1.5 shrink-0" title="Cetak / Simpan Laporan PDF Resmi">
+                <a href="{{ route('admin.buku.export.pdf') }}" target="_blank" class="px-3 sm:px-3.5 py-2 bg-rose-700 hover:bg-rose-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Cetak / Simpan Laporan PDF Resmi">
                     <i class="fa-solid fa-file-pdf"></i>
-                    <span>Cetak / PDF</span>
+                    <span class="hidden sm:inline">Cetak / PDF</span>
                 </a>
                 <button @click="addRakId = ''; addLaciId = ''; openAddModal = true" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-2 shrink-0">
                     <i class="fa-solid fa-plus text-emerald-300"></i>
