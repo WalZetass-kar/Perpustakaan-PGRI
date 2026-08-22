@@ -207,25 +207,6 @@
             background-color: #f8fafc;
         }
 
-        .badge-status {
-            display: inline-block;
-            padding: 1.5px 5px;
-            border-radius: 4px;
-            font-size: 7pt;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-        .badge-tersedia {
-            background-color: #ecfdf5;
-            color: #065f46;
-            border: 1px solid #a7f3d0;
-        }
-        .badge-habis {
-            background-color: #fff1f2;
-            color: #9f1239;
-            border: 1px solid #fecdd3;
-        }
-
         .signature-section {
             margin-top: 24px;
             display: flex;
@@ -337,53 +318,33 @@
             <thead>
                 <tr>
                     <th style="width: 25px;">No</th>
-                    <th style="text-align: left;">Judul Buku &amp; Penulis</th>
+                    <th style="text-align: left;">Judul Buku</th>
                     <th style="width: 80px;">ISBN</th>
-                    <th style="width: 100px; text-align: left;">Penerbit / Thn</th>
-                    <th style="width: 80px; text-align: left;">Kategori</th>
-                    <th style="width: 85px; text-align: left;">Lokasi Rak/Laci</th>
-                    <th style="width: 35px;">Tot</th>
-                    <th style="width: 35px;">Ada</th>
-                    <th style="width: 65px;">Status</th>
+                    <th style="width: 110px; text-align: left;">Penulis</th>
+                    <th style="width: 100px; text-align: left;">Penerbit</th>
+                    <th style="width: 45px;">Tahun</th>
+                    <th style="width: 85px; text-align: left;">Kategori</th>
+                    <th style="width: 40px;">Total</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($bukuItems as $idx => $buku)
                     @php
-                        $tersedia = (int) $buku->available_quantity;
                         $total = (int) $buku->total_quantity;
-                        $rakName = $buku->rak ? ($buku->rak->kode_rak) : '-';
-                        $laciName = $buku->laci ? $buku->laci->nama_laci : ($buku->rak ? 'Laci 1' : '-');
                     @endphp
                     <tr>
                         <td style="text-align: center; font-weight: bold;">{{ $idx + 1 }}</td>
-                        <td>
-                            <div style="font-weight: bold; color: #0f172a; line-height: 1.2;">{{ $buku->judul }}</div>
-                            <div style="font-size: 7.5pt; color: #64748b; margin-top: 1px;">Penulis: {{ $buku->penulis->nama ?? '-' }}</div>
-                        </td>
+                        <td style="font-weight: bold; color: #0f172a;">{{ $buku->judul }}</td>
                         <td style="text-align: center; font-family: monospace; font-size: 7.5pt;">{{ $buku->isbn ?? '-' }}</td>
-                        <td>
-                            <div>{{ $buku->penerbit->nama ?? '-' }}</div>
-                            <div style="font-size: 7.5pt; color: #64748b;">Thn: {{ $buku->tahun_terbit ?? '-' }}</div>
-                        </td>
+                        <td>{{ $buku->penulis->nama ?? '-' }}</td>
+                        <td>{{ $buku->penerbit->nama ?? '-' }}</td>
+                        <td style="text-align: center;">{{ $buku->tahun_terbit ?? '-' }}</td>
                         <td>{{ $buku->kategori->nama ?? 'Umum' }}</td>
-                        <td>
-                            <strong style="color: #881337;">{{ $rakName }}</strong>
-                            <div style="font-size: 7pt; color: #64748b;">{{ $laciName }}</div>
-                        </td>
                         <td style="text-align: center; font-weight: bold;">{{ $total }}</td>
-                        <td style="text-align: center; font-weight: bold; color: {{ $tersedia > 0 ? '#059669' : '#dc2626' }};">{{ $tersedia }}</td>
-                        <td style="text-align: center;">
-                            @if($tersedia > 0)
-                                <span class="badge-status badge-tersedia">Tersedia</span>
-                            @else
-                                <span class="badge-status badge-habis">Dipinjam</span>
-                            @endif
-                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9" style="text-align: center; padding: 20px; color: #94a3b8;">Tidak ada data buku yang terdaftar di sistem.</td>
+                        <td colspan="8" style="text-align: center; padding: 20px; color: #94a3b8;">Tidak ada data buku yang terdaftar di sistem.</td>
                     </tr>
                 @endforelse
             </tbody>
