@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Beranda - ' . ($pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI'))
+@section('title', 'Perpustakaan Digital & Katalog OPAC ' . ($pengaturan['nama_sekolah'] ?? 'SMK PGRI Pekanbaru'))
+@section('meta_description', 'Portal resmi ' . ($pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI Pekanbaru') . '. Telusuri koleksi buku dan modul kejuruan lewat katalog OPAC, cek lokasi rak dan laci, serta ajukan peminjaman secara online.')
+@section('og_type', 'website')
 
 @section('content')
 

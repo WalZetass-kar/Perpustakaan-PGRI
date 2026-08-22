@@ -207,25 +207,6 @@
             background-color: #f8fafc;
         }
 
-        .badge-status {
-            display: inline-block;
-            padding: 1.5px 5px;
-            border-radius: 4px;
-            font-size: 7pt;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-        .badge-tersedia {
-            background-color: #ecfdf5;
-            color: #065f46;
-            border: 1px solid #a7f3d0;
-        }
-        .badge-habis {
-            background-color: #fff1f2;
-            color: #9f1239;
-            border: 1px solid #fecdd3;
-        }
-
         .signature-section {
             margin-top: 36px;
             display: flex;
@@ -352,10 +333,10 @@
                     <th style="width: 25px;">No</th>
                     <th style="text-align: left;">Judul Buku</th>
                     <th style="width: 85px;">ISBN</th>
-                    <th style="width: 75px;">Untuk Kelas</th>
-                    <th style="width: 130px; text-align: left;">Penulis</th>
-                    <th style="width: 120px; text-align: left;">Penerbit</th>
+                    <th style="width: 120px; text-align: left;">Penulis</th>
+                    <th style="width: 110px; text-align: left;">Penerbit</th>
                     <th style="width: 40px;">Thn</th>
+                    <th style="width: 95px; text-align: left;">Kategori</th>
                     <th style="width: 45px;">Total</th>
                 </tr>
             </thead>
@@ -363,16 +344,15 @@
                 @forelse($bukuItems as $idx => $buku)
                     @php
                         $total = (int) $buku->total_quantity;
-                        $kelasName = $buku->kelas ? $buku->kelas->nama_kelas : '-';
                     @endphp
                     <tr>
                         <td style="text-align: center; font-weight: bold; color: #64748b;">{{ $idx + 1 }}</td>
                         <td style="font-weight: bold; color: #0f172a;">{{ $buku->judul }}</td>
                         <td style="text-align: center; font-family: monospace; font-size: 7.5pt;">{{ $buku->isbn ?? '-' }}</td>
-                        <td style="text-align: center; font-weight: bold; color: #475569;">{{ $kelasName }}</td>
                         <td>{{ $buku->penulis->nama ?? '-' }}</td>
                         <td>{{ $buku->penerbit->nama ?? '-' }}</td>
                         <td style="text-align: center;">{{ $buku->tahun_terbit ?? '-' }}</td>
+                        <td>{{ $buku->kategori->nama ?? 'Umum' }}</td>
                         <td style="text-align: center; font-weight: bold; color: #0f172a;">{{ $total }}</td>
                     </tr>
                 @empty

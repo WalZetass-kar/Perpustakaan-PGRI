@@ -243,16 +243,22 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-gray-100">
             <div>
                 <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Total Sirkulasi Buku</span>
+                <p class="text-[11px] text-gray-400 mt-0.5">Jumlah eksemplar buku yang dipinjam &amp; dikembalikan per periode.</p>
                 <div class="flex items-baseline gap-2 mt-1">
                     <span class="text-3xl sm:text-4xl font-black text-gray-900 tracking-tight"
                           x-text="(chartPeriod === 'monthly' ? monthlyData.loans.reduce((a,b)=>a+b, 0) : yearlyData.loans.reduce((a,b)=>a+b, 0)) + ' Peminjaman'"></span>
                 </div>
-                <div class="flex items-center gap-2 mt-1">
+                <div class="flex flex-wrap items-center gap-2 mt-1">
                     <span class="text-xs font-bold text-emerald-600 flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span x-text="chartPeriod === 'monthly' ? '+' + monthlyData.returns.reduce((a,b)=>a+b, 0) + ' Pengembalian (Tahun ' + monthlyData.year + ')' : '+' + yearlyData.returns.reduce((a,b)=>a+b, 0) + ' Pengembalian (5 Tahun)'"></span>
                     </span>
-                    <span class="text-xs text-gray-400 font-medium">• Database Terverifikasi</span>
+                    @if($chartMonthly['busiest_month'])
+                        <span x-show="chartPeriod === 'monthly'" x-cloak class="text-[10.5px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5 flex items-center gap-1">
+                            <i class="fa-solid fa-fire text-amber-500"></i>
+                            <span>Bulan Tersibuk: {{ $chartMonthly['busiest_month'] }}</span>
+                        </span>
+                    @endif
                 </div>
             </div>
 
@@ -286,6 +292,46 @@
         <div class="h-72 sm:h-80 w-full relative">
             <canvas id="sirkulasiLineChart"></canvas>
         </div>
+    </div>
+
+    @php
+        // Warna diurutkan dari yang paling menonjol untuk peringkat teratas.
+        $kategoriWarna = ['#B91C1C', '#D97706', '#059669', '#0284C7', '#7C3AED', '#9CA3AF'];
+    @endphp
+    <div class="bg-white rounded-3xl border-2 border-gray-200 shadow-sm p-6 sm:p-8 space-y-5">
+        @if($kategoriChart->isEmpty())
+            <div class="py-10 text-center text-xs text-gray-400 font-semibold">
+                <i class="fa-regular fa-chart-bar text-2xl text-gray-300 block mb-2"></i>
+                Belum ada data peminjaman yang tercatat untuk ditampilkan.
+            </div>
+        @else
+            <div class="p-4 rounded-2xl bg-brand-50/70 border border-brand-100 flex items-start gap-3">
+                <i class="fa-solid fa-circle-info text-brand-600 mt-0.5"></i>
+                <p class="text-xs sm:text-[13px] text-gray-700 font-semibold leading-relaxed">
+                    <span class="font-black text-brand-700">{{ $kategoriTerpopuler->nama }}</span>
+                    paling sering dipinjam dengan
+                    <span class="font-black text-gray-900">{{ number_format($kategoriTerpopuler->total) }} eksemplar</span>
+                    ({{ $kategoriBorrowTotal > 0 ? round(($kategoriTerpopuler->total / $kategoriBorrowTotal) * 100, 1) : 0 }}% dari total {{ number_format($kategoriBorrowTotal) }} peminjaman sepanjang waktu).
+                </p>
+            </div>
+
+            <div class="space-y-4">
+                @foreach($kategoriChart as $i => $k)
+                    <div>
+                        <div class="flex items-center justify-between text-xs mb-1.5 gap-2">
+                            <span class="font-bold text-gray-800 flex items-center gap-2 min-w-0">
+                                <span class="w-5 h-5 shrink-0 rounded-full flex items-center justify-center text-[10px] font-black text-white" style="background-color: {{ $kategoriWarna[$i] ?? '#9CA3AF' }}">{{ $i + 1 }}</span>
+                                <span class="truncate">{{ $k['nama'] }}</span>
+                            </span>
+                            <span class="font-black text-gray-900 shrink-0">{{ number_format($k['total']) }} <span class="text-gray-400 font-bold">eks &middot; {{ $k['persen'] }}%</span></span>
+                        </div>
+                        <div class="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full transition-all duration-700" style="width: {{ max($k['persen'], 2) }}%; background-color: {{ $kategoriWarna[$i] ?? '#9CA3AF' }}"></div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
