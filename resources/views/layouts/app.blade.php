@@ -1,12 +1,173 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="id" class="scroll-smooth" x-data="{ mobileMenuOpen: false }">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI')</title>
+    @php
+        /*
+        |----------------------------------------------------------------------
+        | Konfigurasi SEO terpusat
+        |----------------------------------------------------------------------
+        | Setiap halaman publik boleh menimpa nilai di bawah lewat @section:
+        |   title, meta_description, meta_keywords, robots, canonical,
+        |   og_type, og_image, og_image_alt
+        | dan menambah structured data lewat @push('schema').
+        */
+        $seoSite   = trim($pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI Pekanbaru');
+        $seoSchool = trim($pengaturan['nama_sekolah'] ?? 'SMK PGRI Pekanbaru');
+        $seoHome   = url('/');
 
+        /*
+        | Laravel meng-escape isi @section('nama', 'nilai') saat disimpan, jadi
+        | nilainya harus di-decode dulu -- kalau tidak, {{ }} akan meng-escape
+        | untuk kedua kalinya dan "&" berubah jadi "&amp;amp;".
+        */
+        $seoSection = fn ($name) => trim(html_entity_decode(
+            $__env->yieldContent($name), ENT_QUOTES | ENT_HTML5, 'UTF-8'
+        ));
+
+        // Judul halaman + suffix nama perpustakaan (tidak digandakan bila sudah ada).
+        $seoPageTitle = $seoSection('title');
+        $seoTitle = $seoPageTitle === ''
+            ? $seoSite . ' - ' . $seoSchool
+            : (\Illuminate\Support\Str::contains($seoPageTitle, $seoSite)
+                ? $seoPageTitle
+                : $seoPageTitle . ' | ' . $seoSite);
+
+        $seoDescription = $seoSection('meta_description');
+        if ($seoDescription === '') {
+            $seoDescription = 'Katalog OPAC ' . $seoSite . ' ' . $seoSchool . '. Telusuri koleksi buku, modul kejuruan, dan referensi digital lengkap dengan lokasi rak serta pengajuan peminjaman online.';
+        }
+        // Dipotong di batas kata supaya cuplikan di Google tidak terputus di tengah kata.
+        $seoDescription = \Illuminate\Support\Str::limit(
+            trim(preg_replace('/\s+/', ' ', strip_tags($seoDescription))), 160, '...', true
+        );
+
+        $seoKeywords = $seoSection('meta_keywords');
+        if ($seoKeywords === '') {
+            $seoKeywords = 'perpustakaan sekolah, katalog opac, perpustakaan digital, ' . mb_strtolower($seoSchool) . ', peminjaman buku online, koleksi modul kejuruan';
+        }
+
+        $seoRobots    = $seoSection('robots') ?: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+        $seoCanonical = $seoSection('canonical') ?: url()->current();
+        $seoImage     = $seoSection('og_image') ?: asset('images/logo.png');
+        $seoImageAlt  = $seoSection('og_image_alt') ?: 'Logo ' . $seoSite;
+        $seoType      = $seoSection('og_type') ?: 'website';
+
+        /*
+        | Data kontak hanya ikut ke structured data kalau memang tersimpan di
+        | tabel pengaturan -- jangan pernah mengirim data placeholder ke Google.
+        */
+        $seoAddress = trim($pengaturan['alamat'] ?? '');
+        $seoEmail   = trim($pengaturan['email_perpustakaan'] ?? '');
+        $seoPhone   = trim($pengaturan['telepon'] ?? '');
+
+        $seoOrganization = array_filter([
+            '@type'         => ['Library', 'EducationalOrganization'],
+            '@id'           => $seoHome . '#organization',
+            'name'          => $seoSite,
+            'alternateName' => $seoSchool,
+            'url'           => $seoHome,
+            'logo'          => asset('images/logo.png'),
+            'image'         => asset('images/logo.png'),
+            'description'   => 'Perpustakaan digital ' . $seoSchool . ' dengan layanan katalog OPAC, penelusuran lokasi rak dan laci, serta sirkulasi peminjaman buku.',
+            'email'         => $seoEmail ?: null,
+            'telephone'     => $seoPhone ?: null,
+            'address'       => $seoAddress ? [
+                '@type'          => 'PostalAddress',
+                'streetAddress'  => $seoAddress,
+                'addressCountry' => 'ID',
+            ] : null,
+            'parentOrganization' => [
+                '@type' => 'EducationalOrganization',
+                'name'  => $seoSchool,
+            ],
+        ]);
+
+        $seoWebsite = [
+            '@type'      => 'WebSite',
+            '@id'        => $seoHome . '#website',
+            'url'        => $seoHome,
+            'name'       => $seoSite,
+            'inLanguage' => 'id-ID',
+            'publisher'  => ['@id' => $seoHome . '#organization'],
+            // Sitelinks search box: Google boleh mengarahkan pencarian ke OPAC.
+            'potentialAction' => [
+                '@type'  => 'SearchAction',
+                'target' => [
+                    '@type'       => 'EntryPoint',
+                    'urlTemplate' => route('katalog') . '?search={search_term_string}',
+                ],
+                'query-input' => 'required name=search_term_string',
+            ],
+        ];
+
+        $seoJsonFlags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG;
+    @endphp
+
+    {{-- ============================ Dasar ============================ --}}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+
+    {{-- ====================== Title & deskripsi ====================== --}}
+    <title>{{ $seoTitle }}</title>
+    <meta name="description" content="{{ $seoDescription }}">
+    <meta name="keywords" content="{{ $seoKeywords }}">
+    <meta name="robots" content="{{ $seoRobots }}">
+    <meta name="googlebot" content="{{ $seoRobots }}">
+    <meta name="author" content="{{ $seoSchool }}">
+    <meta name="publisher" content="{{ $seoSchool }}">
+    <meta name="language" content="id">
+    <meta name="geo.region" content="ID-RI">
+    <meta name="geo.placename" content="Pekanbaru">
+
+    <link rel="canonical" href="{{ $seoCanonical }}">
+    <link rel="alternate" hreflang="id" href="{{ $seoCanonical }}">
+    <link rel="alternate" hreflang="x-default" href="{{ $seoCanonical }}">
+
+    {{-- ==================== Open Graph (Facebook/WA) ================== --}}
+    <meta property="og:type" content="{{ $seoType }}">
+    <meta property="og:site_name" content="{{ $seoSite }}">
+    <meta property="og:title" content="{{ $seoTitle }}">
+    <meta property="og:description" content="{{ $seoDescription }}">
+    <meta property="og:url" content="{{ $seoCanonical }}">
+    <meta property="og:image" content="{{ $seoImage }}">
+    <meta property="og:image:secure_url" content="{{ $seoImage }}">
+    <meta property="og:image:alt" content="{{ $seoImageAlt }}">
+    <meta property="og:locale" content="id_ID">
+    @hasSection('og_extra')
+        @yield('og_extra')
+    @endif
+
+    {{-- ============================ Twitter =========================== --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $seoTitle }}">
+    <meta name="twitter:description" content="{{ $seoDescription }}">
+    <meta name="twitter:image" content="{{ $seoImage }}">
+    <meta name="twitter:image:alt" content="{{ $seoImageAlt }}">
+
+    {{-- ======================== Ikon & PWA-ish ======================== --}}
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
+    <meta name="theme-color" content="#b91c1c">
+    <meta name="color-scheme" content="light">
+    <meta name="application-name" content="{{ $seoSite }}">
+    <meta name="apple-mobile-web-app-title" content="{{ $seoSite }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    {{-- =================== Structured data (JSON-LD) ================== --}}
+    <script type="application/ld+json">{!! json_encode(['@context' => 'https://schema.org', '@graph' => [$seoOrganization, $seoWebsite]], $seoJsonFlags) !!}</script>
+    @stack('schema')
+
+    {{-- ================= Performance: hint koneksi CDN ================ --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://unpkg.com">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -36,16 +197,13 @@
         }
     </script>
 
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script defer src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         [x-cloak] { display: none !important; }
@@ -62,6 +220,9 @@
             animation: skeleton-shimmer 1.5s infinite ease-in-out;
         }
     </style>
+
+    @stack('styles')
+    @stack('head')
 </head>
 <body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen font-sans relative selection:bg-brand-700 selection:text-white">
 
@@ -174,7 +335,7 @@
         @yield('content')
     </main>
 
-    <footer class="bg-white border-t border-gray-200 py-12 text-xs">
+    <footer class="bg-black border-t border-white/10 py-12 text-xs">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
 
@@ -182,27 +343,27 @@
                     <div class="flex items-center gap-3">
                         <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI" class="w-10 h-10 object-contain drop-shadow-xs">
                         <div>
-                            <span class="text-sm font-black text-gray-900 block">{{ $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI Pekanbaru' }}</span>
-                            <span class="text-[10px] text-gray-500 font-bold uppercase">{{ $pengaturan['nama_sekolah'] ?? 'SMK PGRI Pekanbaru' }}</span>
+                            <span class="text-sm font-black text-white block">{{ $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI Pekanbaru' }}</span>
+                            <span class="text-[10px] text-gray-400 font-bold uppercase">{{ $pengaturan['nama_sekolah'] ?? 'SMK PGRI Pekanbaru' }}</span>
                         </div>
                     </div>
-                    <p class="text-gray-500 text-xs leading-relaxed max-w-sm">
+                    <p class="text-gray-400 text-xs leading-relaxed max-w-sm">
                         Sistem Informasi Perpustakaan Digital Sekolah (Inlislite) terintegrasi untuk katalogisasi, lokasi rak, laci, dan sirkulasi peminjaman buku.
                     </p>
                 </div>
 
                 <div class="space-y-2">
-                    <h4 class="font-bold text-gray-900 uppercase tracking-wider text-[11px]">Informasi & Layanan</h4>
-                    <ul class="space-y-1.5 text-gray-600">
-                        <li><a href="{{ route('katalog') }}" class="hover:text-brand-700 transition">Pencarian Koleksi Modul</a></li>
-                        <li><span class="text-gray-500">{{ $pengaturan['jam_operasional'] ?? 'Senin - Jumat: 07.00 - 15.30 WIB' }}</span></li>
-                        <li><span class="text-gray-500">Sirkulasi Peminjaman Hari Ini</span></li>
+                    <h4 class="font-bold text-white uppercase tracking-wider text-[11px]">Informasi & Layanan</h4>
+                    <ul class="space-y-1.5 text-gray-300">
+                        <li><a href="{{ route('katalog') }}" class="hover:text-brand-400 transition">Pencarian Koleksi Modul</a></li>
+                        <li><span class="text-gray-400">{{ $pengaturan['jam_operasional'] ?? 'Senin - Jumat: 07.00 - 15.30 WIB' }}</span></li>
+                        <li><span class="text-gray-400">Sirkulasi Peminjaman Hari Ini</span></li>
                     </ul>
                 </div>
 
                 <div class="space-y-2">
-                    <h4 class="font-bold text-gray-900 uppercase tracking-wider text-[11px]">Alamat & Kontak</h4>
-                    <p class="text-gray-600 leading-relaxed text-[11px]">
+                    <h4 class="font-bold text-white uppercase tracking-wider text-[11px]">Alamat & Kontak</h4>
+                    <p class="text-gray-400 leading-relaxed text-[11px]">
                         {{ $pengaturan['alamat'] ?? 'Jl. Pendidikan No. 45, Gedung Utama Perpustakaan SMK PGRI Pekanbaru.' }}<br>
                         Email: {{ $pengaturan['email_perpustakaan'] ?? 'perpustakaan@smkpgri.sch.id' }}<br>
                         Telp: {{ $pengaturan['telepon'] ?? '(021) 7890-1234' }}
@@ -211,10 +372,10 @@
 
             </div>
 
-            <div class="pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-gray-500 gap-3 border-t border-gray-100">
+            <div class="pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-gray-400 gap-3 border-t border-white/10">
                 <span>{{ $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI Pekanbaru' }} &copy; {{ date('Y') }}. All rights reserved.</span>
                 <div>
-                    <span class="font-medium text-gray-400">Sistem Informasi Perpustakaan Sekolah Terpadu</span>
+                    <span class="font-medium text-gray-500">Sistem Informasi Perpustakaan Sekolah Terpadu</span>
                 </div>
             </div>
         </div>

@@ -9,7 +9,7 @@
     <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm"
          x-data="{ toolOpen: {{ request()->filled('search') ? 'true' : 'false' }} }">
 
-        {{-- Desktop/tablet: search kiri, Export & Peminjaman Baru kanan --}}
+        {{-- Desktop/tablet: search kiri, Peminjaman Baru kanan --}}
         <div class="hidden sm:flex sm:flex-row items-center justify-between gap-3">
             <form action="{{ route('admin.peminjaman') }}" method="GET" class="relative w-64">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari kode, siswa, NIS..."
@@ -17,14 +17,6 @@
                 <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </form>
             <div class="flex flex-wrap items-center justify-end gap-2 shrink-0">
-                <a href="{{ route('admin.peminjaman.export.excel', array_merge(request()->all(), ['status' => 'dipinjam'])) }}" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Export Excel">
-                    <i class="fa-solid fa-file-excel"></i>
-                    <span>Excel</span>
-                </a>
-                <a href="{{ route('admin.peminjaman.export.pdf', array_merge(request()->all(), ['status' => 'dipinjam'])) }}" target="_blank" class="px-3 py-1.5 bg-rose-700 hover:bg-rose-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Cetak / PDF">
-                    <i class="fa-solid fa-file-pdf"></i>
-                    <span>Cetak / PDF</span>
-                </a>
                 <button @click="openAddModal = true" class="px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0">
                     <i class="fa-solid fa-plus text-emerald-300"></i>
                     <span>Peminjaman Baru</span>
@@ -32,12 +24,12 @@
             </div>
         </div>
 
-        {{-- Mobile: panah kiri (toggle search & export) — tombol Peminjaman Baru kanan --}}
+        {{-- Mobile: panah kiri (toggle search) — tombol Peminjaman Baru kanan --}}
         <div class="sm:hidden">
             <div class="flex items-center justify-between gap-2">
                 <button type="button" @click="toolOpen = !toolOpen"
                         class="relative w-9 h-9 shrink-0 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-600 flex items-center justify-center transition"
-                        title="Tampilkan/Sembunyikan Pencarian & Export" aria-label="Toggle Pencarian & Export">
+                        title="Tampilkan/Sembunyikan Pencarian" aria-label="Toggle Pencarian">
                     <svg class="w-4 h-4 transition-transform duration-200" :class="toolOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     @if(request()->filled('search'))
                         <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-brand-700 rounded-full border-2 border-white"></span>
@@ -50,7 +42,7 @@
                 </button>
             </div>
 
-            {{-- Panel collapsible: search di atas, Export Excel/PDF di bawahnya --}}
+            {{-- Panel collapsible: search --}}
             <div x-show="toolOpen" x-cloak
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 -translate-y-1"
@@ -58,22 +50,12 @@
                  x-transition:leave="transition ease-in duration-150"
                  x-transition:leave-start="opacity-100 translate-y-0"
                  x-transition:leave-end="opacity-0 -translate-y-1"
-                 class="mt-3 space-y-2">
+                 class="mt-3">
                 <form action="{{ route('admin.peminjaman') }}" method="GET" class="relative">
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari kode, siswa, NIS..."
                            class="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:outline-none font-medium">
                     <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </form>
-                <div class="grid grid-cols-2 gap-2">
-                    <a href="{{ route('admin.peminjaman.export.excel', array_merge(request()->all(), ['status' => 'dipinjam'])) }}" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center justify-center gap-1.5" title="Export Excel">
-                        <i class="fa-solid fa-file-excel"></i>
-                        <span>Excel</span>
-                    </a>
-                    <a href="{{ route('admin.peminjaman.export.pdf', array_merge(request()->all(), ['status' => 'dipinjam'])) }}" target="_blank" class="px-3 py-2 bg-rose-700 hover:bg-rose-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center justify-center gap-1.5" title="Cetak / PDF">
-                        <i class="fa-solid fa-file-pdf"></i>
-                        <span>Cetak / PDF</span>
-                    </a>
-                </div>
             </div>
         </div>
     </div>

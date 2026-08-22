@@ -1,6 +1,83 @@
 @extends('layouts.app')
 
-@section('title', $buku->judul . ' - ' . ($pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI'))
+@php
+    $seoBukuPenulis  = $buku->penulis->nama ?? null;
+    $seoBukuPenerbit = $buku->penerbit->nama ?? null;
+    $seoBukuKategori = $buku->kategori->nama ?? null;
+    $seoBukuUrl      = route('buku.detail', $buku->id);
+    $seoBukuCover    = $buku->cover_url ?: asset('images/logo.png');
+
+    // Sinopsis dipakai sebagai meta description; kalau kosong dirakit dari metadata buku.
+    $seoBukuDeskripsi = trim(preg_replace('/\s+/', ' ', strip_tags((string) $buku->sinopsis)));
+    if ($seoBukuDeskripsi === '') {
+        $seoBukuDeskripsi = 'Detail koleksi "' . $buku->judul . '"'
+            . ($seoBukuPenulis ? ' karya ' . $seoBukuPenulis : '')
+            . ($seoBukuPenerbit ? ', terbitan ' . $seoBukuPenerbit : '')
+            . ($buku->tahun_terbit ? ' (' . $buku->tahun_terbit . ')' : '')
+            . '. Cek ketersediaan, lokasi rak, dan ajukan peminjaman di '
+            . ($pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI Pekanbaru') . '.';
+    }
+
+    $seoBukuSchema = array_filter([
+        '@context'     => 'https://schema.org',
+        '@type'        => 'Book',
+        '@id'          => $seoBukuUrl . '#book',
+        'name'         => $buku->judul,
+        'url'          => $seoBukuUrl,
+        'inLanguage'   => 'id-ID',
+        'description'  => \Illuminate\Support\Str::limit($seoBukuDeskripsi, 300, ''),
+        'image'        => $seoBukuCover,
+        'isbn'         => $buku->isbn ?: null,
+        'datePublished'=> $buku->tahun_terbit ? (string) $buku->tahun_terbit : null,
+        'genre'        => $seoBukuKategori,
+        'author'       => $seoBukuPenulis ? ['@type' => 'Person', 'name' => $seoBukuPenulis] : null,
+        'publisher'    => $seoBukuPenerbit ? ['@type' => 'Organization', 'name' => $seoBukuPenerbit] : null,
+        'offers'       => [
+            '@type'         => 'Offer',
+            'availability'  => $buku->available_quantity > 0
+                ? 'https://schema.org/InStock'
+                : 'https://schema.org/OutOfStock',
+            'price'         => '0',
+            'priceCurrency' => 'IDR',
+            'seller'        => ['@id' => url('/') . '#organization'],
+        ],
+    ]);
+
+    $seoBukuBreadcrumb = [
+        '@context' => 'https://schema.org',
+        '@type'    => 'BreadcrumbList',
+        'itemListElement' => array_values(array_filter([
+            ['@type' => 'ListItem', 'position' => 1, 'name' => 'Beranda', 'item' => route('home')],
+            ['@type' => 'ListItem', 'position' => 2, 'name' => 'Katalog OPAC', 'item' => route('katalog')],
+            $seoBukuKategori
+                ? ['@type' => 'ListItem', 'position' => 3, 'name' => $seoBukuKategori, 'item' => route('katalog', ['kategori_id' => $buku->kategori_id])]
+                : null,
+            ['@type' => 'ListItem', 'position' => $seoBukuKategori ? 4 : 3, 'name' => $buku->judul, 'item' => $seoBukuUrl],
+        ])),
+    ];
+
+    $seoJsonFlagsBuku = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG;
+@endphp
+
+@section('title', $buku->judul . ($seoBukuPenulis ? ' - ' . $seoBukuPenulis : ''))
+@section('meta_description', $seoBukuDeskripsi)
+@section('meta_keywords', collect([$buku->judul, $seoBukuPenulis, $seoBukuPenerbit, $seoBukuKategori, $buku->isbn, 'katalog opac', 'perpustakaan sekolah'])->filter()->map(fn ($v) => mb_strtolower($v))->implode(', '))
+@section('canonical', $seoBukuUrl)
+@section('og_type', 'book')
+@section('og_image', $seoBukuCover)
+@section('og_image_alt', 'Sampul buku ' . $buku->judul)
+
+@section('og_extra')
+    @if($seoBukuPenulis)<meta property="book:author" content="{{ $seoBukuPenulis }}">@endif
+    @if($buku->isbn)<meta property="book:isbn" content="{{ $buku->isbn }}">@endif
+    @if($buku->tahun_terbit)<meta property="book:release_date" content="{{ $buku->tahun_terbit }}">@endif
+    @if($seoBukuKategori)<meta property="book:tag" content="{{ $seoBukuKategori }}">@endif
+@endsection
+
+@push('schema')
+<script type="application/ld+json">{!! json_encode($seoBukuSchema, $seoJsonFlagsBuku) !!}</script>
+<script type="application/ld+json">{!! json_encode($seoBukuBreadcrumb, $seoJsonFlagsBuku) !!}</script>
+@endpush
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6" x-data="detailBukuPage()">

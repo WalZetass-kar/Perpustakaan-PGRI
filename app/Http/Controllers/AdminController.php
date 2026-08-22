@@ -95,6 +95,52 @@ class AdminController extends Controller
             $chartYearly['returns'][] = (int) ($yearlyReturnsData[$y] ?? 0);
         }
 
+        // Bulan dengan jumlah peminjaman tertinggi tahun berjalan, untuk badge "bulan tersibuk".
+        $busiestMonthIndex = null;
+        if (max($chartMonthly['loans']) > 0) {
+            $busiestMonthIndex = array_search(max($chartMonthly['loans']), $chartMonthly['loans']);
+        }
+        $chartMonthly['busiest_month'] = $busiestMonthIndex !== null && $busiestMonthIndex !== false
+            ? $monthNames[$busiestMonthIndex]
+            : null;
+
+        /*
+        | Ranking kategori buku berdasarkan total eksemplar yang pernah
+        | dipinjam (bukan hanya jumlah transaksi) -- ini jawaban langsung
+        | untuk pertanyaan "jenis buku apa yang sering dipinjam".
+        */
+        $kategoriBorrowRaw = DB::table('peminjaman')
+            ->join('buku', 'peminjaman.buku_id', '=', 'buku.id')
+            ->join('kategori', 'buku.kategori_id', '=', 'kategori.id')
+            ->selectRaw('kategori.nama as nama, SUM(peminjaman.jumlah) as total')
+            ->groupBy('kategori.id', 'kategori.nama')
+            ->orderByDesc('total')
+            ->get();
+
+        $kategoriBorrowTotal = (int) $kategoriBorrowRaw->sum('total');
+
+        $kategoriTopN = 6;
+        $kategoriTop = $kategoriBorrowRaw->take($kategoriTopN);
+        $kategoriSisaTotal = (int) $kategoriBorrowRaw->slice($kategoriTopN)->sum('total');
+
+        $kategoriChart = $kategoriTop->map(function ($row) use ($kategoriBorrowTotal) {
+            return [
+                'nama'     => $row->nama,
+                'total'    => (int) $row->total,
+                'persen'   => $kategoriBorrowTotal > 0 ? round(($row->total / $kategoriBorrowTotal) * 100, 1) : 0,
+            ];
+        })->values();
+
+        if ($kategoriSisaTotal > 0) {
+            $kategoriChart->push([
+                'nama'   => 'Kategori Lainnya',
+                'total'  => $kategoriSisaTotal,
+                'persen' => $kategoriBorrowTotal > 0 ? round(($kategoriSisaTotal / $kategoriBorrowTotal) * 100, 1) : 0,
+            ]);
+        }
+
+        $kategoriTerpopuler = $kategoriBorrowRaw->first();
+
         $recentLoans = Peminjaman::with(['user', 'buku'])
             ->latest()
             ->take(6)
@@ -107,7 +153,7 @@ class AdminController extends Controller
 
         $recentAuditLogs = AuditLog::latest()->take(6)->get();
 
-        return view('admin.dashboard', compact('stats', 'chartMonthly', 'chartYearly', 'recentLoans', 'mostBorrowedBooks', 'recentAuditLogs'));
+        return view('admin.dashboard', compact('stats', 'chartMonthly', 'chartYearly', 'kategoriChart', 'kategoriTerpopuler', 'kategoriBorrowTotal', 'recentLoans', 'mostBorrowedBooks', 'recentAuditLogs'));
     }
 
     public function temukanBukuIndex(Request $request)
@@ -713,12 +759,12 @@ class AdminController extends Controller
         <thead>
             <tr>
                 <th style="width: 35px;">No</th>
-                <th style="width: 300px;">Judul Buku</th>
+                <th style="width: 280px;">Judul Buku</th>
                 <th style="width: 120px;">ISBN</th>
-                <th style="width: 100px;">Untuk Kelas</th>
                 <th style="width: 160px;">Penulis</th>
                 <th style="width: 150px;">Penerbit</th>
                 <th style="width: 60px;">Tahun</th>
+                <th style="width: 140px;">Kategori</th>
                 <th style="width: 80px;">Total</th>
             </tr>
         </thead>
@@ -727,16 +773,15 @@ class AdminController extends Controller
         foreach ($bukuItems as $idx => $buku) {
             $rowClass = ($idx % 2 === 1) ? ' class="row-even"' : '';
             $total = (int) $buku->total_quantity;
-            $kelasName = $buku->kelas ? $buku->kelas->nama_kelas : '-';
 
             $html .= '<tr' . $rowClass . '>
                 <td class="text-center font-bold" style="color: #64748b;">' . ($idx + 1) . '</td>
                 <td class="text-left font-bold" style="color: #0f172a;">' . e($buku->judul) . '</td>
                 <td class="text-center mso-text" style="font-family: monospace; font-size: 8.5pt;">' . e($buku->isbn ?? '-') . '</td>
-                <td class="text-center font-bold" style="color: #475569;">' . e($kelasName) . '</td>
                 <td class="text-left">' . e($buku->penulis->nama ?? '-') . '</td>
                 <td class="text-left">' . e($buku->penerbit->nama ?? '-') . '</td>
                 <td class="text-center mso-text">' . e($buku->tahun_terbit ?? '-') . '</td>
+                <td class="text-left">' . e($buku->kategori->nama ?? 'Umum') . '</td>
                 <td class="text-center font-bold mso-num" style="color: #0f172a;">' . $total . '</td>
             </tr>';
         }
