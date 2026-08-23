@@ -34,7 +34,14 @@ Route::middleware(['auth'])->group(function () {
         return redirect()->route('admin.dashboard');
     })->name('dashboard');
 
-    Route::prefix('admin')->name('admin.')->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware('role:admin,super_admin')->group(function () {
+        // `/admin` polos: arahkan ke dashboard. Karena berada di dalam grup
+        // auth, pengunjung yang belum login akan tertahan middleware dan
+        // dilempar ke halaman login, bukan mendapat 404.
+        Route::get('/', function () {
+            return redirect()->route('admin.dashboard');
+        })->name('index');
+
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         Route::get('/data-buku', [AdminController::class, 'dataBukuIndex'])->name('data-buku');
         Route::get('/data-buku/rak/{rakId}', [AdminController::class, 'dataBukuByRak'])->name('data-buku.rak')->whereNumber('rakId');

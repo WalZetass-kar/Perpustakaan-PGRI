@@ -472,7 +472,7 @@ class AdminController extends Controller
         $penulisList = Penulis::orderBy('nama', 'asc')->get();
         $penerbitList = Penerbit::orderBy('nama', 'asc')->get();
         $kategoriList = Kategori::orderBy('nama', 'asc')->get();
-        $kelasList = Kelas::orderBy('nama_kelas', 'asc')->get();
+        $kelasList = Kelas::orderByRaw('CAST(tingkat AS UNSIGNED) asc')->orderBy('nama_kelas', 'asc')->get();
         $rakList = Rak::with('laci')->orderBy('kode_rak', 'asc')->get();
 
         return view('admin.buku.index', compact('penulisList', 'penerbitList', 'kategoriList', 'kelasList', 'rakList'));
@@ -720,39 +720,39 @@ class AdminController extends Controller
 <body>
     <table>
         <tr>
-            <td colspan="8" class="banner-top">' . strtoupper(e($namaPerpus)) . '</td>
+            <td colspan="9" class="banner-top">' . strtoupper(e($namaPerpus)) . '</td>
         </tr>
         <tr>
-            <td colspan="8" class="banner-sub">' . strtoupper(e($namaSekolah)) . ' &bull; NPSN: ' . e($npsn) . ' &bull; ' . e($alamat) . '</td>
+            <td colspan="9" class="banner-sub">' . strtoupper(e($namaSekolah)) . ' &bull; NPSN: ' . e($npsn) . ' &bull; ' . e($alamat) . '</td>
         </tr>
         <tr>
-            <td colspan="8" class="banner-ribbon"></td>
+            <td colspan="9" class="banner-ribbon"></td>
         </tr>
         <tr>
-            <td colspan="8" class="banner-title">
+            <td colspan="9" class="banner-title">
                 LAPORAN DATA INVENTARIS BUKU &amp; KOLEKSI PERPUSTAKAAN
             </td>
         </tr>
-        <tr><td colspan="8"></td></tr>
+        <tr><td colspan="9"></td></tr>
         
         <tr>
-            <td colspan="2" class="kpi-head-blue">TOTAL JUDUL BUKU</td>
+            <td colspan="3" class="kpi-head-blue">TOTAL JUDUL BUKU</td>
             <td colspan="2" class="kpi-head-purple">TOTAL EKSEMPLAR FISIK</td>
             <td colspan="2" class="kpi-head-green">TERSEDIA DI RAK</td>
             <td colspan="2" class="kpi-head-amber">SEDANG DIPINJAM</td>
         </tr>
         <tr>
-            <td colspan="2" class="kpi-val-blue mso-num">' . number_format($totalJudul, 0, ',', '.') . ' Judul</td>
+            <td colspan="3" class="kpi-val-blue mso-num">' . number_format($totalJudul, 0, ',', '.') . ' Judul</td>
             <td colspan="2" class="kpi-val-purple mso-num">' . number_format($totalEksemplar, 0, ',', '.') . ' Eksemplar</td>
             <td colspan="2" class="kpi-val-green mso-num">' . number_format($totalTersedia, 0, ',', '.') . ' Eksemplar</td>
             <td colspan="2" class="kpi-val-amber mso-num">' . number_format($totalDipinjam, 0, ',', '.') . ' Eksemplar</td>
         </tr>
         <tr>
-            <td colspan="8" class="meta-strip">
+            <td colspan="9" class="meta-strip">
                 <strong>Informasi Ekspor:</strong> Dicetak pada ' . $tanggalCetak . ' WIB | Petugas Pencetak: <strong>' . e($namaPetugas) . '</strong> | Status: <strong>Resmi Terverifikasi Sistem Perpustakaan</strong>
             </td>
         </tr>
-        <tr><td colspan="8"></td></tr>
+        <tr><td colspan="9"></td></tr>
     </table>
 
     <table class="table-data">
@@ -765,6 +765,7 @@ class AdminController extends Controller
                 <th style="width: 150px;">Penerbit</th>
                 <th style="width: 60px;">Tahun</th>
                 <th style="width: 140px;">Kategori</th>
+                <th style="width: 90px;">Kelas</th>
                 <th style="width: 80px;">Total</th>
             </tr>
         </thead>
@@ -782,12 +783,13 @@ class AdminController extends Controller
                 <td class="text-left">' . e($buku->penerbit->nama ?? '-') . '</td>
                 <td class="text-center mso-text">' . e($buku->tahun_terbit ?? '-') . '</td>
                 <td class="text-left">' . e($buku->kategori->nama ?? 'Umum') . '</td>
+                <td class="text-center">' . e($buku->kelas->label_lengkap ?? '-') . '</td>
                 <td class="text-center font-bold mso-num" style="color: #0f172a;">' . $total . '</td>
             </tr>';
         }
 
         $html .= '<tr class="row-total">
-            <td colspan="7" class="text-center font-bold" style="font-size: 9.5pt; color: #0f172a;">
+            <td colspan="8" class="text-center font-bold" style="font-size: 9.5pt; color: #0f172a;">
                 TOTAL REKAPITULASI KOLEKSI BUKU (' . $totalJudul . ' JUDUL)
             </td>
             <td class="text-center font-bold mso-num" style="font-size: 10pt; color: #881337;">' . $totalEksemplar . '</td>
@@ -797,15 +799,15 @@ class AdminController extends Controller
     </table>
 
     <table>
-        <tr><td colspan="8"></td></tr>
-        <tr><td colspan="8"></td></tr>
+        <tr><td colspan="9"></td></tr>
+        <tr><td colspan="9"></td></tr>
         <tr>
             <td colspan="3" class="text-center" style="font-size: 9.5pt; vertical-align: top;">
                 Petugas Administrasi Perpustakaan,<br/><br/><br/><br/>
                 <strong><u>' . e($namaPetugas) . '</u></strong><br/>
                 Admin Sirkulasi
             </td>
-            <td colspan="2"></td>
+            <td colspan="3"></td>
             <td colspan="3" class="text-center" style="font-size: 9.5pt; vertical-align: top;">
                 Pekanbaru, ' . date('d F Y') . '<br/>
                 Mengetahui,<br/>
@@ -829,13 +831,16 @@ class AdminController extends Controller
 
     public function bukuExportPdf(Request $request)
     {
-        $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci']);
+        $query = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci', 'kelas']);
 
         if ($request->filled('kategori_id')) {
             $query->where('kategori_id', $request->kategori_id);
         }
         if ($request->filled('rak_id')) {
             $query->where('rak_id', $request->rak_id);
+        }
+        if ($request->filled('kelas_id')) {
+            $query->where('kelas_id', $request->kelas_id);
         }
 
         $bukuItems = $query->orderBy('judul', 'asc')->get();
@@ -1014,33 +1019,47 @@ class AdminController extends Controller
 
         if ($request->filled('search')) {
             $search = trim($request->search);
-            $query->where('nama_kelas', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_kelas', 'like', "%{$search}%")
+                  ->orWhere('tingkat', 'like', "%{$search}%");
+            });
         }
 
-        $kelasList = $query->orderBy('nama_kelas', 'asc')->paginate(10)->withQueryString();
+        $kelasList = $query->orderByRaw('CAST(tingkat AS UNSIGNED) asc')
+                           ->orderBy('nama_kelas', 'asc')
+                           ->paginate(10)
+                           ->withQueryString();
         return view('admin.kelas.index', compact('kelasList'));
+    }
+
+    /**
+     * Tingkat diketik bebas oleh petugas (10, 11, 12, X, XI, dst.) dan boleh
+     * dikosongkan supaya kelas non-jenjang tetap bisa didata. Batas 10 karakter
+     * mengikuti lebar kolomnya di database.
+     */
+    private function kelasRules(): array
+    {
+        return [
+            'tingkat'    => 'nullable|string|max:10',
+            'nama_kelas' => 'required|string|max:255',
+            'deskripsi'  => 'nullable|string|max:255',
+        ];
     }
 
     public function kelasStore(Request $request)
     {
-        $request->validate([
-            'nama_kelas' => 'required|string|max:255',
-            'keterangan' => 'nullable|string|max:255',
-        ]);
+        $request->validate($this->kelasRules());
 
-        Kelas::create($request->only('nama_kelas', 'keterangan'));
+        Kelas::create($request->only('tingkat', 'nama_kelas', 'deskripsi'));
         return back()->with('success', 'Kelas baru berhasil ditambahkan.');
     }
 
     public function kelasUpdate(Request $request, $id)
     {
         $kelas = Kelas::findOrFail($id);
-        $request->validate([
-            'nama_kelas' => 'required|string|max:255',
-            'keterangan' => 'nullable|string|max:255',
-        ]);
+        $request->validate($this->kelasRules());
 
-        $kelas->update($request->only('nama_kelas', 'keterangan'));
+        $kelas->update($request->only('tingkat', 'nama_kelas', 'deskripsi'));
         return back()->with('success', 'Data kelas berhasil diperbarui.');
     }
 
