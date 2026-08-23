@@ -48,4 +48,12 @@ class Peminjaman extends Model
     {
         return $this->nama_peminjam ?: ($this->user->name ?? 'Siswa / Anggota');
     }
+
+    public function isOverdue(): bool
+    {
+        if ($this->status !== 'dipinjam' || empty($this->tanggal_jatuh_tempo)) {
+            return false;
+        }
+        return \Carbon\Carbon::parse($this->tanggal_jatuh_tempo)->lt(\Carbon\Carbon::today());
+    }
 }

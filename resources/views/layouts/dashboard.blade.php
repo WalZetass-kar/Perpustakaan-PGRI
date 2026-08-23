@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Admin Perpustakaan') - {{ $pengaturan['nama_perpustakaan'] ?? 'SMK PGRI Pekanbaru' }}</title>
+    <title>@yield('title', 'Admin Perpustakaan') - {{ $pengaturan['nama_perpustakaan'] ?? 'Sistem Informasi Perpustakaan' }}</title>
 
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
@@ -37,14 +37,10 @@
         }
     </script>
 
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script defer src="{{ asset('vendor/alpine/alpine.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/all.min.css') }}">
     @stack('styles')
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
 
     <style>
         [x-cloak] { display: none !important; }
@@ -150,11 +146,11 @@
             <div class="flex flex-col flex-1 min-h-0">
                 <div class="h-20 flex items-center border-b-2 border-gray-100 bg-gradient-to-r from-gray-50 to-white shrink-0"
                      :class="sidebarCollapsed ? 'lg:flex-col lg:justify-center lg:gap-1 px-2' : 'justify-between px-4'">
-                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 min-w-0" :title="sidebarCollapsed ? 'Perpustakaan SMK PGRI' : ''">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI Pekanbaru" class="w-9 h-9 object-contain drop-shadow-xs shrink-0">
+                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 min-w-0" :title="sidebarCollapsed ? 'Admin Perpustakaan' : ''">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo Perpustakaan" class="w-9 h-9 object-contain drop-shadow-xs shrink-0">
                         <div class="leading-tight truncate" x-show="!sidebarCollapsed || sidebarOpen">
-                            <span class="text-sm font-black text-gray-900 tracking-tight block truncate">{{ $pengaturan['nama_sekolah'] ?? 'SMK PGRI' }}</span>
-                            <span class="text-[10px] font-extrabold text-brand-700 tracking-wider uppercase block">Perpustakaan</span>
+                            <span class="text-sm font-black text-gray-900 tracking-tight block truncate">{{ $pengaturan['nama_sekolah'] ?? 'Perpustakaan' }}</span>
+                            <span class="text-[10px] font-extrabold text-brand-700 tracking-wider uppercase block">Dashboard Admin</span>
                         </div>
                     </a>
                     <div class="flex items-center gap-1">
@@ -304,6 +300,12 @@
                                     <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Akun Pengelola</span>
                                 </a>
                             @endif
+                            <a href="{{ route('admin.profil') }}" title="Profil & Keamanan Akun"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.profil*') ? 'bg-emerald-50 text-emerald-900 border-emerald-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"
+                               :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
+                                <i class="fa-solid fa-user-shield text-emerald-600 text-sm shrink-0"></i>
+                                <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Profil & Keamanan</span>
+                            </a>
                             <a href="{{ route('admin.pengaturan') }}" title="Pengaturan Sistem"
                                class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.pengaturan*') ? 'bg-emerald-50 text-emerald-900 border-emerald-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"
                                :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
@@ -349,7 +351,7 @@
                     </button>
                     <div class="min-w-0">
                         <h1 class="text-xs sm:text-base font-black text-gray-900 truncate tracking-tight leading-tight">@yield('page_heading', 'Overview')</h1>
-                        <p class="text-[10px] sm:text-[11px] text-gray-500 font-medium truncate hidden sm:block">{{ $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI Pekanbaru' }}</p>
+                        <p class="text-[10px] sm:text-[11px] text-gray-500 font-medium truncate hidden sm:block">{{ $pengaturan['nama_perpustakaan'] ?? 'Sistem Informasi Perpustakaan' }}</p>
                     </div>
                 </div>
 

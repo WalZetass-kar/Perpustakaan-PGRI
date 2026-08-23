@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI')</title>
+    <title>@yield('title', $pengaturan['nama_perpustakaan'] ?? 'Sistem Informasi Perpustakaan')</title>
 
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
@@ -36,16 +36,11 @@
         }
     </script>
 
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="{{ asset('vendor/aos/aos.css') }}" rel="stylesheet">
+    <script src="{{ asset('vendor/aos/aos.js') }}"></script>
+    <script defer src="{{ asset('vendor/alpine/alpine.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/all.min.css') }}">
+    <script src="{{ asset('vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
 
     <style>
         [x-cloak] { display: none !important; }
@@ -113,10 +108,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
 
             <a href="{{ route('home') }}" class="flex items-center gap-3.5 shrink-0 group">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI" class="w-12 h-12 object-contain transform group-hover:scale-105 transition duration-300 drop-shadow-xs">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo Perpustakaan" class="w-12 h-12 object-contain transform group-hover:scale-105 transition duration-300 drop-shadow-xs">
                 <div>
                     <span class="text-base sm:text-lg font-black text-gray-900 leading-tight block group-hover:text-brand-700 transition">Sistem Perpustakaan</span>
-                    <span class="text-xs text-gray-500 font-bold tracking-wider uppercase block">{{ $pengaturan['nama_sekolah'] ?? 'SMK PGRI Pekanbaru' }}</span>
+                    <span class="text-xs text-gray-500 font-bold tracking-wider uppercase block">{{ $pengaturan['nama_sekolah'] ?? 'Perpustakaan Digital' }}</span>
                 </div>
             </a>
 
@@ -128,42 +123,40 @@
 
             <div class="hidden md:flex items-center gap-3">
                 <a href="{{ route('katalog') }}" class="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-gray-700 hover:text-brand-700 hover:bg-gray-50 rounded-xl transition border border-gray-200">
-                    <svg class="w-4 h-4 text-brand-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     <span>Cari Buku</span>
                 </a>
                 @auth
-                    <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-extrabold text-white bg-brand-700 rounded-xl hover:bg-brand-800 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                        <span>Dashboard Pengelola</span>
-                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    <a href="{{ route('dashboard') }}" class="px-5 py-2.5 bg-brand-700 text-white font-extrabold text-xs sm:text-sm rounded-xl hover:bg-brand-800 transition duration-300 shadow-md">
+                        Dashboard
                     </a>
                 @else
-                    <a href="{{ route('login') }}" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-extrabold text-white bg-brand-700 rounded-xl hover:bg-brand-800 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                        <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
-                        <span>Login Admin</span>
+                    <a href="{{ route('login') }}" class="px-5 py-2.5 bg-brand-700 text-white font-extrabold text-xs sm:text-sm rounded-xl hover:bg-brand-800 transition duration-300 shadow-md">
+                        Masuk Admin
                     </a>
                 @endauth
             </div>
 
-            <div class="flex md:hidden items-center gap-2">
-                <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2.5 rounded-xl text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none" aria-label="Toggle Mobile Menu">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-show="!mobileMenuOpen"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-show="mobileMenuOpen" x-cloak><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            <div class="md:hidden flex items-center">
+                <button type="button" @click="mobileMenuOpen = !mobileMenuOpen" class="p-2 rounded-xl text-gray-700 hover:bg-gray-100 focus:outline-none" aria-label="Menu navigasi">
+                    <svg x-show="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    <svg x-show="mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-cloak><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
         </div>
 
-        <div x-show="mobileMenuOpen" x-cloak class="md:hidden border-t border-gray-100 bg-white px-5 pt-3 pb-5 space-y-3 shadow-lg">
-            <a href="{{ route('home') }}" class="block px-4 py-2.5 rounded-xl text-sm font-bold text-gray-800 hover:bg-brand-50 hover:text-brand-700">Beranda</a>
-            <a href="{{ route('katalog') }}" class="block px-4 py-2.5 rounded-xl text-sm font-bold text-gray-800 hover:bg-brand-50 hover:text-brand-700">Katalog OPAC</a>
-            <a href="{{ route('home') }}#pusat-data-section" class="block px-4 py-2.5 rounded-xl text-sm font-bold text-gray-800 hover:bg-brand-50 hover:text-brand-700">Pusat Data</a>
-            <div class="pt-3 border-t border-gray-100 space-y-2">
+        <div x-show="mobileMenuOpen" @click.away="mobileMenuOpen = false" x-cloak class="md:hidden border-t border-gray-100 bg-white/98 backdrop-blur-md px-4 py-4 space-y-3">
+            <a href="{{ route('home') }}" class="block px-3 py-2 rounded-lg text-sm font-bold {{ request()->routeIs('home') ? 'bg-brand-50 text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">Beranda</a>
+            <a href="{{ route('katalog') }}" class="block px-3 py-2 rounded-lg text-sm font-bold {{ request()->routeIs('katalog') || request()->routeIs('buku.detail') ? 'bg-brand-50 text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">Katalog OPAC</a>
+            <a href="{{ route('home') }}#pusat-data-section" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Pusat Data</a>
+            <div class="pt-2 border-t border-gray-100">
                 @auth
-                    <a href="{{ route('dashboard') }}" class="w-full py-2.5 text-center bg-brand-700 text-white font-extrabold text-xs rounded-xl block">
+                    <a href="{{ route('dashboard') }}" class="block w-full text-center px-4 py-2.5 bg-brand-700 text-white font-bold text-sm rounded-xl">
                         Dashboard Pengelola
                     </a>
                 @else
-                    <a href="{{ route('login') }}" class="w-full py-2.5 text-center bg-brand-700 text-white font-extrabold text-xs rounded-xl block">
-                        Login Admin
+                    <a href="{{ route('login') }}" class="block w-full text-center px-4 py-2.5 bg-brand-700 text-white font-bold text-sm rounded-xl">
+                        Masuk Admin
                     </a>
                 @endauth
             </div>
@@ -180,14 +173,14 @@
 
                 <div class="space-y-3 md:col-span-2">
                     <div class="flex items-center gap-3">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI" class="w-10 h-10 object-contain drop-shadow-xs">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo Perpustakaan" class="w-10 h-10 object-contain drop-shadow-xs">
                         <div>
-                            <span class="text-sm font-black text-gray-900 block">{{ $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI Pekanbaru' }}</span>
-                            <span class="text-[10px] text-gray-500 font-bold uppercase">{{ $pengaturan['nama_sekolah'] ?? 'SMK PGRI Pekanbaru' }}</span>
+                            <span class="text-sm font-black text-gray-900 block">{{ $pengaturan['nama_perpustakaan'] ?? 'Sistem Informasi Perpustakaan' }}</span>
+                            <span class="text-[10px] text-gray-500 font-bold uppercase">{{ $pengaturan['nama_sekolah'] ?? 'Perpustakaan Sekolah' }}</span>
                         </div>
                     </div>
                     <p class="text-gray-500 text-xs leading-relaxed max-w-sm">
-                        Sistem Informasi Perpustakaan Digital Sekolah (Inlislite) terintegrasi untuk katalogisasi, lokasi rak, laci, dan sirkulasi peminjaman buku.
+                        Sistem Informasi Perpustakaan Digital Sekolah terintegrasi untuk katalogisasi, lokasi rak, laci, dan sirkulasi peminjaman buku.
                     </p>
                 </div>
 
@@ -203,8 +196,8 @@
                 <div class="space-y-2">
                     <h4 class="font-bold text-gray-900 uppercase tracking-wider text-[11px]">Alamat & Kontak</h4>
                     <p class="text-gray-600 leading-relaxed text-[11px]">
-                        {{ $pengaturan['alamat'] ?? 'Jl. Pendidikan No. 45, Gedung Utama Perpustakaan SMK PGRI Pekanbaru.' }}<br>
-                        Email: {{ $pengaturan['email_perpustakaan'] ?? 'perpustakaan@smkpgri.sch.id' }}<br>
+                        {{ $pengaturan['alamat'] ?? 'Gedung Perpustakaan Sekolah.' }}<br>
+                        Email: {{ $pengaturan['email_perpustakaan'] ?? 'perpustakaan@sekolah.sch.id' }}<br>
                         Telp: {{ $pengaturan['telepon'] ?? '(021) 7890-1234' }}
                     </p>
                 </div>
@@ -212,7 +205,7 @@
             </div>
 
             <div class="pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-gray-500 gap-3 border-t border-gray-100">
-                <span>{{ $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI Pekanbaru' }} &copy; {{ date('Y') }}. All rights reserved.</span>
+                <span>{{ $pengaturan['nama_perpustakaan'] ?? 'Sistem Informasi Perpustakaan' }} &copy; {{ date('Y') }}. All rights reserved.</span>
                 <div>
                     <span class="font-medium text-gray-400">Sistem Informasi Perpustakaan Sekolah Terpadu</span>
                 </div>

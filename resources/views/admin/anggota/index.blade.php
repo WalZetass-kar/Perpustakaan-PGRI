@@ -249,7 +249,7 @@
 
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Email Akun (Login ID) <span class="text-rose-500">*</span></label>
-                        <input type="email" name="email" required placeholder="Contoh: budi@smkpgri.sch.id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                        <input type="email" name="email" required placeholder="Contoh: petugas@sekolah.sch.id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                     </div>
 
                     <div>

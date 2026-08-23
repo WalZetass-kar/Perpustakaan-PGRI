@@ -8,8 +8,8 @@
 
     <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
         <div>
-            <h2 class="text-sm font-black text-gray-900">Daftar Kategori Kejuruan Terdaftar</h2>
-            <p class="text-[11px] text-gray-500 mt-0.5">Kelola pengelompokan klasifikasi modul dan bidang keahlian di SMK PGRI Pekanbaru</p>
+            <h2 class="text-sm font-black text-gray-900">Daftar Kategori Koleksi Terdaftar</h2>
+            <p class="text-[11px] text-gray-500 mt-0.5">Kelola pengelompokan klasifikasi modul dan bidang keahlian perpustakaan</p>
         </div>
         <button @click="openAddModal = true" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-300 shadow-md hover:shadow-lg transform active:scale-95 flex items-center gap-2">
             <i class="fa-solid fa-plus text-emerald-400"></i>

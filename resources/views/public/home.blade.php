@@ -1,12 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Beranda - ' . ($pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI'))
+@section('title', 'Beranda - ' . ($pengaturan['nama_perpustakaan'] ?? 'Perpustakaan Sekolah'))
 
 @section('content')
 
 <section class="relative bg-gradient-to-r from-brand-900/95 via-brand-800/90 to-red-950/95 text-white min-h-[calc(100vh-5rem)] flex items-center py-16 lg:py-24 overflow-hidden shadow-lg">
-
-    <div class="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-30 pointer-events-none transform scale-105 transition duration-1000 animate-pulse" style="background-image: url('https://smkpgripekanbaru.sch.id/images/pgri.webp');"></div>
 
     <div class="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none animate-bounce" style="animation-duration: 8s;"></div>
     <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-red-500/10 rounded-full blur-3xl pointer-events-none animate-pulse" style="animation-duration: 6s;"></div>
@@ -17,7 +15,7 @@
             <div class="lg:col-span-7 space-y-6 text-center lg:text-left" data-aos="fade-right" data-aos-duration="1000">
 
                 <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight text-white drop-shadow-md">
-                    {{ $pengaturan['judul_hero'] ?? 'Sistem Perpustakaan SMK PGRI Pekanbaru (Inlislite)' }}
+                    {{ $pengaturan['judul_hero'] ?? 'Sistem Informasi Perpustakaan' }}
                 </h1>
                 <p class="text-sm sm:text-base text-red-100 max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
                     {{ $pengaturan['subjudul_hero'] ?? 'Sebuah Perpustakaan Digital Sekolah yang dikembangkan langsung untuk menghimpun koleksi kejuruan, referensi modul, dan pelayanan perpustakaan dalam bentuk digital.' }}
@@ -42,9 +40,9 @@
             <div class="lg:col-span-5 flex justify-center" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
                 <div class="w-full max-w-md bg-white/95 backdrop-blur-md rounded-3xl p-6 text-gray-800 shadow-2xl border border-white/40 relative z-30 transition duration-300">
                     <div class="flex items-center gap-3 border-b border-gray-100 pb-4 mb-4">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI Official" class="w-11 h-11 object-contain drop-shadow-xs">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo Perpustakaan" class="w-11 h-11 object-contain drop-shadow-xs">
                         <div>
-                            <span class="text-xs font-black text-gray-900 block leading-tight">INLISLITE SMK PGRI</span>
+                            <span class="text-xs font-black text-gray-900 block leading-tight">KATALOG PERPUSTAKAAN</span>
                             <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Official School Library Portal</span>
                         </div>
                     </div>
@@ -145,7 +143,7 @@
                 Pusat Data dan Informasi
             </span>
             <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-gray-900">
-                {{ $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI Pekanbaru' }}
+                {{ $pengaturan['nama_perpustakaan'] ?? 'Sistem Informasi Perpustakaan' }}
             </h2>
             <p class="text-xs sm:text-sm text-gray-600 max-w-2xl mx-auto leading-relaxed font-normal">
                 Sistem perpustakaan digital terpadu untuk pencarian koleksi buku kejuruan, peminjaman, keanggotaan hingga pelayanan literasi sekolah.
@@ -213,7 +211,7 @@
             </span>
             <h2 class="text-2xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">Koleksi Terpopuler</h2>
             <p class="text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
-                Buku-buku kejuruan dan referensi yang paling banyak diakses di {{ $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI Pekanbaru' }}.
+                Buku-buku kejuruan dan referensi yang paling banyak diakses di {{ $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan Sekolah' }}.
             </p>
         </div>
 
@@ -249,7 +247,7 @@
                                             <i class="fa-solid fa-book text-white/30 text-xs mb-0.5"></i>
                                             <p class="text-[8px] font-bold text-white line-clamp-2 leading-tight">{{ $buku->judul }}</p>
                                         </div>
-                                        <span class="text-[6px] font-bold text-white/50 uppercase">SMK PGRI</span>
+                                        <span class="text-[6px] font-bold text-white/50 uppercase">Perpustakaan</span>
                                     </div>
                                 @endif
                             </div>
@@ -314,7 +312,7 @@
             Kemudahan Layanan Perpustakaan Sekolah
         </h2>
         <p class="text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
-            Akses sistem informasi terpadu <strong class="text-gray-900">{{ $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI Pekanbaru' }}</strong> kapan saja dan di mana saja.
+            Akses sistem informasi terpadu <strong class="text-gray-900">{{ $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan Sekolah' }}</strong> kapan saja dan di mana saja.
         </p>
 
         <div class="flex flex-wrap items-center justify-center gap-4 pt-2 text-xs">

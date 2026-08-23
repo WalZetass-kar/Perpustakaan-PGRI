@@ -1,124 +1,119 @@
-# Sistem Perpustakaan SMK PGRI Pekanbaru
+# Sistem Informasi Perpustakaan Digital Sekolah
+### Katalog OPAC & Panel Manajemen Sirkulasi Back-Office
 
-Sistem Informasi Manajemen Perpustakaan dan Katalog Publik (OPAC) modern yang dirancang khusus untuk mendukung operasional perpustakaan, pencatatan sirkulasi buku fisik, serta penunjuk lokasi rak & laci (Physical Wayfinding) di SMK PGRI Pekanbaru.
-
----
-
-## Fitur Utama Sistem
-
-### 1. Katalog Publik & OPAC (Online Public Access Catalog)
-* **Pencarian Koleksi Cepat**: Pencarian instan berbasis judul, pengarang, penerbit, ISBN, subjek kategori, dan tahun terbit.
-* **Status Ketersediaan Real-Time**: Informasi stok buku fisik yang siap dipinjam vs sedang dipinjam oleh siswa.
-* **Autosuggestion & Filter Dinamis**: Saran pencarian otomatis dan penyaringan berdasarkan kategori dan lokasi rak.
-
-### 2. Fitur Wayfinding Lokasi Fisik Buku
-* **Navigasi Cepat (2–3 Detik)**: Alur lokasi berurutan dari `Lantai & Ruangan` &rarr; `Lemari Rak` &rarr; `Laci Tujuan (Endpoint)`.
-* **Kode Lokasi Terstandarisasi**: Format lokasi ringkas (contoh: `L1 · RAK-TKJ-01 · L01`).
-* **Modal Peta Rak Interaktif**: Fitur visual denah tata letak lemari rak di ruangan perpustakaan yang menandai secara dinamis posisi rak dan laci target buku.
-
-### 3. Portal Back-Office & Manajemen Sirkulasi
-* **Fitur Mandiri "Temukan Buku"**: Menu lokator buku mandiri pada sidebar admin untuk membantu pustakawan menemukan letak buku secara instan.
-* **Sirkulasi Peminjaman Fisik**:
-  * Pencatatan peminjaman cepat di meja sirkulasi menggunakan data nama peminjam, kelas/jurusan, dan NIS.
-  * Pelacakan jatuh tempo pinjaman, perpanjangan, dan pengembalian buku dengan validasi otomatis stok.
-* **Manajemen Master Data Lengkap**:
-  * Pengelolaan Koleksi Buku beserta cover dan spesifikasi bibliografi.
-  * Pengelolaan Kategori Subjek, Penulis, dan Penerbit.
-  * Pengelolaan Lemari Rak dan Tingkat Laci (*Multi-tier Drawers*).
-* **Sidebar Fleksibel & Mini Sidebar Mode**:
-  * Dukungan buka/tutup (*collapsible*) pada desktop dan mobile.
-  * Mode mini sidebar (`w-20`) dengan logo tengah dan ikon menu ber-tooltip.
-* **Keamanan & Audit Log**:
-  * Role-based access control (`super_admin` dan `admin`).
-  * Pencatatan riwayat aktivitas penting pengguna (*Audit Trail*).
-  * Perlindungan headers keamanan standar web.
+Sistem Informasi Manajemen Perpustakaan dan Katalog Publik (OPAC) modern yang dirancang khusus untuk mendukung operasional perpustakaan sekolah, penataan inventaris fisik, visualisasi denah lokasi rak & laci (Physical Wayfinding), serta pencatatan sirkulasi peminjaman siswa secara terintegrasi.
 
 ---
 
-## Teknologi yang Digunakan
+## 1. Dokumentasi Lengkap Serah Terima Proyek
 
-* **Backend**: PHP 8.2+, Laravel 11.x
-* **Database**: MySQL / MariaDB (XAMPP / LAMPP)
-* **Frontend**: Blade Templating, TailwindCSS, Alpine.js
-* **Komponen & Dialog**: SweetAlert2, Plus Jakarta Sans & JetBrains Mono Fonts
+Untuk mempermudah teknisi sekolah dalam melakukan pemasangan dan membantu pustakawan dalam pengoperasian sistem, telah disediakan dokumen panduan terpisah:
+
+1. **[Panduan Pemasangan & Pemeliharaan untuk Teknisi IT](PANDUAN_PEMASANGAN_TEKNISI.md)**:
+   - Persyaratan server & ekstensi PHP
+   - Langkah demi langkah instalasi, migrasi, dan konfigurasi `.env`
+   - Pengaturan Web Server (Apache VirtualHost, Nginx, dan cPanel)
+   - Otomasi pencadangan database (Cron Job) & pemecahan masalah (Troubleshooting)
+2. **[Panduan Penggunaan untuk Petugas Perpustakaan](PANDUAN_PENGGUNAAN_PETUGAS.md)**:
+   - Alur pengelolaan master buku, kategori, penulis, penerbit, dan kelas
+   - Manajemen rak buku & peta denah interaktif 2D
+   - Alur persetujuan peminjaman online siswa & pencatatan langsung (Walk-in)
+   - Pelacakan keterlambatan, perpanjangan, dan pengembalian buku
+   - Rekapitulasi laporan Excel dan cetak PDF resmi format A4
+   - Pengaturan instansi & fitur pencadangan database mandiri
+3. **[Template Berita Acara Serah Terima (BAST)](BERITA_ACARA_SERAH_TERIMA.md)**:
+   - Format berita acara serah terima pekerjaan antara pengembang dan pihak sekolah
 
 ---
 
-## Struktur Database Inti
+## 2. Fitur Utama Sistem
 
-Sistem menggunakan 19 tabel aktif yang terorganisir dan bersih:
-* **Master Buku & Lokasi**: `buku`, `kategori`, `penulis`, `penerbit`, `rak`, `rak_laci`
-* **Transaksi Sirkulasi**: `peminjaman`
-* **Akun & Konfigurasi**: `users`, `roles`, `audit_logs`, `pengaturan`
-* **Sistem Laravel**: `migrations`, `sessions`, `cache`, `cache_locks`, `jobs`, `job_batches`, `failed_jobs`, `password_reset_tokens`
+### A. Katalog Publik & OPAC (Online Public Access Catalog)
+- **Pencarian Cepat & Instan**: Pencarian berbasis judul, penulis, penerbit, ISBN, kelas sasaran, dan kategori modul.
+- **Ketersediaan Stok Real-Time**: Status stok fisik siap pinjam vs sedang dipinjam yang selalu sinkron.
+- **Penunjuk Lokasi Rak & Laci**: Informasi lokasi rak dan tingkat laci fisik pada setiap kartu buku.
+- **Formulir Pengajuan Peminjaman Mandiri**: Siswa dapat mengajukan peminjaman buku langsung dari halaman detail buku dengan validasi batas pinjaman aktif.
+
+### B. Portal Back-Office Pengelola Perpustakaan
+- **Dashboard KPI Sirkulasi**: Metrik sirkulasi hari ini, buku sedang dipinjam, pengembalian, dan penghitung buku terlambat jatuh tempo.
+- **Visualisasi Grafik Aktivitas**: Grafik aktivitas sirkulasi bulanan dan tahunan.
+- **Manajemen Inventaris Koleksi**: Penambahan, pengubahan, dan penghapusan buku dengan proteksi transaksi aktif.
+- **Denah Lokasi Rak 2D (Wayfinding)**: Tampilan visual tata letak rak dan laci perpustakaan.
+- **Sirkulasi & Overdue Tracker**: Penyaringan status peminjaman (Semua, Aktif, Terlambat, Selesai, Pending) serta perpanjangan masa pinjam terukur.
+- **Rekapitulasi Laporan Formal**:
+  - Ekspor Excel koleksi buku dengan format kolom rapi.
+  - Cetak PDF laporan inventaris buku dan sirkulasi peminjaman (A4 Portrait) lengkap dengan Kop Surat Instansi dan blok tanda tangan formal 2 kolom simetris.
+- **Pencadangan Database Terintegrasi**: Fasilitas unduh salinan basis data SQL langsung dari panel admin dan melalui CLI.
+- **Manajemen Akun & Keamanan Mandiri**: Pembagian hak akses (Super Admin dan Petugas) serta halaman ganti kata sandi mandiri.
 
 ---
 
-## Panduan Instalasi & Menjalankan Proyek
+## 3. Spesifikasi & Teknologi
 
-### 1. Prasyarat Sistem
-* PHP >= 8.2 dengan ekstensi `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `fileinfo`
-* Composer
-* Web Server & Database (MySQL / MariaDB via XAMPP/LAMPP)
-* Node.js & NPM (opsional jika memerlukan build asset tambahan)
+- **Backend Framework**: Laravel 11 (PHP 8.2+)
+- **Database**: MySQL 5.7+ / 8.0+ atau MariaDB 10.4+
+- **Frontend**: Blade Templating, Tailwind CSS, Alpine.js
+- **Aset & Icon**: FontAwesome 6, Chart.js, SweetAlert2, AOS (Tersimpan lokal di `public/vendor/` untuk performa 100% luring)
+- **Ekspor Dokumen**: PhpSpreadsheet & Blade HTML Print
 
-### 2. Kloning Repositori
+---
+
+## 4. Panduan Singkat Menjalankan di Lingkungan Lokal
+
+### Langkah 1: Kloning Repositori
 ```bash
 git clone https://github.com/WalZetass-kar/Perpustakaan-PGRI.git
 cd Perpustakaan-PGRI
 ```
 
-### 3. Instalasi Dependensi
+### Langkah 2: Instalasi Dependensi
 ```bash
 composer install
 ```
 
-### 4. Konfigurasi Environment (`.env`)
-Salin file konfigurasi environment dan sesuaikan pengaturan database:
+### Langkah 3: Konfigurasi File Lingkungan (.env)
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
+Sesuaikan konfigurasi database `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD` pada berkas `.env`.
 
-Sesuaikan baris konfigurasi database di file `.env`:
-```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=perpustakaan_pgri
-DB_USERNAME=root
-DB_PASSWORD=
-```
-
-### 5. Jalankan Migrasi & Database Seeder
-Pastikan MySQL service di LAMPP/XAMPP telah berjalan, kemudian jalankan:
+### Langkah 4: Migrasi & Seeder Database
 ```bash
 php artisan migrate --seed
 ```
 
-### 6. Buat Symlink Storage Cover Buku
+### Langkah 5: Buat Akun Administrator
+```bash
+php artisan perpus:buat-admin
+```
+
+### Langkah 6: Buat Symbolic Link Storage
 ```bash
 php artisan storage:link
 ```
 
-### 7. Jalankan Server Lokal
+### Langkah 7: Jalankan Server Pengembangan
 ```bash
 php artisan serve
 ```
-Akses aplikasi melalui browser:
-* **Katalog Publik (OPAC)**: `http://localhost:8000/`
-* **Portal Login Admin**: `http://localhost:8000/aksesperpuspgri`
+- **Katalog OPAC**: `http://localhost:8000/`
+- **Panel Admin**: `http://localhost:8000/akses-perpustakaan`
 
 ---
 
-## Akun Default Masuk Admin
+## 5. Daftar Perintah Artisan Khusus
 
-* **URL Login**: `/aksesperpuspgri`
-* **Email**: `admin@smkpgri.sch.id`
-* **Password**: `password123` (atau sesuai konfigurasi seeder awal)
+| Perintah | Deskripsi Fungsi |
+|---|---|
+| `php artisan perpus:buat-admin` | Membuat akun Super Admin atau Petugas baru secara interaktif melalui CLI |
+| `php artisan perpus:reset-password` | Mereset kata sandi akun admin dalam kondisi darurat |
+| `php artisan perpus:backup` | Mencadangkan basis data ke berkas SQL di `storage/app/backups/` |
+| `php artisan perpus:backup --zip` | Mencadangkan basis data beserta seluruh berkas cover buku ke arsip ZIP |
+| `php artisan perpus:regenerate-covers` | Menghasilkan ulang varian thumbnail cover buku |
 
 ---
 
-## Lisensi & Hak Cipta
+## 6. Hak Cipta & Lisensi
 
-Dikembangkan untuk SMK PGRI Pekanbaru. Hak cipta dilindungi undang-undang.
+Sistem Informasi Perpustakaan Digital Sekolah. Seluruh hak kepemilikan dan pemeliharaan diserahkan kepada pihak sekolah sesuai Berita Acara Serah Terima (BAST).

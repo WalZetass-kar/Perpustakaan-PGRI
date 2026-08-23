@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Katalog OPAC - Perpustakaan SMK PGRI Pekanbaru')
+@section('title', 'Katalog OPAC - ' . ($pengaturan['nama_perpustakaan'] ?? 'Perpustakaan Sekolah'))
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6" x-data="katalogPage()">
@@ -308,7 +308,7 @@
                             'kelas' => $item->kelas->nama_kelas ?? '',
                             'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
                             'laci' => $laciName,
-                            'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi SMK PGRI Pekanbaru.',
+                            'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi sekolah.',
                             'tersedia' => $item->available_quantity,
                             'total' => $item->total_quantity,
                             'cover' => $item->cover_card_url ?? ''
@@ -329,11 +329,11 @@
                                         <div class="flex flex-col items-center justify-center my-auto text-center px-2">
                                             <i class="fa-solid fa-book-bookmark text-white/25 text-3xl mb-2 drop-shadow-xs"></i>
                                             <p class="text-xs sm:text-sm font-black text-white leading-snug line-clamp-3 drop-shadow-sm">{{ $item->judul }}</p>
-                                            <p class="text-[10px] text-white/70 font-medium truncate max-w-full mt-1">{{ $item->penulis->nama ?? 'SMK PGRI' }}</p>
+                                            <p class="text-[10px] text-white/70 font-medium truncate max-w-full mt-1">{{ $item->penulis->nama ?? 'Penulis' }}</p>
                                         </div>
                                         <div class="flex items-center justify-between border-t border-white/10 pt-1.5 text-[8px] font-bold text-white/60 tracking-wider uppercase">
                                             <span>PERPUSTAKAAN</span>
-                                            <span>SMK PGRI</span>
+                                            <span>SEKOLAH</span>
                                         </div>
                                     </div>
                                 @endif
@@ -435,7 +435,7 @@
                             'kelas' => $item->kelas->nama_kelas ?? '',
                             'rak' => ($item->rak->kode_rak ?? '') . ' - ' . ($item->rak->nama_rak ?? ''),
                             'laci' => $laciName,
-                            'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi SMK PGRI Pekanbaru.',
+                            'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi sekolah.',
                             'tersedia' => $item->available_quantity,
                             'total' => $item->total_quantity,
                             'cover' => $item->cover_card_url ?? ''
@@ -454,7 +454,7 @@
                                             <i class="fa-solid fa-book text-white/30 text-xs mb-0.5"></i>
                                             <p class="text-[8px] font-bold text-white line-clamp-2 leading-tight">{{ $item->judul }}</p>
                                         </div>
-                                        <span class="text-[6px] font-bold text-white/50 uppercase">SMK PGRI</span>
+                                        <span class="text-[6px] font-bold text-white/50 uppercase">Perpustakaan</span>
                                     </div>
                                 @endif
                             </div>
@@ -533,7 +533,7 @@
                             </div>
                             <div class="flex items-center justify-between border-t border-white/10 pt-1.5 text-[8px] font-bold text-white/60 tracking-wider uppercase">
                                 <span>PERPUSTAKAAN</span>
-                                <span>SMK PGRI</span>
+                                <span>SEKOLAH</span>
                             </div>
                         </div>
                     </template>

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $buku->judul . ' - ' . ($pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI'))
+@section('title', $buku->judul . ' - ' . ($pengaturan['nama_perpustakaan'] ?? 'Perpustakaan'))
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6" x-data="detailBukuPage()">
@@ -42,7 +42,7 @@
                             </div>
                             <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[8px] font-bold text-white/60 tracking-wider uppercase">
                                 <span>PERPUSTAKAAN</span>
-                                <span>SMK PGRI</span>
+                                <span>SEKOLAH</span>
                             </div>
                         </div>
                     @endif
@@ -204,7 +204,7 @@
                 <div class="space-y-2">
                     <h3 class="text-xs font-bold text-gray-900 uppercase tracking-wider">Sinopsis &amp; Ringkasan Buku</h3>
                     <div class="text-xs text-gray-600 leading-relaxed bg-gray-50/50 p-4 rounded-2xl border border-gray-200">
-                        {{ $buku->sinopsis ?? 'Buku pegangan dan bahan ajar referensi resmi untuk civitas akademika SMK PGRI Pekanbaru.' }}
+                        {{ $buku->sinopsis ?? 'Buku pegangan dan bahan ajar referensi resmi perpustakaan sekolah.' }}
                     </div>
                 </div>
 
@@ -293,7 +293,7 @@
                                             <i class="fa-solid fa-book text-white/30 text-xs mb-0.5"></i>
                                             <p class="text-[8px] font-bold text-white line-clamp-2 leading-tight">{{ $rb->judul }}</p>
                                         </div>
-                                        <span class="text-[6px] font-bold text-white/50 uppercase">SMK PGRI</span>
+                                        <span class="text-[6px] font-bold text-white/50 uppercase">Perpustakaan</span>
                                     </div>
                                 @endif
                             </div>
@@ -456,7 +456,7 @@
             </div>
 
             <div class="pt-3 border-t border-gray-100 flex items-center justify-between">
-                <span class="text-xs text-gray-500">Perpustakaan SMK PGRI Pekanbaru</span>
+                <span class="text-xs text-gray-500">{{ $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan Sekolah' }}</span>
                 <button type="button" @click="openPetaRak = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold rounded-xl text-xs transition">
                     Tutup Peta
                 </button>

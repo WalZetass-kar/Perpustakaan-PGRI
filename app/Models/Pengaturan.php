@@ -10,4 +10,10 @@ class Pengaturan extends Model
     use HasFactory;
     protected $table = 'pengaturan';
     protected $fillable = ['key', 'value', 'label', 'deskripsi'];
+
+    public static function ambil(string $key, $default = null)
+    {
+        $item = static::where('key', $key)->first();
+        return ($item && $item->value !== null && $item->value !== '') ? $item->value : $default;
+    }
 }

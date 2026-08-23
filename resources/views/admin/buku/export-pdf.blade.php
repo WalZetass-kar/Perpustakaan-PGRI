@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Inventaris Buku - {{ $pengaturan['nama_sekolah'] ?? 'SMK PGRI PEKANBARU' }}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Laporan Inventaris Buku - {{ $pengaturan['nama_sekolah'] ?? 'Perpustakaan Sekolah' }}</title>
+    <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/all.min.css') }}">
     <style>
         @page {
             size: A4 portrait;
@@ -315,10 +315,10 @@
     <div class="paper-page">
         <div class="header-kop">
             <div class="kop-text">
-                <h1>{{ $pengaturan['nama_sekolah'] ?? 'SMK PGRI PEKANBARU' }}</h1>
+                <h1>{{ $pengaturan['nama_sekolah'] ?? 'PERPUSTAKAAN SEKOLAH' }}</h1>
                 <h2>{{ $pengaturan['nama_perpustakaan'] ?? 'UNIT PERPUSTAKAAN & PUSAT SUMBER BELAJAR' }}</h2>
-                <p>NPSN: {{ $pengaturan['npsn'] ?? '10404457' }} | Alamat: {{ $pengaturan['alamat'] ?? 'Jl. Bangau No. 16 Sukajadi, Pekanbaru, Riau' }}</p>
-                <p>Telepon: {{ $pengaturan['telepon'] ?? '(0761) 23456' }} | Email: {{ $pengaturan['email_perpustakaan'] ?? 'perpustakaan@smkpgri-pku.sch.id' }}</p>
+                <p>NPSN: {{ $pengaturan['npsn'] ?? '-' }} | Alamat: {{ $pengaturan['alamat'] ?? 'Gedung Perpustakaan Sekolah' }}</p>
+                <p>Telepon: {{ $pengaturan['telepon'] ?? '-' }} | Email: {{ $pengaturan['email_perpustakaan'] ?? 'perpustakaan@sekolah.sch.id' }}</p>
             </div>
         </div>
 
@@ -407,7 +407,7 @@
 
             <div class="sig-col">
                 <div class="sig-header">
-                    <div>Pekanbaru, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</div>
+                    <div>{{ $pengaturan['kota'] ?? 'Pekanbaru' }}, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</div>
                     <div>Mengetahui,</div>
                     <div style="font-weight: bold;">Kepala Perpustakaan</div>
                 </div>

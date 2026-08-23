@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Pengelola - {{ $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI Pekanbaru' }}</title>
+    <title>Portal Pengelola - {{ $pengaturan['nama_perpustakaan'] ?? 'Sistem Informasi Perpustakaan' }}</title>
 
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
@@ -40,7 +40,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="{{ asset('vendor/alpine/alpine.min.js') }}"></script>
 
     <style>
         [x-cloak] { display: none !important; }
@@ -58,36 +58,39 @@
         }
 
         @keyframes skeleton-shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        .skeleton-shimmer {
-            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
-            background-size: 200% 100%;
-            animation: skeleton-shimmer 1.5s infinite ease-in-out;
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-brand-950 via-brand-900 to-red-950 text-gray-900 antialiased selection:bg-brand-700 selection:text-white">
+<body class="bg-gray-100 selection:bg-brand-700 selection:text-white flex flex-col justify-between min-h-[100dvh] relative overflow-x-hidden">
 
-    <div id="login-skeleton-loader" class="fixed inset-0 z-50 bg-gradient-to-br from-brand-950 via-brand-900 to-red-950 flex items-center justify-center p-4 pointer-events-none transition-opacity duration-300">
-        <div class="w-full max-w-4xl bg-white rounded-3xl overflow-hidden shadow-2xl grid grid-cols-1 md:grid-cols-12">
-            <div class="md:col-span-5 bg-brand-800 p-8 space-y-6">
-                <div class="w-16 h-16 rounded-2xl bg-white/20 skeleton-shimmer"></div>
-                <div class="w-48 h-6 bg-white/20 rounded skeleton-shimmer"></div>
-                <div class="w-full h-16 bg-white/20 rounded skeleton-shimmer"></div>
+    <div id="login-skeleton" class="fixed inset-0 z-50 bg-gray-50 flex items-center justify-center p-4 transition-opacity duration-300">
+        <div class="w-full max-w-4xl bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 grid grid-cols-1 md:grid-cols-12 min-h-[480px]">
+            <div class="md:col-span-5 bg-brand-900 p-8 flex flex-col justify-between space-y-6">
+                <div class="space-y-4">
+                    <div class="w-28 h-6 bg-white/20 rounded-full animate-pulse"></div>
+                    <div class="w-16 h-16 bg-white/20 rounded-2xl animate-pulse mt-4"></div>
+                    <div class="w-48 h-7 bg-white/20 rounded-lg animate-pulse"></div>
+                    <div class="w-full h-12 bg-white/10 rounded-lg animate-pulse"></div>
+                </div>
+                <div class="w-40 h-4 bg-white/20 rounded animate-pulse"></div>
             </div>
-            <div class="md:col-span-7 p-8 space-y-6 bg-white">
-                <div class="w-40 h-6 bg-gray-200 rounded skeleton-shimmer"></div>
-                <div class="w-full h-10 bg-gray-100 rounded-xl skeleton-shimmer"></div>
-                <div class="w-full h-10 bg-gray-100 rounded-xl skeleton-shimmer"></div>
-                <div class="w-full h-12 bg-gray-200 rounded-xl skeleton-shimmer"></div>
+            <div class="md:col-span-7 p-8 flex flex-col justify-center space-y-5">
+                <div class="space-y-2">
+                    <div class="w-40 h-6 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="w-56 h-4 bg-gray-100 rounded animate-pulse"></div>
+                </div>
+                <div class="space-y-4 pt-2">
+                    <div class="w-full h-11 bg-gray-100 rounded-xl animate-pulse"></div>
+                    <div class="w-full h-11 bg-gray-100 rounded-xl animate-pulse"></div>
+                    <div class="w-full h-11 bg-brand-100 rounded-xl animate-pulse mt-2"></div>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="fixed inset-0 pointer-events-none overflow-hidden -z-10" aria-hidden="true">
-        <div class="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-35 transform scale-105 transition duration-1000" style="background-image: url('https://smkpgripekanbaru.sch.id/images/pgri.webp');"></div>
         <div class="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none animate-bounce" style="animation-duration: 8s;"></div>
         <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-red-500/20 rounded-full blur-3xl pointer-events-none animate-pulse" style="animation-duration: 6s;"></div>
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-700/15 rounded-full blur-3xl pointer-events-none"></div>
@@ -105,14 +108,14 @@
                     </a>
 
                     <div class="pt-1">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo SMK PGRI Pekanbaru" class="w-14 h-14 sm:w-16 sm:h-16 object-contain drop-shadow-md">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo Perpustakaan" class="w-14 h-14 sm:w-16 sm:h-16 object-contain drop-shadow-md">
 
                         <span class="inline-block px-3 py-1 mt-3 sm:mt-4 rounded-full text-[10px] font-extrabold bg-white/10 text-emerald-300 border border-white/20 uppercase tracking-wider">
                             Portal Back-Office
                         </span>
-                        <h2 class="mt-2.5 sm:mt-3 text-xl sm:text-2xl font-black leading-snug">{{ $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI' }}</h2>
+                        <h2 class="mt-2.5 sm:mt-3 text-xl sm:text-2xl font-black leading-snug">{{ $pengaturan['nama_perpustakaan'] ?? 'Sistem Informasi Perpustakaan' }}</h2>
                         <p class="mt-1.5 sm:mt-2 text-xs text-red-100 leading-relaxed font-normal">
-                            Akses khusus pengelola perpustakaan untuk manajemen koleksi buku, data master, dan sirkulasi peminjaman harian.
+                            Akses khusus pengelola perpustakaan untuk manajemen koleksi buku, data master, dan sirkulasi peminjaman.
                         </p>
                     </div>
                 </div>
@@ -136,12 +139,12 @@
                     </div>
                 @endif
 
-                <form action="{{ route('login') }}" method="POST" class="space-y-4 text-xs">
+                <form action="{{ route('login.post') }}" method="POST" class="space-y-4 text-xs">
                     @csrf
                     <div>
                         <label for="email" class="block font-bold text-gray-700 mb-1.5">Email Pengelola <span class="text-rose-500">*</span></label>
                         <div class="relative">
-                            <input type="email" name="email" id="email" value="{{ old('email') }}" required autofocus placeholder="contoh: admin@smkpgri.sch.id"
+                            <input type="email" name="email" id="email" value="{{ old('email') }}" required autofocus placeholder="contoh: admin@sekolah.sch.id"
                                 class="w-full pl-10 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:border-brand-700 focus:bg-white focus:outline-none font-medium text-gray-900 transition">
                             <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/></svg>
                         </div>
@@ -176,7 +179,7 @@
 
                 <div class="border-t-2 border-gray-100 pt-4 text-center">
                     <p class="text-[11px] text-gray-500 font-medium leading-relaxed">
-                        Hanya untuk Petugas &amp; Administrator {{ $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI Pekanbaru' }}.
+                        Hanya untuk Petugas &amp; Administrator {{ $pengaturan['nama_perpustakaan'] ?? 'Sistem Informasi Perpustakaan' }}.
                     </p>
                 </div>
             </div>
@@ -188,7 +191,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
-                var loader = document.getElementById('login-skeleton-loader');
+                var loader = document.getElementById('login-skeleton');
                 if (loader) {
                     loader.style.opacity = '0';
                     setTimeout(function() {

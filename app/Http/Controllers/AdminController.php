@@ -33,6 +33,7 @@ class AdminController extends Controller
             'total_buku'             => (int) Buku::sum('total_quantity'),
             'buku_tersedia'          => (int) Buku::sum('available_quantity'),
             'buku_sedang_dipinjam'   => (int) Peminjaman::where('status', 'dipinjam')->sum('jumlah'),
+            'total_terlambat'        => Peminjaman::where('status', 'dipinjam')->whereDate('tanggal_jatuh_tempo', '<', $today)->count(),
             'total_kategori'         => Kategori::count(),
             'total_penulis'          => Penulis::count(),
             'total_penerbit'         => Penerbit::count(),
@@ -45,18 +46,19 @@ class AdminController extends Controller
         $currentYear = (int) date('Y');
         $monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 
-        $monthlyLoansData = Peminjaman::whereYear('tanggal_pinjam', $currentYear)
-            ->selectRaw('MONTH(tanggal_pinjam) as bulan, SUM(jumlah) as total_buku')
-            ->groupBy('bulan')
-            ->pluck('total_buku', 'bulan')
-            ->all();
+        $loansThisYear = Peminjaman::whereYear('tanggal_pinjam', $currentYear)->get(['tanggal_pinjam', 'jumlah']);
+        $monthlyLoansData = [];
+        foreach ($loansThisYear as $l) {
+            $m = (int) Carbon::parse($l->tanggal_pinjam)->format('n');
+            $monthlyLoansData[$m] = ($monthlyLoansData[$m] ?? 0) + (int) $l->jumlah;
+        }
 
-        $monthlyReturnsData = Peminjaman::where('status', 'dikembalikan')
-            ->whereYear('waktu_kembali', $currentYear)
-            ->selectRaw('MONTH(waktu_kembali) as bulan, SUM(jumlah) as total_buku')
-            ->groupBy('bulan')
-            ->pluck('total_buku', 'bulan')
-            ->all();
+        $returnsThisYear = Peminjaman::where('status', 'dikembalikan')->whereYear('waktu_kembali', $currentYear)->get(['waktu_kembali', 'jumlah']);
+        $monthlyReturnsData = [];
+        foreach ($returnsThisYear as $r) {
+            $m = (int) Carbon::parse($r->waktu_kembali)->format('n');
+            $monthlyReturnsData[$m] = ($monthlyReturnsData[$m] ?? 0) + (int) $r->jumlah;
+        }
 
         $chartMonthly = [
             'labels'  => $monthNames,
@@ -71,18 +73,19 @@ class AdminController extends Controller
         }
 
         $yearsRange = range($currentYear - 4, $currentYear);
-        $yearlyLoansData = Peminjaman::whereIn(DB::raw('YEAR(tanggal_pinjam)'), $yearsRange)
-            ->selectRaw('YEAR(tanggal_pinjam) as tahun, SUM(jumlah) as total_buku')
-            ->groupBy('tahun')
-            ->pluck('total_buku', 'tahun')
-            ->all();
+        $loansMultiYear = Peminjaman::whereYear('tanggal_pinjam', '>=', $currentYear - 4)->get(['tanggal_pinjam', 'jumlah']);
+        $yearlyLoansData = [];
+        foreach ($loansMultiYear as $l) {
+            $y = (int) Carbon::parse($l->tanggal_pinjam)->format('Y');
+            $yearlyLoansData[$y] = ($yearlyLoansData[$y] ?? 0) + (int) $l->jumlah;
+        }
 
-        $yearlyReturnsData = Peminjaman::where('status', 'dikembalikan')
-            ->whereIn(DB::raw('YEAR(waktu_kembali)'), $yearsRange)
-            ->selectRaw('YEAR(waktu_kembali) as tahun, SUM(jumlah) as total_buku')
-            ->groupBy('tahun')
-            ->pluck('total_buku', 'tahun')
-            ->all();
+        $returnsMultiYear = Peminjaman::where('status', 'dikembalikan')->whereYear('waktu_kembali', '>=', $currentYear - 4)->get(['waktu_kembali', 'jumlah']);
+        $yearlyReturnsData = [];
+        foreach ($returnsMultiYear as $r) {
+            $y = (int) Carbon::parse($r->waktu_kembali)->format('Y');
+            $yearlyReturnsData[$y] = ($yearlyReturnsData[$y] ?? 0) + (int) $r->jumlah;
+        }
 
         $chartYearly = [
             'labels'  => array_map('strval', $yearsRange),
@@ -554,12 +557,11 @@ class AdminController extends Controller
     {
         $buku = Buku::findOrFail($id);
 
-        $activeLoans = Peminjaman::where('buku_id', $buku->id)->where('status', 'dipinjam')->count();
+        $activeLoans = Peminjaman::where('buku_id', $buku->id)->whereIn('status', ['dipinjam', 'pending'])->count();
         if ($activeLoans > 0) {
-            return back()->with('error', "Buku tidak dapat dihapus karena masih memiliki {$activeLoans} transaksi peminjaman aktif.");
+            return back()->with('error', "Buku tidak dapat dihapus karena masih memiliki {$activeLoans} transaksi peminjaman aktif atau menunggu persetujuan.");
         }
 
-        // Hapus berikut variannya, jangan hanya file aslinya.
         app(CoverImageService::class)->delete($buku->cover);
 
         $bukuTitle = $buku->judul;
@@ -598,16 +600,17 @@ class AdminController extends Controller
         $totalTersedia = (int) $bukuItems->sum('available_quantity');
         $totalDipinjam = $totalEksemplar - $totalTersedia;
 
-        $namaSekolah = $pengaturan['nama_sekolah'] ?? 'SMK PGRI PEKANBARU';
-        $namaPerpus = $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI Pekanbaru';
-        $alamat = $pengaturan['alamat'] ?? 'Jl. Bangau No. 16 Sukajadi, Pekanbaru, Riau';
-        $npsn = $pengaturan['npsn'] ?? '10404457';
-        $kepalaPerpus = $pengaturan['kepala_perpustakaan'] ?? 'Dra. Hj. Perpustakaan';
+        $namaSekolah = $pengaturan['nama_sekolah'] ?? '-';
+        $namaPerpus = $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan Sekolah';
+        $alamat = $pengaturan['alamat'] ?? '-';
+        $npsn = $pengaturan['npsn'] ?? '-';
+        $kepalaPerpus = $pengaturan['kepala_perpustakaan'] ?? '-';
         $nipKepala = $pengaturan['nip_kepala_perpustakaan'] ?? '-';
+        $kota = $pengaturan['kota'] ?? '';
         $tanggalCetak = date('d/m/Y H:i');
         $namaPetugas = auth()->user()->name ?? 'Petugas Perpustakaan';
 
-        $filename = 'Laporan_Data_Buku_' . preg_replace('/[^A-Za-z0-9]/', '_', $namaSekolah) . '_' . date('Ymd_His') . '.xls';
+        $filename = 'Laporan_Data_Buku_' . preg_replace('/[^A-Za-z0-9]/', '_', $namaPerpus) . '_' . date('Ymd_His') . '.xls';
 
         AuditLog::create([
             'user_id'    => auth()->id(),
@@ -762,7 +765,7 @@ class AdminController extends Controller
             </td>
             <td colspan="2"></td>
             <td colspan="3" class="text-center" style="font-size: 9.5pt; vertical-align: top;">
-                Pekanbaru, ' . date('d F Y') . '<br/>
+                ' . ($kota ? e($kota) . ', ' : '') . date('d F Y') . '<br/>
                 Mengetahui,<br/>
                 <strong>Kepala Perpustakaan</strong><br/><br/><br/><br/>
                 <strong><u>' . e($kepalaPerpus) . '</u></strong><br/>
@@ -1241,7 +1244,12 @@ class AdminController extends Controller
 
     public function peminjamanIndex(Request $request)
     {
+        $today = Carbon::today()->toDateString();
         $query = Peminjaman::with(['user', 'buku', 'petugas'])->where('status', 'dipinjam');
+
+        if ($request->get('filter') === 'terlambat') {
+            $query->whereDate('tanggal_jatuh_tempo', '<', $today);
+        }
 
         if ($request->filled('search')) {
             $search = trim($request->search);
@@ -1261,7 +1269,10 @@ class AdminController extends Controller
         $bukuList = Buku::where('status', 'tersedia')->where('available_quantity', '>', 0)->orderBy('judul', 'asc')->get();
         $booksList = $bukuList;
 
-        return view('admin.peminjaman.index', compact('activeLoans', 'peminjamanList', 'bukuList', 'booksList'));
+        $totalActive = Peminjaman::where('status', 'dipinjam')->count();
+        $totalOverdue = Peminjaman::where('status', 'dipinjam')->whereDate('tanggal_jatuh_tempo', '<', $today)->count();
+
+        return view('admin.peminjaman.index', compact('activeLoans', 'peminjamanList', 'bukuList', 'booksList', 'totalActive', 'totalOverdue'));
     }
 
     public function peminjamanStore(Request $request)
@@ -1281,11 +1292,13 @@ class AdminController extends Controller
             return back()->with('error', "Stok buku tidak mencukupi. Sisa stok tersedia saat ini: {$buku->available_quantity} buku.");
         }
 
+        $durasiHari = (int) Pengaturan::ambil('durasi_pinjam_hari', 7);
         $kodePinjam = 'PJ-' . date('Ymd') . '-' . strtoupper(Str::random(4));
         $today = Carbon::today()->toDateString();
+        $due = Carbon::today()->addDays($durasiHari)->toDateString();
 
         try {
-            $loan = DB::transaction(function () use ($buku, $request, $jumlahPinjam, $kodePinjam, $today) {
+            $loan = DB::transaction(function () use ($buku, $request, $jumlahPinjam, $kodePinjam, $today, $due) {
                 $lockedBook = Buku::where('id', $buku->id)->lockForUpdate()->first();
                 if ($lockedBook->available_quantity < $jumlahPinjam) {
                     throw new \Exception('STOCK_INSUFFICIENT');
@@ -1303,7 +1316,7 @@ class AdminController extends Controller
                     'buku_id'             => $buku->id,
                     'jumlah'              => $jumlahPinjam,
                     'tanggal_pinjam'      => $today,
-                    'tanggal_jatuh_tempo' => $today,
+                    'tanggal_jatuh_tempo' => $due,
                     'status'              => 'dipinjam',
                     'petugas_id'          => auth()->id(),
                 ]);
@@ -1397,16 +1410,17 @@ class AdminController extends Controller
         $totalKembali = $loanItems->where('status', 'dikembalikan')->count();
         $totalBukuPinjam = (int) $loanItems->sum('jumlah');
 
-        $namaSekolah = $pengaturan['nama_sekolah'] ?? 'SMK PGRI PEKANBARU';
-        $namaPerpus = $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan SMK PGRI Pekanbaru';
-        $alamat = $pengaturan['alamat'] ?? 'Jl. Bangau No. 16 Sukajadi, Pekanbaru, Riau';
-        $npsn = $pengaturan['npsn'] ?? '10404457';
-        $kepalaPerpus = $pengaturan['kepala_perpustakaan'] ?? 'Dra. Hj. Perpustakaan';
+        $namaSekolah = $pengaturan['nama_sekolah'] ?? '-';
+        $namaPerpus = $pengaturan['nama_perpustakaan'] ?? 'Perpustakaan Sekolah';
+        $alamat = $pengaturan['alamat'] ?? '-';
+        $npsn = $pengaturan['npsn'] ?? '-';
+        $kepalaPerpus = $pengaturan['kepala_perpustakaan'] ?? '-';
         $nipKepala = $pengaturan['nip_kepala_perpustakaan'] ?? '-';
+        $kota = $pengaturan['kota'] ?? '';
         $tanggalCetak = date('d/m/Y H:i');
         $namaPetugas = auth()->user()->name ?? 'Petugas Perpustakaan';
 
-        $filename = 'Laporan_Sirkulasi_Peminjaman_' . preg_replace('/[^A-Za-z0-9]/', '_', $namaSekolah) . '_' . date('Ymd_His') . '.xls';
+        $filename = 'Laporan_Sirkulasi_Peminjaman_' . preg_replace('/[^A-Za-z0-9]/', '_', $namaPerpus) . '_' . date('Ymd_His') . '.xls';
 
         AuditLog::create([
             'user_id'    => auth()->id(),
@@ -1577,7 +1591,7 @@ class AdminController extends Controller
             </td>
             <td colspan="1"></td>
             <td colspan="4" class="text-center" style="font-size: 9.5pt; vertical-align: top;">
-                Pekanbaru, ' . date('d F Y') . '<br/>
+                ' . ($kota ? e($kota) . ', ' : '') . date('d F Y') . '<br/>
                 Mengetahui,<br/>
                 <strong>Kepala Perpustakaan</strong><br/><br/><br/><br/>
                 <strong><u>' . e($kepalaPerpus) . '</u></strong><br/>
@@ -1740,10 +1754,11 @@ class AdminController extends Controller
                 $book->save();
 
                 $today = Carbon::today()->toDateString();
+                $durasiHari = (int) Pengaturan::ambil('durasi_pinjam_hari', 7);
                 $lockedLoan->status = 'dipinjam';
                 $lockedLoan->kode_peminjaman = 'PJ-' . date('Ymd') . '-' . strtoupper(Str::random(4));
                 $lockedLoan->tanggal_pinjam = $today;
-                $lockedLoan->tanggal_jatuh_tempo = Carbon::today()->addDays(7)->toDateString();
+                $lockedLoan->tanggal_jatuh_tempo = Carbon::today()->addDays($durasiHari)->toDateString();
                 $lockedLoan->petugas_id = auth()->id();
                 $lockedLoan->save();
 
@@ -2020,6 +2035,7 @@ class AdminController extends Controller
             'pesan_sirkulasi'         => 'nullable|string|max:500',
             'max_buku_pinjam'         => 'required|integer|min:1|max:50',
             'durasi_pinjam_hari'      => 'required|integer|min:1|max:365',
+            'max_perpanjangan'        => 'nullable|integer|min:0|max:10',
             'syarat_peminjaman'       => 'nullable|string|max:500',
             'judul_hero'              => 'nullable|string|max:255',
             'subjudul_hero'           => 'nullable|string|max:500',
@@ -2046,5 +2062,58 @@ class AdminController extends Controller
         ]);
 
         return back()->with('success', 'Pengaturan sistem perpustakaan berhasil diperbarui.');
+    }
+
+    public function profilIndex()
+    {
+        $user = auth()->user();
+        return view('admin.profil.index', compact('user'));
+    }
+
+    public function ubahPassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password'         => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user = auth()->user();
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        AuditLog::create([
+            'user_id'    => $user->id,
+            'user_name'  => $user->name,
+            'aktivitas'  => 'UBAH_PASSWORD_MANDIRI',
+            'deskripsi'  => "Pengguna memperbarui password akunnya sendiri ({$user->email})",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', 'Password Anda berhasil diperbarui.');
+    }
+
+    public function backupDatabase()
+    {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Administrator yang berwenang mengunduh cadangan basis data.');
+        }
+
+        $backupService = app(\App\Services\DatabaseBackupService::class);
+        $sqlContent = $backupService->generateSqlDump();
+        $filename = 'backup_perpustakaan_' . date('Ymd_His') . '.sql';
+
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'DOWNLOAD_BACKUP_SQL',
+            'deskripsi'  => "Super Admin mengunduh berkas cadangan database ({$filename})",
+            'ip_address' => request()->ip(),
+        ]);
+
+        return response($sqlContent, 200, [
+            'Content-Type'        => 'application/sql',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
     }
 }

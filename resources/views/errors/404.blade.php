@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>403 — Akses Ditolak | Sistem Informasi Perpustakaan</title>
+    <title>404 — Halaman Tidak Ditemukan | Sistem Informasi Perpustakaan</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -22,18 +22,17 @@
         .icon {
             width: 80px;
             height: 80px;
-            background: #fef2f2;
+            background: #eff6ff;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 1.5rem;
-            font-size: 2.5rem;
         }
         h1 {
             font-size: 5rem;
             font-weight: 800;
-            color: #ef4444;
+            color: #2563eb;
             line-height: 1;
             margin-bottom: 0.5rem;
         }
@@ -63,43 +62,21 @@
             transition: background 0.2s;
         }
         .btn:hover { background: #701a31; }
-        .role-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            background: #fef3c7;
-            color: #92400e;
-            border-radius: 99px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="icon">
-            <svg style="width: 3.5rem; height: 3.5rem; margin: 0 auto; color: #dc2626;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <svg style="width: 3.5rem; height: 3.5rem; color: #2563eb;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
         </div>
-        <h1>403</h1>
-        <h2>Akses Ditolak</h2>
-        @auth
-            <div class="role-badge">
-                Role: {{ auth()->user()->role->display_name ?? 'Pengguna' }}
-            </div>
-        @endauth
+        <h1>404</h1>
+        <h2>Halaman Tidak Ditemukan</h2>
         <p>
-            Anda tidak memiliki izin untuk mengakses halaman ini.<br>
-            Halaman ini hanya dapat diakses oleh administrator dengan hak akses tertentu.
+            Tautan atau halaman yang Anda tuju mungkin telah dipindahkan, dihapus, atau tidak tersedia pada server.
         </p>
-        @auth
-            <a href="{{ route('admin.dashboard') }}" class="btn">
-                Kembali ke Dashboard
-            </a>
-        @else
-            <a href="{{ route('home') }}" class="btn">
-                Kembali ke Beranda
-            </a>
-        @endauth
+        <a href="{{ url('/') }}" class="btn">
+            Kembali ke Beranda
+        </a>
     </div>
 </body>
 </html>

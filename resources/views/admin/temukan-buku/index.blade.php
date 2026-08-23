@@ -137,11 +137,11 @@
                             <div class="flex flex-col items-center justify-center my-auto text-center px-1">
                                 <i class="fa-solid fa-book-bookmark text-white/25 text-2xl mb-1.5 drop-shadow-xs"></i>
                                 <p class="text-[11px] font-black text-white leading-tight line-clamp-3 drop-shadow-sm">{{ $buku->judul }}</p>
-                                <p class="text-[9px] text-white/70 font-medium truncate max-w-full mt-1">{{ $buku->penulis->nama ?? 'SMK PGRI' }}</p>
+                                <p class="text-[9px] text-white/70 font-medium truncate max-w-full mt-1">{{ $buku->penulis->nama ?? 'Penulis' }}</p>
                             </div>
                             <div class="flex items-center justify-between border-t border-white/10 pt-1 text-[7px] font-bold text-white/60 tracking-wider uppercase">
                                 <span>PERPUSTAKAAN</span>
-                                <span>SMK PGRI</span>
+                                <span>SEKOLAH</span>
                             </div>
                         </div>
                     @endif
@@ -246,7 +246,7 @@
                             <i class="fa-solid fa-book-bookmark text-white/25 text-xl mb-1"></i>
                             <p id="modal-cover-judul" class="text-[9.5px] font-black text-white line-clamp-3 leading-tight drop-shadow-sm"></p>
                         </div>
-                        <span class="text-[6.5px] font-bold text-white/60 tracking-widest text-center uppercase border-t border-white/10 pt-0.5">SMK PGRI</span>
+                        <span class="text-[6.5px] font-bold text-white/60 tracking-widest text-center uppercase border-t border-white/10 pt-0.5">Perpustakaan</span>
                     </div>
                 </div>
 

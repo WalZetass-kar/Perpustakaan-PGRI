@@ -11,8 +11,9 @@ Route::get('/buku/{id}', [PublicController::class, 'detailBuku'])->name('buku.de
 Route::get('/api/buku/search-suggestions', [PublicController::class, 'searchSuggestions'])->name('buku.search-suggestions')->middleware('throttle:60,1');
 Route::post('/katalog/ajukan-peminjaman', [PublicController::class, 'ajukanPeminjaman'])->name('katalog.ajukan')->middleware('throttle:10,1');
 
-Route::get('/aksesperpuspgri', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/aksesperpuspgri', [AuthController::class, 'login'])->name('login.post')->middleware('throttle:5,1');
+$adminLoginPath = trim(env('ADMIN_LOGIN_PATH', 'akses-perpustakaan'), '/');
+Route::get('/' . $adminLoginPath, [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/' . $adminLoginPath, [AuthController::class, 'login'])->name('login.post')->middleware('throttle:5,1');
 
 Route::get('/login', function () {
     return redirect()->route('home');
@@ -27,7 +28,7 @@ Route::get('/register', function () {
     return redirect()->route('home');
 })->name('register');
 
-Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
@@ -93,8 +94,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/anggota/toggle-status/{id}', [AdminController::class, 'anggotaToggleStatus'])->name('anggota.toggle-status')->whereNumber('id');
         Route::post('/anggota/delete/{id}', [AdminController::class, 'anggotaDestroy'])->name('anggota.delete')->whereNumber('id');
 
+        Route::get('/profil', [AdminController::class, 'profilIndex'])->name('profil');
+        Route::post('/profil/ubah-password', [AdminController::class, 'ubahPassword'])->name('profil.ubah-password');
+
         Route::get('/pengaturan', [AdminController::class, 'pengaturanIndex'])->name('pengaturan');
         Route::post('/pengaturan', [AdminController::class, 'pengaturanUpdate'])->name('pengaturan.update');
+        Route::get('/pengaturan/backup-database', [AdminController::class, 'backupDatabase'])->name('pengaturan.backup');
         Route::get('/audit-log', [AdminController::class, 'auditLogIndex'])->name('audit-log');
     });
 });

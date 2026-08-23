@@ -30,11 +30,13 @@ class DatabaseSeeder extends Seeder
             ['display_name' => 'Admin Perpustakaan']
         );
 
+        $seedPassword = env('SEED_ADMIN_PASSWORD') ?: \Illuminate\Support\Str::random(12);
+
         $admin = User::firstOrCreate(
-            ['email' => 'admin@smkpgri.sch.id'],
+            ['email' => 'admin@sekolah.sch.id'],
             [
                 'name' => 'Administrator Sekolah',
-                'password' => Hash::make('password'),
+                'password' => Hash::make($seedPassword),
                 'role_id' => $roleSuperAdmin->id,
                 'phone' => '081234567890',
                 'status' => 'active',
@@ -42,10 +44,10 @@ class DatabaseSeeder extends Seeder
         );
 
         $pustakawan = User::firstOrCreate(
-            ['email' => 'pustakawan@smkpgri.sch.id'],
+            ['email' => 'pustakawan@sekolah.sch.id'],
             [
-                'name' => 'Siti Rahmawati, S.Pd',
-                'password' => Hash::make('password'),
+                'name' => 'Staf Perpustakaan',
+                'password' => Hash::make($seedPassword),
                 'role_id' => $roleAdmin->id,
                 'phone' => '081298765432',
                 'status' => 'active',
@@ -288,7 +290,7 @@ class DatabaseSeeder extends Seeder
             'user_id' => $admin->id,
             'user_name' => $admin->name,
             'aktivitas' => 'SYSTEM_INIT',
-            'deskripsi' => 'Inisialisasi sistem perpustakaan SMK PGRI sukses.',
+            'deskripsi' => 'Inisialisasi sistem perpustakaan sukses.',
             'ip_address' => '127.0.0.1',
         ]);
 
@@ -296,8 +298,8 @@ class DatabaseSeeder extends Seeder
             ['key' => 'max_buku_pinjam', 'value' => '3', 'label' => 'Maksimal Buku Dipinjam Per Siswa', 'tipe' => 'number'],
             ['key' => 'durasi_pinjam_hari', 'value' => '7', 'label' => 'Durasi Peminjaman Standar (Hari)', 'tipe' => 'number'],
             ['key' => 'max_perpanjangan', 'value' => '2', 'label' => 'Maksimal Perpanjangan Online', 'tipe' => 'number'],
-            ['key' => 'nama_perpustakaan', 'value' => 'Sistem Perpustakaan', 'label' => 'Nama Resmi Perpustakaan', 'tipe' => 'text'],
-            ['key' => 'nama_sekolah', 'value' => 'SMK PGRI PEKANBARU', 'label' => 'Nama Sekolah', 'tipe' => 'text'],
+            ['key' => 'nama_perpustakaan', 'value' => 'Sistem Perpustakaan Sekolah', 'label' => 'Nama Resmi Perpustakaan', 'tipe' => 'text'],
+            ['key' => 'nama_sekolah', 'value' => 'SMK Negeri / Swasta', 'label' => 'Nama Sekolah', 'tipe' => 'text'],
             ['key' => 'jam_operasional', 'value' => 'Senin - Jumat: 07.00 - 15.30 WIB', 'label' => 'Informasi Jam Operasional', 'tipe' => 'text'],
             ['key' => 'pesan_sirkulasi', 'value' => 'Untuk meminjam buku fisik, silakan langsung menuju meja layanan sirkulasi perpustakaan.', 'label' => 'Petunjuk Sirkulasi', 'tipe' => 'text'],
         ];

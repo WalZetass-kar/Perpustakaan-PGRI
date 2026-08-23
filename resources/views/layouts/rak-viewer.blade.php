@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Data Buku') - {{ $pengaturan['nama_perpustakaan'] ?? 'SMK PGRI Pekanbaru' }}</title>
+    <title>@yield('title', 'Data Buku') - {{ $pengaturan['nama_perpustakaan'] ?? 'Sistem Informasi Perpustakaan' }}</title>
 
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
@@ -37,11 +37,8 @@
         }
     </script>
 
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script defer src="{{ asset('vendor/alpine/alpine.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/all.min.css') }}">
     @stack('styles')
 
     <style>
@@ -57,7 +54,7 @@
             <div class="flex items-center gap-2.5 min-w-0">
                 <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-8 h-8 rounded-lg object-contain shrink-0" onerror="this.style.display='none'">
                 <div class="min-w-0">
-                    <span class="text-xs font-black text-gray-900 tracking-tight block truncate">{{ $pengaturan['nama_sekolah'] ?? 'SMK PGRI' }}</span>
+                    <span class="text-xs font-black text-gray-900 tracking-tight block truncate">{{ $pengaturan['nama_sekolah'] ?? 'Perpustakaan' }}</span>
                     <span class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Mode Tampilan Rak &middot; Baca Saja</span>
                 </div>
             </div>

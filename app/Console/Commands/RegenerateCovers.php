@@ -44,10 +44,10 @@ class RegenerateCovers extends Command
 
             if ($covers->generateVariants($buku->cover)) {
                 $dibuat++;
-                $this->line("  <fg=green>✓</> {$buku->judul}");
+                $this->line("  <fg=green>[OK]</> {$buku->judul}");
             } else {
                 $gagal++;
-                $this->line("  <fg=red>✗</> {$buku->judul} <fg=gray>({$buku->cover} tidak terbaca)</>");
+                $this->line("  <fg=red>[FAIL]</> {$buku->judul} <fg=gray>({$buku->cover} tidak terbaca)</>");
             }
         }
 

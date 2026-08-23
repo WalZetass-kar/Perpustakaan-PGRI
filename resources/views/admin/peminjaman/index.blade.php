@@ -9,10 +9,20 @@
     <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
         <div>
             <h2 class="text-sm font-black text-gray-900">Daftar Peminjaman Sedang Berlangsung</h2>
-            <p class="text-[11px] text-gray-500 mt-0.5">Catatan buku yang sedang dipinjam dan belum dikembalikan hari ini</p>
+            <div class="flex items-center gap-2 mt-1.5">
+                <a href="{{ route('admin.peminjaman') }}" class="px-2.5 py-1 rounded-lg text-xs font-bold transition {{ request('filter') !== 'terlambat' ? 'bg-brand-700 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                    Semua Aktif ({{ $totalActive ?? $activeLoans->total() }})
+                </a>
+                <a href="{{ route('admin.peminjaman', ['filter' => 'terlambat']) }}" class="px-2.5 py-1 rounded-lg text-xs font-bold transition {{ request('filter') === 'terlambat' ? 'bg-rose-700 text-white' : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200' }}">
+                    Terlambat ({{ $totalOverdue ?? 0 }})
+                </a>
+            </div>
         </div>
         <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <form action="{{ route('admin.peminjaman') }}" method="GET" class="relative flex-1 sm:w-60">
+                @if(request('filter'))
+                    <input type="hidden" name="filter" value="{{ request('filter') }}">
+                @endif
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari kode, siswa, NIS..."
                        class="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:outline-none font-medium">
                 <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -42,14 +52,14 @@
                         <th class="py-3 px-4 font-bold">Jurusan / Kelas</th>
                         <th class="py-3 px-4 font-bold">Judul Buku</th>
                         <th class="py-3 px-4 font-bold text-center">Jumlah</th>
-                        <th class="py-3 px-4 font-bold">Tanggal & Waktu Pinjam</th>
+                        <th class="py-3 px-4 font-bold">Jatuh Tempo</th>
                         <th class="py-3 px-4 font-bold">Petugas</th>
                         <th class="py-3 px-4 font-bold text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 text-gray-700 font-medium">
                     @forelse($activeLoans as $loan)
-                        <tr class="hover:bg-gray-50/70 transition">
+                        <tr class="hover:bg-gray-50/70 transition {{ $loan->isOverdue() ? 'bg-rose-50/40' : '' }}">
                             <td class="py-3 px-4">
                                 <span class="px-2 py-0.5 rounded bg-gray-100 text-brand-700 font-mono font-black text-[11px] border border-gray-200">
                                     {{ $loan->kode_peminjaman }}
@@ -75,8 +85,15 @@
                                 </span>
                             </td>
                             <td class="py-3 px-4">
-                                <span class="font-bold text-gray-800">{{ \Carbon\Carbon::parse($loan->tanggal_pinjam)->format('d M Y') }}</span>
-                                <span class="text-[10px] text-gray-400 block">{{ $loan->created_at->format('H:i') }} WIB</span>
+                                @if($loan->isOverdue())
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-black bg-rose-100 text-rose-700 border border-rose-300 flex items-center gap-1 w-fit">
+                                        <i class="fa-solid fa-triangle-exclamation"></i>
+                                        <span>Terlambat ({{ \Carbon\Carbon::parse($loan->tanggal_jatuh_tempo)->format('d M Y') }})</span>
+                                    </span>
+                                @else
+                                    <span class="font-bold text-gray-800">{{ \Carbon\Carbon::parse($loan->tanggal_jatuh_tempo)->format('d M Y') }}</span>
+                                    <span class="text-[10px] text-gray-400 block">Pinjam: {{ \Carbon\Carbon::parse($loan->tanggal_pinjam)->format('d M Y') }}</span>
+                                @endif
                             </td>
                             <td class="py-3 px-4 text-gray-600 font-medium">
                                 {{ $loan->petugas->name ?? 'Admin' }}

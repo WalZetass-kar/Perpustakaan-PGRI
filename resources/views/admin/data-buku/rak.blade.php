@@ -289,7 +289,7 @@
                                     <i class="fa-solid fa-book-bookmark text-white/25 text-xl mb-1"></i>
                                     <p class="text-[9.5px] font-black text-white line-clamp-3 leading-tight drop-shadow-sm" x-text="detailData.judul"></p>
                                 </div>
-                                <span class="text-[6.5px] font-bold text-white/60 tracking-widest text-center uppercase border-t border-white/10 pt-0.5">SMK PGRI</span>
+                                <span class="text-[6.5px] font-bold text-white/60 tracking-widest text-center uppercase border-t border-white/10 pt-0.5">Perpustakaan</span>
                             </div>
                         </template>
                     </div>

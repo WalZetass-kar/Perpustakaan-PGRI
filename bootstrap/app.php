@@ -11,11 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->trustProxies(at: '*');
-
-        $middleware->validateCsrfTokens(except: [
-            '/logout',
-        ]);
+        $trustedProxies = env('TRUSTED_PROXIES');
+        if (!empty($trustedProxies)) {
+            $middleware->trustProxies(at: array_map('trim', explode(',', $trustedProxies)));
+        }
 
         $middleware->web(append: [
             \App\Http\Middleware\SecurityHeaders::class,

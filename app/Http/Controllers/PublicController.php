@@ -40,8 +40,8 @@ class PublicController extends Controller
         $penulis_list = Penulis::orderBy('nama', 'asc')->get();
         $tahun_list = Buku::select('tahun_terbit')->whereNotNull('tahun_terbit')->distinct()->orderBy('tahun_terbit', 'desc')->pluck('tahun_terbit');
 
-        $jam_operasional = Pengaturan::where('key', 'jam_operasional')->value('value') ?? 'Senin - Jumat: 07.00 - 15.30 WIB';
-        $nama_perpustakaan = Pengaturan::where('key', 'nama_perpustakaan')->value('value') ?? 'Perpustakaan SMK PGRI';
+        $jam_operasional = Pengaturan::ambil('jam_operasional', 'Senin - Jumat: 07.00 - 15.30 WIB');
+        $nama_perpustakaan = Pengaturan::ambil('nama_perpustakaan', 'Perpustakaan Sekolah');
 
         return view('public.home', compact('stats', 'buku_terbaru', 'buku_populer', 'kategori_list', 'penulis_list', 'tahun_list', 'jam_operasional', 'nama_perpustakaan'));
     }
@@ -236,15 +236,46 @@ class PublicController extends Controller
         }
 
         $jumlah = isset($validated['jumlah']) ? (int) $validated['jumlah'] : 1;
+        $nomorInduk = !empty($validated['nomor_induk']) ? trim($validated['nomor_induk']) : null;
+
+        if ($nomorInduk) {
+            $existingPending = Peminjaman::where('nomor_induk', $nomorInduk)
+                ->where('buku_id', $buku->id)
+                ->where('status', 'pending')
+                ->exists();
+
+            if ($existingPending) {
+                $msg = 'Anda sudah memiliki pengajuan peminjaman yang sedang menunggu konfirmasi untuk buku ini.';
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['success' => false, 'message' => $msg], 422);
+                }
+                return back()->with('error', $msg);
+            }
+
+            $maxPinjam = (int) Pengaturan::ambil('max_buku_pinjam', 3);
+            $activeCount = (int) Peminjaman::where('nomor_induk', $nomorInduk)
+                ->whereIn('status', ['pending', 'dipinjam'])
+                ->sum('jumlah');
+
+            if (($activeCount + $jumlah) > $maxPinjam) {
+                $msg = "Batas maksimal peminjaman aktif adalah {$maxPinjam} buku. Anda saat ini memiliki {$activeCount} buku yang sedang diajukan/dipinjam.";
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['success' => false, 'message' => $msg], 422);
+                }
+                return back()->with('error', $msg);
+            }
+        }
+
+        $durasiHari = (int) Pengaturan::ambil('durasi_pinjam_hari', 7);
         $requestCode = 'REQ-' . date('Ymd') . '-' . strtoupper(Str::random(4));
         $today = Carbon::today()->toDateString();
-        $due = Carbon::today()->addDays(7)->toDateString();
+        $due = Carbon::today()->addDays($durasiHari)->toDateString();
 
         $loan = Peminjaman::create([
             'kode_peminjaman'     => $requestCode,
             'nama_peminjam'       => trim($validated['nama_peminjam']),
             'jurusan'             => trim($validated['jurusan']),
-            'nomor_induk'         => !empty($validated['nomor_induk']) ? trim($validated['nomor_induk']) : null,
+            'nomor_induk'         => $nomorInduk,
             'no_wa'               => !empty($validated['no_wa']) ? trim($validated['no_wa']) : null,
             'user_id'             => auth()->id(),
             'buku_id'             => $buku->id,

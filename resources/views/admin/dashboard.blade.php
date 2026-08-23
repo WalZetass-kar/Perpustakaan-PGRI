@@ -147,7 +147,7 @@
          $nextTick(() => {
              if (typeof Chart === 'undefined') {
                  const script = document.createElement('script');
-                 script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+                 script.src = '{{ asset('vendor/chartjs/chart.umd.min.js') }}';
                  script.onload = () => initChart();
                  document.head.appendChild(script);
              } else {
@@ -158,7 +158,7 @@
 
     <div>
         <h3 class="text-xs font-black text-gray-500 uppercase tracking-wider mb-3">Sirkulasi Hari Ini ({{ date('d M Y') }})</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
             <div class="p-4 sm:p-5 rounded-2xl bg-white border-2 border-gray-200 shadow-sm flex items-center justify-between">
                 <div>
@@ -181,6 +181,17 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
             </div>
+
+            <a href="{{ route('admin.peminjaman', ['filter' => 'terlambat']) }}" class="p-4 sm:p-5 rounded-2xl bg-white border-2 {{ ($stats['total_terlambat'] ?? 0) > 0 ? 'border-rose-300 bg-rose-50/20' : 'border-gray-200' }} shadow-sm flex items-center justify-between hover:border-rose-400 transition block">
+                <div>
+                    <span class="text-[11px] font-bold {{ ($stats['total_terlambat'] ?? 0) > 0 ? 'text-rose-700' : 'text-gray-500' }} block">Terlambat Kembali</span>
+                    <span class="text-2xl font-black {{ ($stats['total_terlambat'] ?? 0) > 0 ? 'text-rose-700' : 'text-gray-900' }} mt-1 block">{{ $stats['total_terlambat'] ?? 0 }} Transaksi</span>
+                    <span class="text-[10px] text-rose-600 font-bold">Lewat jatuh tempo &rarr;</span>
+                </div>
+                <div class="w-11 h-11 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 flex items-center justify-center font-bold">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </div>
+            </a>
 
             <div class="p-4 sm:p-5 rounded-2xl bg-white border-2 border-gray-200 shadow-sm flex items-center justify-between">
                 <div>
