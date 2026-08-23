@@ -337,6 +337,7 @@
                     <th style="width: 110px; text-align: left;">Penerbit</th>
                     <th style="width: 40px;">Thn</th>
                     <th style="width: 95px; text-align: left;">Kategori</th>
+                    <th style="width: 60px;">Kelas</th>
                     <th style="width: 45px;">Total</th>
                 </tr>
             </thead>
@@ -353,16 +354,17 @@
                         <td>{{ $buku->penerbit->nama ?? '-' }}</td>
                         <td style="text-align: center;">{{ $buku->tahun_terbit ?? '-' }}</td>
                         <td>{{ $buku->kategori->nama ?? 'Umum' }}</td>
+                        <td style="text-align: center;">{{ $buku->kelas->label_lengkap ?? '-' }}</td>
                         <td style="text-align: center; font-weight: bold; color: #0f172a;">{{ $total }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" style="text-align: center; padding: 20px; color: #94a3b8;">Tidak ada data buku yang terdaftar di sistem.</td>
+                        <td colspan="9" style="text-align: center; padding: 20px; color: #94a3b8;">Tidak ada data buku yang terdaftar di sistem.</td>
                     </tr>
                 @endforelse
                 @if($bukuItems->count() > 0)
                     <tr style="background-color: #e2e8f0; font-weight: bold; border-top: 2px solid #881337;">
-                        <td colspan="7" style="text-align: center; font-weight: 800; text-transform: uppercase; font-size: 8pt; color: #0f172a;">
+                        <td colspan="8" style="text-align: center; font-weight: 800; text-transform: uppercase; font-size: 8pt; color: #0f172a;">
                             Total Rekapitulasi Koleksi Buku ({{ number_format($totalJudul, 0, ',', '.') }} Judul)
                         </td>
                         <td style="text-align: center; font-weight: 900; color: #881337; font-size: 8.5pt;">

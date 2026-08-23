@@ -54,8 +54,9 @@
             <table class="w-full text-left border-collapse text-xs">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase tracking-wider font-extrabold">
+                        <th class="py-3 px-4 font-bold">Tingkat</th>
                         <th class="py-3 px-4 font-bold">Nama Kelas</th>
-                        <th class="py-3 px-4 font-bold">Keterangan</th>
+                        <th class="py-3 px-4 font-bold">Deskripsi</th>
                         <th class="py-3 px-4 font-bold text-center">Jumlah Buku</th>
                         <th class="py-3 px-4 lg:pr-8 font-bold text-right">Aksi</th>
                     </tr>
@@ -63,8 +64,15 @@
                 <tbody class="divide-y divide-gray-100 text-gray-700 font-medium">
                     @forelse($kelasList as $k)
                         <tr class="hover:bg-gray-50/70 transition">
+                            <td class="py-3 px-4">
+                                @if($k->tingkat)
+                                    <span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-amber-50 text-amber-700 border border-amber-200">{{ $k->tingkat }}</span>
+                                @else
+                                    <span class="text-gray-400">-</span>
+                                @endif
+                            </td>
                             <td class="py-3 px-4 font-bold text-gray-900">{{ $k->nama_kelas }}</td>
-                            <td class="py-3 px-4 text-gray-600 max-w-sm truncate">{{ $k->keterangan ?? '-' }}</td>
+                            <td class="py-3 px-4 text-gray-600 max-w-sm truncate">{{ $k->deskripsi ?? '-' }}</td>
                             <td class="py-3 px-4 text-center">
                                 <span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-blue-50 text-blue-700 border border-blue-200">
                                     {{ $k->buku_count ?? 0 }} Judul
@@ -86,8 +94,9 @@
                                              class="fixed z-[100] w-36 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
                                             <button type="button" @click="editData = {{ json_encode([
                                                 'id' => $k->id,
+                                                'tingkat' => $k->tingkat ?? '',
                                                 'nama_kelas' => $k->nama_kelas,
-                                                'keterangan' => $k->keterangan ?? ''
+                                                'deskripsi' => $k->deskripsi ?? ''
                                             ]) }}; openEditModal = true; open = false" class="w-full flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-amber-700 hover:bg-amber-50 transition">
                                                 <i class="fa-solid fa-pen-to-square w-3.5 text-center"></i>
                                                 <span>Edit</span>
@@ -106,7 +115,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="py-8 text-center text-gray-400 font-medium">Belum ada data kelas terdaftar.</td>
+                            <td colspan="5" class="py-8 text-center text-gray-400 font-medium">Belum ada data kelas terdaftar.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -137,8 +146,9 @@
                                          class="fixed z-[100] w-36 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
                                         <button type="button" @click="editData = {{ json_encode([
                                             'id' => $k->id,
+                                            'tingkat' => $k->tingkat ?? '',
                                             'nama_kelas' => $k->nama_kelas,
-                                            'keterangan' => $k->keterangan ?? ''
+                                            'deskripsi' => $k->deskripsi ?? ''
                                         ]) }}; openEditModal = true; open = false" class="w-full flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-amber-700 hover:bg-amber-50 transition">
                                             <i class="fa-solid fa-pen-to-square w-3.5 text-center"></i>
                                             <span>Edit</span>
@@ -153,10 +163,15 @@
                                     </div>
                                 </template>
                             </div>
-                            <p class="text-[11px] text-gray-500 font-medium mt-1 line-clamp-2">{{ $k->keterangan ?? 'Tidak ada keterangan.' }}</p>
-                            <span class="inline-block mt-2 px-2 py-0.5 rounded-lg text-[10px] font-black bg-blue-50 text-blue-700 border border-blue-200">
-                                {{ $k->buku_count ?? 0 }} Judul
-                            </span>
+                            <p class="text-[11px] text-gray-500 font-medium mt-1 line-clamp-2">{{ $k->deskripsi ?? 'Tidak ada deskripsi.' }}</p>
+                            <div class="flex flex-wrap items-center gap-1.5 mt-2">
+                                @if($k->tingkat)
+                                    <span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-amber-50 text-amber-700 border border-amber-200">{{ $k->tingkat }}</span>
+                                @endif
+                                <span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-blue-50 text-blue-700 border border-blue-200">
+                                    {{ $k->buku_count ?? 0 }} Judul
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -185,12 +200,16 @@
             <form action="{{ route('admin.kelas.store') }}" method="POST" class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 text-xs">
                 @csrf
                 <div>
+                    <label class="block font-bold text-gray-700 mb-1">Kelas / Tingkat (Opsional)</label>
+                    <input type="text" name="tingkat" maxlength="10" placeholder="Contoh: 10, 11, 12" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                </div>
+                <div>
                     <label class="block font-bold text-gray-700 mb-1">Nama Kelas <span class="text-rose-500">*</span></label>
                     <input type="text" name="nama_kelas" required placeholder="Contoh: X RPL 1, XI TKJ 2" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                 </div>
                 <div>
-                    <label class="block font-bold text-gray-700 mb-1">Keterangan (Opsional)</label>
-                    <input type="text" name="keterangan" placeholder="Contoh: Wali kelas, jurusan, dsb." class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                    <label class="block font-bold text-gray-700 mb-1">Deskripsi (Opsional)</label>
+                    <input type="text" name="deskripsi" placeholder="Contoh: Wali kelas, jurusan, dsb." class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                 </div>
                 <div class="pt-3 border-t border-gray-100 flex justify-end gap-2 shrink-0">
                     <button type="button" @click="openAddModal = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-xs">Batal</button>
@@ -215,12 +234,16 @@
             <form :action="'{{ url('/admin/kelas/update') }}/' + editData.id" method="POST" class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 text-xs">
                 @csrf
                 <div>
+                    <label class="block font-bold text-gray-700 mb-1">Kelas / Tingkat (Opsional)</label>
+                    <input type="text" name="tingkat" x-model="editData.tingkat" maxlength="10" placeholder="Contoh: 10, 11, 12" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                </div>
+                <div>
                     <label class="block font-bold text-gray-700 mb-1">Nama Kelas <span class="text-rose-500">*</span></label>
                     <input type="text" name="nama_kelas" x-model="editData.nama_kelas" required class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                 </div>
                 <div>
-                    <label class="block font-bold text-gray-700 mb-1">Keterangan (Opsional)</label>
-                    <input type="text" name="keterangan" x-model="editData.keterangan" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                    <label class="block font-bold text-gray-700 mb-1">Deskripsi (Opsional)</label>
+                    <input type="text" name="deskripsi" x-model="editData.deskripsi" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                 </div>
                 <div class="pt-3 border-t border-gray-100 flex justify-end gap-2 shrink-0">
                     <button type="button" @click="openEditModal = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-xs">Batal</button>
