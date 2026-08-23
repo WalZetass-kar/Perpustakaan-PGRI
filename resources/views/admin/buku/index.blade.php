@@ -137,13 +137,17 @@
                 </div>
             </div>
             <div class="flex flex-wrap items-center gap-2 justify-end shrink-0">
-                <a href="{{ route('admin.buku.export.excel') }}" class="px-3 sm:px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Export seluruh data buku ke format Excel">
+                {{-- Di bawah 1024px kedua tombol ini sengaja disembunyikan: versi
+                     mobile/tablet-nya sudah tersedia di dasar panel filter. Kalau
+                     ditampilkan di sini juga, tombol export jadi muncul dua kali
+                     sekaligus dan berdesakan dengan tombol panah di kiri. --}}
+                <a href="{{ route('admin.buku.export.excel') }}" class="hidden lg:flex px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm items-center gap-1.5 shrink-0" title="Export seluruh data buku ke format Excel">
                     <i class="fa-solid fa-file-excel"></i>
-                    <span class="hidden sm:inline">Export Excel</span>
+                    <span>Export Excel</span>
                 </a>
-                <a href="{{ route('admin.buku.export.pdf') }}" target="_blank" class="px-3 sm:px-3.5 py-2 bg-rose-700 hover:bg-rose-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0" title="Cetak / Simpan Laporan PDF Resmi">
+                <a href="{{ route('admin.buku.export.pdf') }}" target="_blank" class="hidden lg:flex px-3.5 py-2 bg-rose-700 hover:bg-rose-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm items-center gap-1.5 shrink-0" title="Cetak / Simpan Laporan PDF Resmi">
                     <i class="fa-solid fa-file-pdf"></i>
-                    <span class="hidden sm:inline">Cetak / PDF</span>
+                    <span>Cetak / PDF</span>
                 </a>
                 <button @click="addRakId = ''; addLaciId = ''; openAddModal = true" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-2 shrink-0">
                     <i class="fa-solid fa-plus text-emerald-300"></i>
@@ -175,7 +179,7 @@
                 <select id="filter-kelas-buku" class="px-2.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:ring-1 focus:ring-brand-700 focus:outline-none font-medium">
                     <option value="">Semua Kelas</option>
                     @foreach($kelasList as $kl)
-                        <option value="{{ $kl->id }}">{{ $kl->nama_kelas }}</option>
+                        <option value="{{ $kl->id }}">{{ $kl->label_lengkap }}</option>
                     @endforeach
                 </select>
                 <select id="filter-status-buku" class="px-2.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:ring-1 focus:ring-brand-700 focus:outline-none font-medium">
@@ -308,7 +312,7 @@
                         <select name="kelas_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                             <option value="">-- Pilih Kelas --</option>
                             @foreach($kelasList as $kl)
-                                <option value="{{ $kl->id }}">{{ $kl->nama_kelas }}</option>
+                                <option value="{{ $kl->id }}">{{ $kl->label_lengkap }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -449,7 +453,7 @@
                         <select name="kelas_id" x-model="editData.kelas_id" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                             <option value="">-- Pilih Kelas --</option>
                             @foreach($kelasList as $kl)
-                                <option value="{{ $kl->id }}">{{ $kl->nama_kelas }}</option>
+                                <option value="{{ $kl->id }}">{{ $kl->label_lengkap }}</option>
                             @endforeach
                         </select>
                     </div>

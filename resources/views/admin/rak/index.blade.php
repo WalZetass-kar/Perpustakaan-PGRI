@@ -103,12 +103,12 @@
     </div>
 
     <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-2xs space-y-3">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <button type="button" @click="toggleFilter()" class="w-8 h-8 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-600 flex items-center justify-center border border-gray-200 transition shrink-0 self-start md:self-auto" :title="showFilter ? 'Sembunyikan Pencarian & Filter' : 'Tampilkan Pencarian & Filter'" aria-label="Toggle Pencarian & Filter">
+        <div class="flex items-center justify-between gap-2 sm:gap-3">
+            <button type="button" @click="toggleFilter()" class="w-8 h-8 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-600 flex items-center justify-center border border-gray-200 transition shrink-0" :title="showFilter ? 'Sembunyikan Pencarian & Filter' : 'Tampilkan Pencarian & Filter'" aria-label="Toggle Pencarian & Filter">
                 <svg class="w-3.5 h-3.5 transform transition-transform duration-200" :class="showFilter ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
 
-            <div class="flex items-center gap-2 self-start md:self-auto">
+            <div class="flex items-center gap-2">
                 <button type="button" @click="toggleAll()" class="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs font-semibold rounded-xl border border-gray-200 transition flex items-center gap-1.5" :title="allExpanded ? 'Tutup Seluruh Laci' : 'Buka Seluruh Laci'">
                     <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
                     <span x-text="allExpanded ? 'Collapse Semua' : 'Expand Semua'"></span>

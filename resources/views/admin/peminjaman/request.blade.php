@@ -13,11 +13,7 @@
 }">
 
     <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div>
-            <h2 class="text-sm font-black text-gray-900">Pengajuan Peminjaman Buku Daring (OPAC)</h2>
-            <p class="text-[11px] text-gray-500 mt-0.5">Daftar permintaan peminjaman mandiri yang diajukan oleh siswa melalui Katalog OPAC</p>
-        </div>
-        <div class="flex items-center gap-2 w-full sm:w-auto">
+        <div class="flex items-center justify-center gap-2 w-full sm:w-auto">
             <a href="{{ route('admin.peminjaman') }}" class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-extrabold rounded-xl transition flex items-center gap-1.5">
                 <i class="fa-solid fa-list-check text-gray-500"></i>
                 <span>Sirkulasi Aktif</span>
@@ -60,7 +56,7 @@
     </div>
 
     <div class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
+        <div class="hidden lg:block overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase tracking-wider font-extrabold text-[11px]">
@@ -192,6 +188,123 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <div class="lg:hidden divide-y divide-gray-100">
+            @forelse($requestList as $req)
+                <div class="p-4">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0">
+                            <span class="font-mono font-bold text-gray-900 bg-gray-100 px-2 py-0.5 rounded border border-gray-200 text-[10px] inline-block">
+                                {{ $req->kode_peminjaman }}
+                            </span>
+                            <span class="block text-[10px] text-gray-400 font-mono mt-1">
+                                {{ $req->created_at ? $req->created_at->format('d M Y, H:i') : '-' }} WIB
+                            </span>
+                        </div>
+                        <div class="shrink-0">
+                            @if($req->status === 'pending')
+                                <span class="px-2 py-1 rounded-full text-[10px] font-black bg-amber-50 text-amber-700 border border-amber-200 inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-clock text-amber-600"></i>
+                                    <span>Menunggu</span>
+                                </span>
+                            @elseif($req->status === 'dipinjam')
+                                <span class="px-2 py-1 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                                    <span>Disetujui</span>
+                                </span>
+                            @elseif($req->status === 'ditolak')
+                                <span class="px-2 py-1 rounded-full text-[10px] font-black bg-rose-50 text-rose-700 border border-rose-200 inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-circle-xmark text-rose-600"></i>
+                                    <span>Ditolak</span>
+                                </span>
+                            @else
+                                <span class="px-2 py-1 rounded-full text-[10px] font-black bg-gray-100 text-gray-700 border border-gray-200">{{ ucfirst($req->status) }}</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <p class="font-black text-gray-900 text-xs">{{ $req->nama_peminjam }}</p>
+                        <div class="flex items-center gap-1.5 text-[10.5px] text-gray-500 font-medium mt-0.5">
+                            <span class="font-bold text-brand-700">{{ $req->jurusan }}</span>
+                            <span>&bull;</span>
+                            <span>NISN: {{ $req->nomor_induk ?: '-' }}</span>
+                        </div>
+                        @if($req->no_wa)
+                            <p class="text-[10px] text-emerald-700 font-mono font-bold mt-0.5 flex items-center gap-1">
+                                <i class="fa-brands fa-whatsapp text-xs text-emerald-600"></i>
+                                <span>{{ $req->no_wa }}</span>
+                            </p>
+                        @endif
+                    </div>
+
+                    <div class="mt-3 pt-3 border-t border-gray-100">
+                        @if($req->buku)
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-12 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center">
+                                    @if($req->buku->cover_url)
+                                        <img src="{{ $req->buku->cover_thumb_url }}" alt="Cover" width="36" height="48" loading="lazy" class="w-full h-full object-cover">
+                                    @else
+                                        <div class="w-full h-full bg-brand-700 text-white font-bold flex items-center justify-center text-xs">
+                                            {{ substr($req->buku->judul, 0, 1) }}
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="font-bold text-gray-900 line-clamp-1 text-xs">{{ $req->buku->judul }}</p>
+                                    <div class="flex items-center gap-1.5 text-[10px] text-gray-500 mt-0.5">
+                                        <span class="px-1.5 py-0.5 rounded bg-gray-100 font-mono text-gray-800 font-bold">{{ $req->buku->rak->kode_rak ?? '-' }}</span>
+                                        <span>&bull;</span>
+                                        <span class="text-amber-700 font-bold">{{ $req->buku->laci->nama_laci ?? ($req->buku->rak ? 'Laci 1' : '-') }}</span>
+                                    </div>
+                                    <p class="text-[10px] text-gray-400 font-bold mt-0.5">
+                                        Sisa Stok: <span class="{{ $req->buku->available_quantity > 0 ? 'text-emerald-700' : 'text-rose-600' }}">{{ $req->buku->available_quantity }} / {{ $req->buku->total_quantity }}</span>
+                                    </p>
+                                </div>
+                            </div>
+                        @else
+                            <span class="text-gray-400 italic text-xs">Buku telah dihapus</span>
+                        @endif
+                    </div>
+
+                    @if($req->catatan)
+                        <p class="text-[10px] text-gray-500 italic mt-2 bg-amber-50/70 border border-amber-200/60 p-1.5 rounded-lg">"{{ $req->catatan }}"</p>
+                    @endif
+
+                    @if($req->status === 'ditolak' && $req->alasan_penolakan)
+                        <p class="text-[10px] text-rose-600 mt-2 bg-rose-50/70 border border-rose-200/60 p-1.5 rounded-lg">"{{ $req->alasan_penolakan }}"</p>
+                    @endif
+
+                    @if($req->status === 'dipinjam' && $req->petugas)
+                        <p class="text-[10px] text-gray-400 mt-2">Disetujui oleh: <span class="font-bold text-gray-600">{{ $req->petugas->name }}</span></p>
+                    @endif
+
+                    @if($req->status === 'pending')
+                        <div class="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+                            <form action="{{ route('admin.peminjaman.request.approve', $req->id) }}" method="POST" class="flex-1" onsubmit="return confirmDelete(event, 'Setujui Peminjaman?', 'Buku ini akan resmi dicatat dipinjam dan stok fisik otomatis dipotong.')">
+                                @csrf
+                                <button type="submit" class="w-full px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-lg text-xs transition shadow-xs flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-check"></i>
+                                    <span>Setujui</span>
+                                </button>
+                            </form>
+                            <button type="button" @click="rejectId = {{ $req->id }}; rejectNama = '{{ addslashes($req->nama_peminjam) }}'; rejectJudul = '{{ addslashes($req->buku->judul ?? 'Buku') }}'; alasanText = ''; openRejectModal = true" class="flex-1 px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white font-extrabold rounded-lg text-xs transition shadow-xs flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-xmark"></i>
+                                <span>Tolak</span>
+                            </button>
+                        </div>
+                    @endif
+                </div>
+            @empty
+                <div class="py-12 text-center text-gray-400 px-4">
+                    <div class="w-12 h-12 rounded-2xl bg-gray-50 border border-gray-200 flex items-center justify-center mx-auto mb-2 text-gray-400">
+                        <i class="fa-solid fa-inbox text-xl"></i>
+                    </div>
+                    <p class="text-xs font-bold text-gray-700">Tidak ada data request peminjaman</p>
+                    <p class="text-[11px] text-gray-400 mt-0.5">Pengajuan baru dari siswa melalui OPAC akan muncul di sini</p>
+                </div>
+            @endforelse
         </div>
 
         @if($requestList->hasPages())

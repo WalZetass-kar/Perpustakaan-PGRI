@@ -21,7 +21,17 @@ return new class extends Migration
             }
         });
 
-        DB::statement("ALTER TABLE peminjaman MODIFY COLUMN status VARCHAR(50) NOT NULL DEFAULT 'dipinjam'");
+        // `MODIFY COLUMN` hanya dikenal MySQL. Pernyataan aslinya dipertahankan
+        // apa adanya untuk MySQL supaya hasil di server produksi tidak berubah,
+        // sementara driver lain (sqlite yang dipakai test) memakai padanan
+        // portabel dari Schema builder.
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE peminjaman MODIFY COLUMN status VARCHAR(50) NOT NULL DEFAULT 'dipinjam'");
+        } else {
+            Schema::table('peminjaman', function (Blueprint $table) {
+                $table->string('status', 50)->nullable(false)->default('dipinjam')->change();
+            });
+        }
     }
 
     public function down(): void

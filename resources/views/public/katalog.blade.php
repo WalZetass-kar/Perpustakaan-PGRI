@@ -1,6 +1,52 @@
 @extends('layouts.app')
 
-@section('title', 'Katalog OPAC - ' . ($pengaturan['nama_perpustakaan'] ?? 'Perpustakaan Sekolah'))
+@php
+    /* Halaman hasil filter/pencarian/paginasi tidak diindeks supaya tidak
+       menghasilkan duplicate & thin content; canonical selalu ke URL bersih. */
+    $katalogFilterAktif = request()->hasAny(['search', 'kategori_id', 'penulis_id', 'rak_id', 'tahun', 'status', 'sort', 'page']);
+    $katalogSearch = trim((string) request('search'));
+@endphp
+
+@section('title', $katalogSearch !== ''
+    ? 'Hasil Pencarian "' . $katalogSearch . '" - Katalog OPAC'
+    : 'Katalog OPAC - Koleksi Buku & Modul Pembelajaran')
+
+@section('meta_description', 'Katalog OPAC ' . ($pengaturan['nama_perpustakaan'] ?? 'Perpustakaan Sekolah') . ' berisi ' . number_format($total_buku_count ?? 0) . ' judul dalam ' . number_format($total_kategori_count ?? 0) . ' kategori. Cari buku berdasarkan judul, penulis, ISBN, atau kata kunci lalu ajukan peminjaman secara mandiri.')
+
+@section('meta_keywords', 'katalog opac, pencarian buku sekolah, koleksi perpustakaan, modul kejuruan, isbn, ' . mb_strtolower($pengaturan['nama_sekolah'] ?? 'perpustakaan sekolah'))
+
+@section('robots', $katalogFilterAktif ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1')
+@section('canonical', route('katalog'))
+@section('og_type', 'website')
+
+@push('schema')
+<script type="application/ld+json">{!! json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'BreadcrumbList',
+    'itemListElement' => [
+        ['@type' => 'ListItem', 'position' => 1, 'name' => 'Beranda', 'item' => route('home')],
+        ['@type' => 'ListItem', 'position' => 2, 'name' => 'Katalog OPAC', 'item' => route('katalog')],
+    ],
+], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
+<script type="application/ld+json">{!! json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'CollectionPage',
+    'name' => 'Katalog OPAC ' . ($pengaturan['nama_perpustakaan'] ?? 'Perpustakaan Sekolah'),
+    'url' => route('katalog'),
+    'inLanguage' => 'id-ID',
+    'isPartOf' => ['@id' => url('/') . '#website'],
+    'mainEntity' => [
+        '@type' => 'ItemList',
+        'numberOfItems' => $buku->total(),
+        'itemListElement' => collect($buku->items())->values()->map(fn ($b, $i) => array_filter([
+            '@type' => 'ListItem',
+            'position' => $i + 1,
+            'url' => route('buku.detail', $b->id),
+            'name' => $b->judul,
+        ]))->all(),
+    ],
+], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
+@endpush
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6" x-data="katalogPage()">
@@ -679,6 +725,13 @@ function katalogPage() {
         openDetailModal: false,
         modalData: {},
         openLoanModal: false,
+        init() {
+            this.$watch('openLoanModal', (val) => this.syncBodyScrollLock());
+            this.$watch('openDetailModal', (val) => this.syncBodyScrollLock());
+        },
+        syncBodyScrollLock() {
+            document.body.style.overflow = (this.openLoanModal || this.openDetailModal) ? 'hidden' : '';
+        },
         loanData: {
             buku_id: '',
             judul: '',

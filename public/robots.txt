@@ -1,2 +1,15 @@
 User-agent: *
-Disallow:
+Allow: /
+
+# Area pengelola & endpoint internal -- tidak untuk mesin pencari
+Disallow: /admin/
+Disallow: /aksesperpuspgri
+Disallow: /login
+Disallow: /register
+Disallow: /dashboard
+Disallow: /api/
+
+# Catatan: halaman katalog dengan filter/pencarian TIDAK diblokir di sini.
+# Halaman tersebut sengaja dibiarkan bisa dirayapi agar crawler tetap
+# menemukan halaman detail buku, tapi ditandai "noindex, follow" lewat
+# meta robots di resources/views/public/katalog.blade.php.
