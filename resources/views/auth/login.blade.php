@@ -95,10 +95,10 @@
     </div>
 
     <div class="fixed inset-0 pointer-events-none overflow-hidden -z-10" aria-hidden="true">
-        <div class="absolute inset-0 bg-cover bg-center bg-no-repeat transform scale-105 transition duration-1000" style="background-image: url('{{ asset('images/bg-hero.webp') }}');"></div>
-        <div class="absolute inset-0 bg-gradient-to-br from-brand-950/90 via-brand-900/85 to-red-950/90"></div>
-        <div class="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none animate-bounce" style="animation-duration: 8s;"></div>
-        <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-red-500/20 rounded-full blur-3xl pointer-events-none animate-pulse" style="animation-duration: 6s;"></div>
+        <div class="absolute inset-0 bg-cover bg-center bg-no-repeat transform scale-105" style="background-image: url('{{ asset('images/bg-hero.webp') }}');"></div>
+        <div class="absolute inset-0 bg-gradient-to-br from-brand-900/85 via-red-800/80 to-brand-950/85"></div>
+        <div class="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-red-500/20 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-700/15 rounded-full blur-3xl pointer-events-none"></div>
     </div>
 

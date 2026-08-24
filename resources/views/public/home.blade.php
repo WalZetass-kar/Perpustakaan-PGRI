@@ -6,13 +6,13 @@
 
 @section('content')
 
-<section class="relative bg-brand-950 text-white min-h-[calc(100vh-5rem)] flex items-center py-16 lg:py-24 overflow-hidden shadow-lg">
+<section class="relative bg-brand-900 text-white min-h-[calc(100vh-5rem)] flex items-center py-16 lg:py-24 overflow-hidden shadow-lg">
 
-    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat pointer-events-none transform scale-105 transition duration-1000" style="background-image: url('{{ asset('images/bg-hero.webp') }}');"></div>
-    <div class="absolute inset-0 bg-gradient-to-r from-brand-950/90 via-brand-900/80 to-red-950/85 pointer-events-none"></div>
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat pointer-events-none transform scale-105" style="background-image: url('{{ asset('images/bg-hero.webp') }}');"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-brand-900/85 via-red-800/80 to-brand-950/85 pointer-events-none"></div>
 
-    <div class="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none animate-bounce" style="animation-duration: 8s;"></div>
-    <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-red-500/10 rounded-full blur-3xl pointer-events-none animate-pulse" style="animation-duration: 6s;"></div>
+    <div class="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-red-500/20 rounded-full blur-3xl pointer-events-none"></div>
 
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
