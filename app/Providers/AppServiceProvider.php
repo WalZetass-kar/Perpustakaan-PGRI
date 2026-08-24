@@ -17,23 +17,35 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         try {
-            if (Schema::hasTable('pengaturan')) {
-                View::composer('*', function ($view) {
-                    static $cachedSettings = null;
-                    if ($cachedSettings === null) {
-                        $cachedSettings = Pengaturan::all()->pluck('value', 'key');
+            View::composer('*', function ($view) {
+                static $cachedSettings = null;
+                if ($cachedSettings === null) {
+                    try {
+                        if (Schema::hasTable('pengaturan')) {
+                            $cachedSettings = Pengaturan::all()->pluck('value', 'key');
+                        } else {
+                            $cachedSettings = collect();
+                        }
+                    } catch (\Throwable $e) {
+                        $cachedSettings = collect();
                     }
-                    $view->with('pengaturan', $cachedSettings);
-                });
-            }
+                }
+                $view->with('pengaturan', $cachedSettings);
+            });
 
-            if (Schema::hasTable('peminjaman')) {
-                View::composer('layouts.dashboard', function ($view) {
-                    $pendingCount = Peminjaman::where('status', 'pending')->count();
-                    $view->with('pendingRequestsCount', $pendingCount);
-                });
-            }
-        } catch (\Exception $e) {
+            View::composer('layouts.dashboard', function ($view) {
+                try {
+                    if (Schema::hasTable('peminjaman')) {
+                        $pendingCount = Peminjaman::where('status', 'pending')->count();
+                        $view->with('pendingRequestsCount', $pendingCount);
+                    } else {
+                        $view->with('pendingRequestsCount', 0);
+                    }
+                } catch (\Throwable $e) {
+                    $view->with('pendingRequestsCount', 0);
+                }
+            });
+        } catch (\Throwable $e) {
         }
     }
 }

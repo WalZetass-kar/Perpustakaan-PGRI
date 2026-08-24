@@ -19,113 +19,140 @@ class PublicController extends Controller
 {
     public function home()
     {
-        $stats = [
-            'total_koleksi'   => Buku::count(),
-            'buku_tersedia'   => (int) Buku::sum('available_quantity'),
-            'sedang_dipinjam' => (int) Peminjaman::where('status', 'dipinjam')->sum('jumlah'),
-            'anggota_aktif'   => User::where('status', 'active')->count(),
-        ];
+        try {
+            $stats = [
+                'total_koleksi'   => Buku::count(),
+                'buku_tersedia'   => (int) Buku::sum('available_quantity'),
+                'sedang_dipinjam' => (int) Peminjaman::where('status', 'dipinjam')->sum('jumlah'),
+                'anggota_aktif'   => User::where('status', 'active')->count(),
+            ];
 
-        $buku_terbaru = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci'])
-            ->latest()
-            ->take(6)
-            ->get();
+            $buku_terbaru = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci'])
+                ->latest()
+                ->take(6)
+                ->get();
 
-        $buku_populer = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci'])
-            ->orderBy('view_count', 'desc')
-            ->take(6)
-            ->get();
+            $buku_populer = Buku::with(['penulis', 'penerbit', 'kategori', 'rak', 'laci'])
+                ->orderBy('view_count', 'desc')
+                ->take(6)
+                ->get();
 
-        $kategori_list = Kategori::orderBy('nama', 'asc')->get();
-        $penulis_list = Penulis::orderBy('nama', 'asc')->get();
-        $tahun_list = Buku::select('tahun_terbit')->whereNotNull('tahun_terbit')->distinct()->orderBy('tahun_terbit', 'desc')->pluck('tahun_terbit');
+            $kategori_list = Kategori::orderBy('nama', 'asc')->get();
+            $penulis_list = Penulis::orderBy('nama', 'asc')->get();
+            $tahun_list = Buku::select('tahun_terbit')->whereNotNull('tahun_terbit')->distinct()->orderBy('tahun_terbit', 'desc')->pluck('tahun_terbit');
 
-        $jam_operasional = Pengaturan::ambil('jam_operasional', 'Senin - Jumat: 07.00 - 15.30 WIB');
-        $nama_perpustakaan = Pengaturan::ambil('nama_perpustakaan', 'Perpustakaan Sekolah');
+            $jam_operasional = Pengaturan::ambil('jam_operasional', 'Senin - Jumat: 07.00 - 15.30 WIB');
+            $nama_perpustakaan = Pengaturan::ambil('nama_perpustakaan', 'Perpustakaan Sekolah');
+        } catch (\Throwable $e) {
+            $stats = [
+                'total_koleksi'   => 0,
+                'buku_tersedia'   => 0,
+                'sedang_dipinjam' => 0,
+                'anggota_aktif'   => 0,
+            ];
+            $buku_terbaru = collect();
+            $buku_populer = collect();
+            $kategori_list = collect();
+            $penulis_list = collect();
+            $tahun_list = collect();
+            $jam_operasional = 'Senin - Jumat: 07.00 - 15.30 WIB';
+            $nama_perpustakaan = 'Perpustakaan Sekolah';
+        }
 
         return view('public.home', compact('stats', 'buku_terbaru', 'buku_populer', 'kategori_list', 'penulis_list', 'tahun_list', 'jam_operasional', 'nama_perpustakaan'));
     }
 
     public function katalog(Request $request)
     {
-        $query = Buku::with(['penulis', 'penerbit', 'kategori', 'kelas', 'rak', 'laci']);
+        try {
+            $query = Buku::with(['penulis', 'penerbit', 'kategori', 'kelas', 'rak', 'laci']);
 
-        if ($request->filled('search')) {
-            $search = substr(trim($request->search), 0, 100);
-            $query->where(function($q) use ($search) {
-                $q->where('judul', 'like', "%{$search}%")
-                  ->orWhere('isbn', 'like', "%{$search}%")
-                  ->orWhereHas('penulis', function($qp) use ($search) {
-                      $qp->where('nama', 'like', "%{$search}%");
-                  })
-                  ->orWhereHas('kategori', function($qk) use ($search) {
-                      $qk->where('nama', 'like', "%{$search}%");
-                  })
-                  ->orWhereHas('penerbit', function($qpb) use ($search) {
-                      $qpb->where('nama', 'like', "%{$search}%");
-                  });
-            });
-        }
-
-        if ($request->filled('kategori_id') && is_numeric($request->kategori_id)) {
-            $query->where('kategori_id', (int) $request->kategori_id);
-        }
-
-        if ($request->filled('penulis_id') && is_numeric($request->penulis_id)) {
-            $query->where('penulis_id', (int) $request->penulis_id);
-        }
-
-        if ($request->filled('rak_id') && is_numeric($request->rak_id)) {
-            $query->where('rak_id', (int) $request->rak_id);
-        }
-
-        if ($request->filled('tahun') && is_numeric($request->tahun)) {
-            $query->where('tahun_terbit', (int) $request->tahun);
-        }
-
-        if ($request->filled('status')) {
-            $status = strtolower(trim($request->status));
-            if ($status === 'tersedia') {
-                $query->where('available_quantity', '>', 0);
-            } elseif ($status === 'dipinjam') {
-                $query->where('available_quantity', '<=', 0);
+            if ($request->filled('search')) {
+                $search = substr(trim($request->search), 0, 100);
+                $query->where(function($q) use ($search) {
+                    $q->where('judul', 'like', "%{$search}%")
+                      ->orWhere('isbn', 'like', "%{$search}%")
+                      ->orWhereHas('penulis', function($qp) use ($search) {
+                          $qp->where('nama', 'like', "%{$search}%");
+                      })
+                      ->orWhereHas('kategori', function($qk) use ($search) {
+                          $qk->where('nama', 'like', "%{$search}%");
+                      })
+                      ->orWhereHas('penerbit', function($qpb) use ($search) {
+                          $qpb->where('nama', 'like', "%{$search}%");
+                      });
+                });
             }
+
+            if ($request->filled('kategori_id') && is_numeric($request->kategori_id)) {
+                $query->where('kategori_id', (int) $request->kategori_id);
+            }
+
+            if ($request->filled('penulis_id') && is_numeric($request->penulis_id)) {
+                $query->where('penulis_id', (int) $request->penulis_id);
+            }
+
+            if ($request->filled('rak_id') && is_numeric($request->rak_id)) {
+                $query->where('rak_id', (int) $request->rak_id);
+            }
+
+            if ($request->filled('tahun') && is_numeric($request->tahun)) {
+                $query->where('tahun_terbit', (int) $request->tahun);
+            }
+
+            if ($request->filled('status')) {
+                $status = strtolower(trim($request->status));
+                if ($status === 'tersedia') {
+                    $query->where('available_quantity', '>', 0);
+                } elseif ($status === 'dipinjam') {
+                    $query->where('available_quantity', '<=', 0);
+                }
+            }
+
+            $sort = strtolower(trim($request->get('sort', 'terbaru')));
+            $validSorts = ['terbaru', 'terlama', 'judul_asc', 'judul_desc', 'populer'];
+            if (!in_array($sort, $validSorts)) {
+                $sort = 'terbaru';
+            }
+
+            switch ($sort) {
+                case 'terlama':
+                    $query->oldest();
+                    break;
+                case 'judul_asc':
+                    $query->orderBy('judul', 'asc');
+                    break;
+                case 'judul_desc':
+                    $query->orderBy('judul', 'desc');
+                    break;
+                case 'populer':
+                    $query->orderBy('view_count', 'desc');
+                    break;
+                default:
+                    $query->latest();
+                    break;
+            }
+
+            $buku = $query->paginate(12)->withQueryString();
+
+            $total_buku_count = Buku::count();
+            $total_kategori_count = Kategori::count();
+            $total_rak_count = Rak::count();
+
+            $kategori_list = Kategori::orderBy('nama', 'asc')->get();
+            $penulis_list = Penulis::orderBy('nama', 'asc')->get();
+            $rak_list = Rak::with('laci')->orderBy('kode_rak', 'asc')->get();
+            $tahun_list = Buku::select('tahun_terbit')->whereNotNull('tahun_terbit')->distinct()->orderBy('tahun_terbit', 'desc')->pluck('tahun_terbit');
+        } catch (\Throwable $e) {
+            $buku = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
+            $total_buku_count = 0;
+            $total_kategori_count = 0;
+            $total_rak_count = 0;
+            $kategori_list = collect();
+            $penulis_list = collect();
+            $rak_list = collect();
+            $tahun_list = collect();
         }
-
-        $sort = strtolower(trim($request->get('sort', 'terbaru')));
-        $validSorts = ['terbaru', 'terlama', 'judul_asc', 'judul_desc', 'populer'];
-        if (!in_array($sort, $validSorts)) {
-            $sort = 'terbaru';
-        }
-
-        switch ($sort) {
-            case 'terlama':
-                $query->oldest();
-                break;
-            case 'judul_asc':
-                $query->orderBy('judul', 'asc');
-                break;
-            case 'judul_desc':
-                $query->orderBy('judul', 'desc');
-                break;
-            case 'populer':
-                $query->orderBy('view_count', 'desc');
-                break;
-            default:
-                $query->latest();
-                break;
-        }
-
-        $buku = $query->paginate(12)->withQueryString();
-
-        $total_buku_count = Buku::count();
-        $total_kategori_count = Kategori::count();
-        $total_rak_count = Rak::count();
-
-        $kategori_list = Kategori::orderBy('nama', 'asc')->get();
-        $penulis_list = Penulis::orderBy('nama', 'asc')->get();
-        $rak_list = Rak::with('laci')->orderBy('kode_rak', 'asc')->get();
-        $tahun_list = Buku::select('tahun_terbit')->whereNotNull('tahun_terbit')->distinct()->orderBy('tahun_terbit', 'desc')->pluck('tahun_terbit');
 
         return view('public.katalog', compact('buku', 'kategori_list', 'penulis_list', 'rak_list', 'tahun_list', 'total_buku_count', 'total_kategori_count', 'total_rak_count'));
     }
