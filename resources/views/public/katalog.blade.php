@@ -652,21 +652,72 @@
                 <p class="text-[11px] text-gray-500">Lengkapi data diri Anda untuk konfirmasi peminjaman buku ke petugas perpustakaan.</p>
             </div>
 
-            <div class="p-3 bg-gray-50 rounded-2xl border border-gray-200 flex items-center gap-3">
-                <div class="w-12 h-16 bg-gray-200 rounded-lg overflow-hidden shrink-0 border border-gray-300 flex items-center justify-center shadow-2xs">
-                    <template x-if="loanData.cover">
-                        <img :src="loanData.cover" alt="Cover" class="w-full h-full object-cover">
-                    </template>
-                    <template x-if="!loanData.cover">
-                        <div class="w-full h-full bg-brand-800 text-white font-bold flex items-center justify-center text-xs">
-                            <i class="fa-solid fa-book"></i>
+            <div class="p-3 bg-gray-50 rounded-2xl border border-gray-200 space-y-2.5">
+                <div class="flex items-start gap-3">
+                    <div class="w-12 h-16 bg-gray-200 rounded-lg overflow-hidden shrink-0 border border-gray-300 flex items-center justify-center shadow-2xs">
+                        <template x-if="loanData.cover">
+                            <img :src="loanData.cover" alt="Cover" class="w-full h-full object-cover">
+                        </template>
+                        <template x-if="!loanData.cover">
+                            <div class="w-full h-full bg-brand-800 text-white font-bold flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-book"></i>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="min-w-0 flex-1 text-xs">
+                        <p class="font-extrabold text-gray-900 line-clamp-2 leading-snug" x-text="loanData.judul"></p>
+                        <p class="text-[11px] text-gray-500 mt-0.5">Penulis: <span class="font-bold text-gray-700" x-text="loanData.penulis"></span></p>
+                        <div class="mt-1.5">
+                            <template x-if="loanData.tersedia > 0">
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200 uppercase tracking-wide">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+                                    Tersedia (<span x-text="loanData.tersedia"></span>)
+                                </span>
+                            </template>
+                            <template x-if="loanData.tersedia <= 0">
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black bg-blue-100 text-blue-700 border border-blue-200 uppercase tracking-wide">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block"></span>
+                                    Sedang Dipinjam (<span x-text="loanData.total"></span>)
+                                </span>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-x-3 gap-y-1 text-[10px] border-t border-gray-200 pt-2">
+                    <div class="flex items-start gap-1 text-gray-500">
+                        <i class="fa-solid fa-building-columns text-gray-400 mt-0.5 w-3 shrink-0"></i>
+                        <span>Penerbit: <span class="font-semibold text-gray-700" x-text="loanData.penerbit || '-'"></span></span>
+                    </div>
+                    <div class="flex items-start gap-1 text-gray-500">
+                        <i class="fa-solid fa-calendar text-gray-400 mt-0.5 w-3 shrink-0"></i>
+                        <span>Tahun: <span class="font-semibold text-gray-700" x-text="loanData.tahun || '-'"></span></span>
+                    </div>
+                    <div class="flex items-start gap-1 text-gray-500">
+                        <i class="fa-solid fa-tag text-gray-400 mt-0.5 w-3 shrink-0"></i>
+                        <span>Kategori: <span class="font-semibold text-gray-700" x-text="loanData.kategori || '-'"></span></span>
+                    </div>
+                    <template x-if="loanData.kelas">
+                        <div class="flex items-start gap-1 text-gray-500">
+                            <i class="fa-solid fa-graduation-cap text-gray-400 mt-0.5 w-3 shrink-0"></i>
+                            <span>Kelas: <span class="font-semibold text-gray-700" x-text="loanData.kelas"></span></span>
                         </div>
                     </template>
-                </div>
-                <div class="min-w-0 flex-1 text-xs">
-                    <p class="font-extrabold text-gray-900 line-clamp-1" x-text="loanData.judul"></p>
-                    <p class="text-[11px] text-gray-500 mt-0.5">Penulis: <span class="font-bold text-gray-700" x-text="loanData.penulis"></span></p>
-                    <p class="text-[10px] text-brand-700 font-mono font-bold mt-0.5">Lokasi Rak: <span x-text="loanData.rak"></span></p>
+                    <div class="col-span-2 flex items-start gap-1 text-gray-500">
+                        <i class="fa-solid fa-location-dot text-brand-600 mt-0.5 w-3 shrink-0"></i>
+                        <span class="text-brand-700 font-bold">
+                            <span x-text="loanData.rak"></span>
+                            <template x-if="loanData.laci">
+                                <span> &bull; <span x-text="loanData.laci"></span></span>
+                            </template>
+                        </span>
+                    </div>
+                    <template x-if="loanData.isbn && loanData.isbn !== 'Tanpa ISBN'">
+                        <div class="col-span-2 flex items-start gap-1 text-gray-500">
+                            <i class="fa-solid fa-barcode text-gray-400 mt-0.5 w-3 shrink-0"></i>
+                            <span>ISBN: <span class="font-mono font-semibold text-gray-700" x-text="loanData.isbn"></span></span>
+                        </div>
+                    </template>
                 </div>
             </div>
 
@@ -737,7 +788,15 @@ function katalogPage() {
             judul: '',
             cover: '',
             penulis: '',
+            penerbit: '',
+            tahun: '',
+            isbn: '',
+            kategori: '',
+            kelas: '',
             rak: '',
+            laci: '',
+            tersedia: 0,
+            total: 0,
             nama_peminjam: '',
             jurusan: '',
             nomor_induk: '',
@@ -771,7 +830,7 @@ function katalogPage() {
             window.location.href = '{{ route('katalog') }}?search=' + encodeURIComponent(item.judul);
         },
         startLoan(book) {
-            if (book.available <= 0) {
+            if (book.tersedia <= 0) {
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
                         icon: 'warning',
@@ -784,11 +843,19 @@ function katalogPage() {
                 }
                 return;
             }
-            this.loanData.buku_id = book.id;
-            this.loanData.judul = book.judul;
-            this.loanData.cover = book.cover;
-            this.loanData.penulis = book.penulis;
-            this.loanData.rak = book.rak;
+            this.loanData.buku_id  = book.id;
+            this.loanData.judul    = book.judul;
+            this.loanData.cover    = book.cover;
+            this.loanData.penulis  = book.penulis;
+            this.loanData.penerbit = book.penerbit;
+            this.loanData.tahun    = book.tahun;
+            this.loanData.isbn     = book.isbn;
+            this.loanData.kategori = book.kategori;
+            this.loanData.kelas    = book.kelas;
+            this.loanData.rak      = book.rak;
+            this.loanData.laci     = book.laci;
+            this.loanData.tersedia = book.tersedia;
+            this.loanData.total    = book.total;
             this.openDetailModal = false;
             this.openLoanModal = true;
         },
