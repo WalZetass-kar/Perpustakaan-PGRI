@@ -24,15 +24,16 @@
                     @if(request('filter'))
                         <input type="hidden" name="filter" value="{{ request('filter') }}">
                     @endif
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari kode, siswa, NIS..."
-                       class="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:outline-none font-medium">
-                <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            </form>
-            <div class="flex flex-wrap items-center justify-end gap-2 shrink-0">
-                <button @click="openAddModal = true" class="px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0">
-                    <i class="fa-solid fa-plus text-emerald-300"></i>
-                    <span>Peminjaman Baru</span>
-                </button>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari kode, siswa, NIS..."
+                           class="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:outline-none font-medium">
+                    <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </form>
+                <div class="flex flex-wrap items-center justify-end gap-2 shrink-0">
+                    <button @click="openAddModal = true" class="px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-1.5 shrink-0">
+                        <i class="fa-solid fa-plus text-emerald-300"></i>
+                        <span>Peminjaman Baru</span>
+                    </button>
+                </div>
             </div>
         </div>
 
