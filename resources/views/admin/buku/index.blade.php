@@ -94,6 +94,22 @@
     @media (min-width: 1024px) {
         #list-buku-mobile-container { display: none !important; }
     }
+
+    /* Kedua container ini disisipkan ke dalam .dataTables_wrapper, tepat setelah
+       <table>. Di atasnya ada .dataTables_length yang ber-float:left. Saat mode
+       Grid, tabel diberi class "hidden" sehingga clear:both bawaan
+       table.dataTable ikut hilang dari alur dokumen. Tanpa clear di sini,
+       container Grid -- yang membentuk formatting context sendiri -- akan
+       menyusut menghindari float tersebut dan tampak mengumpul, tidak memenuhi
+       lebar. */
+    #grid-buku-container,
+    #list-buku-mobile-container { clear: both; }
+
+    /* Jaring pengaman: pastikan tabel selalu selebar wadahnya. Aturan bawaan
+       table.dataTable adalah width:100% dengan margin:0 auto, sehingga lebar
+       apa pun yang lebih kecil akan tampil terpusat dan menyisakan ruang kosong
+       di kiri-kanan. */
+    #tabel-buku { width: 100% !important; }
 </style>
 @endpush
 
@@ -545,6 +561,14 @@
             pageLength: 10,
             lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
             dom: 'lrtip',
+            // Wajib false. Dengan autoWidth aktif, DataTables mengukur tabel lalu
+            // menuliskan hasilnya sebagai lebar inline. Ketika halaman dibuka pada
+            // mode Grid, tabel sedang display:none saat pengukuran berlangsung,
+            // sehingga yang tersimpan adalah lebar sebesar isi kolom saja. Saat
+            // pengguna pindah ke mode List, lebar inline itu menimpa width:100%
+            // milik table.dataTable dan tabel tampil menyempit, lalu dipusatkan
+            // oleh margin:0 auto pada aturan yang sama.
+            autoWidth: false,
             language: {
                 processing: '<div class="py-4 text-center text-xs font-bold text-brand-700 flex items-center justify-center gap-2"><i class="fa-solid fa-spinner fa-spin text-sm"></i> Memuat data koleksi...</div>',
                 lengthMenu: 'Tampilkan _MENU_ data',
@@ -709,6 +733,7 @@
                 btnList.classList.remove(...inactiveClass);
                 btnGrid.classList.remove(...activeClass);
                 btnGrid.classList.add(...inactiveClass);
+
             }
         };
 
