@@ -46,9 +46,24 @@
                   localStorage.setItem('sidebar_collapsed', this.sidebarCollapsed);
               }
           },
-          openManageBuku: {{ request()->routeIs('admin.buku*', 'admin.data-buku*', 'admin.kategori*', 'admin.penulis*', 'admin.penerbit*', 'admin.kelas*', 'admin.rak*') ? 'true' : 'false' }},
-          openSirkulasi: {{ request()->routeIs('admin.peminjaman*', 'admin.riwayat*') ? 'true' : 'false' }},
-          openAdmin: {{ request()->routeIs('admin.anggota*', 'admin.pengaturan*', 'admin.audit-log*') ? 'true' : 'false' }}
+          {{-- Keadaan tiap dropdown sidebar ditentukan dua hal, digabung dengan OR:
+
+               1. Grup yang MEMUAT halaman aktif selalu terbuka, supaya petugas
+                  selalu melihat posisinya. Karena itu setiap tautan di dalam
+                  sebuah grup wajib punya pasangan pola di sini — satu yang
+                  lupa didaftarkan membuat dropdown-nya menutup sendiri begitu
+                  tautan itu diklik.
+               2. Grup LAIN mempertahankan pilihan terakhir petugas, yang
+                  disimpan di localStorage lewat toggleGrup(). Tanpa ini,
+                  membuka menu di satu bagian akan menutup dropdown bagian lain
+                  yang sengaja dibiarkan terbuka. --}}
+          toggleGrup(nama) {
+              this[nama] = !this[nama];
+              localStorage.setItem('sidebar_' + nama, this[nama]);
+          },
+          openManageBuku: {{ request()->routeIs('admin.buku*', 'admin.data-buku*', 'admin.kategori*', 'admin.penulis*', 'admin.penerbit*', 'admin.kelas*', 'admin.rak*') ? 'true' : 'false' }} || localStorage.getItem('sidebar_openManageBuku') === 'true',
+          openSirkulasi: {{ request()->routeIs('admin.peminjaman*', 'admin.riwayat*') ? 'true' : 'false' }} || localStorage.getItem('sidebar_openSirkulasi') === 'true',
+          openAdmin: {{ request()->routeIs('admin.anggota*', 'admin.profil*', 'admin.pengaturan*', 'admin.audit-log*') ? 'true' : 'false' }} || localStorage.getItem('sidebar_openAdmin') === 'true'
       }">
 
     <div id="admin-skeleton-loader" class="fixed inset-0 z-50 bg-gray-100 flex pointer-events-none transition-opacity duration-300">
@@ -157,7 +172,7 @@
                     </a>
 
                     <div class="space-y-1">
-                        <button type="button" @click="openManageBuku = !openManageBuku" title="MANAGE BUKU"
+                        <button type="button" @click="toggleGrup('openManageBuku')" title="MANAGE BUKU"
                                 class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-700 hover:bg-gray-100 transition duration-200 border border-transparent font-extrabold text-xs"
                                 :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
                             <div class="flex items-center gap-3 min-w-0">
@@ -214,7 +229,7 @@
                     </div>
 
                     <div class="space-y-1">
-                        <button type="button" @click="openSirkulasi = !openSirkulasi" title="SIRKULASI PINJAM"
+                        <button type="button" @click="toggleGrup('openSirkulasi')" title="SIRKULASI PINJAM"
                                 class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-700 hover:bg-gray-100 transition duration-200 border border-transparent font-extrabold text-xs"
                                 :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
                             <div class="flex items-center gap-3 min-w-0">
@@ -259,7 +274,7 @@
                     </div>
 
                     <div class="space-y-1">
-                        <button type="button" @click="openAdmin = !openAdmin" title="PENGATURAN &amp; AKUN"
+                        <button type="button" @click="toggleGrup('openAdmin')" title="PENGATURAN &amp; AKUN"
                                 class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-700 hover:bg-gray-100 transition duration-200 border border-transparent font-extrabold text-xs"
                                 :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
                             <div class="flex items-center gap-3 min-w-0">
