@@ -43,6 +43,12 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // Jika SEED_ADMIN_PASSWORD di-set secara eksplisit, paksa update password
+        // (berguna untuk recovery akses ketika password awal tidak tercatat)
+        if (env('SEED_ADMIN_PASSWORD')) {
+            $admin->update(['password' => Hash::make($seedPassword)]);
+        }
+
         $pustakawan = User::firstOrCreate(
             ['email' => 'pustakawan@sekolah.sch.id'],
             [
@@ -53,6 +59,10 @@ class DatabaseSeeder extends Seeder
                 'status' => 'active',
             ]
         );
+
+        if (env('SEED_ADMIN_PASSWORD')) {
+            $pustakawan->update(['password' => Hash::make($seedPassword)]);
+        }
 
         $catTKJ = Kategori::firstOrCreate(
             ['slug' => 'tkj'],
