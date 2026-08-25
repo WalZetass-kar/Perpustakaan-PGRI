@@ -2087,6 +2087,10 @@ class AdminController extends Controller
 
     public function pengaturanIndex()
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Administrator yang berwenang membuka pengaturan sistem.');
+        }
+
         $pengaturan = Pengaturan::all()->pluck('value', 'key');
         $systemInfo = [
             'laravel_version' => app()->version(),
@@ -2102,6 +2106,10 @@ class AdminController extends Controller
 
     public function pengaturanUpdate(Request $request)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Administrator yang berwenang mengubah pengaturan sistem.');
+        }
+
         $validated = $request->validate([
             'nama_perpustakaan'       => 'required|string|max:255',
             'nama_sekolah'            => 'nullable|string|max:255',
