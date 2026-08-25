@@ -46,7 +46,7 @@ Untuk mempermudah teknisi sekolah dalam melakukan pemasangan dan membantu pustak
   - Ekspor Excel koleksi buku dengan format kolom rapi.
   - Cetak PDF laporan inventaris buku dan sirkulasi peminjaman (A4 Portrait) lengkap dengan Kop Surat Instansi dan blok tanda tangan formal 2 kolom simetris.
 - **Pencadangan Database Terintegrasi**: Fasilitas unduh salinan basis data SQL langsung dari panel admin dan melalui CLI.
-- **Manajemen Akun & Keamanan Mandiri**: Pembagian hak akses (Super Admin dan Petugas) serta halaman ganti kata sandi mandiri.
+- **Manajemen Akun & Kendali Kata Sandi Terpusat**: Pembagian hak akses Super Admin dan Petugas. Penggantian kata sandi dipusatkan pada Super Admin — Super Admin dapat mengubah kata sandinya sendiri melalui halaman Profil & Keamanan sekaligus mereset kata sandi akun Petugas, sedangkan Petugas menghubungi Super Admin bila perlu penggantian.
 
 ---
 

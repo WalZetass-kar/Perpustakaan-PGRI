@@ -93,14 +93,37 @@ Terdapat 2 cara peminjaman:
 
 ---
 
-### 5. PROFIL AKUN & KEAMANAN MANDIRI
+### 5. PROFIL AKUN & KEAMANAN
 
-Petugas dan Admin dapat memperbarui profil dan kata sandi masing-masing secara mandiri:
+Seluruh pengguna dapat meninjau data akunnya sendiri, namun **penggantian kata
+sandi hanya dapat dilakukan oleh Super Administrator**. Ketentuan ini berlaku
+agar kendali keamanan akun terpusat pada satu penanggung jawab.
+
+#### Untuk Semua Pengguna (Petugas & Super Admin)
 1. Buka menu **Profil & Keamanan** di bilah navigasi samping.
-2. Di halaman ini, Anda dapat:
-   - Melihat rincian nama akun, email, dan hak akses (role).
-   - Mengubah kata sandi dengan memasukkan **Kata Sandi Saat Ini**, **Kata Sandi Baru** (minimal 8 karakter), dan **Konfirmasi Kata Sandi Baru**.
+2. Di halaman ini Anda dapat melihat rincian nama akun, email, dan hak akses (role).
+
+#### Mengubah Kata Sandi Sendiri (Khusus Super Administrator)
+1. Buka menu **Profil & Keamanan**.
+2. Isi **Kata Sandi Saat Ini**, **Kata Sandi Baru** (minimal 8 karakter), dan
+   **Konfirmasi Kata Sandi Baru**.
 3. Klik **Perbarui Kata Sandi**.
+
+> Formulir penggantian kata sandi tidak ditampilkan pada akun Petugas. Ini
+> perilaku yang memang dirancang demikian, bukan kerusakan sistem.
+
+#### Bila Petugas Perlu Mengganti Kata Sandi
+Petugas menghubungi Super Administrator, lalu Super Administrator mereset kata
+sandi tersebut melalui menu **Akun Pengelola**:
+1. Buka menu **Akun Pengelola**.
+2. Cari nama petugas yang bersangkutan.
+3. Pilih tindakan **Reset Password**, lalu masukkan kata sandi baru beserta
+   konfirmasinya.
+4. Sampaikan kata sandi baru itu kepada petugas yang bersangkutan.
+
+> Dalam keadaan darurat, misalnya seluruh akun Super Admin tidak dapat diakses,
+> teknisi sekolah dapat mereset kata sandi melalui terminal server dengan
+> perintah `php artisan perpus:reset-password <email>`.
 
 ---
 
