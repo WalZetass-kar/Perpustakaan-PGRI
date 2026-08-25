@@ -305,9 +305,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $settings = [
-            ['key' => 'max_buku_pinjam', 'value' => '3', 'label' => 'Maksimal Buku Dipinjam Per Siswa', 'tipe' => 'number'],
             ['key' => 'durasi_pinjam_hari', 'value' => '7', 'label' => 'Durasi Peminjaman Standar (Hari)', 'tipe' => 'number'],
-            ['key' => 'max_perpanjangan', 'value' => '2', 'label' => 'Maksimal Perpanjangan Online', 'tipe' => 'number'],
             ['key' => 'nama_perpustakaan', 'value' => 'Sistem Perpustakaan Sekolah', 'label' => 'Nama Resmi Perpustakaan', 'tipe' => 'text'],
             ['key' => 'nama_sekolah', 'value' => 'SMK Negeri / Swasta', 'label' => 'Nama Sekolah', 'tipe' => 'text'],
             ['key' => 'jam_operasional', 'value' => 'Senin - Jumat: 07.00 - 15.30 WIB', 'label' => 'Informasi Jam Operasional', 'tipe' => 'text'],

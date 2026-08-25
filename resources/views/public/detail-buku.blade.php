@@ -295,7 +295,6 @@
                     </p>
                     <div class="pt-2 border-t border-gray-200/60 flex flex-wrap items-center gap-x-6 gap-y-1 text-[11px] text-gray-500 font-medium">
                         <span>Jam Layanan: <strong class="text-gray-800">{{ $pengaturan['jam_operasional'] ?? 'Senin - Jumat: 07.00 - 15.30 WIB' }}</strong></span>
-                        <span>Maksimal Pinjam: <strong class="text-gray-800">{{ $pengaturan['max_buku_pinjam'] ?? 2 }} Buku</strong></span>
                     </div>
                 </div>
             </div>
