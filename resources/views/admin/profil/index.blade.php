@@ -62,39 +62,49 @@
             </div>
             <div>
                 <h3 class="text-sm font-black text-gray-900">Ubah Password Akun</h3>
-                <p class="text-[11px] text-gray-500">Perbarui kata sandi Anda secara berkala demi keamanan sistem</p>
+                <p class="text-[11px] text-gray-500">Keamanan kata sandi akun sistem perpustakaan</p>
             </div>
         </div>
 
-        <form action="{{ route('admin.profil.ubah-password') }}" method="POST" class="space-y-4 text-xs">
-            @csrf
+        @if(auth()->user()->isSuperAdmin())
+            <form action="{{ route('admin.profil.ubah-password') }}" method="POST" class="space-y-4 text-xs">
+                @csrf
 
-            <div class="space-y-1">
-                <label class="block font-bold text-gray-800">Password Saat Ini <span class="text-rose-500">*</span></label>
-                <input type="password" name="current_password" required
-                       class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="space-y-1">
-                    <label class="block font-bold text-gray-800">Password Baru (min. 8 karakter) <span class="text-rose-500">*</span></label>
-                    <input type="password" name="password" required minlength="8"
+                    <label class="block font-bold text-gray-800">Password Saat Ini <span class="text-rose-500">*</span></label>
+                    <input type="password" name="current_password" required
                            class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                 </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="block font-bold text-gray-800">Password Baru (min. 8 karakter) <span class="text-rose-500">*</span></label>
+                        <input type="password" name="password" required minlength="8"
+                               class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block font-bold text-gray-800">Konfirmasi Password Baru <span class="text-rose-500">*</span></label>
+                        <input type="password" name="password_confirmation" required minlength="8"
+                               class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                    </div>
+                </div>
+
+                <div class="pt-3 flex justify-end">
+                    <button type="submit" class="px-5 py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Simpan Password Baru</span>
+                    </button>
+                </div>
+            </form>
+        @else
+            <div class="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs">
+                <i class="fa-solid fa-lock text-amber-500 mt-0.5 shrink-0 text-sm"></i>
                 <div class="space-y-1">
-                    <label class="block font-bold text-gray-800">Konfirmasi Password Baru <span class="text-rose-500">*</span></label>
-                    <input type="password" name="password_confirmation" required minlength="8"
-                           class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                    <p class="font-bold text-amber-800">Perubahan password tidak diizinkan untuk akun ini.</p>
+                    <p class="text-amber-700">Jika Anda perlu mengganti password, silakan hubungi <span class="font-bold">Super Administrator</span> perpustakaan untuk mereset password akun Anda.</p>
                 </div>
             </div>
-
-            <div class="pt-3 flex justify-end">
-                <button type="submit" class="px-5 py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold rounded-xl transition duration-200 shadow-sm flex items-center gap-2">
-                    <i class="fa-solid fa-floppy-disk"></i>
-                    <span>Simpan Password Baru</span>
-                </button>
-            </div>
-        </form>
+        @endif
     </div>
 
 </div>

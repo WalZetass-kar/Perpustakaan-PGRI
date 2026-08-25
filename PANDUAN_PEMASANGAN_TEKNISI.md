@@ -1,11 +1,25 @@
 # PANDUAN LENGKAP PEMASANGAN & KONEKSI DATABASE DI HOSTING & SERVER
 ## Sistem Informasi Perpustakaan Digital Sekolah (Katalog OPAC & Panel Admin)
 
-Dokumen ini disusun sebagai panduan langkah-demi-langkah bagi teknisi IT sekolah atau pengelola web untuk memasang aplikasi di berbagai jenis lingkungan hosting (cPanel / Shared Hosting, VPS, maupun Cloud PaaS seperti Railway), mulai dari pembuatan basis data (database), menghubungkan koneksi, hingga aplikasi siap digunakan.
+Dokumen ini disusun sebagai panduan langkah-demi-langkah bagi teknisi IT sekolah atau pengelola web untuk memasang aplikasi di berbagai jenis lingkungan — jaringan lokal sekolah (LAN), hosting berbasis cPanel, VPS, maupun Cloud PaaS seperti Railway — mulai dari pembuatan basis data (database), menghubungkan koneksi, hingga aplikasi siap digunakan.
+
+---
+
+## PILIH SKENARIO PEMASANGAN
+
+Aplikasi ini mendukung dua skenario utama. Pilih sesuai kebutuhan sekolah:
+
+| Skenario | Keterangan | File Konfigurasi |
+|---|---|---|
+| **Lokal (LAN)** | Satu komputer di sekolah jadi server, komputer lain akses lewat jaringan WiFi/kabel lokal | `env.example.lokal` |
+| **Hosting / Cloud** | Aplikasi diakses lewat internet via domain sekolah (cPanel, VPS, Railway, dll.) | `env.example.hosting` |
+
+Kedua file contoh tersebut sudah tersedia di folder proyek. Salin salah satu sesuai pilihan dan ubah namanya menjadi `.env`.
 
 ---
 
 ## DAFTAR ISI
+0. [Panduan Pemasangan di Jaringan Lokal Sekolah (LAN/XAMPP)](#0-panduan-pemasangan-di-jaringan-lokal-sekolah-lanxampp)
 1. [Spesifikasi & Kebutuhan Server](#1-spesifikasi--kebutuhan-server)
 2. [Panduan Pemasangan di cPanel / Shared Hosting](#2-panduan-pemasangan-di-cpanel--shared-hosting)
    - [Langkah 1: Membuat Database & User di cPanel](#langkah-1-membuat-database--user-di-cpanel)
@@ -18,6 +32,110 @@ Dokumen ini disusun sebagai panduan langkah-demi-langkah bagi teknisi IT sekolah
 4. [Panduan Pemasangan di Cloud PaaS (Railway / Docker Container)](#4-panduan-pemasangan-di-cloud-paas-railway--docker-container)
 5. [Daftar Perintah Artisan untuk Pemeliharaan](#5-daftar-perintah-artisan-untuk-pemeliharaan)
 6. [Panduan Pemecahan Masalah (Troubleshooting)](#6-panduan-pemecahan-masalah-troubleshooting)
+
+---
+
+## 0. PANDUAN PEMASANGAN DI JARINGAN LOKAL SEKOLAH (LAN/XAMPP)
+
+Skenario ini cocok jika sekolah memiliki satu komputer yang dijadikan server dan komputer lain (di ruang perpustakaan, ruang guru, dll.) mengakses sistem via jaringan WiFi atau kabel lokal.
+
+### Prasyarat
+- Komputer server menggunakan **XAMPP** (Windows) atau **LAMPP** (Linux/Ubuntu)
+- PHP 8.2+ dan MySQL sudah aktif di XAMPP/LAMPP
+- Semua komputer klien terhubung ke jaringan yang sama (WiFi sekolah atau switch/hub)
+
+---
+
+### Langkah 1: Letakkan Folder Proyek di XAMPP
+
+**Windows (XAMPP):**
+1. Salin seluruh folder proyek ke: `C:\xampp\htdocs\perpustakaan`
+2. Buka browser, akses `http://localhost/perpustakaan/public` — pastikan halaman muncul.
+
+**Linux (LAMPP):**
+1. Salin seluruh folder proyek ke: `/opt/lampp/htdocs/perpustakaan`
+2. Buka browser, akses `http://localhost/perpustakaan/public` — pastikan halaman muncul.
+
+> **Tips:** Agar URL lebih rapi tanpa `/public`, konfigurasi Virtual Host Apache di XAMPP/LAMPP sehingga document root mengarah langsung ke folder `public/` proyek.
+
+---
+
+### Langkah 2: Buat Database di phpMyAdmin
+
+1. Buka `http://localhost/phpmyadmin` di browser komputer server.
+2. Klik tab **Databases** (Basis Data).
+3. Di kolom "Create database", ketik `perpustakaan` lalu pilih collation `utf8mb4_unicode_ci`, klik **Create**.
+
+---
+
+### Langkah 3: Konfigurasi File .env
+
+1. Masuk ke folder proyek, salin file `env.example.lokal` dan ubah namanya menjadi `.env`:
+   ```bash
+   cp env.example.lokal .env
+   ```
+2. Buka file `.env`, cari dan ganti nilai `APP_URL`:
+   ```env
+   # Ganti 192.168.1.10 dengan IP komputer SERVER (bukan komputer yang sedang dipakai)
+   APP_URL=http://192.168.1.10
+   ```
+3. Cara mengetahui IP komputer server:
+   - **Windows**: Buka CMD → ketik `ipconfig` → lihat **IPv4 Address** (biasanya 192.168.x.x)
+   - **Linux**: Buka Terminal → ketik `ip addr` → lihat nilai `inet` pada antarmuka `eth0` atau `wlan0`
+4. Pastikan konfigurasi database sesuai (default XAMPP/LAMPP tidak pakai password):
+   ```env
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=perpustakaan
+   DB_USERNAME=root
+   DB_PASSWORD=
+   ```
+
+---
+
+### Langkah 4: Inisialisasi Aplikasi
+
+Buka Terminal (Linux) atau Command Prompt (Windows), masuk ke folder proyek:
+
+```bash
+# Windows (jalankan di CMD, bukan PowerShell)
+cd C:\xampp\htdocs\perpustakaan
+
+# Linux
+cd /opt/lampp/htdocs/perpustakaan
+```
+
+Jalankan perintah berikut satu per satu:
+
+```bash
+php artisan key:generate
+php artisan migrate --seed --force
+php artisan perpus:buat-admin
+php artisan storage:link
+```
+
+---
+
+### Langkah 5: Uji Akses dari Komputer Lain
+
+1. Di komputer server, pastikan Apache dan MySQL di XAMPP/LAMPP **sudah berjalan**.
+2. Di komputer klien (komputer lain di jaringan yang sama), buka browser.
+3. Akses: `http://192.168.1.10/perpustakaan/public` (ganti IP sesuai IP server)
+4. Halaman katalog seharusnya muncul.
+5. Akses halaman admin: `http://192.168.1.10/perpustakaan/public/akses-perpustakaan`
+
+> **Catatan Firewall:** Jika komputer klien tidak bisa mengakses server, nonaktifkan sementara Windows Firewall di komputer server, atau tambahkan rule exception untuk port 80 (Apache).
+
+---
+
+### Pindah ke Hosting di Kemudian Hari
+
+Jika sekolah nantinya ingin memindahkan sistem ke hosting online:
+1. Gunakan file `env.example.hosting` sebagai template `.env` baru.
+2. Ikuti panduan di seksi 2 (cPanel) atau seksi 3 (VPS) di bawah.
+3. Export database dari phpMyAdmin lokal, lalu import ke database hosting.
+
+Tidak ada perubahan kode yang diperlukan — cukup ganti file `.env`.
 
 ---
 

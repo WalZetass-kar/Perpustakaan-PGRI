@@ -2154,6 +2154,10 @@ class AdminController extends Controller
 
     public function ubahPassword(Request $request)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Administrator yang dapat mengubah password. Hubungi Super Admin untuk mereset password Anda.');
+        }
+
         $request->validate([
             'current_password' => ['required', 'current_password'],
             'password'         => ['required', 'string', 'min:8', 'confirmed'],

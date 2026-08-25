@@ -439,7 +439,7 @@
                             <button type="button" @click="modalData = {{ json_encode($bookPayload) }}; openDetailModal = true" class="flex-1 py-2 bg-gray-200/80 hover:bg-gray-300 text-gray-800 font-bold text-[11px] rounded-xl transition text-center">
                                 Detail
                             </button>
-                            <button type="button" @click="startLoan({ id: {{ $item->id }}, judul: '{{ addslashes($item->judul) }}', cover: '{{ $item->cover_thumb_url ?? '' }}', penulis: '{{ addslashes($item->penulis->nama ?? '-') }}', rak: '{{ addslashes($item->rak->kode_rak ?? '-') }}', available: {{ $available }} })" class="flex-1 py-2 {{ $available > 0 ? 'bg-brand-700 hover:bg-brand-800 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed' }} font-extrabold text-[11px] rounded-xl transition shadow-xs text-center flex items-center justify-center gap-1">
+                            <button type="button" @click="startLoan({{ json_encode($bookPayload) }})" class="flex-1 py-2 {{ $available > 0 ? 'bg-brand-700 hover:bg-brand-800 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed' }} font-extrabold text-[11px] rounded-xl transition shadow-xs text-center flex items-center justify-center gap-1">
                                 <i class="fa-solid fa-hand-holding-hand text-xs"></i>
                                 <span>Ajukan Pinjam</span>
                             </button>
@@ -531,7 +531,7 @@
                             <button type="button" @click="modalData = {{ json_encode($bookPayload) }}; openDetailModal = true" class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl transition">
                                 Detail
                             </button>
-                            <button type="button" @click="startLoan({ id: {{ $item->id }}, judul: '{{ addslashes($item->judul) }}', cover: '{{ $item->cover_thumb_url ?? '' }}', penulis: '{{ addslashes($item->penulis->nama ?? '-') }}', rak: '{{ addslashes($item->rak->kode_rak ?? '-') }}', available: {{ $available }} })" class="px-4 py-2 {{ $available > 0 ? 'bg-brand-700 hover:bg-brand-800 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed' }} font-extrabold text-xs rounded-xl transition shadow-2xs flex items-center gap-1.5">
+                            <button type="button" @click="startLoan({{ json_encode($bookPayload) }})" class="px-4 py-2 {{ $available > 0 ? 'bg-brand-700 hover:bg-brand-800 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed' }} font-extrabold text-xs rounded-xl transition shadow-2xs flex items-center gap-1.5">
                                 <i class="fa-solid fa-hand-holding-hand text-xs"></i>
                                 <span>Ajukan Pinjam</span>
                             </button>
@@ -623,7 +623,7 @@
                             <span class="text-[10px] font-extrabold text-gray-500 block">Status Ketersediaan:</span>
                             <span class="text-xs font-black text-emerald-600" x-text="modalData.tersedia + ' Tersedia / ' + modalData.total + ' Eksemplar Total'"></span>
                         </div>
-                        <button type="button" @click="startLoan({ id: modalData.id, judul: modalData.judul, cover: modalData.cover, penulis: modalData.penulis, rak: modalData.rak, available: modalData.tersedia })" class="w-full sm:w-auto px-5 py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md">
+                        <button type="button" @click="startLoan(modalData)" class="w-full sm:w-auto px-5 py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md">
                             <i class="fa-solid fa-hand-holding-hand"></i>
                             <span>Ajukan Peminjaman Ini</span>
                         </button>
@@ -667,19 +667,17 @@
                     <div class="min-w-0 flex-1 text-xs">
                         <p class="font-extrabold text-gray-900 line-clamp-2 leading-snug" x-text="loanData.judul"></p>
                         <p class="text-[11px] text-gray-500 mt-0.5">Penulis: <span class="font-bold text-gray-700" x-text="loanData.penulis"></span></p>
-                        <div class="mt-1.5">
-                            <template x-if="loanData.tersedia > 0">
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200 uppercase tracking-wide">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
-                                    Tersedia (<span x-text="loanData.tersedia"></span>)
-                                </span>
-                            </template>
-                            <template x-if="loanData.tersedia <= 0">
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black bg-blue-100 text-blue-700 border border-blue-200 uppercase tracking-wide">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block"></span>
-                                    Sedang Dipinjam (<span x-text="loanData.total"></span>)
-                                </span>
-                            </template>
+                        <div class="mt-1.5 flex items-center gap-1.5">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold"
+                                  :class="loanData.tersedia > 0 ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-gray-100 border-gray-200 text-gray-400'">
+                                <i class="fa-solid fa-circle-check text-[9px]"></i>
+                                <span x-text="loanData.tersedia + ' tersedia'"></span>
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold"
+                                  :class="(loanData.total - loanData.tersedia) > 0 ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-gray-100 border-gray-200 text-gray-400'">
+                                <i class="fa-solid fa-book-open text-[9px]"></i>
+                                <span x-text="(loanData.total - loanData.tersedia) + ' dipinjam'"></span>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -712,12 +710,6 @@
                             </template>
                         </span>
                     </div>
-                    <template x-if="loanData.isbn && loanData.isbn !== 'Tanpa ISBN'">
-                        <div class="col-span-2 flex items-start gap-1 text-gray-500">
-                            <i class="fa-solid fa-barcode text-gray-400 mt-0.5 w-3 shrink-0"></i>
-                            <span>ISBN: <span class="font-mono font-semibold text-gray-700" x-text="loanData.isbn"></span></span>
-                        </div>
-                    </template>
                 </div>
             </div>
 
@@ -748,11 +740,23 @@
                     <textarea x-model="loanData.catatan" rows="2" placeholder="Contoh: Untuk keperluan tugas akhir / ujian kejuruan..." class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium"></textarea>
                 </div>
 
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">Jumlah Buku yang Dipinjam <span class="text-rose-600">*</span></label>
+                    <template x-if="loanData.tersedia > 0">
+                        <input type="number" x-model.number="loanData.jumlah" :min="1" :max="loanData.tersedia" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                    </template>
+                    <template x-if="loanData.tersedia <= 0">
+                        <div class="w-full px-3 py-2 bg-red-50 border border-red-200 rounded-xl text-rose-700 font-bold text-center text-xs">
+                            <i class="fa-solid fa-circle-xmark mr-1"></i> Stok habis — tidak dapat dipinjam
+                        </div>
+                    </template>
+                </div>
+
                 <div class="pt-3 border-t border-gray-100 flex items-center justify-end gap-2">
                     <button type="button" @click="openLoanModal = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-xs">
                         Batal
                     </button>
-                    <button type="submit" :disabled="submittingLoan" class="px-6 py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold rounded-xl text-xs transition shadow-md flex items-center gap-1.5 disabled:opacity-50">
+                    <button type="submit" :disabled="submittingLoan || loanData.tersedia <= 0" class="px-6 py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold rounded-xl text-xs transition shadow-md flex items-center gap-1.5 disabled:opacity-50">
                         <template x-if="submittingLoan">
                             <i class="fa-solid fa-spinner fa-spin"></i>
                         </template>
@@ -801,7 +805,8 @@ function katalogPage() {
             jurusan: '',
             nomor_induk: '',
             no_wa: '',
-            catatan: ''
+            catatan: '',
+            jumlah: 1
         },
         submittingLoan: false,
         searchQuery: @json(request('search', '')),
@@ -856,6 +861,7 @@ function katalogPage() {
             this.loanData.laci     = book.laci;
             this.loanData.tersedia = book.tersedia;
             this.loanData.total    = book.total;
+            this.loanData.jumlah   = 1;
             this.openDetailModal = false;
             this.openLoanModal = true;
         },
@@ -896,6 +902,7 @@ function katalogPage() {
                     this.loanData.nomor_induk = '';
                     this.loanData.no_wa = '';
                     this.loanData.catatan = '';
+                    this.loanData.jumlah = 1;
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             icon: 'success',
