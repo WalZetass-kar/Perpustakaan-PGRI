@@ -234,6 +234,7 @@ class AdminController extends Controller
     {
         $query = Rak::with('kategori')
             ->withCount('buku')
+            ->withCount('laci')
             ->withSum('buku', 'total_quantity')
             ->withSum('buku', 'available_quantity');
 
@@ -258,10 +259,53 @@ class AdminController extends Controller
         return view('admin.data-buku.index', compact('rakList', 'stats'));
     }
 
-    public function dataBukuByRak(Request $request, $rakId)
+    public function dataBukuByRak($rakId)
     {
         $rak = Rak::with('kategori')->findOrFail($rakId);
 
+        $laciList = RakLaci::where('rak_id', $rak->id)
+            ->withCount('buku')
+            ->withSum('buku', 'total_quantity')
+            ->withSum('buku', 'available_quantity')
+            ->orderBy('nomor_laci', 'asc')
+            ->get();
+
+        // rak_laci_id bersifat nullable dengan onDelete('set null'), sehingga buku
+        // bisa kehilangan lacinya saat laci dihapus. Tanpa jalur khusus, buku
+        // seperti itu tidak akan terjangkau dari halaman mana pun.
+        $jumlahTanpaLaci = Buku::where('rak_id', $rak->id)->whereNull('rak_laci_id')->count();
+
+        return view('admin.data-buku.rak', compact('rak', 'laciList', 'jumlahTanpaLaci'));
+    }
+
+    public function dataBukuByLaci(Request $request, $rakId, $laciId)
+    {
+        $rak  = Rak::with('kategori')->findOrFail($rakId);
+        $laci = RakLaci::where('rak_id', $rak->id)->findOrFail($laciId);
+
+        $bukuList = $this->bukuDiRakQuery($request, $rak->id)
+            ->where('rak_laci_id', $laci->id)
+            ->paginate(12)
+            ->withQueryString();
+
+        return view('admin.data-buku.laci', compact('bukuList', 'rak', 'laci'));
+    }
+
+    public function dataBukuTanpaLaci(Request $request, $rakId)
+    {
+        $rak  = Rak::with('kategori')->findOrFail($rakId);
+        $laci = null;
+
+        $bukuList = $this->bukuDiRakQuery($request, $rak->id)
+            ->whereNull('rak_laci_id')
+            ->paginate(12)
+            ->withQueryString();
+
+        return view('admin.data-buku.laci', compact('bukuList', 'rak', 'laci'));
+    }
+
+    private function bukuDiRakQuery(Request $request, $rakId)
+    {
         $query = Buku::with([
             'penulis',
             'penerbit',
@@ -279,9 +323,7 @@ class AdminController extends Controller
             });
         }
 
-        $bukuList = $query->orderBy('judul', 'asc')->paginate(12)->withQueryString();
-
-        return view('admin.data-buku.rak', compact('bukuList', 'rak'));
+        return $query->orderBy('judul', 'asc');
     }
 
     public function bukuIndex(Request $request)
@@ -2123,9 +2165,7 @@ class AdminController extends Controller
             'jam_operasional'         => 'required|string|max:255',
             'jam_operasional_jumat'   => 'nullable|string|max:255',
             'pesan_sirkulasi'         => 'nullable|string|max:500',
-            'max_buku_pinjam'         => 'required|integer|min:1|max:50',
             'durasi_pinjam_hari'      => 'required|integer|min:1|max:365',
-            'max_perpanjangan'        => 'nullable|integer|min:0|max:10',
             'syarat_peminjaman'       => 'nullable|string|max:500',
             'judul_hero'              => 'nullable|string|max:255',
             'subjudul_hero'           => 'nullable|string|max:500',

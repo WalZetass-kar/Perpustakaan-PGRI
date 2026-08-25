@@ -113,7 +113,10 @@
                 $totalJudulRak = $rak->buku_count ?? 0;
                 $totalEksemplarRak = (int) ($rak->buku_sum_total_quantity ?? 0);
                 $totalTersediaRak = (int) ($rak->buku_sum_available_quantity ?? 0);
-                $isKosong = $totalJudulRak === 0;
+                // Tombol menuju daftar laci, sehingga rak yang sudah punya laci tetap
+                // dapat dibuka meski bukunya belum ada.
+                $totalLaciRak = $rak->laci_count ?? 0;
+                $isKosong = $totalJudulRak === 0 && $totalLaciRak === 0;
             @endphp
             <div class="bg-white rounded-2xl border-2 border-gray-200 hover:border-brand-300 hover:shadow-md transition duration-200 overflow-hidden flex flex-col">
                 <div class="p-4 flex items-start justify-between gap-2 bg-gradient-to-br from-gray-50 to-white border-b border-gray-100">
@@ -162,13 +165,13 @@
                     @if($isKosong)
                         <span class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-100 text-gray-400 text-xs font-extrabold rounded-xl cursor-not-allowed">
                             <i class="fa-solid fa-box-open text-[11px]"></i>
-                            <span>Belum Ada Buku</span>
+                            <span>Belum Ada Laci</span>
                         </span>
                     @else
                         <a href="{{ route('admin.data-buku.rak', $rak->id) }}" target="_blank"
                            class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-brand-700 hover:bg-brand-800 text-white text-xs font-extrabold rounded-xl transition shadow-sm">
                             <i class="fa-solid fa-eye text-[11px]"></i>
-                            <span>Lihat Buku di Rak Ini</span>
+                            <span>Lihat Laci di Rak Ini</span>
                             <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-70"></i>
                         </a>
                     @endif
@@ -193,7 +196,10 @@
                     $totalJudulRak = $rak->buku_count ?? 0;
                     $totalEksemplarRak = (int) ($rak->buku_sum_total_quantity ?? 0);
                     $totalTersediaRak = (int) ($rak->buku_sum_available_quantity ?? 0);
-                    $isKosong = $totalJudulRak === 0;
+                    // Tombol menuju daftar laci, sehingga rak yang sudah punya laci
+                    // tetap dapat dibuka meski bukunya belum ada.
+                    $totalLaciRak = $rak->laci_count ?? 0;
+                    $isKosong = $totalJudulRak === 0 && $totalLaciRak === 0;
                 @endphp
                 <div class="flex items-center gap-4 px-4 py-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition duration-150">
 
@@ -253,13 +259,13 @@
                         @if($isKosong)
                             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-400 text-[11px] font-extrabold rounded-lg cursor-not-allowed">
                                 <i class="fa-solid fa-box-open text-[10px]"></i>
-                                <span class="hidden lg:inline">Belum Ada Buku</span>
+                                <span class="hidden lg:inline">Belum Ada Laci</span>
                             </span>
                         @else
                             <a href="{{ route('admin.data-buku.rak', $rak->id) }}" target="_blank"
                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-700 hover:bg-brand-800 text-white text-[11px] font-extrabold rounded-lg transition shadow-sm">
                                 <i class="fa-solid fa-eye text-[10px]"></i>
-                                <span class="hidden lg:inline">Lihat Buku</span>
+                                <span class="hidden lg:inline">Lihat Laci</span>
                                 <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-70"></i>
                             </a>
                         @endif

@@ -190,33 +190,13 @@
                            class="w-full px-3.5 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-semibold">
                 </div>
 
-                <div class="space-y-1 bg-gray-50 p-4 rounded-xl border border-gray-200">
-                    <label class="block font-bold text-gray-900">Batas Maksimal Buku Dipinjam <span class="text-rose-500">*</span></label>
-                    <p class="text-[10.5px] text-gray-500 mb-2">Batas maksimal buku yang dapat dipinjam siswa sekaligus</p>
-                    <div class="flex items-center gap-2">
-                        <input type="number" name="max_buku_pinjam" value="{{ old('max_buku_pinjam', $pengaturan['max_buku_pinjam'] ?? 3) }}" required min="1" max="20"
-                               class="w-24 px-3 py-1.5 bg-white border border-gray-300 rounded-lg focus:ring-1.5 focus:ring-brand-700 font-mono font-bold text-sm">
-                        <span class="font-bold text-gray-700">Buku / Transaksi</span>
-                    </div>
-                </div>
-
-                <div class="space-y-1 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <div class="space-y-1 bg-gray-50 p-4 rounded-xl border border-gray-200 sm:col-span-2">
                     <label class="block font-bold text-gray-900">Durasi Pinjam Standar <span class="text-rose-500">*</span></label>
                     <p class="text-[10.5px] text-gray-500 mb-2">Durasi peminjaman sebelum tanggal jatuh tempo</p>
                     <div class="flex items-center gap-2">
                         <input type="number" name="durasi_pinjam_hari" value="{{ old('durasi_pinjam_hari', $pengaturan['durasi_pinjam_hari'] ?? 7) }}" required min="1" max="30"
                                class="w-24 px-3 py-1.5 bg-white border border-gray-300 rounded-lg focus:ring-1.5 focus:ring-brand-700 font-mono font-bold text-sm">
                         <span class="font-bold text-gray-700">Hari</span>
-                    </div>
-                </div>
-
-                <div class="space-y-1 bg-gray-50 p-4 rounded-xl border border-gray-200 sm:col-span-2">
-                    <label class="block font-bold text-gray-900">Maksimal Perpanjangan Online</label>
-                    <p class="text-[10.5px] text-gray-500 mb-2">Batas frekuensi perpanjangan durasi pinjam yang diizinkan</p>
-                    <div class="flex items-center gap-2">
-                        <input type="number" name="max_perpanjangan" value="{{ old('max_perpanjangan', $pengaturan['max_perpanjangan'] ?? 2) }}" min="0" max="10"
-                               class="w-24 px-3 py-1.5 bg-white border border-gray-300 rounded-lg focus:ring-1.5 focus:ring-brand-700 font-mono font-bold text-sm">
-                        <span class="font-bold text-gray-700">Kali</span>
                     </div>
                 </div>
 

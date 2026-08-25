@@ -247,7 +247,7 @@ class PublicController extends Controller
             'nomor_induk'   => 'nullable|string|max:50',
             'no_wa'         => 'nullable|string|max:30',
             'catatan'       => 'nullable|string|max:500',
-            'jumlah'        => 'nullable|integer|min:1|max:5',
+            'jumlah'        => 'nullable|integer|min:1',
         ]);
 
         $buku = Buku::findOrFail($validated['buku_id']);
@@ -278,19 +278,17 @@ class PublicController extends Controller
                 }
                 return back()->with('error', $msg);
             }
+        }
 
-            $maxPinjam = (int) Pengaturan::ambil('max_buku_pinjam', 3);
-            $activeCount = (int) Peminjaman::where('nomor_induk', $nomorInduk)
-                ->whereIn('status', ['pending', 'dipinjam'])
-                ->sum('jumlah');
-
-            if (($activeCount + $jumlah) > $maxPinjam) {
-                $msg = "Batas maksimal peminjaman aktif adalah {$maxPinjam} buku. Anda saat ini memiliki {$activeCount} buku yang sedang diajukan/dipinjam.";
-                if ($request->ajax() || $request->wantsJson()) {
-                    return response()->json(['success' => false, 'message' => $msg], 422);
-                }
-                return back()->with('error', $msg);
+        // Satu-satunya pembatas adalah ketersediaan stok fisik: siswa boleh
+        // meminjam berapa pun selama jumlahnya tidak melebihi eksemplar yang
+        // masih ada di rak.
+        if ($jumlah > $buku->available_quantity) {
+            $msg = "Jumlah yang diminta melebihi stok tersedia. Saat ini hanya tersisa {$buku->available_quantity} eksemplar.";
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
             }
+            return back()->with('error', $msg);
         }
 
         $durasiHari = (int) Pengaturan::ambil('durasi_pinjam_hari', 7);

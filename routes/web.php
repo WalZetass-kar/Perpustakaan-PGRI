@@ -46,6 +46,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         Route::get('/data-buku', [AdminController::class, 'dataBukuIndex'])->name('data-buku');
         Route::get('/data-buku/rak/{rakId}', [AdminController::class, 'dataBukuByRak'])->name('data-buku.rak')->whereNumber('rakId');
+        Route::get('/data-buku/rak/{rakId}/tanpa-laci', [AdminController::class, 'dataBukuTanpaLaci'])->name('data-buku.tanpa-laci')->whereNumber('rakId');
+        Route::get('/data-buku/rak/{rakId}/laci/{laciId}', [AdminController::class, 'dataBukuByLaci'])->name('data-buku.laci')->whereNumber('rakId')->whereNumber('laciId');
         Route::get('/temukan-buku', [AdminController::class, 'temukanBukuIndex'])->name('temukan-buku');
 
         Route::get('/buku', [AdminController::class, 'bukuIndex'])->name('buku');
