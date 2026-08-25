@@ -21,8 +21,10 @@ Untuk mempermudah teknisi sekolah dalam melakukan pemasangan dan membantu pustak
    - Pelacakan keterlambatan, perpanjangan, dan pengembalian buku
    - Rekapitulasi laporan Excel dan cetak PDF resmi format A4
    - Pengaturan instansi & fitur pencadangan database mandiri
-3. **[Template Berita Acara Serah Terima (BAST)](BERITA_ACARA_SERAH_TERIMA.md)**:
-   - Format berita acara serah terima pekerjaan antara pengembang dan pihak sekolah
+3. **[Panduan Server Lokal (Satu Komputer sebagai Server)](PANDUAN_SERVER_LOKAL/)**:
+   - Menjadikan satu komputer sekolah sebagai server tanpa hosting internet
+   - Akses dari komputer petugas & HP siswa melalui jaringan LAN / WiFi
+   - Otomatisasi server menyala sendiri, pencadangan berkala, dan pemecahan masalah
 
 ---
 
@@ -52,6 +54,8 @@ Untuk mempermudah teknisi sekolah dalam melakukan pemasangan dan membantu pustak
 
 - **Backend Framework**: Laravel 11 (PHP 8.2+)
 - **Database**: MySQL 5.7+ / 8.0+ atau MariaDB 10.4+
+- **Ekstensi PHP Wajib Aktif**: `bcmath`, `ctype`, `curl`, `dom`, `fileinfo`, `gd`, `json`, `mbstring`, `openssl`, `pcre`, `pdo`, `pdo_mysql`, `tokenizer`, `xml`, `zip`
+  > Periksa dengan `php -m`. Tanpa `gd` thumbnail cover gagal dibuat, tanpa `zip` fitur backup ZIP tidak jalan.
 - **Frontend**: Blade Templating, Tailwind CSS, Alpine.js
 - **Aset & Icon**: FontAwesome 6, Chart.js, SweetAlert2, AOS (Tersimpan lokal di `public/vendor/` untuk performa 100% luring)
 - **Ekspor Dokumen**: PhpSpreadsheet & Blade HTML Print
@@ -59,6 +63,10 @@ Untuk mempermudah teknisi sekolah dalam melakukan pemasangan dan membantu pustak
 ---
 
 ## 4. Panduan Singkat Menjalankan di Lingkungan Lokal
+
+> Butuh panduan yang jauh lebih rinci, termasuk cara menjadikan satu komputer
+> sebagai server yang diakses komputer lain lewat jaringan sekolah? Lihat folder
+> **[PANDUAN_SERVER_LOKAL/](PANDUAN_SERVER_LOKAL/)**.
 
 ### Langkah 1: Kloning Repositori
 ```bash
@@ -70,35 +78,60 @@ cd Perpustakaan-PGRI
 ```bash
 composer install
 ```
+> Folder `vendor/` sudah disertakan di dalam repositori, sehingga langkah ini
+> dapat dilewati jika Composer belum terpasang di komputer Anda.
 
-### Langkah 3: Konfigurasi File Lingkungan (.env)
+### Langkah 3: Membuat Database Kosong
+Basis data harus sudah ada sebelum migrasi dijalankan.
+```bash
+mysql -u root -p -e "CREATE DATABASE perpustakaan CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
+
+### Langkah 4: Konfigurasi File Lingkungan (.env)
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
-Sesuaikan konfigurasi database `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD` pada berkas `.env`.
+Sesuaikan `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD` pada berkas `.env`.
 
-### Langkah 4: Migrasi & Seeder Database
+> **Penting untuk komputer pengembangan:** `.env.example` disetel untuk server
+> produksi (`APP_ENV=production`, `APP_DEBUG=false`) sehingga pesan galat
+> disembunyikan. Untuk pengembangan lokal, ubah menjadi:
+> ```env
+> APP_ENV=local
+> APP_DEBUG=true
+> ```
+
+### Langkah 5: Migrasi & Data Awal
 ```bash
 php artisan migrate --seed
 ```
+> **Perhatian:** seeder membuat akun `admin@sekolah.sch.id` memakai nilai
+> `SEED_ADMIN_PASSWORD` dari `.env`. Jika dibiarkan kosong, sistem membuat
+> password acak yang **tidak pernah ditampilkan** dan akun tersebut menjadi
+> tidak dapat diakses. Isi `SEED_ADMIN_PASSWORD` terlebih dahulu, atau lewati
+> peringatan ini dan buat akun sendiri pada Langkah 6.
 
-### Langkah 5: Buat Akun Administrator
+### Langkah 6: Buat Akun Administrator
 ```bash
 php artisan perpus:buat-admin
 ```
 
-### Langkah 6: Buat Symbolic Link Storage
+### Langkah 7: Buat Symbolic Link Storage
 ```bash
 php artisan storage:link
 ```
+Tanpa langkah ini, gambar sampul buku tidak akan tampil.
 
-### Langkah 7: Jalankan Server Pengembangan
+### Langkah 8: Jalankan Server Pengembangan
 ```bash
 php artisan serve
 ```
 - **Katalog OPAC**: `http://localhost:8000/`
 - **Panel Admin**: `http://localhost:8000/akses-perpustakaan`
+
+> Alamat panel admin mengikuti `ADMIN_LOGIN_PATH` pada `.env`
+> (bawaan: `akses-perpustakaan`).
 
 ---
 
@@ -110,7 +143,7 @@ php artisan serve
 | `php artisan perpus:reset-password` | Mereset kata sandi akun admin dalam kondisi darurat |
 | `php artisan perpus:backup` | Mencadangkan basis data ke berkas SQL di `storage/app/backups/` |
 | `php artisan perpus:backup --zip` | Mencadangkan basis data beserta seluruh berkas cover buku ke arsip ZIP |
-| `php artisan perpus:regenerate-covers` | Menghasilkan ulang varian thumbnail cover buku |
+| `php artisan covers:regenerate` | Menghasilkan ulang varian thumbnail cover buku |
 
 ---
 

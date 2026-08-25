@@ -291,7 +291,7 @@ Jika menggunakan platform PaaS modern seperti Railway:
 | `php artisan perpus:reset-password` | Mereset kata sandi akun admin jika petugas lupa password |
 | `php artisan perpus:backup` | Mencadangkan basis data ke berkas SQL di `storage/app/backups/` |
 | `php artisan perpus:backup --zip` | Mencadangkan basis data beserta seluruh berkas cover buku ke format ZIP |
-| `php artisan perpus:regenerate-covers` | Menghasilkan ulang varian thumbnail cover buku |
+| `php artisan covers:regenerate` | Menghasilkan ulang varian thumbnail cover buku |
 
 ---
 
