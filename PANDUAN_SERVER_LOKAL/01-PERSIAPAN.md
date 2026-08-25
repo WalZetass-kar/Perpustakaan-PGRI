@@ -93,7 +93,9 @@ harus diperbarui dulu.
 
 ## 6. Memastikan Ekstensi PHP Lengkap
 
-Aplikasi membutuhkan lima belas ekstensi. Periksa semuanya sekaligus:
+Aplikasi membutuhkan lima belas ekstensi.
+
+### Memeriksa di Linux
 
 ```bash
 for e in bcmath ctype curl dom fileinfo gd json mbstring openssl pcre pdo pdo_mysql tokenizer xml zip; do
@@ -101,15 +103,45 @@ for e in bcmath ctype curl dom fileinfo gd json mbstring openssl pcre pdo pdo_my
 done
 ```
 
-Semua baris harus bertuliskan `OK`. Jika ada yang `KURANG`, pasang di Linux
-dengan pola `sudo apt install php-<nama>`, misalnya:
+Jika ada yang `KURANG`, pasang dengan pola `sudo apt install php-<nama>`:
 
 ```bash
 sudo apt install php-gd php-zip
 ```
 
-Di Windows (Laragon/XAMPP), buka `php.ini`, hapus tanda titik koma `;` di depan
-baris ekstensi yang kurang, lalu nyalakan ulang layanannya.
+### Memeriksa di Windows
+
+Jalankan melalui **Terminal Laragon** atau **XAMPP Shell**:
+
+```cmd
+for %e in (bcmath ctype curl dom fileinfo gd json mbstring openssl pcre pdo pdo_mysql tokenizer xml zip) do @php -r "echo extension_loaded('%e') ? 'OK    : %e' : 'KURANG: %e', PHP_EOL;"
+```
+
+Bila lebih nyaman melihat daftar lengkapnya:
+
+```cmd
+php -m
+```
+
+### Mengaktifkan Ekstensi yang Kurang di Windows
+
+Ekstensi di Windows umumnya sudah terpasang, hanya belum diaktifkan.
+
+1. Cari lokasi `php.ini` yang sedang dipakai:
+
+   ```cmd
+   php --ini
+   ```
+
+2. Buka berkas itu dengan Notepad++ atau VS Code.
+3. Cari baris ekstensi yang kurang, misalnya `;extension=gd`.
+4. Hapus tanda titik koma `;` di depannya sehingga menjadi `extension=gd`.
+5. Simpan, lalu nyalakan ulang layanan dari Laragon (**Stop All → Start All**)
+   atau XAMPP Control Panel.
+
+> Pada Laragon, versi PHP dapat diganti melalui **Menu → PHP → Version**. Bila
+> versi PHP diganti, pengaturan `php.ini` harus diperiksa ulang karena setiap
+> versi memiliki berkas `php.ini` sendiri.
 
 **Akibat jika ekstensi kurang:**
 
@@ -123,6 +155,8 @@ baris ekstensi yang kurang, lalu nyalakan ulang layanannya.
 ---
 
 ## 7. Memastikan MySQL Berjalan
+
+### Linux
 
 ```bash
 mysql --version
@@ -140,8 +174,31 @@ Lalu uji apakah bisa masuk:
 mysql -u root -p
 ```
 
-Jika berhasil masuk ke prompt `mysql>`, ketik `exit` untuk keluar. Persiapan
-selesai.
+Jika berhasil masuk ke prompt `mysql>`, ketik `exit` untuk keluar.
+
+### Windows
+
+1. Buka Laragon atau XAMPP Control Panel.
+2. Pastikan indikator **MySQL** berwarna hijau atau berstatus **Running**.
+3. Uji melalui browser: buka `http://localhost/phpmyadmin`. Bila halaman
+   phpMyAdmin terbuka, MySQL sudah berjalan dengan benar.
+
+Menguji lewat terminal Laragon:
+
+```cmd
+mysql -u root -p
+```
+
+> Kata sandi `root` bawaan Laragon dan XAMPP adalah **kosong** — cukup tekan
+> Enter saat diminta.
+
+Bila MySQL menolak menyala, biasanya port 3306 sedang dipakai program lain:
+
+```cmd
+netstat -ano | findstr :3306
+```
+
+Persiapan selesai.
 
 ---
 

@@ -43,6 +43,22 @@ hanya membuka alamat seperti `http://192.168.1.10:8000` di browser.
 | **[05-PEMELIHARAAN.md](05-PEMELIHARAAN.md)** | Backup rutin, mematikan server dengan benar, memperbarui aplikasi |
 | **[06-MASALAH-UMUM.md](06-MASALAH-UMUM.md)** | Kumpulan gejala galat dan cara mengatasinya |
 
+Seluruh bab menyertakan langkah untuk **Linux** maupun **Windows** secara
+berdampingan. Pengguna Windows cukup mengikuti bagian bertanda Windows tanpa
+perlu memahami perintah Linux.
+
+### Ringkasan Perbedaan Linux dan Windows
+
+| Kegiatan | Linux | Windows |
+|---|---|---|
+| Memasang PHP & MySQL | `apt install` | Laragon atau XAMPP |
+| Terminal yang dipakai | Terminal biasa | Terminal Laragon / XAMPP Shell |
+| Membuat database | perintah `mysql` | phpMyAdmin, tanpa mengetik perintah |
+| Menjalankan otomatis | layanan systemd | NSSM sebagai layanan Windows |
+| Mencari alamat IP | `hostname -I` | `ipconfig` |
+| Membuka firewall | `ufw allow` | `netsh advfirewall` |
+| Penjadwalan backup | `crontab` | Task Scheduler |
+
 ---
 
 ## Ringkasan Cepat
@@ -69,6 +85,10 @@ php artisan serve --host=0.0.0.0 --port=8000
 ```
 
 Alamat yang dibuka dari komputer lain: `http://<IP-SERVER>:8000`
+
+> **Pengguna Windows:** jalankan seluruh perintah di atas melalui
+> **Menu Laragon → Terminal** atau **XAMPP Shell**, bukan Command Prompt biasa.
+> Ganti `cp` menjadi `copy`, dan cari alamat IP dengan `ipconfig`.
 
 ---
 

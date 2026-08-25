@@ -3,6 +3,11 @@
 Kerjakan bab ini di **komputer server** saja. Pastikan
 [01-PERSIAPAN.md](01-PERSIAPAN.md) sudah tuntas.
 
+> **Pengguna Windows:** seluruh perintah pada bab ini dijalankan melalui
+> **Terminal Laragon** (Menu → Terminal) atau **XAMPP Shell**, bukan melalui
+> Command Prompt biasa. Kedua terminal itu sudah mengenali perintah `php` dan
+> `mysql`.
+
 ---
 
 ## Langkah 1: Menyalin Berkas Proyek
@@ -16,15 +21,28 @@ cd Perpustakaan-PGRI
 
 **Bila komputer server tanpa internet:**
 
-Salin seluruh folder proyek dari flashdisk ke komputer server, misalnya ke
-`/opt/perpustakaan` (Linux) atau `C:\perpustakaan` (Windows). Pastikan folder
+Salin seluruh folder proyek dari flashdisk ke komputer server. Pastikan folder
 `vendor/` **ikut tersalin** — folder itu berisi seluruh pustaka yang dibutuhkan
 sehingga Composer tidak diperlukan.
+
+Lokasi yang disarankan:
+
+| Sistem | Lokasi |
+|---|---|
+| Linux | `/opt/perpustakaan` |
+| Windows + Laragon | `C:\laragon\www\perpustakaan` |
+| Windows + XAMPP | `C:\xampp\htdocs\perpustakaan` |
 
 Masuk ke foldernya:
 
 ```bash
+# Linux
 cd /opt/perpustakaan
+```
+
+```cmd
+REM Windows
+cd /d C:\laragon\www\perpustakaan
 ```
 
 ---
@@ -43,36 +61,82 @@ composer install
 
 Database harus dibuat lebih dulu, karena migrasi tidak membuatnya sendiri.
 
+### Cara A — Melalui Perintah (Linux & Windows)
+
 ```bash
 mysql -u root -p -e "CREATE DATABASE perpustakaan CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 ```
 
-Disarankan membuat user khusus, jangan memakai `root` untuk aplikasi:
+> Pada Laragon, kata sandi `root` bawaannya **kosong**. Cukup tekan Enter saat
+> diminta kata sandi. Pada XAMPP juga umumnya kosong.
+
+### Cara B — Melalui phpMyAdmin (Khusus Windows, Lebih Mudah)
+
+Laragon dan XAMPP sudah menyertakan phpMyAdmin, sehingga tidak perlu mengetik
+perintah sama sekali.
+
+1. Nyalakan Laragon/XAMPP, pastikan MySQL berstatus hidup.
+2. Buka `http://localhost/phpmyadmin` di browser.
+3. Klik tab **Databases** di bagian atas.
+4. Pada kolom **Database name**, ketik `perpustakaan`.
+5. Pada kolom sebelahnya (Collation), pilih **utf8mb4_unicode_ci**.
+6. Klik **Create**.
+
+> Pemilihan collation `utf8mb4_unicode_ci` penting agar judul buku berhuruf
+> khusus tidak berubah menjadi tanda tanya.
+
+### Membuat User Database Khusus (Disarankan)
+
+Sebaiknya aplikasi tidak memakai `root`.
 
 ```bash
-mysql -u root -p <<'SQL'
+mysql -u root -p
+```
+
+Lalu ketikkan:
+
+```sql
 CREATE USER 'perpus'@'localhost' IDENTIFIED BY 'GantiDenganPasswordKuat';
 GRANT ALL PRIVILEGES ON perpustakaan.* TO 'perpus'@'localhost';
 FLUSH PRIVILEGES;
-SQL
+EXIT;
 ```
 
-Pastikan database sudah terbentuk:
+Di Windows, langkah yang sama dapat dilakukan lewat phpMyAdmin melalui tab
+**User accounts → Add user account**.
+
+### Memastikan Database Sudah Terbentuk
 
 ```bash
 mysql -u root -p -e "SHOW DATABASES LIKE 'perpustakaan';"
 ```
 
+Di Windows, cukup lihat daftar database pada panel kiri phpMyAdmin.
+
 ---
 
 ## Langkah 4: Menyiapkan Berkas Konfigurasi `.env`
+
+**Linux:**
 
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-Buka `.env` dengan editor teks, lalu sesuaikan bagian berikut:
+**Windows:**
+
+```cmd
+copy .env.example .env
+php artisan key:generate
+```
+
+> Proyek ini juga menyediakan `env.example.lokal` yang memang ditujukan untuk
+> pemasangan lokal. Bila ada, gunakan berkas itu:
+> `copy env.example.lokal .env` (Windows) atau
+> `cp env.example.lokal .env` (Linux).
+
+Buka `.env` dengan editor teks, lalu sesuaikan:
 
 ```env
 APP_NAME="Perpustakaan SMK PGRI"
@@ -92,6 +156,12 @@ SEED_ADMIN_PASSWORD=RahasiaAdmin123
 
 ADMIN_LOGIN_PATH=akses-perpustakaan
 ```
+
+> **Peringatan untuk pengguna Windows:** jangan menyunting `.env` dengan
+> **Notepad** bawaan, karena dapat menyimpan berkas dengan format akhir baris
+> yang menyulitkan. Gunakan **Notepad++**, **VS Code**, atau editor bawaan
+> Laragon. Pastikan pula nama berkasnya benar-benar `.env`, bukan `.env.txt` —
+> aktifkan **View → File name extensions** di File Explorer untuk memastikannya.
 
 ### Penjelasan Setelan Penting
 
@@ -140,6 +210,10 @@ Jika suatu saat password terlupa:
 php artisan perpus:reset-password admin@sekolah.sch.id
 ```
 
+> Perlu diketahui, di dalam aplikasi hanya **Super Administrator** yang dapat
+> mengganti kata sandinya sendiri. Petugas yang ingin berganti kata sandi harus
+> memintanya kepada Super Admin melalui menu **Akun Pengelola**.
+
 ---
 
 ## Langkah 7: Menyambungkan Folder Penyimpanan
@@ -150,24 +224,38 @@ php artisan storage:link
 
 Tanpa langkah ini, **semua gambar sampul buku tidak akan muncul**.
 
-Pastikan berhasil:
+Memastikan berhasil:
 
 ```bash
+# Linux
 ls -l public/storage
 ```
 
-Hasilnya harus berupa tautan yang mengarah ke `storage/app/public`.
+```cmd
+REM Windows
+dir public\storage
+```
+
+> **Catatan khusus Windows:** pembuatan symbolic link memerlukan hak
+> Administrator. Bila muncul galat, tutup terminal lalu buka ulang Laragon
+> dengan klik kanan → **Run as administrator**, dan jalankan kembali perintah
+> di atas. Bila tetap gagal, aktifkan **Developer Mode** melalui
+> *Settings → System → For developers*.
 
 ---
 
-## Langkah 8: Mengatur Hak Akses Folder (Linux)
+## Langkah 8: Mengatur Hak Akses Folder
+
+**Linux:**
 
 ```bash
 sudo chown -R $USER:www-data storage bootstrap/cache
 sudo chmod -R 775 storage bootstrap/cache
 ```
 
-Langkah ini tidak diperlukan di Windows.
+**Windows:** tidak diperlukan. Namun bila muncul galat "failed to open stream:
+Permission denied", klik kanan folder proyek → **Properties → Security → Edit**,
+lalu beri centang **Full control** untuk pengguna **Users**.
 
 ---
 

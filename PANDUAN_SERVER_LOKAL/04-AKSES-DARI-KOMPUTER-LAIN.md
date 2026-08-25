@@ -121,6 +121,56 @@ Sesuaikan Gateway dengan alamat router sekolah. Cari dengan:
 ip route | grep default
 ```
 
+### Cara A — Mengunci dari Komputer Server (Windows)
+
+Cari dahulu alamat Gateway router sekolah:
+
+```cmd
+ipconfig
+```
+
+Perhatikan baris **Default Gateway**, misalnya `192.168.100.1`.
+
+Kemudian melalui tampilan grafis:
+
+1. Tekan `Win + R`, ketik `ncpa.cpl`, tekan Enter.
+2. Klik kanan adaptor yang sedang aktif (Ethernet atau Wi-Fi) → **Properties**.
+3. Pilih **Internet Protocol Version 4 (TCP/IPv4)** → klik **Properties**.
+4. Pilih **Use the following IP address**, lalu isikan:
+
+   | Kolom | Contoh Isian |
+   |---|---|
+   | IP address | `192.168.100.36` |
+   | Subnet mask | `255.255.255.0` |
+   | Default gateway | `192.168.100.1` |
+   | Preferred DNS server | `192.168.100.1` |
+
+5. Centang **Validate settings upon exit**, lalu klik **OK**.
+
+Atau melalui Command Prompt **sebagai Administrator** (ganti `"Ethernet"`
+dengan nama adaptor Anda):
+
+```cmd
+netsh interface ip set address name="Ethernet" static 192.168.100.36 255.255.255.0 192.168.100.1
+netsh interface ip set dns name="Ethernet" static 192.168.100.1
+```
+
+Melihat daftar nama adaptor:
+
+```cmd
+netsh interface show interface
+```
+
+Mengembalikan ke otomatis bila diperlukan:
+
+```cmd
+netsh interface ip set address name="Ethernet" dhcp
+```
+
+> **Peringatan:** pilih alamat IP di luar jangkauan DHCP router, misalnya angka
+> akhir di atas 200, agar tidak diberikan router ke komputer lain dan
+> menyebabkan bentrok.
+
 ### Cara B — Mengunci dari Router (Disarankan)
 
 Masuk ke halaman admin router sekolah, cari menu bernama **DHCP Reservation**
@@ -129,8 +179,17 @@ atau **Static Lease**, lalu ikat alamat MAC komputer server ke satu IP tetap.
 Alamat MAC dapat dilihat dengan:
 
 ```bash
+# Linux
 ip link | grep ether
 ```
+
+```cmd
+REM Windows
+ipconfig /all
+```
+
+Pada Windows, perhatikan baris **Physical Address**, misalnya
+`A4-B1-C2-D3-E4-F5`.
 
 Cara B lebih baik karena pengaturannya terpusat di router dan tidak berisiko
 bentrok dengan komputer lain.
@@ -196,11 +255,34 @@ sudo systemctl daemon-reload
 sudo systemctl restart perpustakaan
 ```
 
+**Windows** — jalankan melalui terminal yang dibuka **sebagai Administrator**:
+
+```cmd
+php artisan serve --host=0.0.0.0 --port=80
+```
+
+Sesuaikan pula isi berkas `jalankan-server.bat` menjadi `--port=80`, dan atur
+pintasannya agar berjalan sebagai Administrator melalui
+**klik kanan pintasan → Properties → Advanced → Run as administrator**.
+
 Jangan lupa buka port 80 di firewall dan perbarui `APP_URL` menjadi
 `http://192.168.100.36` (tanpa port).
 
-> Pastikan tidak ada Apache atau Nginx yang sudah memakai port 80, karena akan
-> bentrok. Periksa dengan `sudo ss -tlnp | grep :80`.
+> Pastikan tidak ada Apache, Nginx, atau IIS yang sudah memakai port 80, karena
+> akan bentrok. Periksa dengan:
+>
+> ```bash
+> # Linux
+> sudo ss -tlnp | grep :80
+> ```
+>
+> ```cmd
+> REM Windows
+> netstat -ano | findstr :80
+> ```
+>
+> Pada Windows, Laragon dan XAMPP biasanya sudah memakai port 80 untuk Apache.
+> Matikan Apache-nya lebih dulu bila ingin memakai port tersebut.
 
 ---
 

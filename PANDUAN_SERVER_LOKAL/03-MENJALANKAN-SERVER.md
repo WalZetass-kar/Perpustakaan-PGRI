@@ -127,7 +127,7 @@ sudo journalctl -u perpustakaan -f     # melihat catatan langsung
 
 ---
 
-## Pilihan C — Otomatis Menyala Saat Komputer Dinyalakan (Windows)
+## Pilihan C — Otomatis Menyala Saat Login (Windows, Cara Mudah)
 
 1. Buat `jalankan-server.bat` seperti pada Pilihan A.
 2. Tekan `Win + R`, ketik `shell:startup`, lalu tekan Enter.
@@ -137,6 +137,73 @@ Server akan menyala otomatis setiap Windows masuk ke desktop.
 
 > Agar jendela hitamnya tidak mengganggu, buka properti pintasan lalu ubah
 > **Run** menjadi **Minimized**.
+
+**Keterbatasan cara ini:** server baru menyala setelah ada orang yang **login**
+ke Windows. Bila komputer menyala tetapi masih di layar kunci, sistem belum
+dapat diakses komputer lain. Untuk perpustakaan yang komputernya dinyalakan
+lalu ditinggal, gunakan Pilihan D.
+
+---
+
+## Pilihan D — Menjadi Layanan Windows Sungguhan (Tanpa Perlu Login)
+
+Cara ini setara dengan systemd di Linux: server hidup begitu Windows menyala,
+tanpa menunggu siapa pun login, dan bangkit sendiri bila berhenti mendadak.
+
+Digunakan perkakas gratis bernama **NSSM** (Non-Sucking Service Manager).
+
+### Langkah Pemasangan
+
+1. Unduh NSSM dari `https://nssm.cc/download`, lalu ekstrak.
+2. Salin `nssm.exe` (pilih folder `win64`) ke `C:\Windows\System32` agar dapat
+   dipanggil dari mana saja.
+3. Buka **Command Prompt sebagai Administrator**, lalu jalankan:
+
+   ```cmd
+   nssm install Perpustakaan
+   ```
+
+4. Sebuah jendela pengaturan akan terbuka. Isi tab **Application**:
+
+   | Kolom | Isian |
+   |---|---|
+   | Path | `C:\laragon\bin\php\php-8.2.x\php.exe` |
+   | Startup directory | `C:\laragon\www\perpustakaan` |
+   | Arguments | `artisan serve --host=0.0.0.0 --port=8000` |
+
+   Sesuaikan Path dengan lokasi `php.exe` di komputer Anda. Cari dengan:
+
+   ```cmd
+   where php
+   ```
+
+5. Buka tab **Details**, isi **Display name** dengan
+   `Server Perpustakaan Sekolah`.
+6. Buka tab **Dependencies**, ketik nama layanan MySQL Anda (misalnya `MySQL80`
+   atau `mysql`) agar server tidak menyala sebelum database siap.
+7. Klik **Install service**.
+
+### Menjalankan dan Mengelola Layanan
+
+```cmd
+nssm start Perpustakaan      REM menyalakan
+nssm stop Perpustakaan       REM mematikan
+nssm restart Perpustakaan    REM menyalakan ulang
+nssm status Perpustakaan     REM memeriksa kondisi
+```
+
+Layanan ini juga muncul di **Services** bawaan Windows (tekan `Win + R`, ketik
+`services.msc`), sehingga petugas dapat menyalakan atau mematikannya tanpa
+mengetik perintah.
+
+### Menghapus Layanan Bila Tidak Diperlukan Lagi
+
+```cmd
+nssm remove Perpustakaan confirm
+```
+
+> Setelah layanan terpasang, jangan lagi menjalankan `jalankan-server.bat`
+> secara manual — port 8000 akan bentrok karena sudah dipakai layanan.
 
 ---
 
