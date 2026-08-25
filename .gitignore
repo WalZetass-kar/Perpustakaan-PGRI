@@ -1,5 +1,8 @@
 /.phpunit.cache
 /node_modules
+package.json
+package-lock.json
+tailwind.config.js
 /public/build
 /public/hot
 /public/storage
@@ -14,6 +17,10 @@
 .phpactor.json
 .phpunit.result.cache
 *.sql
+Dockerfile
+.dockerignore
+Procfile
+instruksi-perbaikan-opac.md
 Homestead.json
 Homestead.yaml
 npm-debug.log

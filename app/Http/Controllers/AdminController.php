@@ -368,23 +368,24 @@ class AdminController extends Controller
                     <div class="w-10 h-14 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center">
                         ' . $coverHtml . '
                     </div>
-                    <div class="min-w-0">
-                        <p class="font-bold text-gray-900 line-clamp-2 text-xs">' . e($buku->judul) . '</p>
-                        <div class="flex items-center gap-2 mt-0.5 text-[10px] text-gray-500 font-mono">
-                            <span>ISBN: ' . e($buku->isbn ?? 'Tanpa ISBN') . '</span>
-                            <span>•</span>
-                            <span>Tahun ' . e($buku->tahun_terbit) . '</span>
-                        </div>
+                    <div class="min-w-0 overflow-hidden">
+                        <p class="font-bold text-gray-900 line-clamp-2 text-xs leading-snug">' . e($buku->judul) . '</p>
+                        <p class="text-[10px] text-gray-400 font-mono truncate mt-0.5">ISBN: ' . e($buku->isbn ?? 'Tanpa ISBN') . ' &bull; ' . e($buku->tahun_terbit) . '</p>
                     </div>
                 </div>';
 
-                $penulisHtml = '<p class="font-bold text-gray-800 text-xs">' . e($buku->penulis->nama ?? '-') . '</p>
-                    <p class="text-[10.5px] text-gray-500">' . e($buku->penerbit->nama ?? '-') . '</p>';
+                $penulisHtml = '<p class="font-bold text-gray-800 text-xs truncate">' . e($buku->penulis->nama ?? '-') . '</p>'
+                    . '<p class="text-[10.5px] text-gray-500 truncate mt-0.5">' . e($buku->penerbit->nama ?? '-') . '</p>';
 
                 $laciName = $buku->laci->nama_laci ?? ($buku->rak ? 'Laci 1' : 'Tanpa Laci');
-                $kategoriHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-brand-50 text-brand-700 border border-brand-200 inline-block">'
-                    . e($buku->kategori->nama ?? 'Umum')
-                    . '</span>';
+                $kelasNama = $buku->kelas->nama_kelas ?? '';
+                $kelasBadge = $kelasNama
+                    ? '<span class="mt-1 px-2 py-0.5 rounded text-[9px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200 inline-block">' . e($kelasNama) . '</span>'
+                    : '';
+                $kategoriHtml = '<div class="flex flex-col items-start gap-0.5">'
+                    . '<span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-brand-50 text-brand-700 border border-brand-200 inline-block">' . e($buku->kategori->nama ?? 'Umum') . '</span>'
+                    . $kelasBadge
+                    . '</div>';
 
                 $stokClass = $buku->available_quantity > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200';
                 $stokText = $buku->available_quantity > 0 ? 'Tersedia' : 'Habis Dipinjam';

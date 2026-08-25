@@ -12,34 +12,8 @@
 
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#fef2f2',
-                            100: '#fee2e2',
-                            200: '#fecaca',
-                            300: '#fca5a5',
-                            400: '#f87171',
-                            500: '#ef4444',
-                            600: '#dc2626',
-                            700: '#b91c1c',
-                            800: '#991b1b',
-                            900: '#7f1d1d',
-                            950: '#450a0a',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <link rel="stylesheet" href="{{ asset('vendor/tailwind/tailwind.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('vendor/datatables/jquery.dataTables.min.css') }}">
 
     <script defer src="{{ asset('vendor/alpine/alpine.min.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/all.min.css') }}">
@@ -474,8 +448,8 @@
             return false;
         }
     </script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="{{ asset('vendor/jquery/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ asset('vendor/datatables/jquery.dataTables.min.js') }}"></script>
     @stack('scripts')
 </body>
 </html>

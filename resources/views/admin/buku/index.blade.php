@@ -220,11 +220,11 @@
             <table id="tabel-buku" class="w-full text-left border-collapse text-xs">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase tracking-wider font-extrabold">
-                        <th class="py-3 px-4 font-bold">Buku & Cover</th>
-                        <th class="py-3 px-4 font-bold">Penulis / Penerbit</th>
-                        <th class="py-3 px-4 font-bold">Kategori</th>
-                        <th class="py-3 px-4 font-bold text-center">Stok Fisik</th>
-                        <th class="py-3 px-4 lg:pr-8 font-bold text-right">Aksi</th>
+                        <th class="py-3 px-4 font-bold w-[38%]">Buku & Cover</th>
+                        <th class="py-3 px-4 font-bold w-[22%]">Penulis / Penerbit</th>
+                        <th class="py-3 px-4 font-bold w-[18%]">Kategori</th>
+                        <th class="py-3 px-4 font-bold text-center w-[12%]">Stok Fisik</th>
+                        <th class="py-3 px-4 lg:pr-8 font-bold text-right w-[10%]">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 text-gray-700 font-medium">
