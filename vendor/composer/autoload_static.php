@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
+class ComposerStaticInitb5d458469dc766692a4a17d5115d852e
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
@@ -16,6 +16,7 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
+        '662a729f963d39afe703c9d9b7ab4a8c' => __DIR__ . '/..' . '/symfony/polyfill-php83/bootstrap.php',
         '606a39d89246991a373564698c2d8383' => __DIR__ . '/..' . '/symfony/polyfill-php85/bootstrap.php',
         '35a6ad97d21e794e7e22a17d806652e4' => __DIR__ . '/..' . '/nunomaduro/termwind/src/Functions.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
@@ -27,7 +28,6 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
         '801c31d8ed748cfa537fa45402288c95' => __DIR__ . '/..' . '/psy/psysh/src/functions.php',
         'e39a8b23c42d4e1452234d762b03835a' => __DIR__ . '/..' . '/ramsey/uuid/src/functions.php',
-        '662a729f963d39afe703c9d9b7ab4a8c' => __DIR__ . '/..' . '/symfony/polyfill-php83/bootstrap.php',
         '476ca15b8d69b04665cd879be9cb4c68' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Collections/functions.php',
         '265b4faa2b3a9766332744949e83bf97' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Collections/helpers.php',
         'c7a3c339e7e14b60e06a2d7fcce9476b' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Events/functions.php',
@@ -523,6 +523,10 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
     );
 
     public static $classMap = array (
+        'App\\Console\\Commands\\BackupDatabaseCommand' => __DIR__ . '/../..' . '/app/Console/Commands/BackupDatabaseCommand.php',
+        'App\\Console\\Commands\\BuatAdminCommand' => __DIR__ . '/../..' . '/app/Console/Commands/BuatAdminCommand.php',
+        'App\\Console\\Commands\\RegenerateCovers' => __DIR__ . '/../..' . '/app/Console/Commands/RegenerateCovers.php',
+        'App\\Console\\Commands\\ResetPasswordCommand' => __DIR__ . '/../..' . '/app/Console/Commands/ResetPasswordCommand.php',
         'App\\Http\\Controllers\\AdminController' => __DIR__ . '/../..' . '/app/Http/Controllers/AdminController.php',
         'App\\Http\\Controllers\\AuthController' => __DIR__ . '/../..' . '/app/Http/Controllers/AuthController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
@@ -532,6 +536,7 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'App\\Models\\AuditLog' => __DIR__ . '/../..' . '/app/Models/AuditLog.php',
         'App\\Models\\Buku' => __DIR__ . '/../..' . '/app/Models/Buku.php',
         'App\\Models\\Kategori' => __DIR__ . '/../..' . '/app/Models/Kategori.php',
+        'App\\Models\\Kelas' => __DIR__ . '/../..' . '/app/Models/Kelas.php',
         'App\\Models\\Peminjaman' => __DIR__ . '/../..' . '/app/Models/Peminjaman.php',
         'App\\Models\\Penerbit' => __DIR__ . '/../..' . '/app/Models/Penerbit.php',
         'App\\Models\\Pengaturan' => __DIR__ . '/../..' . '/app/Models/Pengaturan.php',
@@ -541,6 +546,8 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'App\\Models\\Role' => __DIR__ . '/../..' . '/app/Models/Role.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
+        'App\\Services\\CoverImageService' => __DIR__ . '/../..' . '/app/Services/CoverImageService.php',
+        'App\\Services\\DatabaseBackupService' => __DIR__ . '/../..' . '/app/Services/DatabaseBackupService.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Brick\\Math\\BigDecimal' => __DIR__ . '/..' . '/brick/math/src/BigDecimal.php',
         'Brick\\Math\\BigInteger' => __DIR__ . '/..' . '/brick/math/src/BigInteger.php',
@@ -5994,7 +6001,6 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'Symfony\\Component\\CssSelector\\Node\\NegationNode' => __DIR__ . '/..' . '/symfony/css-selector/Node/NegationNode.php',
         'Symfony\\Component\\CssSelector\\Node\\NodeInterface' => __DIR__ . '/..' . '/symfony/css-selector/Node/NodeInterface.php',
         'Symfony\\Component\\CssSelector\\Node\\PseudoNode' => __DIR__ . '/..' . '/symfony/css-selector/Node/PseudoNode.php',
-        'Symfony\\Component\\CssSelector\\Node\\RelationNode' => __DIR__ . '/..' . '/symfony/css-selector/Node/RelationNode.php',
         'Symfony\\Component\\CssSelector\\Node\\SelectorNode' => __DIR__ . '/..' . '/symfony/css-selector/Node/SelectorNode.php',
         'Symfony\\Component\\CssSelector\\Node\\Specificity' => __DIR__ . '/..' . '/symfony/css-selector/Node/Specificity.php',
         'Symfony\\Component\\CssSelector\\Node\\SpecificityAdjustmentNode' => __DIR__ . '/..' . '/symfony/css-selector/Node/SpecificityAdjustmentNode.php',
@@ -6025,7 +6031,6 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'Symfony\\Component\\CssSelector\\XPath\\Extension\\HtmlExtension' => __DIR__ . '/..' . '/symfony/css-selector/XPath/Extension/HtmlExtension.php',
         'Symfony\\Component\\CssSelector\\XPath\\Extension\\NodeExtension' => __DIR__ . '/..' . '/symfony/css-selector/XPath/Extension/NodeExtension.php',
         'Symfony\\Component\\CssSelector\\XPath\\Extension\\PseudoClassExtension' => __DIR__ . '/..' . '/symfony/css-selector/XPath/Extension/PseudoClassExtension.php',
-        'Symfony\\Component\\CssSelector\\XPath\\Extension\\RelationExtension' => __DIR__ . '/..' . '/symfony/css-selector/XPath/Extension/RelationExtension.php',
         'Symfony\\Component\\CssSelector\\XPath\\Translator' => __DIR__ . '/..' . '/symfony/css-selector/XPath/Translator.php',
         'Symfony\\Component\\CssSelector\\XPath\\TranslatorInterface' => __DIR__ . '/..' . '/symfony/css-selector/XPath/TranslatorInterface.php',
         'Symfony\\Component\\CssSelector\\XPath\\XPathExpr' => __DIR__ . '/..' . '/symfony/css-selector/XPath/XPathExpr.php',
@@ -6682,7 +6687,6 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'Symfony\\Component\\Translation\\Loader\\QtFileLoader' => __DIR__ . '/..' . '/symfony/translation/Loader/QtFileLoader.php',
         'Symfony\\Component\\Translation\\Loader\\XliffFileLoader' => __DIR__ . '/..' . '/symfony/translation/Loader/XliffFileLoader.php',
         'Symfony\\Component\\Translation\\Loader\\YamlFileLoader' => __DIR__ . '/..' . '/symfony/translation/Loader/YamlFileLoader.php',
-        'Symfony\\Component\\Translation\\LocaleFallbackProvider' => __DIR__ . '/..' . '/symfony/translation/LocaleFallbackProvider.php',
         'Symfony\\Component\\Translation\\LocaleSwitcher' => __DIR__ . '/..' . '/symfony/translation/LocaleSwitcher.php',
         'Symfony\\Component\\Translation\\LoggingTranslator' => __DIR__ . '/..' . '/symfony/translation/LoggingTranslator.php',
         'Symfony\\Component\\Translation\\MessageCatalogue' => __DIR__ . '/..' . '/symfony/translation/MessageCatalogue.php',
@@ -6703,6 +6707,7 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'Symfony\\Component\\Translation\\StaticMessage' => __DIR__ . '/..' . '/symfony/translation/StaticMessage.php',
         'Symfony\\Component\\Translation\\Test\\AbstractProviderFactoryTestCase' => __DIR__ . '/..' . '/symfony/translation/Test/AbstractProviderFactoryTestCase.php',
         'Symfony\\Component\\Translation\\Test\\IncompleteDsnTestTrait' => __DIR__ . '/..' . '/symfony/translation/Test/IncompleteDsnTestTrait.php',
+        'Symfony\\Component\\Translation\\Test\\ProviderFactoryTestCase' => __DIR__ . '/..' . '/symfony/translation/Test/ProviderFactoryTestCase.php',
         'Symfony\\Component\\Translation\\Test\\ProviderTestCase' => __DIR__ . '/..' . '/symfony/translation/Test/ProviderTestCase.php',
         'Symfony\\Component\\Translation\\TranslatableMessage' => __DIR__ . '/..' . '/symfony/translation/TranslatableMessage.php',
         'Symfony\\Component\\Translation\\Translator' => __DIR__ . '/..' . '/symfony/translation/Translator.php',
@@ -6892,6 +6897,7 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'Termwind\\ValueObjects\\Node' => __DIR__ . '/..' . '/nunomaduro/termwind/src/ValueObjects/Node.php',
         'Termwind\\ValueObjects\\Style' => __DIR__ . '/..' . '/nunomaduro/termwind/src/ValueObjects/Style.php',
         'Termwind\\ValueObjects\\Styles' => __DIR__ . '/..' . '/nunomaduro/termwind/src/ValueObjects/Styles.php',
+        'Tests\\Feature\\AdminAksesTest' => __DIR__ . '/../..' . '/tests/Feature/AdminAksesTest.php',
         'Tests\\Feature\\ExampleTest' => __DIR__ . '/../..' . '/tests/Feature/ExampleTest.php',
         'Tests\\TestCase' => __DIR__ . '/../..' . '/tests/TestCase.php',
         'Tests\\Unit\\ExampleTest' => __DIR__ . '/../..' . '/tests/Unit/ExampleTest.php',
@@ -6940,9 +6946,9 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitb5d458469dc766692a4a17d5115d852e::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitb5d458469dc766692a4a17d5115d852e::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitb5d458469dc766692a4a17d5115d852e::$classMap;
 
         }, null, ClassLoader::class);
     }

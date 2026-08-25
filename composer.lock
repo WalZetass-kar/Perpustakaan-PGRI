@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7e65a03d4ee43f81254cb328f7f94211",
+    "content-hash": "b5d458469dc766692a4a17d5115d852e",
     "packages": [
         {
             "name": "brick/math",
@@ -3296,35 +3296,78 @@
             "name": "symfony/clock",
             "version": "v7.4.8",
             "source": {
-                "url": "https://github.com/symfony/clock.git",
                 "type": "git",
+                "url": "https://github.com/symfony/clock.git",
                 "reference": "674fa3b98e21531dd040e613479f5f6fa8f32111"
             },
             "dist": {
-                "url": "https://api.github.com/repos/symfony/clock/zipball/674fa3b98e21531dd040e613479f5f6fa8f32111",
                 "type": "zip",
-                "shasum": "",
-                "reference": "674fa3b98e21531dd040e613479f5f6fa8f32111"
+                "url": "https://api.github.com/repos/symfony/clock/zipball/674fa3b98e21531dd040e613479f5f6fa8f32111",
+                "reference": "674fa3b98e21531dd040e613479f5f6fa8f32111",
+                "shasum": ""
             },
             "require": {
                 "php": ">=8.2",
                 "psr/clock": "^1.0",
                 "symfony/polyfill-php83": "^1.28"
             },
+            "provide": {
+                "psr/clock-implementation": "1.0"
+            },
             "type": "library",
-            "autoload": {},
+            "autoload": {
+                "files": [
+                    "Resources/now.php"
+                ],
+                "psr-4": {
+                    "Symfony\\Component\\Clock\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
-            "authors": [],
-            "description": "",
+            "authors": [
+                {
+                    "name": "Nicolas Grekas",
+                    "email": "p@tchwork.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Decouples applications from the system clock",
             "homepage": "https://symfony.com",
-            "keywords": [],
+            "keywords": [
+                "clock",
+                "psr20",
+                "time"
+            ],
             "support": {
                 "source": "https://github.com/symfony/clock/tree/v7.4.8"
             },
-            "funding": [],
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
             "time": "2026-03-24T13:12:05+00:00"
         },
         {
@@ -3429,33 +3472,69 @@
             "name": "symfony/css-selector",
             "version": "v7.4.17",
             "source": {
-                "url": "https://github.com/symfony/css-selector.git",
                 "type": "git",
+                "url": "https://github.com/symfony/css-selector.git",
                 "reference": "e3822e1cb7013a0a99b3c578130458927ec4eb89"
             },
             "dist": {
-                "url": "https://api.github.com/repos/symfony/css-selector/zipball/e3822e1cb7013a0a99b3c578130458927ec4eb89",
                 "type": "zip",
-                "shasum": "",
-                "reference": "e3822e1cb7013a0a99b3c578130458927ec4eb89"
+                "url": "https://api.github.com/repos/symfony/css-selector/zipball/e3822e1cb7013a0a99b3c578130458927ec4eb89",
+                "reference": "e3822e1cb7013a0a99b3c578130458927ec4eb89",
+                "shasum": ""
             },
             "require": {
                 "php": ">=8.2"
             },
             "type": "library",
-            "autoload": {},
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\CssSelector\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
-            "authors": [],
-            "description": "",
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Jean-François Simon",
+                    "email": "jeanfrancois.simon@sensiolabs.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Converts CSS selectors to XPath expressions",
             "homepage": "https://symfony.com",
-            "keywords": [],
             "support": {
                 "source": "https://github.com/symfony/css-selector/tree/v7.4.17"
             },
-            "funding": [],
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
             "time": "2026-08-21T17:40:08+00:00"
         },
         {
@@ -3615,38 +3694,27 @@
             "name": "symfony/event-dispatcher",
             "version": "v7.4.17",
             "source": {
-                "url": "https://github.com/symfony/event-dispatcher.git",
                 "type": "git",
+                "url": "https://github.com/symfony/event-dispatcher.git",
                 "reference": "d269974ee93c61d03620ffee358355bfdb471d66"
             },
             "dist": {
-                "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/d269974ee93c61d03620ffee358355bfdb471d66",
                 "type": "zip",
-                "shasum": "",
-                "reference": "d269974ee93c61d03620ffee358355bfdb471d66"
+                "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/d269974ee93c61d03620ffee358355bfdb471d66",
+                "reference": "d269974ee93c61d03620ffee358355bfdb471d66",
+                "shasum": ""
             },
             "require": {
                 "php": ">=8.2",
                 "symfony/event-dispatcher-contracts": "^2.5|^3"
             },
-            "type": "library",
-            "autoload": {},
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [],
-            "description": "",
-            "homepage": "https://symfony.com",
-            "keywords": [],
-            "support": {
-                "source": "https://github.com/symfony/event-dispatcher/tree/v7.4.17"
-            },
-            "funding": [],
-            "time": "2026-08-21T17:40:08+00:00",
             "conflict": {
                 "symfony/dependency-injection": "<6.4",
                 "symfony/service-contracts": "<2.5"
+            },
+            "provide": {
+                "psr/event-dispatcher-implementation": "1.0",
+                "symfony/event-dispatcher-implementation": "2.0|3.0"
             },
             "require-dev": {
                 "psr/log": "^1|^2|^3",
@@ -3658,7 +3726,54 @@
                 "symfony/http-foundation": "^6.4|^7.0|^8.0",
                 "symfony/service-contracts": "^2.5|^3",
                 "symfony/stopwatch": "^6.4|^7.0|^8.0"
-            }
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\EventDispatcher\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Provides tools that allow your application components to communicate with each other by dispatching events and listening to them",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/event-dispatcher/tree/v7.4.17"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-08-21T17:40:08+00:00"
         },
         {
             "name": "symfony/event-dispatcher-contracts",
@@ -4436,16 +4551,16 @@
         },
         {
             "name": "symfony/polyfill-intl-normalizer",
-            "version": "v1.38.0",
+            "version": "v1.42.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-intl-normalizer.git",
-                "reference": "2d446c214bdbe5b71bde5011b060a05fece3ae6b"
+                "reference": "aa20edea75bd9c48cfecc8360922e5a6e5c44502"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-intl-normalizer/zipball/2d446c214bdbe5b71bde5011b060a05fece3ae6b",
-                "reference": "2d446c214bdbe5b71bde5011b060a05fece3ae6b",
+                "url": "https://api.github.com/repos/symfony/polyfill-intl-normalizer/zipball/aa20edea75bd9c48cfecc8360922e5a6e5c44502",
+                "reference": "aa20edea75bd9c48cfecc8360922e5a6e5c44502",
                 "shasum": ""
             },
             "require": {
@@ -4497,7 +4612,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-intl-normalizer/tree/v1.38.0"
+                "source": "https://github.com/symfony/polyfill-intl-normalizer/tree/v1.42.0"
             },
             "funding": [
                 {
@@ -4517,7 +4632,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-05-25T13:48:31+00:00"
+            "time": "2026-08-07T06:33:24+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
@@ -5172,15 +5287,15 @@
             "name": "symfony/string",
             "version": "v7.4.15",
             "source": {
-                "url": "https://github.com/symfony/string.git",
                 "type": "git",
+                "url": "https://github.com/symfony/string.git",
                 "reference": "e394af32256bf9e7bf80849d95e589167c10097b"
             },
             "dist": {
-                "url": "https://api.github.com/repos/symfony/string/zipball/e394af32256bf9e7bf80849d95e589167c10097b",
                 "type": "zip",
-                "shasum": "",
-                "reference": "e394af32256bf9e7bf80849d95e589167c10097b"
+                "url": "https://api.github.com/repos/symfony/string/zipball/e394af32256bf9e7bf80849d95e589167c10097b",
+                "reference": "e394af32256bf9e7bf80849d95e589167c10097b",
+                "shasum": ""
             },
             "require": {
                 "php": ">=8.2",
@@ -5190,74 +5305,108 @@
                 "symfony/polyfill-intl-normalizer": "~1.0",
                 "symfony/polyfill-mbstring": "~1.0"
             },
-            "type": "library",
-            "autoload": {},
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [],
-            "description": "",
-            "homepage": "https://symfony.com",
-            "keywords": [],
-            "support": {
-                "source": "https://github.com/symfony/string/tree/v7.4.15"
+            "conflict": {
+                "symfony/translation-contracts": "<2.5"
             },
-            "funding": [],
-            "time": "2026-07-28T07:33:02+00:00",
             "require-dev": {
                 "symfony/emoji": "^7.1|^8.0",
                 "symfony/http-client": "^6.4|^7.0|^8.0",
                 "symfony/intl": "^6.4|^7.0|^8.0",
                 "symfony/translation-contracts": "^2.5|^3.0",
                 "symfony/var-exporter": "^6.4|^7.0|^8.0"
-            }
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "Resources/functions.php"
+                ],
+                "psr-4": {
+                    "Symfony\\Component\\String\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nicolas Grekas",
+                    "email": "p@tchwork.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Provides an object-oriented API to strings and deals with bytes, UTF-8 code points and grapheme clusters in a unified way",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "grapheme",
+                "i18n",
+                "string",
+                "unicode",
+                "utf-8",
+                "utf8"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/string/tree/v7.4.15"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-07-28T07:33:02+00:00"
         },
         {
             "name": "symfony/translation",
             "version": "v7.4.17",
             "source": {
-                "url": "https://github.com/symfony/translation.git",
                 "type": "git",
+                "url": "https://github.com/symfony/translation.git",
                 "reference": "2ee1e4a3b32a528a642babe041ff7c440b213b4b"
             },
             "dist": {
-                "url": "https://api.github.com/repos/symfony/translation/zipball/2ee1e4a3b32a528a642babe041ff7c440b213b4b",
                 "type": "zip",
-                "shasum": "",
-                "reference": "2ee1e4a3b32a528a642babe041ff7c440b213b4b"
+                "url": "https://api.github.com/repos/symfony/translation/zipball/2ee1e4a3b32a528a642babe041ff7c440b213b4b",
+                "reference": "2ee1e4a3b32a528a642babe041ff7c440b213b4b",
+                "shasum": ""
             },
             "require": {
                 "php": ">=8.2",
+                "symfony/deprecation-contracts": "^2.5|^3",
                 "symfony/polyfill-mbstring": "~1.0",
-                "symfony/translation-contracts": "^2.5.3|^3.3",
-                "symfony/deprecation-contracts": "^2.5|^3"
+                "symfony/translation-contracts": "^2.5.3|^3.3"
             },
-            "type": "library",
-            "autoload": {},
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [],
-            "description": "",
-            "homepage": "https://symfony.com",
-            "keywords": [],
-            "support": {
-                "source": "https://github.com/symfony/translation/tree/v7.4.17"
-            },
-            "funding": [],
-            "time": "2026-08-21T17:40:08+00:00",
             "conflict": {
                 "nikic/php-parser": "<5.0",
                 "symfony/config": "<6.4",
+                "symfony/console": "<6.4",
                 "symfony/dependency-injection": "<6.4",
                 "symfony/http-client-contracts": "<2.5",
                 "symfony/http-kernel": "<6.4",
                 "symfony/service-contracts": "<2.5",
                 "symfony/twig-bundle": "<6.4",
-                "symfony/yaml": "<6.4",
-                "symfony/console": "<6.4"
+                "symfony/yaml": "<6.4"
+            },
+            "provide": {
+                "symfony/translation-implementation": "2.3|3.0"
             },
             "require-dev": {
                 "nikic/php-parser": "^5.0",
@@ -5273,7 +5422,57 @@
                 "symfony/routing": "^6.4|^7.0|^8.0",
                 "symfony/service-contracts": "^2.5|^3",
                 "symfony/yaml": "^6.4|^7.0|^8.0"
-            }
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "Resources/functions.php"
+                ],
+                "psr-4": {
+                    "Symfony\\Component\\Translation\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Provides tools to internationalize your application",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/translation/tree/v7.4.17"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-08-21T17:40:08+00:00"
         },
         {
             "name": "symfony/translation-contracts",
@@ -7975,42 +8174,77 @@
             "name": "symfony/yaml",
             "version": "v7.4.17",
             "source": {
-                "url": "https://github.com/symfony/yaml.git",
                 "type": "git",
+                "url": "https://github.com/symfony/yaml.git",
                 "reference": "0b040d7b66ceb10b7bb24c8e6656257932693a12"
             },
             "dist": {
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/0b040d7b66ceb10b7bb24c8e6656257932693a12",
                 "type": "zip",
-                "shasum": "",
-                "reference": "0b040d7b66ceb10b7bb24c8e6656257932693a12"
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/0b040d7b66ceb10b7bb24c8e6656257932693a12",
+                "reference": "0b040d7b66ceb10b7bb24c8e6656257932693a12",
+                "shasum": ""
             },
             "require": {
                 "php": ">=8.2",
                 "symfony/deprecation-contracts": "^2.5|^3",
                 "symfony/polyfill-ctype": "^1.8"
             },
-            "type": "library",
-            "autoload": {},
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [],
-            "description": "",
-            "homepage": "https://symfony.com",
-            "keywords": [],
-            "support": {
-                "source": "https://github.com/symfony/yaml/tree/v7.4.17"
-            },
-            "funding": [],
-            "time": "2026-08-21T12:09:28+00:00",
             "conflict": {
                 "symfony/console": "<6.4"
             },
             "require-dev": {
                 "symfony/console": "^6.4|^7.0|^8.0"
-            }
+            },
+            "bin": [
+                "Resources/bin/yaml-lint"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Yaml\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Loads and dumps YAML files",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/yaml/tree/v7.4.17"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-08-21T12:09:28+00:00"
         },
         {
             "name": "theseer/tokenizer",
@@ -8072,5 +8306,8 @@
         "php": "^8.2"
     },
     "platform-dev": {},
+    "platform-overrides": {
+        "php": "8.2.0"
+    },
     "plugin-api-version": "2.9.0"
 }
