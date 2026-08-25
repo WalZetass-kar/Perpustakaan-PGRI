@@ -278,18 +278,20 @@
                                     <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Akun Pengelola</span>
                                 </a>
                             @endif
-                            <a href="{{ route('admin.profil') }}" title="Profil & Keamanan Akun"
-                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.profil*') ? 'bg-emerald-50 text-emerald-900 border-emerald-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"
-                               :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
-                                <i class="fa-solid fa-user-shield text-emerald-600 text-sm shrink-0"></i>
-                                <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Profil & Keamanan</span>
-                            </a>
-                            <a href="{{ route('admin.pengaturan') }}" title="Pengaturan Sistem"
-                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.pengaturan*') ? 'bg-emerald-50 text-emerald-900 border-emerald-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"
-                               :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
-                                <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-                                <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Pengaturan Sistem</span>
-                            </a>
+                            @if(auth()->user()->isSuperAdmin())
+                                <a href="{{ route('admin.profil') }}" title="Profil & Keamanan Akun"
+                                   class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.profil*') ? 'bg-emerald-50 text-emerald-900 border-emerald-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"
+                                   :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
+                                    <i class="fa-solid fa-user-shield text-emerald-600 text-sm shrink-0"></i>
+                                    <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Profil & Keamanan</span>
+                                </a>
+                                <a href="{{ route('admin.pengaturan') }}" title="Pengaturan Sistem"
+                                   class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.pengaturan*') ? 'bg-emerald-50 text-emerald-900 border-emerald-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"
+                                   :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
+                                    <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                                    <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Pengaturan Sistem</span>
+                                </a>
+                            @endif
                             <a href="{{ route('admin.audit-log') }}" title="Audit Log"
                                class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.audit-log*') ? 'bg-gray-100 text-gray-900 border-gray-300 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"
                                :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
