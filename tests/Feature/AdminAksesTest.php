@@ -119,7 +119,7 @@ class AdminAksesTest extends TestCase
         $this->buatAdmin();
 
         // Login sungguhan, bukan actingAs, supaya sesinya benar-benar terisi.
-        $this->post('/aksesperpuspgri', [
+        $this->post(route('login.post'), [
             'email'    => 'petugas.uji@example.test',
             'password' => 'rahasia123',
         ]);
@@ -138,7 +138,7 @@ class AdminAksesTest extends TestCase
     {
         $this->buatAdmin();
 
-        $this->post('/aksesperpuspgri', [
+        $this->post(route('login.post'), [
             'email'    => 'petugas.uji@example.test',
             'password' => 'password-salah',
         ])->assertSessionHasErrors('email');
@@ -151,7 +151,7 @@ class AdminAksesTest extends TestCase
     {
         $this->buatAdmin();
 
-        $this->post('/aksesperpuspgri', [
+        $this->post(route('login.post'), [
             'email'    => 'petugas.uji@example.test',
             'password' => 'rahasia123',
         ])->assertRedirect(route('admin.dashboard'));
