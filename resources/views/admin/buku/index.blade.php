@@ -113,14 +113,6 @@
        dua alasan: menang atas grid-cols-1 bawaan tanpa perlu !important, dan
        tidak bergantung pada kelas yang mungkin tidak ikut ter-generate di
        public/vendor/tailwind/tailwind.min.css yang sudah di-purge. */
-    /* Di layar HP (<640px) kartu mode Grid sebelumnya jatuh menjadi satu kolom
-       memanjang ke bawah, sehingga sekali layar hanya memuat satu buku.
-       Dijadikan dua kolom, kiri-kanan, lalu lanjut ke bawah.
-
-       Ditulis sebagai media query ber-selektor id, bukan varian Tailwind, dengan
-       dua alasan: menang atas grid-cols-1 bawaan tanpa perlu !important, dan
-       tidak bergantung pada kelas yang mungkin tidak ikut ter-generate di
-       public/vendor/tailwind/tailwind.min.css yang sudah di-purge. */
     @media (max-width: 639px) {
         /* Padding bertumpuk tiga lapis (main 16px + wrapper 16px + container
            8px) memakan 80px dari layar 360px -- 22% habis jadi ruang kosong,
