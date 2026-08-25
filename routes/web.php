@@ -103,12 +103,18 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/anggota/toggle-status/{id}', [AdminController::class, 'anggotaToggleStatus'])->name('anggota.toggle-status')->whereNumber('id');
         Route::post('/anggota/delete/{id}', [AdminController::class, 'anggotaDestroy'])->name('anggota.delete')->whereNumber('id');
 
-        Route::get('/profil', [AdminController::class, 'profilIndex'])->name('profil');
-        Route::post('/profil/ubah-password', [AdminController::class, 'ubahPassword'])->name('profil.ubah-password');
+        // Otoritas penuh dipegang Super Administrator. Petugas ber-role `admin`
+        // tidak boleh menyentuh profil/keamanan akun maupun pengaturan sistem,
+        // termasuk lewat URL yang diketik langsung — menyembunyikan menunya di
+        // sidebar saja tidak menutup apa pun.
+        Route::middleware('role:super_admin')->group(function () {
+            Route::get('/profil', [AdminController::class, 'profilIndex'])->name('profil');
+            Route::post('/profil/ubah-password', [AdminController::class, 'ubahPassword'])->name('profil.ubah-password');
 
-        Route::get('/pengaturan', [AdminController::class, 'pengaturanIndex'])->name('pengaturan');
-        Route::post('/pengaturan', [AdminController::class, 'pengaturanUpdate'])->name('pengaturan.update');
-        Route::get('/pengaturan/backup-database', [AdminController::class, 'backupDatabase'])->name('pengaturan.backup');
+            Route::get('/pengaturan', [AdminController::class, 'pengaturanIndex'])->name('pengaturan');
+            Route::post('/pengaturan', [AdminController::class, 'pengaturanUpdate'])->name('pengaturan.update');
+            Route::get('/pengaturan/backup-database', [AdminController::class, 'backupDatabase'])->name('pengaturan.backup');
+        });
         Route::get('/audit-log', [AdminController::class, 'auditLogIndex'])->name('audit-log');
     });
 });

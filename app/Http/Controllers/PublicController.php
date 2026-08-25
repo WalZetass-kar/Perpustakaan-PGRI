@@ -245,9 +245,12 @@ class PublicController extends Controller
             'nama_peminjam' => 'required|string|max:255',
             'jurusan'       => 'required|string|max:150',
             'nomor_induk'   => 'nullable|string|max:50',
-            'no_wa'         => 'nullable|string|max:30',
+            'no_wa'         => 'required|string|max:30',
             'catatan'       => 'nullable|string|max:500',
             'jumlah'        => 'nullable|integer|min:1',
+        ], [
+            'no_wa.required' => 'Nomor WhatsApp wajib diisi agar petugas dapat menghubungi Anda.',
+            'no_wa.max'      => 'Nomor WhatsApp terlalu panjang (maksimal 30 karakter).',
         ]);
 
         $buku = Buku::findOrFail($validated['buku_id']);
@@ -298,10 +301,11 @@ class PublicController extends Controller
 
         $loan = Peminjaman::create([
             'kode_peminjaman'     => $requestCode,
+            'sumber'              => 'opac',
             'nama_peminjam'       => trim($validated['nama_peminjam']),
             'jurusan'             => trim($validated['jurusan']),
             'nomor_induk'         => $nomorInduk,
-            'no_wa'               => !empty($validated['no_wa']) ? trim($validated['no_wa']) : null,
+            'no_wa'               => trim($validated['no_wa']),
             'user_id'             => auth()->id(),
             'buku_id'             => $buku->id,
             'jumlah'              => $jumlah,

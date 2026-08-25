@@ -105,6 +105,110 @@
     #grid-buku-container,
     #list-buku-mobile-container { clear: both; }
 
+    /* Di layar HP (<640px) kartu mode Grid sebelumnya jatuh menjadi satu kolom
+       memanjang ke bawah, sehingga sekali layar hanya memuat satu buku.
+       Dijadikan dua kolom, kiri-kanan, lalu lanjut ke bawah.
+
+       Ditulis sebagai media query ber-selektor id, bukan varian Tailwind, dengan
+       dua alasan: menang atas grid-cols-1 bawaan tanpa perlu !important, dan
+       tidak bergantung pada kelas yang mungkin tidak ikut ter-generate di
+       public/vendor/tailwind/tailwind.min.css yang sudah di-purge. */
+    @media (max-width: 639px) {
+        /* Padding bertumpuk tiga lapis (main 16px + wrapper 16px + container
+           8px) memakan 80px dari layar 360px -- 22% habis jadi ruang kosong,
+           sisanya baru dibagi dua. Dirampingkan supaya kartunya dapat lebar
+           yang layak; inilah sebab utama tampilan terasa sesak. */
+        .dataTables_wrapper { padding: 0.5rem; }
+
+        #grid-buku-container {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.5rem;
+            padding: 0.25rem;
+        }
+
+        .kartu-grid-buku-isi {
+            padding: 0.5rem;
+            gap: 0.25rem;
+        }
+
+        /* Garis pemisah di atas baris kaki tidak perlu jarak selega desktop. */
+        .kartu-grid-buku-kaki { padding-top: 0.25rem; }
+
+        /* Banner "Menampilkan hasil untuk ..." (muncul saat datang dari menu
+           Temukan Buku dengan ?search=). Isinya satu baris mendatar: ikon +
+           label, teks petunjuk, lalu tombol reset yang ber-shrink-0. Di layar
+           360px tombol itu mempertahankan lebarnya sehingga teks petunjuk
+           terjepit tinggal +-50px dan pecah satu kata per baris.
+
+           Di HP ketiganya ditumpuk ke bawah, dan teks petunjuk diberi baris
+           sendiri supaya utuh terbaca. */
+        #search-filter-banner {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.5rem;
+            padding: 0.75rem;
+        }
+
+        .banner-cari-teks {
+            flex-wrap: wrap;
+            align-items: flex-start;
+        }
+
+        /* flex-basis penuh memaksa petunjuk turun ke barisnya sendiri; margin
+           kiri menyejajarkannya dengan label di atas, melewati lebar ikon. */
+        .banner-cari-petunjuk {
+            flex-basis: 100%;
+            margin-left: 1.4rem;
+        }
+
+        #btn-reset-search-filter { width: 100%; }
+
+        /* CoverImageService me-resize sampul berdasarkan LEBAR saja, jadi rasio
+           aslinya yang tegak tetap utuh. Kotak h-44 (176px) di kartu selebar
+           ~148px nyaris persegi, sehingga object-cover memangkas sampul di sisi
+           kiri-kanan -- judul pada gambarnya ikut terpotong.
+
+           Dikunci ke rasio supaya tingginya ikut lebar kartu, berapa pun lebar
+           layarnya. Angkanya kompromi antara sampul yang utuh dan kartu yang
+           pendek; makin mendekati 1, makin pendek kartunya dan makin terpangkas
+           sisi sampulnya. Urutannya: 2/3 (222px, utuh) - 3/4 (197px) -
+           4/5 (185px, dipakai sekarang) - 1/1 (148px, paling pendek).
+           Angka di bawah ini satu-satunya tempat penyetelannya. */
+        .kartu-grid-buku-sampul {
+            height: auto;
+            aspect-ratio: 4 / 5;
+        }
+
+        /* Badge kategori seperti "Teknik Komputer & Jaringan" jatuh ke dua
+           baris dan membuat tinggi kartu tidak seragam. Dikecilkan sedikit dan
+           dipotong dengan elipsis, bukan dibiarkan pecah. */
+        .kartu-grid-buku-badge > span {
+            font-size: 9px;
+            padding: 0.05rem 0.3rem;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Baris kaki: badge stok TIDAK BOLEH pecah jadi "4/4" lalu "Eks" di
+           baris berikutnya. Badge dikunci satu baris, kode rak yang mengalah
+           dan menyusut. */
+        .kartu-grid-buku-kaki { gap: 0.25rem; }
+        .kartu-grid-buku-kaki > span:last-child {
+            flex-shrink: 0;
+            white-space: nowrap;
+            font-size: 9px;
+            padding: 0.05rem 0.3rem;
+        }
+        .kartu-grid-buku-kaki > span:first-child {
+            min-width: 0;
+            flex: 1 1 auto;
+            max-width: none;
+            font-size: 9px;
+        }
+    }
+
     /* Jaring pengaman: pastikan tabel selalu selebar wadahnya. Aturan bawaan
        table.dataTable adalah width:100% dengan margin:0 auto, sehingga lebar
        apa pun yang lebih kecil akan tampil terpusat dan menyisakan ruang kosong
@@ -221,10 +325,10 @@
 
     {{-- Banner: ditampilkan via JS saat ada ?search= di URL --}}
     <div id="search-filter-banner" class="hidden bg-blue-50 border border-blue-200 rounded-2xl px-4 py-3 flex items-center justify-between gap-3 text-xs">
-        <div class="flex items-center gap-2 text-blue-800">
+        <div class="banner-cari-teks flex items-center gap-2 text-blue-800">
             <i class="fa-solid fa-filter text-blue-500"></i>
             <span id="search-filter-text" class="font-semibold"></span>
-            <span class="text-blue-500 font-normal">— klik tombol aksi ⋮ pada buku untuk edit data</span>
+            <span class="banner-cari-petunjuk text-blue-500 font-normal">— klik tombol aksi ⋮ pada buku untuk edit data</span>
         </div>
         <button id="btn-reset-search-filter" type="button" class="shrink-0 px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold rounded-xl transition text-[11px]">
             Tampilkan Semua Buku
@@ -604,21 +708,21 @@
                 ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-black bg-amber-50 text-amber-700 border border-amber-200">' + escapeHtml(row.kelas_nama) + '</span>'
                 : '';
 
-            return '<div class="bg-white rounded-2xl border-2 border-gray-200 hover:border-brand-300 hover:shadow-md transition duration-200 overflow-hidden flex flex-col">'
-                + '<div class="relative w-full h-44 bg-gray-100 overflow-hidden">'
+            return '<div class="kartu-grid-buku bg-white rounded-2xl border-2 border-gray-200 hover:border-brand-300 hover:shadow-md transition duration-200 overflow-hidden flex flex-col">'
+                + '<div class="kartu-grid-buku-sampul relative w-full h-44 bg-gray-100 overflow-hidden">'
                 +     coverInner
                 +     '<div class="absolute top-2 right-2 bg-white/95 rounded-lg shadow-sm">' + row.aksi + '</div>'
                 + '</div>'
-                + '<div class="p-3.5 flex-1 flex flex-col justify-between gap-2.5 text-xs">'
+                + '<div class="kartu-grid-buku-isi p-3.5 flex-1 flex flex-col justify-between gap-2.5 text-xs">'
                 +   '<div>'
                 +     '<h3 class="font-extrabold text-gray-900 line-clamp-2 leading-snug">' + escapeHtml(row.judul_raw) + '</h3>'
                 +     '<p class="text-[11px] text-gray-500 truncate mt-0.5">' + escapeHtml(row.penulis_nama) + '</p>'
                 +   '</div>'
-                +   '<div class="flex flex-wrap gap-1">'
+                +   '<div class="kartu-grid-buku-badge flex flex-wrap gap-1">'
                 +     '<span class="px-2 py-0.5 rounded-md text-[10px] font-black bg-brand-50 text-brand-700 border border-brand-200">' + escapeHtml(row.kategori_nama) + '</span>'
                 +     kelasBadge
                 +   '</div>'
-                +   '<div class="pt-2 border-t border-gray-100 flex items-center justify-between text-[10.5px]">'
+                +   '<div class="kartu-grid-buku-kaki pt-2 border-t border-gray-100 flex items-center justify-between text-[10.5px]">'
                 +     '<span class="font-mono font-bold text-gray-600 truncate max-w-[60%]">' + escapeHtml(row.rak_text) + '</span>'
                 +     '<span class="px-2 py-0.5 rounded-md text-[10px] font-black border ' + stokClass + '">' + row.available_quantity + '/' + row.total_quantity + ' Eks</span>'
                 +   '</div>'

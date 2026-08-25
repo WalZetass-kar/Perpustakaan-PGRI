@@ -21,7 +21,13 @@
                     </p>
                 </div>
             </div>
-            <button type="button" onclick="window.close()" class="hidden sm:flex px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-extrabold rounded-xl transition items-center gap-1.5 border border-gray-200 shrink-0 self-center">
+            {{-- Halaman ini dibuka di tab baru dari menu Data Buku, jadi tombol
+                 ini satu-satunya jalan menutupnya dari dalam aplikasi. Dulu
+                 ber-"hidden sm:flex" sehingga lenyap di HP dan petugas terjebak
+                 di tab tanpa jalan keluar. Di HP dibuat selebar penuh karena
+                 header-nya menumpuk ke bawah; di layar >=640px lebarnya kembali
+                 mengikuti isi, persis seperti semula. --}}
+            <button type="button" onclick="window.close()" class="flex w-full sm:w-auto justify-center px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-extrabold rounded-xl transition items-center gap-1.5 border border-gray-200 shrink-0 self-center">
                 <i class="fa-solid fa-xmark text-gray-500"></i>
                 <span>Tutup Tab</span>
             </button>

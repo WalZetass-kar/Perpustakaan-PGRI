@@ -4,7 +4,7 @@
 @section('page_heading', 'Sirkulasi Peminjaman Buku')
 
 @section('content')
-<div class="space-y-5" x-data="{ openAddModal: false, selectedBookQty: 1 }" x-init="openAddModal = false">
+<div class="space-y-5" x-data="{ openAddModal: false, selectedBookQty: 1, openDetailModal: false, detail: {} }" x-init="openAddModal = false">
 
     <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-gray-200 shadow-sm"
          x-data="{ toolOpen: {{ request()->filled('search') ? 'true' : 'false' }} }">
@@ -138,13 +138,23 @@
                                 {{ $loan->petugas->name ?? 'Admin' }}
                             </td>
                             <td class="py-3 px-4 text-right whitespace-nowrap">
-                                <form action="{{ route('admin.peminjaman.kembali', $loan->id) }}" method="POST" class="inline" onsubmit="return confirmDelete(event, 'Proses Pengembalian?', 'Buku akan dikembalikan ke stok fisik perpustakaan.')">
-                                    @csrf
-                                    <button type="submit" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-lg text-[11px] transition shadow-2xs flex items-center gap-1.5 ml-auto">
-                                        <i class="fa-solid fa-arrow-rotate-left text-xs"></i>
-                                        <span>Pengembalian</span>
+                                <div class="flex items-center justify-end gap-1.5">
+                                    <button type="button" @click="detail = @js($loan->data_detail); openDetailModal = true"
+                                            title="Lihat data lengkap peminjam"
+                                            aria-label="Lihat data lengkap peminjam {{ $loan->nama_peminjam ?: ($loan->user->name ?? '') }}"
+                                            class="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-extrabold rounded-lg text-[11px] transition flex items-center gap-1.5 cursor-pointer">
+                                        <i class="fa-solid fa-id-card text-xs"></i>
+                                        <span>Detail</span>
                                     </button>
-                                </form>
+
+                                    <form action="{{ route('admin.peminjaman.kembali', $loan->id) }}" method="POST" class="inline" onsubmit="return confirmDelete(event, 'Proses Pengembalian?', 'Buku akan dikembalikan ke stok fisik perpustakaan.')">
+                                        @csrf
+                                        <button type="submit" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-lg text-[11px] transition shadow-2xs flex items-center gap-1.5">
+                                            <i class="fa-solid fa-arrow-rotate-left text-xs"></i>
+                                            <span>Pengembalian</span>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -189,13 +199,22 @@
                         <span class="flex items-center gap-1"><i class="fa-solid fa-user-tie text-gray-300"></i>{{ $loan->petugas->name ?? 'Admin' }}</span>
                     </div>
 
-                    <form action="{{ route('admin.peminjaman.kembali', $loan->id) }}" method="POST" class="mt-3 pt-3 border-t border-gray-100" onsubmit="return confirmDelete(event, 'Proses Pengembalian?', 'Buku akan dikembalikan ke stok fisik perpustakaan.')">
-                        @csrf
-                        <button type="submit" class="w-full px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-lg text-xs transition shadow-2xs flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-arrow-rotate-left text-xs"></i>
-                            <span>Proses Pengembalian</span>
+                    <div class="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2">
+                        <button type="button" @click="detail = @js($loan->data_detail); openDetailModal = true"
+                                aria-label="Lihat data lengkap peminjam {{ $loan->nama_peminjam ?: ($loan->user->name ?? '') }}"
+                                class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-extrabold rounded-lg text-xs transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer">
+                            <i class="fa-solid fa-id-card text-xs"></i>
+                            <span>Detail</span>
                         </button>
-                    </form>
+
+                        <form action="{{ route('admin.peminjaman.kembali', $loan->id) }}" method="POST" class="flex-1" onsubmit="return confirmDelete(event, 'Proses Pengembalian?', 'Buku akan dikembalikan ke stok fisik perpustakaan.')">
+                            @csrf
+                            <button type="submit" class="w-full px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-lg text-xs transition shadow-2xs flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-arrow-rotate-left text-xs"></i>
+                                <span>Proses Pengembalian</span>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             @empty
                 <div class="py-10 text-center text-gray-400 font-medium text-xs px-4">Tidak ada buku yang sedang dipinjam saat ini. Semua buku berada di rak.</div>
@@ -291,6 +310,139 @@
                     <button type="submit" class="px-5 py-2 bg-brand-700 text-white font-extrabold rounded-xl hover:bg-brand-800 text-xs">Simpan Peminjaman</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    {{-- Modal: data lengkap peminjam. Isian yang hanya bisa didapat lewat
+         katalog OPAC (No. WhatsApp, catatan siswa) tidak muat di tabel, jadi
+         ditampilkan di sini. --}}
+    <div x-show="openDetailModal" @click.self="openDetailModal = false" @keydown.escape.window="openDetailModal = false"
+         class="fixed inset-0 z-[100] !mt-0 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         role="dialog" aria-modal="true" aria-label="Data lengkap peminjam"
+         x-cloak>
+        <div @click.stop class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl border-2 border-gray-200 overflow-hidden transform transition-all my-auto">
+
+            <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-gray-50/70">
+                <div class="flex items-center gap-2 min-w-0">
+                    <div class="w-8 h-8 rounded-xl bg-brand-50 border border-brand-200 text-brand-700 flex items-center justify-center font-bold shrink-0">
+                        <i class="fa-solid fa-id-card"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 class="text-sm font-black text-gray-900 truncate" x-text="detail.nama"></h3>
+                        <p class="text-[10px] text-gray-500 font-mono" x-text="detail.kode"></p>
+                    </div>
+                </div>
+                <button @click="openDetailModal = false" aria-label="Tutup"
+                        class="w-7 h-7 rounded-full bg-gray-200/70 hover:bg-gray-300 text-gray-600 flex items-center justify-center font-bold text-sm shrink-0 cursor-pointer">&times;</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 text-xs">
+
+                {{-- Asal peminjaman + peringatan keterlambatan --}}
+                <div class="flex flex-wrap items-center gap-2">
+                    <template x-if="detail.dari_opac">
+                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-brand-50 text-brand-700 border border-brand-200 flex items-center gap-1">
+                            <i class="fa-solid fa-globe"></i>
+                            <span>Diajukan sendiri lewat Katalog OPAC</span>
+                        </span>
+                    </template>
+                    <template x-if="!detail.dari_opac">
+                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-gray-100 text-gray-700 border border-gray-200 flex items-center gap-1">
+                            <i class="fa-solid fa-user-tie"></i>
+                            <span>Dicatat petugas di meja sirkulasi</span>
+                        </span>
+                    </template>
+                    <template x-if="detail.terlambat">
+                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-rose-100 text-rose-700 border border-rose-300 flex items-center gap-1">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <span>Terlambat <span x-text="detail.hari_terlambat"></span> hari</span>
+                        </span>
+                    </template>
+                </div>
+
+                {{-- Identitas peminjam --}}
+                <div>
+                    <p class="font-black text-gray-400 uppercase tracking-wider text-[10px] mb-2">Data Peminjam</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <p class="text-[10px] text-gray-400 font-bold">Nama Lengkap</p>
+                            <p class="font-bold text-gray-900" x-text="detail.nama"></p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-400 font-bold">Kelas / Jurusan</p>
+                            <p class="font-bold text-gray-900" x-text="detail.jurusan || 'Tidak diisi'"></p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-400 font-bold">NIS / NISN</p>
+                            <p class="font-bold text-gray-900 font-mono" x-text="detail.nomor_induk || 'Tidak diisi'"></p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-400 font-bold">No. WhatsApp</p>
+                            <p class="font-bold text-gray-900 font-mono" x-text="detail.no_wa || 'Tidak diisi'"></p>
+                        </div>
+                    </div>
+
+                    <template x-if="detail.wa_link">
+                        <a :href="detail.wa_link" target="_blank" rel="noopener noreferrer"
+                           class="mt-3 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-[11px] transition shadow-2xs flex items-center justify-center gap-1.5 w-fit">
+                            <i class="fa-brands fa-whatsapp"></i>
+                            <span>Hubungi lewat WhatsApp</span>
+                        </a>
+                    </template>
+                </div>
+
+                {{-- Buku yang dipinjam --}}
+                <div class="pt-3 border-t border-gray-100">
+                    <p class="font-black text-gray-400 uppercase tracking-wider text-[10px] mb-2">Buku Dipinjam</p>
+                    <p class="font-bold text-gray-900" x-text="detail.buku || '-'"></p>
+                    <p class="text-[11px] text-gray-500 mt-0.5">
+                        Penulis: <span class="font-bold text-gray-700" x-text="detail.penulis || '-'"></span>
+                        &bull; <span class="font-bold text-gray-700"><span x-text="detail.jumlah"></span> eksemplar</span>
+                    </p>
+                </div>
+
+                {{-- Waktu --}}
+                <div class="pt-3 border-t border-gray-100">
+                    <p class="font-black text-gray-400 uppercase tracking-wider text-[10px] mb-2">Waktu Peminjaman</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <p class="text-[10px] text-gray-400 font-bold">Tanggal Pinjam</p>
+                            <p class="font-bold text-gray-900" x-text="detail.tanggal_pinjam || '-'"></p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-400 font-bold">Jatuh Tempo</p>
+                            <p class="font-bold" :class="detail.terlambat ? 'text-rose-700' : 'text-gray-900'" x-text="detail.jatuh_tempo || '-'"></p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-400 font-bold">Diajukan / Dicatat Pada</p>
+                            <p class="font-bold text-gray-900" x-text="detail.diajukan_pada || '-'"></p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-400 font-bold">Petugas Pemroses</p>
+                            <p class="font-bold text-gray-900" x-text="detail.petugas || 'Admin'"></p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Catatan siswa, hanya ada kalau lewat OPAC --}}
+                <template x-if="detail.catatan">
+                    <div class="pt-3 border-t border-gray-100">
+                        <p class="font-black text-gray-400 uppercase tracking-wider text-[10px] mb-2">Catatan dari Peminjam</p>
+                        <p class="p-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 font-medium whitespace-pre-line" x-text="detail.catatan"></p>
+                    </div>
+                </template>
+            </div>
+
+            <div class="px-5 py-3 border-t border-gray-100 flex justify-end shrink-0 bg-gray-50/70">
+                <button type="button" @click="openDetailModal = false"
+                        class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-xs cursor-pointer">Tutup</button>
+            </div>
         </div>
     </div>
 

@@ -2,6 +2,75 @@
 
 @section('title', ($laci ? 'Buku di ' . $laci->nama_laci : 'Buku Tanpa Laci') . ' - Rak ' . $rak->kode_rak)
 
+@push('styles')
+<style>
+    /* Kartu buku di dalam laci disamakan dengan mode Grid halaman Koleksi Buku:
+       dua kolom kiri-kanan sejak layar terkecil.
+
+       Ditulis sebagai media query ber-selektor kelas, bukan varian Tailwind,
+       karena public/vendor/tailwind/tailwind.min.css sudah di-purge sehingga
+       kelas yang belum terpakai di mana pun tidak ikut ter-generate. */
+    @media (max-width: 639px) {
+        /* Lebar satu kartu tinggal +-150px. Jarak dalamnya dirapatkan supaya
+           judul dua baris, nama penulis, dan baris kaki tetap muat. */
+        .kartu-laci-grid { gap: 0.5rem; }
+
+        .kartu-laci-isi {
+            padding: 0.5rem;
+        }
+        .kartu-laci-isi > * + * { margin-top: 0.25rem; }
+
+        /* Sampul di-resize berdasarkan LEBAR saja oleh CoverImageService, jadi
+           rasio aslinya yang tegak tetap utuh. Tinggi tetap h-48 (192px) di
+           kartu selebar +-150px membuat object-cover memangkas sisi kiri-kanan.
+           Dikunci ke rasio yang sama dengan Koleksi Buku supaya kedua halaman
+           terasa satu gaya. */
+        .kartu-laci-sampul {
+            height: auto;
+            aspect-ratio: 4 / 5;
+        }
+
+        /* Badge kategori seperti "Rekayasa Perangkat Lunak" melebihi lebar
+           sampul dan tumpah keluar kartu. Dibatasi lalu dipotong elipsis. */
+        .kartu-laci-label-kategori {
+            max-width: calc(100% - 1.25rem);
+        }
+        .kartu-laci-label-kategori > span,
+        .kartu-laci-label-stok > span {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 9px;
+            padding: 0.05rem 0.3rem;
+        }
+
+        /* Baris kaki: tautan "Detail" dikunci satu baris, kode rak dan nama
+           laci yang mengalah menyusut. */
+        .kartu-laci-kaki {
+            gap: 0.25rem;
+            padding-top: 0.25rem;
+        }
+        .kartu-laci-kaki > div:first-child {
+            min-width: 0;
+            flex: 1 1 auto;
+            overflow: hidden;
+        }
+        .kartu-laci-kaki > div:first-child > span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 9px;
+        }
+        .kartu-laci-kaki > span:last-child {
+            flex-shrink: 0;
+            white-space: nowrap;
+            font-size: 10px;
+        }
+    }
+</style>
+@endpush
+
 @section('content')
 <div id="data-buku-rak-container" class="space-y-5" x-data="{
     openDetailModal: false,
@@ -81,7 +150,7 @@
 
     {{-- ======================== GRID VIEW ======================== --}}
     <div x-show="viewMode === 'grid'" x-cloak>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div class="kartu-laci-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             @forelse($bukuList as $buku)
                 @php $bookData = json_encode([
                     'id'                 => $buku->id,
@@ -104,7 +173,7 @@
                 <div @click="detailData = {{ $bookData }}; openDetailModal = true"
                      class="bg-white rounded-2xl border-2 border-gray-200 hover:border-brand-300 hover:shadow-md transition duration-200 overflow-hidden flex flex-col cursor-pointer group">
 
-                    <div class="relative w-full h-48 bg-gray-100 overflow-hidden">
+                    <div class="kartu-laci-sampul relative w-full h-48 bg-gray-100 overflow-hidden">
                         @if($buku->cover_url)
                             <img src="{{ $buku->cover_card_url }}" alt="{{ $buku->judul }}" width="300" height="192" loading="lazy"
                                  class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
@@ -115,20 +184,20 @@
                             </div>
                         @endif
 
-                        <div class="absolute top-2.5 left-2.5">
+                        <div class="kartu-laci-label-kategori absolute top-2.5 left-2.5">
                             <span class="px-2 py-0.5 rounded-md text-[10px] font-black bg-white/95 text-gray-800 shadow-xs border border-gray-200">
                                 {{ $buku->kategori->nama ?? 'Umum' }}
                             </span>
                         </div>
 
-                        <div class="absolute bottom-2.5 right-2.5">
+                        <div class="kartu-laci-label-stok absolute bottom-2.5 right-2.5">
                             <span class="px-2 py-0.5 rounded-md text-[10px] font-black {{ $buku->available_quantity > 0 ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white' }} shadow-xs">
                                 {{ $buku->available_quantity }} / {{ $buku->total_quantity }} Eks
                             </span>
                         </div>
                     </div>
 
-                    <div class="p-3.5 flex-1 flex flex-col justify-between space-y-2.5 text-xs">
+                    <div class="kartu-laci-isi p-3.5 flex-1 flex flex-col justify-between space-y-2.5 text-xs">
                         <div>
                             <h3 class="font-extrabold text-gray-900 line-clamp-2 leading-snug group-hover:text-brand-700 transition" title="{{ $buku->judul }}">
                                 {{ $buku->judul }}
@@ -138,7 +207,7 @@
                             </p>
                         </div>
 
-                        <div class="pt-2 border-t border-gray-100 flex items-center justify-between text-[10.5px]">
+                        <div class="kartu-laci-kaki pt-2 border-t border-gray-100 flex items-center justify-between text-[10.5px]">
                             <div class="flex items-center gap-1 font-bold text-gray-700 font-mono">
                                 <span class="px-1.5 py-0.5 rounded bg-gray-100 border border-gray-200">{{ $buku->rak->kode_rak ?? '-' }}</span>
                                 <span class="text-amber-700 font-sans font-bold">{{ $buku->laci->nama_laci ?? ($buku->rak ? 'Laci 1' : '-') }}</span>
