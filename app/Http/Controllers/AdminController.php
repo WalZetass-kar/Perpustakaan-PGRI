@@ -1369,7 +1369,9 @@ class AdminController extends Controller
     public function peminjamanIndex(Request $request)
     {
         $today = Carbon::today()->toDateString();
-        $query = Peminjaman::with(['user', 'buku', 'petugas'])->where('status', 'dipinjam');
+        // buku.penulis ikut dimuat karena modal "Detail" menampilkannya; tanpa
+        // ini setiap baris memicu query tambahan sendiri.
+        $query = Peminjaman::with(['user', 'buku.penulis', 'petugas'])->where('status', 'dipinjam');
 
         if ($request->get('filter') === 'terlambat') {
             $query->whereDate('tanggal_jatuh_tempo', '<', $today);
@@ -1433,6 +1435,7 @@ class AdminController extends Controller
 
                 return Peminjaman::create([
                     'kode_peminjaman'     => $kodePinjam,
+                    'sumber'              => 'petugas',
                     'nama_peminjam'       => trim($request->nama_peminjam),
                     'jurusan'             => trim($request->jurusan),
                     'nomor_induk'         => $request->filled('nomor_induk') ? trim($request->nomor_induk) : null,

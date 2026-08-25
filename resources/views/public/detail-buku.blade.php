@@ -440,8 +440,9 @@
                 </div>
 
                 <div>
-                    <label class="block font-bold text-gray-700 mb-1">No. WhatsApp Aktif (Opsional)</label>
-                    <input type="text" x-model="loanData.no_wa" placeholder="Contoh: 081234567890" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                    <label class="block font-bold text-gray-700 mb-1">No. WhatsApp Aktif <span class="text-rose-600">*</span></label>
+                    <input type="tel" x-model="loanData.no_wa" required placeholder="Contoh: 081234567890" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                    <p class="text-[10px] text-gray-500 mt-1">Dipakai petugas untuk mengabari Anda saat buku siap diambil atau mendekati jatuh tempo.</p>
                 </div>
 
                 <div>
@@ -581,16 +582,16 @@ function detailBukuPage() {
             @endif
         },
         submitLoanRequest() {
-            if (!this.loanData.nama_peminjam || !this.loanData.jurusan) {
+            if (!this.loanData.nama_peminjam || !this.loanData.jurusan || !this.loanData.no_wa) {
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
                         icon: 'error',
                         title: 'Data Belum Lengkap',
-                        text: 'Mohon isi Nama Siswa dan Kelas/Jurusan.',
+                        text: 'Mohon isi Nama Siswa, Kelas/Jurusan, dan No. WhatsApp.',
                         confirmButtonColor: '#991b1b'
                     });
                 } else {
-                    alert('Mohon isi Nama Siswa dan Kelas/Jurusan.');
+                    alert('Mohon isi Nama Siswa, Kelas/Jurusan, dan No. WhatsApp.');
                 }
                 return;
             }
