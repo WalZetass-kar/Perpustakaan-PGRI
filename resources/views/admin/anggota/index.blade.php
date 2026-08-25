@@ -383,7 +383,7 @@
 
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Password Baru <span class="text-rose-500">*</span></label>
-                        <input type="password" name="password" required placeholder="Minimal 8 karakter" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                        <x-input-password name="password" required minlength="8" autocomplete="new-password" placeholder="Minimal 8 karakter" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium" />
                     </div>
 
                     <div>
@@ -504,12 +504,12 @@
                     @csrf
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Password Baru <span class="text-rose-500">*</span></label>
-                        <input type="password" name="password" required placeholder="Minimal 8 karakter" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                        <x-input-password name="password" required minlength="8" autocomplete="new-password" placeholder="Minimal 8 karakter" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium" />
                     </div>
 
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Ulangi Password Baru <span class="text-rose-500">*</span></label>
-                        <input type="password" name="password_confirmation" required placeholder="Ketik ulang password baru" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                        <x-input-password name="password_confirmation" required minlength="8" autocomplete="new-password" placeholder="Ketik ulang password baru" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium" />
                     </div>
 
                     <div class="pt-3 border-t border-gray-100 flex items-center justify-end gap-2 shrink-0">

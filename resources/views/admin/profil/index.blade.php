@@ -70,22 +70,16 @@
             <form action="{{ route('admin.profil.ubah-password') }}" method="POST" class="space-y-4 text-xs">
                 @csrf
 
-                <div class="space-y-1">
-                    <label class="block font-bold text-gray-800">Password Saat Ini <span class="text-rose-500">*</span></label>
-                    <input type="password" name="current_password" required
-                           class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
-                </div>
-
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="space-y-1">
                         <label class="block font-bold text-gray-800">Password Baru (min. 8 karakter) <span class="text-rose-500">*</span></label>
-                        <input type="password" name="password" required minlength="8"
-                               class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                        <x-input-password name="password" required minlength="8" autocomplete="new-password"
+                                          class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium" />
                     </div>
                     <div class="space-y-1">
                         <label class="block font-bold text-gray-800">Konfirmasi Password Baru <span class="text-rose-500">*</span></label>
-                        <input type="password" name="password_confirmation" required minlength="8"
-                               class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                        <x-input-password name="password_confirmation" required minlength="8" autocomplete="new-password"
+                                          class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium" />
                     </div>
                 </div>
 

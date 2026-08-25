@@ -2198,9 +2198,15 @@ class AdminController extends Controller
             abort(403, 'Hanya Super Administrator yang dapat mengubah password. Hubungi Super Admin untuk mereset password Anda.');
         }
 
+        // Password lama sengaja tidak diminta: pengguna sudah terbukti memegang
+        // akun ini karena sedang login, jadi menanyakannya lagi hanya menambah
+        // langkah tanpa menambah keamanan yang berarti.
+        //
+        // Risiko yang diterima secara sadar: sesi yang ditinggalkan terbuka di
+        // komputer bersama bisa dipakai orang lain untuk mengganti password.
+        // Penggantinya adalah jejak di audit log di bawah.
         $request->validate([
-            'current_password' => ['required', 'current_password'],
-            'password'         => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
         $user = auth()->user();
