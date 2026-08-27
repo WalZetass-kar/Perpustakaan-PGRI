@@ -19,7 +19,16 @@ class SecurityHeaders
         $response->headers->set('X-Permitted-Cross-Domain-Policies', 'none');
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
 
-        $csp = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://unpkg.com https://code.jquery.com https://cdn.datatables.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdnjs.cloudflare.com https://cdn.datatables.net https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net https://cdnjs.cloudflare.com data:; img-src 'self' data: https: blob:; connect-src 'self' https:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'";
+        // Seluruh pustaka front-end (Tailwind, Alpine, jQuery, DataTables,
+        // Chart.js, SweetAlert2, Font Awesome, AOS) dilayani dari public/vendor,
+        // jadi tidak ada satu pun CDN skrip yang perlu diizinkan di sini —
+        // izin yang menganggur hanya memperluas jalan masuk serangan XSS.
+        // 'unsafe-eval' masih dibutuhkan Alpine.js untuk menilai ekspresi
+        // pada atribut x-*, dan 'unsafe-inline' untuk blok <script>/<style>
+        // yang ditulis langsung di dalam view.
+        //
+        // Yang tersisa hanyalah Google Fonts, yang masih dimuat halaman login.
+        $csp = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'";
         $response->headers->set('Content-Security-Policy', $csp);
 
         if ($request->isSecure()) {
