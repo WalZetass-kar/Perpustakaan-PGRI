@@ -215,10 +215,37 @@ bersamaan — kemampuannya sudah memadai dan jauh lebih sederhana dipelihara.
 
 Namun perlu diketahui keterbatasannya:
 
-- Melayani permintaan satu per satu, sehingga terasa melambat bila puluhan siswa
-  membuka katalog secara bersamaan.
+- Bawaannya melayani permintaan **satu per satu**, sehingga terasa melambat bila
+  puluhan siswa membuka katalog secara bersamaan. Ini bisa diperbaiki — lihat
+  bagian di bawah.
 - Tidak memiliki HTTPS.
 - Bukan rancangan untuk beban berat jangka panjang.
+
+### Melayani Beberapa Permintaan Sekaligus
+
+Keterbatasan "satu per satu" di atas tidak mutlak. Tambahkan baris berikut pada
+`.env`:
+
+```env
+PHP_CLI_SERVER_WORKERS=4
+```
+
+Server akan menyiapkan empat pekerja, sehingga permintaan yang datang bersamaan
+tidak lagi mengantre di belakang satu sama lain. Angka 4 memadai untuk satu
+ruang perpustakaan; sesuaikan dengan jumlah inti prosesor komputer server.
+
+Bila memakai layanan systemd, nilainya dapat pula ditulis langsung pada berkas
+layanan:
+
+```ini
+Environment=PHP_CLI_SERVER_WORKERS=4
+```
+
+Nyalakan ulang server setelah mengubahnya.
+
+> Berlaku untuk PHP 7.4 ke atas di Linux dan macOS. Pada Windows, PHP tidak
+> mendukung pekerja ganda sehingga setelan ini diabaikan — di sana pemakaian
+> Apache bawaan Laragon/XAMPP menjadi pilihan bila kecepatannya terasa kurang.
 
 Bila di kemudian hari sekolah membutuhkan kapasitas lebih besar, pasang Apache
 atau Nginx dengan mengikuti bagian **VPS / Dedicated Linux** pada

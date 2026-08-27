@@ -117,30 +117,48 @@ Di Windows, cukup lihat daftar database pada panel kiri phpMyAdmin.
 
 ## Langkah 4: Menyiapkan Berkas Konfigurasi `.env`
 
+Proyek ini menyertakan tiga berkas contoh konfigurasi. Untuk server lokal,
+**hanya `env.example.lokal` yang benar**:
+
+| Berkas | Untuk |
+|---|---|
+| **`env.example.lokal`** | **Server lokal LAN — pakai yang ini** |
+| `env.example.hosting` | Hosting cPanel / VPS dengan domain ber-https |
+| `.env.example` | Contoh umum, setelannya mengikuti hosting |
+
 **Linux:**
 
 ```bash
-cp .env.example .env
+cp env.example.lokal .env
 php artisan key:generate
 ```
 
 **Windows:**
 
 ```cmd
-copy .env.example .env
+copy env.example.lokal .env
 php artisan key:generate
 ```
 
-> Proyek ini juga menyediakan `env.example.lokal` yang memang ditujukan untuk
-> pemasangan lokal. Bila ada, gunakan berkas itu:
-> `copy env.example.lokal .env` (Windows) atau
-> `cp env.example.lokal .env` (Linux).
+> **Mengapa bukan `.env.example`?** Dua berkas lainnya memakai
+> `APP_ENV=production`, dan pada nilai itu aplikasi memaksa seluruh alamat
+> menjadi `https://`. Server lokal hanya melayani `http`, sehingga seluruh CSS
+> dan JavaScript gagal dimuat: halaman terbuka tetapi tampil polos tanpa gaya,
+> dan menu-menunya tidak bisa diklik — tanpa satu pun pesan galat. Keduanya
+> juga memakai `LOG_CHANNEL=stderr`, yang membuat `storage/logs/laravel.log`
+> tidak pernah terbentuk, padahal berkas itulah yang dibaca saat mencari
+> penyebab masalah di [06-MASALAH-UMUM.md](06-MASALAH-UMUM.md).
 
 Buka `.env` dengan editor teks, lalu sesuaikan:
 
 ```env
 APP_NAME="Perpustakaan SMK PGRI"
+
+# WAJIB `local` untuk server lokal. Nilai `production` memaksa https dan
+# membuat seluruh tampilan rusak. Ini tidak membuat galat terlihat siswa —
+# yang mengatur hal itu APP_DEBUG di bawahnya.
 APP_ENV=local
+
 APP_DEBUG=false
 APP_TIMEZONE=Asia/Jakarta
 APP_URL=http://192.168.1.10:8000
@@ -167,7 +185,8 @@ ADMIN_LOGIN_PATH=akses-perpustakaan
 
 | Setelan | Penjelasan |
 |---|---|
-| `APP_URL` | Isi dengan **alamat IP komputer server**, bukan `localhost`. Cara mencarinya ada di [04-AKSES-DARI-KOMPUTER-LAIN.md](04-AKSES-DARI-KOMPUTER-LAIN.md). Salah isi membuat gambar & tautan cetak PDF rusak. |
+| `APP_ENV` | **Harus `local`.** Pada `production`, aplikasi memaksa seluruh alamat menjadi `https://` sementara server lokal hanya melayani `http` — akibatnya halaman tampil polos tanpa gaya dan tidak bisa dipakai. Ini terpisah dari `APP_DEBUG`, jadi galat teknis tetap tersembunyi dari siswa. |
+| `APP_URL` | Isi dengan **alamat IP komputer server beserta portnya**, misalnya `http://192.168.1.10:8000`. Cara mencari IP-nya ada di [04-AKSES-DARI-KOMPUTER-LAIN.md](04-AKSES-DARI-KOMPUTER-LAIN.md). Dipakai sebagai alamat acuan sistem; halaman biasa tetap tampil walau nilainya salah, tetapi sebaiknya diisi benar agar tidak membingungkan saat menelusuri masalah. |
 | `APP_DEBUG` | Isi `false` untuk pemakaian harian agar galat teknis tidak terlihat siswa. Ubah sementara ke `true` hanya saat mencari penyebab masalah. |
 | `SEED_ADMIN_PASSWORD` | **Wajib diisi sebelum Langkah 5.** Jika dibiarkan kosong, sistem membuat password acak yang tidak pernah ditampilkan, sehingga akun bawaan tidak bisa dipakai. |
 | `ADMIN_LOGIN_PATH` | Alamat rahasia halaman login petugas. Boleh diganti, misalnya `pintu-petugas`, agar tidak mudah ditebak siswa. |

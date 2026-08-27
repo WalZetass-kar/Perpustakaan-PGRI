@@ -204,14 +204,23 @@ Setelah IP terkunci, buka kembali `.env` di komputer server dan pastikan:
 APP_URL=http://192.168.100.36:8000
 ```
 
+Sertakan nomor portnya persis seperti alamat yang diketik petugas di browser.
+Bila server dijalankan pada port 80, tulis tanpa `:8000`.
+
 Lalu bersihkan cache konfigurasi:
 
 ```bash
 php artisan config:clear
 ```
 
-Bila langkah ini dilewati, tautan cetak PDF dan sebagian gambar akan menunjuk ke
-`localhost` sehingga rusak saat dibuka dari komputer lain.
+> **Sejauh mana ini berpengaruh?** Halaman-halaman biasa **tetap tampil normal**
+> walaupun `APP_URL` salah, karena alamat gambar dan berkas tampilan mengikuti
+> alamat yang sedang dibuka di browser, bukan `APP_URL`. Jadi bila gambar sampul
+> tidak muncul, `APP_URL` hampir pasti **bukan** penyebabnya — periksa
+> `php artisan storage:link` lebih dulu.
+>
+> `APP_URL` tetap perlu diisi benar sebagai alamat acuan sistem, dan agar
+> petugas berikutnya tidak tersesat saat membaca konfigurasi.
 
 ---
 

@@ -163,6 +163,55 @@ net stop MySQL80
 
 ---
 
+## Halaman Terbuka Tapi Polos Tanpa Gaya, Menu Tidak Bisa Diklik
+
+Gejalanya: katalog **berhasil terbuka** dan tulisannya terbaca, tetapi tampil
+seperti dokumen putih polos tanpa warna maupun tata letak. Tombol dan menu tidak
+memberi reaksi saat diklik. Tidak ada pesan galat sama sekali.
+
+**Penyebabnya hampir selalu satu:** `APP_ENV` bernilai `production` pada `.env`.
+
+Pada nilai itu aplikasi memaksa seluruh alamat menjadi `https://`, sementara
+server lokal hanya melayani `http` biasa. Akibatnya berkas tampilan (CSS) dan
+berkas penggerak menu (JavaScript) gagal dimuat browser.
+
+Memastikannya:
+
+```bash
+# Linux
+grep APP_ENV .env
+```
+
+```cmd
+REM Windows
+findstr APP_ENV .env
+```
+
+Perbaikannya, ubah menjadi:
+
+```env
+APP_ENV=local
+```
+
+```bash
+php artisan config:clear
+```
+
+Lalu nyalakan ulang server.
+
+> Ini **tidak** membuat galat teknis terlihat oleh siswa — yang mengatur hal itu
+> `APP_DEBUG`, dan nilainya tetap `false`.
+>
+> Penyebab tersering nilai ini salah adalah menyalin berkas contoh yang keliru.
+> Untuk server lokal gunakan `env.example.lokal`, bukan `.env.example` maupun
+> `env.example.hosting`.
+
+Cara memastikan dari sisi browser: klik kanan halaman → **View Page Source**,
+lalu perhatikan baris `<link ... tailwind.min.css">`. Bila alamatnya diawali
+`https://` padahal server berjalan pada `http://`, inilah penyebabnya.
+
+---
+
 ## Halaman Tampil Putih Polos Tanpa Pesan Apa Pun
 
 Ada galat yang disembunyikan karena `APP_DEBUG=false`.
@@ -216,18 +265,31 @@ xcopy /E /I /Y storage\app\public public\storage
 Cara ini berhasil, namun harus diulang setiap kali ada sampul buku baru
 diunggah — jadi tetap usahakan symlink lebih dulu.
 
-### 2. `APP_URL` masih `localhost`
+### 2. Berkas sampulnya memang belum ada
 
-Bila diakses dari komputer lain, `localhost` menunjuk ke komputer petugas
-sendiri, bukan ke server. Perbaiki di `.env`:
-
-```env
-APP_URL=http://192.168.100.36:8000
-```
+Sampul hanya muncul untuk buku yang gambarnya pernah diunggah petugas. Periksa
+isinya:
 
 ```bash
-php artisan config:clear
+# Linux
+ls storage/app/public/covers | head
 ```
+
+```cmd
+REM Windows
+dir storage\app\public\covers
+```
+
+Bila thumbnail tampak rusak atau kosong setelah pemulihan data, bangun ulang
+variannya:
+
+```bash
+php artisan covers:regenerate
+```
+
+> **Catatan:** `APP_URL` yang salah **bukan** penyebab gambar hilang. Alamat
+> gambar mengikuti alamat yang sedang dibuka di browser, bukan `APP_URL`. Jadi
+> jangan menghabiskan waktu di situ — periksa symlink dan berkasnya lebih dulu.
 
 ### 3. Hak akses folder kurang
 
@@ -435,8 +497,17 @@ systemd untuk Linux, atau folder Startup untuk Windows.
 
 ## Sistem Terasa Lambat Saat Banyak Siswa Mengakses
 
-Ini keterbatasan wajar `php artisan serve` yang melayani permintaan satu per
-satu. Bila mengganggu, pasang Apache atau Nginx mengikuti bagian
+Bawaannya `php artisan serve` melayani permintaan satu per satu. Coba dulu yang
+paling mudah — tambahkan pada `.env`:
+
+```env
+PHP_CLI_SERVER_WORKERS=4
+```
+
+lalu `php artisan config:clear` dan nyalakan ulang server. Penjelasan lengkapnya
+ada di [03-MENJALANKAN-SERVER.md](03-MENJALANKAN-SERVER.md).
+
+Bila masih terasa berat, pasang Apache atau Nginx mengikuti bagian
 **VPS / Dedicated Linux** pada
 [PANDUAN_PEMASANGAN_TEKNISI.md](../PANDUAN_PEMASANGAN_TEKNISI.md).
 

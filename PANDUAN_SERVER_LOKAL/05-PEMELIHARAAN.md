@@ -180,6 +180,19 @@ powershell -Command "Get-Content storage\logs\laravel.log -Tail 50"
 Atau cukup buka `storage\logs\laravel.log` dengan Notepad++ dan gulir ke bagian
 paling bawah.
 
+> **Bila berkas itu tidak ada sama sekali**, `.env` kemungkinan memakai
+> `LOG_CHANNEL=stderr` — nilai untuk hosting, yang mengirim catatan galat ke
+> keluaran terminal alih-alih menulisnya ke berkas. Untuk server lokal ubah
+> menjadi:
+>
+> ```env
+> LOG_CHANNEL=single
+> ```
+>
+> lalu `php artisan config:clear`. Bila server dijalankan sebagai layanan
+> systemd dan Anda ingin tetap memakai `stderr`, catatannya dibaca dengan
+> `sudo journalctl -u perpustakaan -n 100`.
+
 ### Memastikan database terhubung
 
 ```bash

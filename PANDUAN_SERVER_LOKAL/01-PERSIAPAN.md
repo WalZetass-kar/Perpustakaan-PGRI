@@ -30,8 +30,20 @@ Hanya dua yang wajib:
 1. **PHP 8.2 atau lebih baru**
 2. **MySQL 8.0** atau **MariaDB 10.4+**
 
-Composer bersifat opsional, karena folder `vendor/` sudah disertakan di dalam
-proyek ini.
+Composer bersifat **opsional**, karena folder `vendor/` sudah disertakan di
+dalam proyek ini.
+
+> **Mengapa `vendor/` ikut disertakan, bukan dipasang dengan `composer install`?**
+>
+> Karena `composer install` mengunduh paketnya dari internet. Komputer server
+> perpustakaan dirancang berjalan tanpa internet sama sekali, dan pemasangan
+> lewat cPanel juga umumnya tidak punya akses terminal untuk memanggil Composer.
+> Menyertakan `vendor/` membuat sistem bisa dipasang cukup dengan menyalin
+> folder dari flashdisk.
+>
+> Konsekuensinya folder proyek menjadi besar (sekitar 90 MB). Itu wajar dan
+> **jangan dihapus** — tanpa `vendor/`, aplikasi tidak akan berjalan sama sekali
+> di komputer tanpa internet.
 
 ---
 

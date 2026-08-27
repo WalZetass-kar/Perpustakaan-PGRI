@@ -10,7 +10,19 @@ tailwind.config.js
 /storage/pail
 /storage/app/backups/*
 /storage/logs/*.log
-/vendor
+# /vendor SENGAJA TIDAK diabaikan — jangan tambahkan kembali.
+#
+# Sekolah tujuan memasang sistem ini tanpa internet (komputer perpustakaan
+# sebagai server LAN) dan lewat cPanel tanpa akses SSH. Di kedua tempat itu
+# `composer install` tidak bisa dijalankan sama sekali, jadi vendor/ harus
+# ikut di dalam repo.
+#
+# Mengabaikannya di sini tidak akan menghapus 8.400-an berkas yang sudah
+# terlacak — Git tidak menerapkan .gitignore pada berkas yang sudah ter-track —
+# tetapi akan membuat berkas BARU dari `composer require` / `composer update`
+# hilang diam-diam tanpa muncul di `git status`. Akibatnya vendor/ di repo jadi
+# tidak lengkap, dan galat "Class ... not found" baru ketahuan di komputer
+# sekolah yang tidak punya internet untuk memperbaikinya.
 .env
 .env.backup
 .env.production
@@ -21,6 +33,11 @@ Dockerfile
 .dockerignore
 Procfile
 instruksi-perbaikan-opac.md
+
+# Catatan kerja pribadi di root proyek — jangan ikut ke repo publik.
+*.text
+HalHalYangHarusDiReady.text
+taskSebelumdiSerahkan.text
 Homestead.json
 Homestead.yaml
 npm-debug.log

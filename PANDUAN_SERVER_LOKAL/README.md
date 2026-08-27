@@ -71,9 +71,10 @@ mysql -u root -p -e "CREATE DATABASE perpustakaan CHARACTER SET utf8mb4 COLLATE 
 
 # 2. Konfigurasi aplikasi
 cd /path/ke/Perpustakaan-PGRI
-cp .env.example .env
+cp env.example.lokal .env          # BUKAN .env.example — itu untuk hosting
 php artisan key:generate
-# sunting .env: DB_USERNAME, DB_PASSWORD, APP_URL
+# sunting .env: DB_USERNAME, DB_PASSWORD, APP_URL, SEED_ADMIN_PASSWORD
+# pastikan APP_ENV=local (bukan production)
 
 # 3. Siapkan isi database & akun
 php artisan migrate --seed
@@ -85,6 +86,20 @@ php artisan serve --host=0.0.0.0 --port=8000
 ```
 
 Alamat yang dibuka dari komputer lain: `http://<IP-SERVER>:8000`
+
+> **Jangan salah berkas contoh.** Proyek ini menyertakan tiga berkas contoh
+> konfigurasi, dan hanya satu yang benar untuk server lokal:
+>
+> | Berkas | Untuk |
+> |---|---|
+> | **`env.example.lokal`** | **Server lokal LAN — inilah yang dipakai panduan ini** |
+> | `env.example.hosting` | Hosting cPanel / VPS dengan domain ber-https |
+> | `.env.example` | Contoh umum, setelannya mengikuti hosting |
+>
+> Dua yang terakhir memakai `APP_ENV=production`, yang membuat aplikasi memaksa
+> seluruh alamat menjadi `https://`. Server lokal hanya melayani `http`, jadi
+> akibatnya halaman terbuka tetapi tampil polos tanpa gaya dan menunya tidak
+> bisa diklik — tanpa pesan galat apa pun.
 
 > **Pengguna Windows:** jalankan seluruh perintah di atas melalui
 > **Menu Laragon → Terminal** atau **XAMPP Shell**, bukan Command Prompt biasa.
