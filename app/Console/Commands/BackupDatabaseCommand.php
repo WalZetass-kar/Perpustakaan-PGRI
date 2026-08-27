@@ -23,6 +23,10 @@ class BackupDatabaseCommand extends Command
 
         $timestamp = date('Ymd_His');
 
+        // Sama seperti pada berkas ZIP: tanpa penanda acak, dua pencadangan
+        // pada detik yang sama saling menimpa dan salah satunya hilang.
+        $penanda = bin2hex(random_bytes(3));
+
         if ($this->option('zip')) {
             $zipPath = $backupService->createZipBackup();
             if (!$zipPath) {
@@ -34,7 +38,7 @@ class BackupDatabaseCommand extends Command
             $this->info("Pencadangan berhasil (Database + Sampul): {$zipPath} ({$size} KB)");
         } else {
             $sqlContent = $backupService->generateSqlDump();
-            $sqlPath = $backupDir . "/backup_database_{$timestamp}.sql";
+            $sqlPath = $backupDir . "/backup_database_{$timestamp}_{$penanda}.sql";
             File::put($sqlPath, $sqlContent);
 
             $size = round(filesize($sqlPath) / 1024, 2);

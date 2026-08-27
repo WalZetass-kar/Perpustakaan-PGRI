@@ -120,6 +120,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/pengaturan', [AdminController::class, 'pengaturanIndex'])->name('pengaturan');
             Route::post('/pengaturan', [AdminController::class, 'pengaturanUpdate'])->name('pengaturan.update');
             Route::get('/pengaturan/backup-database', [AdminController::class, 'backupDatabase'])->name('pengaturan.backup');
+            Route::get('/pengaturan/backup-lengkap', [AdminController::class, 'backupDatabaseLengkap'])->name('pengaturan.backup-lengkap');
         });
         Route::get('/audit-log', [AdminController::class, 'auditLogIndex'])->name('audit-log');
     });
