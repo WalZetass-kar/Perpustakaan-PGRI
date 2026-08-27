@@ -96,18 +96,24 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/peminjaman/request/{id}/reject', [AdminController::class, 'peminjamanRequestReject'])->name('peminjaman.request.reject')->whereNumber('id');
         Route::get('/riwayat', [AdminController::class, 'riwayatIndex'])->name('riwayat');
 
-        Route::get('/anggota', [AdminController::class, 'anggotaIndex'])->name('anggota');
-        Route::post('/anggota', [AdminController::class, 'anggotaStore'])->name('anggota.store');
-        Route::post('/anggota/update/{id}', [AdminController::class, 'anggotaUpdate'])->name('anggota.update')->whereNumber('id');
-        Route::post('/anggota/reset-password/{id}', [AdminController::class, 'anggotaResetPassword'])->name('anggota.reset-password')->whereNumber('id');
-        Route::post('/anggota/toggle-status/{id}', [AdminController::class, 'anggotaToggleStatus'])->name('anggota.toggle-status')->whereNumber('id');
-        Route::post('/anggota/delete/{id}', [AdminController::class, 'anggotaDestroy'])->name('anggota.delete')->whereNumber('id');
-
         // Otoritas penuh dipegang Super Administrator. Petugas ber-role `admin`
         // tidak boleh menyentuh profil/keamanan akun maupun pengaturan sistem,
         // termasuk lewat URL yang diketik langsung — menyembunyikan menunya di
         // sidebar saja tidak menutup apa pun.
         Route::middleware('role:super_admin')->group(function () {
+            // Daftar akun pengelola memuat nama dan email seluruh petugas.
+            // Menunya sudah disembunyikan dari petugas biasa di sidebar, tapi
+            // rutenya sendiri semula masih terbuka lewat URL yang diketik
+            // langsung — persis celah yang sudah ditutup untuk profil dan
+            // pengaturan. Aksi ubah/hapusnya memang sudah menolak sendiri;
+            // yang bocor adalah halaman daftarnya.
+            Route::get('/anggota', [AdminController::class, 'anggotaIndex'])->name('anggota');
+            Route::post('/anggota', [AdminController::class, 'anggotaStore'])->name('anggota.store');
+            Route::post('/anggota/update/{id}', [AdminController::class, 'anggotaUpdate'])->name('anggota.update')->whereNumber('id');
+            Route::post('/anggota/reset-password/{id}', [AdminController::class, 'anggotaResetPassword'])->name('anggota.reset-password')->whereNumber('id');
+            Route::post('/anggota/toggle-status/{id}', [AdminController::class, 'anggotaToggleStatus'])->name('anggota.toggle-status')->whereNumber('id');
+            Route::post('/anggota/delete/{id}', [AdminController::class, 'anggotaDestroy'])->name('anggota.delete')->whereNumber('id');
+
             Route::get('/profil', [AdminController::class, 'profilIndex'])->name('profil');
             Route::post('/profil/ubah-password', [AdminController::class, 'ubahPassword'])->name('profil.ubah-password');
 

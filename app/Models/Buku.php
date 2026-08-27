@@ -64,6 +64,43 @@ class Buku extends Model
         return $this->hasMany(Peminjaman::class);
     }
 
+    /**
+     * Eksemplar yang sedang diantre pengajuan OPAC dan belum diproses petugas.
+     *
+     * Pengajuan `pending` sengaja tidak langsung memotong available_quantity —
+     * stok baru turun saat petugas menyetujui, supaya siswa yang mengajukan
+     * lalu tidak pernah datang tidak memblokir buku selamanya. Tapi antreannya
+     * tetap harus dihitung, kalau tidak lima siswa dari lima komputer bisa
+     * sama-sama diterima mengantre satu eksemplar yang sama.
+     *
+     * Dapat di-preload lewat scope `withAntreanPending()` supaya daftar
+     * katalog tidak menembak satu query per baris.
+     */
+    public function getAntreanPendingAttribute(): int
+    {
+        if (array_key_exists('antrean_pending', $this->attributes)) {
+            return (int) $this->attributes['antrean_pending'];
+        }
+
+        return (int) $this->peminjaman()->where('status', 'pending')->sum('jumlah');
+    }
+
+    /** Eksemplar yang masih boleh diantre pengajuan baru lewat katalog. */
+    public function getSisaUntukDiantreAttribute(): int
+    {
+        return max(0, (int) $this->available_quantity - $this->antrean_pending);
+    }
+
+    /** Ikutkan jumlah antrean pending dalam satu query, bukan per baris. */
+    public function scopeWithAntreanPending($query)
+    {
+        return $query->withSum([
+            'peminjaman as antrean_pending' => function ($q) {
+                $q->where('status', 'pending');
+            },
+        ], 'jumlah');
+    }
+
     public function getCoverUrlAttribute()
     {
         if ($this->cover && file_exists(public_path('storage/' . $this->cover))) {

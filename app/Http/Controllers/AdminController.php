@@ -33,13 +33,17 @@ class AdminController extends Controller
             'total_buku'             => (int) Buku::sum('total_quantity'),
             'buku_tersedia'          => (int) Buku::sum('available_quantity'),
             'buku_sedang_dipinjam'   => (int) Peminjaman::where('status', 'dipinjam')->sum('jumlah'),
+            // Jumlah transaksinya, bukan jumlah bukunya: satu peminjaman bisa
+            // membawa beberapa eksemplar sekaligus.
+            'peminjaman_aktif'       => Peminjaman::where('status', 'dipinjam')->count(),
+            'pengajuan_menunggu'     => Peminjaman::where('status', 'pending')->count(),
             'total_terlambat'        => Peminjaman::where('status', 'dipinjam')->whereDate('tanggal_jatuh_tempo', '<', $today)->count(),
             'total_kategori'         => Kategori::count(),
             'total_penulis'          => Penulis::count(),
             'total_penerbit'         => Penerbit::count(),
             'total_rak'              => Rak::count(),
             'total_anggota'          => User::count(),
-            'peminjaman_hari_ini'    => Peminjaman::whereDate('tanggal_pinjam', $today)->count(),
+            'peminjaman_hari_ini'    => Peminjaman::whereIn('status', ['dipinjam', 'dikembalikan'])->whereDate('tanggal_pinjam', $today)->count(),
             'pengembalian_hari_ini'  => Peminjaman::where('status', 'dikembalikan')->whereDate('waktu_kembali', $today)->count(),
         ];
 
@@ -540,7 +544,11 @@ class AdminController extends Controller
     public function bukuStore(Request $request)
     {
         $request->validate([
-            'isbn'                => 'nullable|string|max:50',
+            // `buku.isbn` ber-index unique di database. Tanpa aturan ini,
+            // petugas yang mengetik ISBN yang sudah terdaftar — mudah terjadi
+            // saat dua orang menginput dari dua komputer — bukan mendapat
+            // pesan validasi, melainkan layar error 500.
+            'isbn'                => 'nullable|string|max:50|unique:buku,isbn',
             'judul'               => 'required|string|max:255',
             'tahun_terbit'        => 'required|integer|min:1900|max:' . (date('Y') + 1),
             'total_quantity'      => 'required|integer|min:1|max:10000',
@@ -549,10 +557,24 @@ class AdminController extends Controller
             'kategori_id'         => 'nullable|exists:kategori,id',
             'kelas_id'            => 'nullable|exists:kelas,id',
             'rak_id'              => 'nullable|exists:rak,id',
-            'rak_laci_id'         => 'nullable|exists:rak_laci,id',
+            'rak_laci_id'         => ['nullable', 'exists:rak_laci,id', function ($attribute, $value, $fail) use ($request) {
+                // Sistem ini dipakai untuk MENEMUKAN buku di rak. Laci milik rak
+                // lain akan tersimpan diam-diam dan membuat halaman Temukan Buku
+                // menunjukkan lokasi yang salah — kesalahan yang baru ketahuan
+                // setelah petugas mencari ke rak yang keliru.
+                if (!$value) {
+                    return;
+                }
+                $laci = \App\Models\RakLaci::find($value);
+                if ($laci && (int) $laci->rak_id !== (int) $request->rak_id) {
+                    $fail('Laci yang dipilih bukan milik rak tersebut. Pilih laci yang tersedia pada rak yang sama.');
+                }
+            }],
             'sinopsis'            => 'nullable|string',
             'keterangan_posisi'   => 'nullable|string|max:500',
             'cover'               => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
+        ], [
+            'isbn.unique' => 'ISBN ini sudah terdaftar pada buku lain. Periksa kembali, atau kosongkan kolom ISBN.',
         ]);
 
         $coverPath = null;
@@ -594,7 +616,7 @@ class AdminController extends Controller
         $buku = Buku::findOrFail($id);
 
         $request->validate([
-            'isbn'              => 'nullable|string|max:50',
+            'isbn'              => 'nullable|string|max:50|unique:buku,isbn,' . $buku->id,
             'judul'             => 'required|string|max:255',
             'tahun_terbit'      => 'required|integer|min:1900|max:' . (date('Y') + 1),
             'total_quantity'    => 'required|integer|min:1|max:10000',
@@ -603,10 +625,24 @@ class AdminController extends Controller
             'kategori_id'       => 'nullable|exists:kategori,id',
             'kelas_id'          => 'nullable|exists:kelas,id',
             'rak_id'            => 'nullable|exists:rak,id',
-            'rak_laci_id'       => 'nullable|exists:rak_laci,id',
+            'rak_laci_id'       => ['nullable', 'exists:rak_laci,id', function ($attribute, $value, $fail) use ($request) {
+                // Sistem ini dipakai untuk MENEMUKAN buku di rak. Laci milik rak
+                // lain akan tersimpan diam-diam dan membuat halaman Temukan Buku
+                // menunjukkan lokasi yang salah — kesalahan yang baru ketahuan
+                // setelah petugas mencari ke rak yang keliru.
+                if (!$value) {
+                    return;
+                }
+                $laci = \App\Models\RakLaci::find($value);
+                if ($laci && (int) $laci->rak_id !== (int) $request->rak_id) {
+                    $fail('Laci yang dipilih bukan milik rak tersebut. Pilih laci yang tersedia pada rak yang sama.');
+                }
+            }],
             'sinopsis'          => 'nullable|string',
             'keterangan_posisi' => 'nullable|string|max:500',
             'cover'             => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
+        ], [
+            'isbn.unique' => 'ISBN ini sudah terdaftar pada buku lain. Periksa kembali, atau kosongkan kolom ISBN.',
         ]);
 
         $coverPath = $buku->cover;
@@ -616,25 +652,36 @@ class AdminController extends Controller
             $coverPath = $this->compressAndStoreCover($request->file('cover'));
         }
 
-        $qtyDiff = $request->total_quantity - $buku->total_quantity;
-        $newAvailable = max(0, $buku->available_quantity + $qtyDiff);
+        // Stok dihitung ulang di dalam transaksi dengan baris bukunya terkunci.
+        // $buku dibaca di awal request, dan di antara pembacaan itu dengan
+        // penulisan ini ada kompresi cover yang bisa memakan hitungan detik —
+        // cukup lama untuk sebuah peminjaman menyelip. Tanpa kunci, peminjaman
+        // itu tertimpa nilai lama dan stoknya kembali seolah tidak pernah ada.
+        DB::transaction(function () use ($buku, $request, $coverPath) {
+            $lockedBook = Buku::where('id', $buku->id)->lockForUpdate()->firstOrFail();
 
-        $buku->update([
-            'isbn'              => $request->isbn,
-            'judul'             => $request->judul,
-            'tahun_terbit'      => $request->tahun_terbit,
-            'total_quantity'    => $request->total_quantity,
-            'available_quantity'=> $newAvailable,
-            'penulis_id'        => $request->penulis_id,
-            'penerbit_id'       => $request->penerbit_id,
-            'kategori_id'       => $request->kategori_id,
-            'kelas_id'          => $request->kelas_id,
-            'rak_id'            => $request->rak_id,
-            'rak_laci_id'       => $request->rak_laci_id,
-            'sinopsis'          => $request->sinopsis,
-            'keterangan_posisi' => $request->keterangan_posisi,
-            'cover'             => $coverPath,
-        ]);
+            $qtyDiff = (int) $request->total_quantity - (int) $lockedBook->total_quantity;
+            $newAvailable = max(0, (int) $lockedBook->available_quantity + $qtyDiff);
+
+            $lockedBook->update([
+                'isbn'              => $request->isbn,
+                'judul'             => $request->judul,
+                'tahun_terbit'      => $request->tahun_terbit,
+                'total_quantity'    => $request->total_quantity,
+                'available_quantity'=> $newAvailable,
+                'penulis_id'        => $request->penulis_id,
+                'penerbit_id'       => $request->penerbit_id,
+                'kategori_id'       => $request->kategori_id,
+                'kelas_id'          => $request->kelas_id,
+                'rak_id'            => $request->rak_id,
+                'rak_laci_id'       => $request->rak_laci_id,
+                'sinopsis'          => $request->sinopsis,
+                'keterangan_posisi' => $request->keterangan_posisi,
+                'cover'             => $coverPath,
+            ]);
+        });
+
+        $buku->refresh();
 
         AuditLog::create([
             'user_id'    => auth()->id(),
@@ -654,6 +701,16 @@ class AdminController extends Controller
         $activeLoans = Peminjaman::where('buku_id', $buku->id)->whereIn('status', ['dipinjam', 'pending'])->count();
         if ($activeLoans > 0) {
             return back()->with('error', "Buku tidak dapat dihapus karena masih memiliki {$activeLoans} transaksi peminjaman aktif atau menunggu persetujuan.");
+        }
+
+        // Riwayat sirkulasi adalah catatan resmi perpustakaan, dan baris riwayat
+        // tanpa data bukunya tidak berarti apa-apa. Dulu penjaga di atas hanya
+        // menahan peminjaman yang masih berjalan, sehingga buku yang seluruh
+        // peminjamannya sudah dikembalikan bisa dihapus — dan seluruh arsip
+        // peminjamannya ikut lenyap diam-diam lewat ON DELETE CASCADE.
+        $riwayat = Peminjaman::where('buku_id', $buku->id)->count();
+        if ($riwayat > 0) {
+            return back()->with('error', "Buku '{$buku->judul}' tidak dapat dihapus karena tercatat dalam {$riwayat} riwayat peminjaman. Menghapusnya akan menghilangkan catatan sirkulasi tersebut dari laporan perpustakaan.");
         }
 
         app(CoverImageService::class)->delete($buku->cover);
@@ -1424,7 +1481,7 @@ class AdminController extends Controller
         }
 
         $durasiHari = (int) Pengaturan::ambil('durasi_pinjam_hari', 7);
-        $kodePinjam = 'PJ-' . date('Ymd') . '-' . strtoupper(Str::random(4));
+        $kodePinjam = Peminjaman::buatKode('PJ');
         $today = Carbon::today()->toDateString();
         $due = Carbon::today()->addDays($durasiHari)->toDateString();
 
@@ -1887,14 +1944,26 @@ class AdminController extends Controller
 
                 $today = Carbon::today()->toDateString();
                 $durasiHari = (int) Pengaturan::ambil('durasi_pinjam_hari', 7);
-                $lockedLoan->status = 'dipinjam';
-                $lockedLoan->kode_peminjaman = 'PJ-' . date('Ymd') . '-' . strtoupper(Str::random(4));
-                $lockedLoan->tanggal_pinjam = $today;
-                $lockedLoan->tanggal_jatuh_tempo = Carbon::today()->addDays($durasiHari)->toDateString();
-                $lockedLoan->petugas_id = auth()->id();
-                $lockedLoan->save();
 
-                return $lockedLoan;
+                // Bersyarat, dengan alasan yang sama seperti pada penolakan:
+                // kalau petugas lain sudah lebih dulu memproses pengajuan ini,
+                // UPDATE-nya tidak mengenai baris apa pun dan seluruh transaksi
+                // — termasuk pemotongan stok di atas — ikut dibatalkan.
+                $terubah = Peminjaman::where('id', $lockedLoan->id)
+                    ->where('status', 'pending')
+                    ->update([
+                        'status'              => 'dipinjam',
+                        'kode_peminjaman'     => Peminjaman::buatKode('PJ'),
+                        'tanggal_pinjam'      => $today,
+                        'tanggal_jatuh_tempo' => Carbon::today()->addDays($durasiHari)->toDateString(),
+                        'petugas_id'          => auth()->id(),
+                    ]);
+
+                if ($terubah === 0) {
+                    throw new \Exception('NOT_PENDING');
+                }
+
+                return $lockedLoan->refresh();
             });
         } catch (\Exception $e) {
             if ($e->getMessage() === 'NOT_PENDING') {
@@ -1923,17 +1992,49 @@ class AdminController extends Controller
             'alasan_penolakan' => 'nullable|string|max:500',
         ]);
 
-        $loan = Peminjaman::findOrFail($id);
+        $alasan = $request->filled('alasan_penolakan')
+            ? trim($request->alasan_penolakan)
+            : 'Permintaan tidak dapat diproses oleh petugas perpustakaan.';
 
-        if ($loan->status !== 'pending') {
-            return back()->with('error', 'Hanya pengajuan dengan status pending yang dapat ditolak.');
+        // Sama seperti approve, penolakan harus mengunci baris pengajuannya
+        // dulu. Tanpa kunci, dua petugas di dua komputer yang menekan
+        // "Setujui" dan "Tolak" bersamaan bisa membuat penolakan menimpa
+        // persetujuan yang sudah mengurangi stok — dan stok itu tidak akan
+        // pernah kembali, karena pengajuan berstatus `ditolak` tidak muncul
+        // di halaman pengembalian.
+        try {
+            $loan = DB::transaction(function () use ($id, $alasan) {
+                $lockedLoan = Peminjaman::where('id', $id)->lockForUpdate()->firstOrFail();
+
+                if ($lockedLoan->status !== 'pending') {
+                    throw new \Exception('NOT_PENDING');
+                }
+
+                // Penulisannya bersyarat: baris hanya berubah kalau statusnya
+                // MASIH `pending` pada saat UPDATE dijalankan. Syarat inilah
+                // yang menjaga kebenaran, bukan hasil pembacaan di atas —
+                // sehingga tetap benar walau kunci baris tidak tersedia
+                // (tabel non-InnoDB, atau MySQL yang dikonfigurasi lain).
+                $terubah = Peminjaman::where('id', $lockedLoan->id)
+                    ->where('status', 'pending')
+                    ->update([
+                        'status'           => 'ditolak',
+                        'alasan_penolakan' => $alasan,
+                        'petugas_id'       => auth()->id(),
+                    ]);
+
+                if ($terubah === 0) {
+                    throw new \Exception('NOT_PENDING');
+                }
+
+                return $lockedLoan->refresh();
+            });
+        } catch (\Exception $e) {
+            if ($e->getMessage() === 'NOT_PENDING') {
+                return back()->with('error', 'Hanya pengajuan dengan status pending yang dapat ditolak.');
+            }
+            return back()->with('error', 'Terjadi kesalahan sistem saat menolak pengajuan.');
         }
-
-        $loan->update([
-            'status'           => 'ditolak',
-            'alasan_penolakan' => $request->filled('alasan_penolakan') ? trim($request->alasan_penolakan) : 'Permintaan tidak dapat diproses oleh petugas perpustakaan.',
-            'petugas_id'       => auth()->id(),
-        ]);
 
         AuditLog::create([
             'user_id'    => auth()->id(),
@@ -1973,7 +2074,7 @@ class AdminController extends Controller
         $request->validate([
             'name'          => 'required|string|max:255',
             'email'         => 'required|string|email|max:255|unique:users,email',
-            'password'      => 'required|string|min:6',
+            'password'      => 'required|string|min:8',
             'phone'         => 'nullable|string|max:20',
             'role_id'       => 'required|exists:roles,id',
             'status'        => 'required|in:active,inactive',
@@ -2015,13 +2116,34 @@ class AdminController extends Controller
             'status'   => 'nullable|in:active,inactive',
         ]);
 
+        // Akun id 1 adalah jaring pengaman terakhir sistem: peran dan statusnya
+        // tidak boleh disentuh siapa pun. Hal yang sama berlaku untuk akun
+        // sendiri — menurunkan pangkat atau menonaktifkan diri sendiri langsung
+        // mengunci petugas keluar, dan tidak ada jalan kembali lewat antarmuka
+        // karena menu pemulihannya justru butuh peran yang barusan dilepas.
+        // anggotaToggleStatus dan anggotaDestroy sudah menjaga hal ini; jalur
+        // update inilah yang sebelumnya terlewat.
+        $menyuntingDiriSendiri = $user->id === auth()->id();
+        $bolehUbahPeranDanStatus = $user->id !== 1 && !$menyuntingDiriSendiri;
+
+        if ($menyuntingDiriSendiri) {
+            $mintaUbahPeran = $request->filled('role_id')
+                && (int) $request->role_id !== (int) $user->role_id;
+            $mintaUbahStatus = $request->filled('status')
+                && $request->status !== $user->status;
+
+            if ($mintaUbahPeran || $mintaUbahStatus) {
+                return back()->with('error', 'Peran dan status akun Anda sendiri tidak dapat diubah dari sini, agar Anda tidak terkunci keluar dari sistem. Mintalah Super Administrator lain untuk melakukannya.');
+            }
+        }
+
         $userData = [
             'name'  => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
         ];
 
-        if ($user->id !== 1) {
+        if ($bolehUbahPeranDanStatus) {
             if ($request->filled('role_id')) {
                 $userData['role_id'] = $request->role_id;
             }
@@ -2052,7 +2174,7 @@ class AdminController extends Controller
         $user = User::findOrFail($id);
 
         $request->validate([
-            'password' => 'required|string|min:6|confirmed',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
         $user->update([
@@ -2110,9 +2232,12 @@ class AdminController extends Controller
             return back()->with('error', 'Akun Super Admin Utama atau akun Anda sendiri tidak dapat dihapus.');
         }
 
+        // Transaksi yang dicatat lewat meja sirkulasi menyimpan id petugasnya di
+        // user_id, jadi hitungan ini mencakup peminjaman yang ia catatkan untuk
+        // siswa — bukan hanya buku yang ia pinjam sendiri.
         $activeLoans = Peminjaman::where('user_id', $user->id)->where('status', 'dipinjam')->count();
         if ($activeLoans > 0) {
-            return back()->with('error', "Pengguna tidak dapat dihapus karena masih memiliki {$activeLoans} buku yang sedang dipinjam.");
+            return back()->with('error', "Akun tidak dapat dihapus karena masih terkait {$activeLoans} peminjaman yang belum dikembalikan. Selesaikan pengembaliannya lebih dulu.");
         }
 
         $userName = $user->name;

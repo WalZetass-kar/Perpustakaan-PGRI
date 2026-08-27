@@ -253,16 +253,27 @@
                                     <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Request Peminjaman</span>
                                 </div>
                                 @if(($pendingRequestsCount ?? 0) > 0)
-                                    <span x-show="!sidebarCollapsed || sidebarOpen" class="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-rose-600 text-white shrink-0">
+                                    <span x-show="!sidebarCollapsed || sidebarOpen" class="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-rose-600 text-white shrink-0">
                                         {{ $pendingRequestsCount }}
                                     </span>
                                 @endif
                             </a>
-                            <a href="{{ route('admin.peminjaman') }}" title="Peminjaman Aktif"
-                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.peminjaman') ? 'bg-amber-50 text-amber-900 border-amber-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"
+                            <a href="{{ route('admin.peminjaman') }}" title="Peminjaman Aktif{{ ($activeLoansCount ?? 0) > 0 ? ' (' . $activeLoansCount . ' sedang berjalan)' : '' }}"
+                               class="flex items-center justify-between px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.peminjaman') ? 'bg-amber-50 text-amber-900 border-amber-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"
                                :class="sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''">
-                                <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Peminjaman Aktif</span>
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                    <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span x-show="!sidebarCollapsed || sidebarOpen" class="truncate">Peminjaman Aktif</span>
+                                </div>
+                                {{-- Merah hanya kalau ada yang lewat jatuh tempo. Peminjaman
+                                     yang sedang berjalan itu keadaan normal, bukan peringatan;
+                                     warna merah disimpan untuk yang benar-benar perlu ditindak. --}}
+                                @if(($activeLoansCount ?? 0) > 0)
+                                    <span x-show="!sidebarCollapsed || sidebarOpen"
+                                          class="px-1.5 py-0.5 rounded-full text-[10px] font-black shrink-0 {{ ($overdueLoansCount ?? 0) > 0 ? 'bg-rose-600 text-white' : 'bg-brand-700 text-white' }}">
+                                        {{ $activeLoansCount }}
+                                    </span>
+                                @endif
                             </a>
                             <a href="{{ route('admin.riwayat') }}" title="Riwayat Transaksi"
                                class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition text-xs font-bold border {{ request()->routeIs('admin.riwayat*') ? 'bg-amber-50 text-amber-900 border-amber-200 shadow-2xs font-black' : 'text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900' }}"

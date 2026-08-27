@@ -38,16 +38,30 @@ class AppServiceProvider extends ServiceProvider
                 $view->with('pengaturan', $cachedSettings);
             });
 
+            // Angka-angka yang menempel di sidebar, jadi harus tersedia di
+            // setiap halaman pengelola — bukan hanya di dashboard.
             View::composer('layouts.dashboard', function ($view) {
+                $kosong = [
+                    'pendingRequestsCount' => 0,
+                    'activeLoansCount'     => 0,
+                    'overdueLoansCount'    => 0,
+                ];
+
                 try {
-                    if (Schema::hasTable('peminjaman')) {
-                        $pendingCount = Peminjaman::where('status', 'pending')->count();
-                        $view->with('pendingRequestsCount', $pendingCount);
-                    } else {
-                        $view->with('pendingRequestsCount', 0);
+                    if (!Schema::hasTable('peminjaman')) {
+                        $view->with($kosong);
+                        return;
                     }
+
+                    $view->with([
+                        'pendingRequestsCount' => Peminjaman::where('status', 'pending')->count(),
+                        'activeLoansCount'     => Peminjaman::where('status', 'dipinjam')->count(),
+                        'overdueLoansCount'    => Peminjaman::where('status', 'dipinjam')
+                            ->whereDate('tanggal_jatuh_tempo', '<', now()->toDateString())
+                            ->count(),
+                    ]);
                 } catch (\Throwable $e) {
-                    $view->with('pendingRequestsCount', 0);
+                    $view->with($kosong);
                 }
             });
         } catch (\Throwable $e) {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Buku;
 use App\Models\Kategori;
 use App\Models\Rak;
@@ -13,7 +14,6 @@ use App\Models\Peminjaman;
 use App\Models\User;
 use App\Models\AuditLog;
 use Carbon\Carbon;
-use Illuminate\Support\Str;
 
 class PublicController extends Controller
 {
@@ -65,7 +65,7 @@ class PublicController extends Controller
     public function katalog(Request $request)
     {
         try {
-            $query = Buku::with(['penulis', 'penerbit', 'kategori', 'kelas', 'rak', 'laci']);
+            $query = Buku::with(['penulis', 'penerbit', 'kategori', 'kelas', 'rak', 'laci'])->withAntreanPending();
 
             if ($request->filled('search')) {
                 $search = substr(trim($request->search), 0, 100);
@@ -133,7 +133,15 @@ class PublicController extends Controller
                     break;
             }
 
-            $buku = $query->paginate(12)->withQueryString();
+            // Setelan ini bisa diubah Super Admin lewat menu Pengaturan
+            // ("Jumlah Koleksi Buku Per Halaman Katalog"). Sebelumnya nilainya
+            // tersimpan tetapi tidak pernah dibaca siapa pun, sehingga
+            // mengubahnya sama sekali tidak berpengaruh di katalog.
+            // Batasnya disamakan dengan aturan validasi di pengaturanUpdate.
+            $perHalaman = (int) Pengaturan::ambil('buku_per_halaman', 12);
+            $perHalaman = $perHalaman > 0 ? max(4, min(100, $perHalaman)) : 12;
+
+            $buku = $query->paginate($perHalaman)->withQueryString();
 
             $total_buku_count = Buku::count();
             $total_kategori_count = Kategori::count();
@@ -159,7 +167,7 @@ class PublicController extends Controller
 
     public function detailBuku($id)
     {
-        $buku = Buku::with(['penulis', 'penerbit', 'kategori', 'kelas', 'rak.laci', 'laci'])->findOrFail((int) $id);
+        $buku = Buku::with(['penulis', 'penerbit', 'kategori', 'kelas', 'rak.laci', 'laci'])->withAntreanPending()->findOrFail((int) $id);
         $buku->increment('view_count');
 
         $userLoan = null;
@@ -255,65 +263,112 @@ class PublicController extends Controller
 
         $buku = Buku::findOrFail($validated['buku_id']);
 
-        if ($buku->available_quantity <= 0) {
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Maaf, seluruh stok buku ini sedang habis dipinjam.'
-                ], 422);
-            }
-            return back()->with('error', 'Maaf, seluruh stok buku ini sedang habis dipinjam.');
-        }
-
         $jumlah = isset($validated['jumlah']) ? (int) $validated['jumlah'] : 1;
         $nomorInduk = !empty($validated['nomor_induk']) ? trim($validated['nomor_induk']) : null;
+        $namaPeminjam = trim($validated['nama_peminjam']);
 
-        if ($nomorInduk) {
-            $existingPending = Peminjaman::where('nomor_induk', $nomorInduk)
-                ->where('buku_id', $buku->id)
-                ->where('status', 'pending')
-                ->exists();
-
-            if ($existingPending) {
-                $msg = 'Anda sudah memiliki pengajuan peminjaman yang sedang menunggu konfirmasi untuk buku ini.';
-                if ($request->ajax() || $request->wantsJson()) {
-                    return response()->json(['success' => false, 'message' => $msg], 422);
-                }
-                return back()->with('error', $msg);
-            }
-        }
-
-        // Satu-satunya pembatas adalah ketersediaan stok fisik: siswa boleh
-        // meminjam berapa pun selama jumlahnya tidak melebihi eksemplar yang
-        // masih ada di rak.
-        if ($jumlah > $buku->available_quantity) {
-            $msg = "Jumlah yang diminta melebihi stok tersedia. Saat ini hanya tersisa {$buku->available_quantity} eksemplar.";
+        $gagal = function (string $pesan) use ($request) {
             if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => $msg], 422);
+                return response()->json(['success' => false, 'message' => $pesan], 422);
             }
-            return back()->with('error', $msg);
-        }
+            return back()->with('error', $pesan);
+        };
 
         $durasiHari = (int) Pengaturan::ambil('durasi_pinjam_hari', 7);
-        $requestCode = 'REQ-' . date('Ymd') . '-' . strtoupper(Str::random(4));
         $today = Carbon::today()->toDateString();
         $due = Carbon::today()->addDays($durasiHari)->toDateString();
 
-        $loan = Peminjaman::create([
-            'kode_peminjaman'     => $requestCode,
-            'sumber'              => 'opac',
-            'nama_peminjam'       => trim($validated['nama_peminjam']),
-            'jurusan'             => trim($validated['jurusan']),
-            'nomor_induk'         => $nomorInduk,
-            'no_wa'               => trim($validated['no_wa']),
-            'user_id'             => auth()->id(),
-            'buku_id'             => $buku->id,
-            'jumlah'              => $jumlah,
-            'tanggal_pinjam'      => $today,
-            'tanggal_jatuh_tempo' => $due,
-            'status'              => 'pending',
-            'catatan'             => !empty($validated['catatan']) ? trim($validated['catatan']) : null,
-        ]);
+        // Seluruh pemeriksaan dan penyimpanannya dijadikan satu langkah yang
+        // tidak bisa disela. Memeriksa antrean lalu menyimpan sebagai dua
+        // langkah terpisah masih bocor: dua siswa dari dua komputer bisa
+        // sama-sama membaca "sisa 10" sebelum salah satunya sempat tersimpan,
+        // lalu keduanya lolos.
+        //
+        // Yang dikunci baris bukunya, walau pengajuan `pending` tidak mengubah
+        // stok sama sekali. Baris itu dipakai sebagai titik antre: pengajuan
+        // atas buku yang sama jadi terlayani satu per satu, sementara pengajuan
+        // untuk buku lain tetap jalan tanpa saling menunggu.
+        try {
+            $loan = DB::transaction(function () use ($buku, $validated, $jumlah, $nomorInduk, $namaPeminjam, $today, $due) {
+                $lockedBook = Buku::where('id', $buku->id)->lockForUpdate()->firstOrFail();
+
+                if ((int) $lockedBook->available_quantity <= 0) {
+                    throw new \RuntimeException('HABIS');
+                }
+
+                // Pengajuan kembar: siswa yang menekan tombol dua kali, atau
+                // membuka katalog dari dua komputer sekaligus. Penyaring lama
+                // hanya bekerja kalau nomor induk diisi, padahal isian itu
+                // opsional — tanpa nomor induk, lima klik jadi lima pengajuan.
+                $kembar = Peminjaman::where('buku_id', $lockedBook->id)
+                    ->where('status', 'pending')
+                    ->when(
+                        $nomorInduk !== null,
+                        fn ($q) => $q->where('nomor_induk', $nomorInduk),
+                        fn ($q) => $q->whereNull('nomor_induk')->where('nama_peminjam', $namaPeminjam)
+                    )
+                    ->exists();
+
+                if ($kembar) {
+                    throw new \RuntimeException('KEMBAR');
+                }
+
+                // Stok fisik dikurangi antrean yang belum diproses petugas.
+                $antrean = (int) Peminjaman::where('buku_id', $lockedBook->id)
+                    ->where('status', 'pending')
+                    ->sum('jumlah');
+
+                $sisa = max(0, (int) $lockedBook->available_quantity - $antrean);
+
+                if ($sisa <= 0) {
+                    throw new \RuntimeException('ANTREAN_PENUH');
+                }
+
+                if ($jumlah > $sisa) {
+                    throw new \RuntimeException('MELEBIHI:' . $sisa);
+                }
+
+                return Peminjaman::create([
+                    'kode_peminjaman'     => Peminjaman::buatKode('REQ'),
+                    'sumber'              => 'opac',
+                    'nama_peminjam'       => $namaPeminjam,
+                    'jurusan'             => trim($validated['jurusan']),
+                    'nomor_induk'         => $nomorInduk,
+                    'no_wa'               => trim($validated['no_wa']),
+                    'user_id'             => auth()->id(),
+                    'buku_id'             => $lockedBook->id,
+                    'jumlah'              => $jumlah,
+                    'tanggal_pinjam'      => $today,
+                    'tanggal_jatuh_tempo' => $due,
+                    'status'              => 'pending',
+                    'catatan'             => !empty($validated['catatan']) ? trim($validated['catatan']) : null,
+                ]);
+            });
+        } catch (\RuntimeException $e) {
+            $sebab = $e->getMessage();
+
+            if ($sebab === 'HABIS') {
+                return $gagal('Maaf, seluruh stok buku ini sedang habis dipinjam.');
+            }
+            if ($sebab === 'KEMBAR') {
+                return $gagal('Anda sudah memiliki pengajuan peminjaman yang sedang menunggu konfirmasi untuk buku ini.');
+            }
+            if ($sebab === 'ANTREAN_PENUH') {
+                return $gagal('Seluruh eksemplar yang tersisa sudah diantre siswa lain dan sedang menunggu konfirmasi petugas. Silakan coba lagi nanti.');
+            }
+            if (str_starts_with($sebab, 'MELEBIHI:')) {
+                $sisa = (int) substr($sebab, strlen('MELEBIHI:'));
+                return $gagal("Jumlah yang diminta melebihi eksemplar yang masih bisa diantre. Saat ini hanya tersisa {$sisa} eksemplar.");
+            }
+
+            report($e);
+            return $gagal('Pengajuan gagal disimpan karena gangguan sistem. Silakan coba lagi sebentar.');
+        } catch (\Throwable $e) {
+            report($e);
+            return $gagal('Pengajuan gagal disimpan karena gangguan sistem. Silakan coba lagi sebentar.');
+        }
+
+        $requestCode = $loan->kode_peminjaman;
 
         AuditLog::create([
             'user_id'    => auth()->id(),

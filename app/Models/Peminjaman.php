@@ -30,6 +30,31 @@ class Peminjaman extends Model
         'petugas_id',
     ];
 
+    /**
+     * Kode peminjaman yang dipastikan belum terpakai.
+     *
+     * `kode_peminjaman` ber-index unique, jadi kode kembar bukan sekadar
+     * membingungkan — ia melempar QueryException, dan di jalur OPAC yang
+     * tidak membungkus create-nya, itu berubah jadi layar error 500 di depan
+     * siswa. Bentuk lama `strtoupper(Str::random(4))` juga melebur huruf besar
+     * dan kecil, sehingga ruang kodenya jauh lebih sempit dari yang terlihat:
+     * hanya 4 karakter dari 36, dengan sebaran yang tidak rata.
+     */
+    public static function buatKode(string $prefix): string
+    {
+        for ($i = 0; $i < 10; $i++) {
+            $kode = $prefix . '-' . date('Ymd') . '-' . strtoupper(\Illuminate\Support\Str::random(6));
+
+            if (!static::where('kode_peminjaman', $kode)->exists()) {
+                return $kode;
+            }
+        }
+
+        // Sepuluh kali bentrok beruntun praktis mustahil. Kalau sampai terjadi,
+        // pakai yang tidak mungkin kembar daripada mengembalikan kode dobel.
+        return $prefix . '-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(5)));
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

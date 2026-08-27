@@ -156,6 +156,29 @@
          });
      ">
 
+    {{-- Pengajuan dari katalog OPAC baru terlihat kalau petugas membuka menu
+         Request Peminjaman. Ditaruh paling atas supaya yang masuk hari itu
+         tidak menginap tanpa ada yang tahu. --}}
+    @if(($stats['pengajuan_menunggu'] ?? 0) > 0)
+        <a href="{{ route('admin.peminjaman.request') }}"
+           class="p-4 sm:p-5 rounded-2xl bg-amber-50 border-2 border-amber-300 shadow-sm flex items-center justify-between gap-3 hover:bg-amber-50 transition block">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="w-11 h-11 rounded-2xl bg-white border border-amber-200 text-amber-700 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-inbox text-lg"></i>
+                </div>
+                <div class="min-w-0">
+                    <span class="text-sm font-black text-amber-900 block">
+                        {{ $stats['pengajuan_menunggu'] }} pengajuan peminjaman menunggu konfirmasi
+                    </span>
+                    <span class="text-[11px] font-bold text-amber-700 block mt-0.5">
+                        Diajukan siswa lewat katalog OPAC &mdash; buka untuk menyetujui atau menolak &rarr;
+                    </span>
+                </div>
+            </div>
+            <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping shrink-0"></span>
+        </a>
+    @endif
+
     <div>
         <h3 class="text-xs font-black text-gray-500 uppercase tracking-wider mb-3">Sirkulasi Hari Ini ({{ date('d M Y') }})</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -171,16 +194,20 @@
                 </div>
             </div>
 
-            <div class="p-4 sm:p-5 rounded-2xl bg-white border-2 border-gray-200 shadow-sm flex items-center justify-between">
+            <a href="{{ route('admin.peminjaman') }}" class="p-4 sm:p-5 rounded-2xl bg-white border-2 border-gray-200 shadow-sm flex items-center justify-between hover:border-brand-300 transition block">
                 <div>
                     <span class="text-[11px] font-bold text-gray-500 block">Buku Sedang Dipinjam</span>
                     <span class="text-2xl font-black text-brand-700 mt-1 block">{{ $stats['buku_sedang_dipinjam'] }} Buku</span>
-                    <span class="text-[10px] text-gray-400 font-medium">Belum dikembalikan</span>
+                    {{-- Satu peminjaman bisa membawa beberapa eksemplar, jadi dua
+                         angka ini memang tidak selalu sama. --}}
+                    <span class="text-[10px] text-gray-400 font-medium">
+                        dari {{ $stats['peminjaman_aktif'] ?? 0 }} peminjaman aktif &rarr;
+                    </span>
                 </div>
                 <div class="w-11 h-11 rounded-2xl bg-brand-50 border border-brand-200 text-brand-700 flex items-center justify-center font-bold">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
-            </div>
+            </a>
 
             <a href="{{ route('admin.peminjaman', ['filter' => 'terlambat']) }}" class="p-4 sm:p-5 rounded-2xl bg-white border-2 {{ ($stats['total_terlambat'] ?? 0) > 0 ? 'border-rose-300 bg-rose-50/20' : 'border-gray-200' }} shadow-sm flex items-center justify-between hover:border-rose-400 transition block">
                 <div>

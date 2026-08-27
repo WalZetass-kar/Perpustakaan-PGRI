@@ -126,7 +126,7 @@
                 </div>
 
                 <div class="w-full max-w-[260px] sm:max-w-[280px] space-y-2 text-xs">
-                    <button type="button" @click="startLoan()" class="w-full py-3 {{ $buku->available_quantity > 0 ? 'bg-brand-700 hover:bg-brand-800 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed' }} font-extrabold rounded-2xl text-xs flex items-center justify-center gap-2 shadow-md transition">
+                    <button type="button" @click="startLoan()" class="w-full py-3 {{ $buku->sisa_untuk_diantre > 0 ? 'bg-brand-700 hover:bg-brand-800 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed' }} font-extrabold rounded-2xl text-xs flex items-center justify-center gap-2 shadow-md transition">
                         <i class="fa-solid fa-hand-holding-hand text-sm"></i>
                         <span>Ajukan Peminjaman</span>
                     </button>
@@ -169,6 +169,13 @@
                             <span class="px-3 py-1 rounded-lg text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1.5">
                                 <span class="w-2 h-2 rounded-full bg-rose-500"></span>
                                 <span>Tidak Tersedia · Semua {{ $buku->total_quantity }} buku sedang dipinjam</span>
+                            </span>
+                        @endif
+
+                        @if($buku->antrean_pending > 0)
+                            <span class="px-3 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1.5">
+                                <i class="fa-solid fa-hourglass-half text-[10px]"></i>
+                                <span>{{ $buku->antrean_pending }} eksemplar sedang diantre siswa lain</span>
                             </span>
                         @endif
                     </div>
@@ -272,8 +279,14 @@
                     </div>
                     <div class="p-2">
                         <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block">Status Sirkulasi</span>
-                        <span class="text-xs font-bold {{ $buku->available_quantity > 0 ? 'text-emerald-700' : 'text-rose-600' }} mt-0.5 block">
-                            {{ $buku->available_quantity > 0 ? 'Bisa Dipinjam' : 'Menunggu Kembali' }}
+                        <span class="text-xs font-bold {{ $buku->sisa_untuk_diantre > 0 ? 'text-emerald-700' : ($buku->available_quantity > 0 ? 'text-amber-700' : 'text-rose-600') }} mt-0.5 block">
+                            @if($buku->sisa_untuk_diantre > 0)
+                                Bisa Dipinjam
+                            @elseif($buku->available_quantity > 0)
+                                Habis Diantre
+                            @else
+                                Menunggu Kembali
+                            @endif
                         </span>
                     </div>
                 </div>
@@ -565,7 +578,19 @@ function detailBukuPage() {
         },
         submittingLoan: false,
         startLoan() {
-            @if($buku->available_quantity <= 0)
+            @if($buku->available_quantity > 0 && $buku->sisa_untuk_diantre <= 0)
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Sedang Diantre Siswa Lain',
+                        text: 'Eksemplar yang tersisa sudah diajukan siswa lain dan sedang menunggu konfirmasi petugas. Silakan coba lagi nanti.',
+                        confirmButtonColor: '#991b1b'
+                    });
+                } else {
+                    alert('Eksemplar yang tersisa sudah diantre siswa lain.');
+                }
+                return;
+            @elseif($buku->available_quantity <= 0)
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
                         icon: 'warning',

@@ -6,6 +6,20 @@
 @section('content')
 <div class="space-y-5">
 
+    @if($errors->any())
+        <div class="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-bold space-y-1">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
+                <span>Terdapat kesalahan pada input formulir:</span>
+            </div>
+            <ul class="list-disc list-inside font-normal pl-4">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <div class="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200 shadow-2xs">
         <form action="{{ route('admin.temukan-buku') }}" method="GET"
               x-data="{ filterOpen: {{ request()->anyFilled(['kategori_id', 'rak_id', 'status_stok']) ? 'true' : 'false' }} }"
@@ -111,6 +125,7 @@
                     'cover_url'          => $buku->cover_card_url ?? '',
                     'katalog_url'        => route('admin.buku', ['search' => $buku->judul]),
                     'pinjam_url'         => route('admin.peminjaman'),
+                    'bisa_dipinjam'      => $isAvailable,
                     'badge_class'        => $badgeClass,
                     'dot_class'          => $dotClass,
                     'badge_text'         => $badgeText,
@@ -178,14 +193,31 @@
                     </div>
 
                     
-                    <button
-                        type="button"
-                        onclick="openBookDetail({{ $modalData }})"
-                        class="w-full mt-1 py-1.5 bg-gray-50 hover:bg-brand-700 hover:text-white border border-gray-200 hover:border-brand-700 text-gray-700 text-[10px] font-bold rounded-xl transition-all duration-200 flex items-center justify-center gap-1"
-                    >
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span>Lihat Detail</span>
-                    </button>
+                    <div class="grid grid-cols-2 gap-1 mt-1">
+                        <button
+                            type="button"
+                            onclick="openBookDetail({{ $modalData }})"
+                            class="w-full py-1.5 bg-gray-50 hover:bg-brand-700 hover:text-white border border-gray-200 hover:border-brand-700 text-gray-700 text-[10px] font-bold rounded-xl transition-all duration-200 flex items-center justify-center gap-1"
+                        >
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span>Detail</span>
+                        </button>
+
+                        {{-- Buku yang stoknya habis tetap ditampilkan tombolnya, tapi mati:
+                             lebih jelas bagi petugas daripada tombol yang hilang begitu saja. --}}
+                        <button
+                            type="button"
+                            @if($isAvailable)
+                                onclick="openLoanForm({{ $modalData }})"
+                            @else
+                                disabled title="Seluruh eksemplar sedang dipinjam"
+                            @endif
+                            class="w-full py-1.5 text-[10px] font-bold rounded-xl transition-all duration-200 flex items-center justify-center gap-1 border {{ $isAvailable ? 'bg-brand-700 hover:bg-brand-800 text-white border-brand-700' : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' }}"
+                        >
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            <span>Buat Pinjam</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         @empty
@@ -332,16 +364,144 @@
         
         <div class="px-5 py-3.5 border-t border-gray-100 shrink-0 flex items-center justify-end gap-1.5">
             <a id="modal-katalog-link" href="#" class="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold rounded-xl border border-gray-200 transition text-[11px]">Katalog</a>
-            <a id="modal-pinjam-link" href="#" class="px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white font-bold rounded-xl transition shadow-2xs text-[11px] flex items-center gap-1">
+            <button type="button" id="modal-pinjam-link" onclick="lanjutkanKeFormulirPinjam()" class="px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white font-bold rounded-xl transition shadow-2xs text-[11px] flex items-center gap-1">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 Catat Pinjam
-            </a>
+            </button>
         </div>
+    </div>
+</div>
+
+{{-- ------------------------------------------------------------------
+     Buatkan peminjaman langsung dari hasil pencarian.
+
+     Tidak semua siswa mengajukan sendiri lewat katalog OPAC — banyak yang
+     datang ke meja dan minta dibuatkan. Formulir ini menembak endpoint
+     sirkulasi yang sama (admin.peminjaman.store), jadi hasilnya langsung
+     berstatus `dipinjam` dan muncul di Peminjaman Aktif, bukan mengantre
+     sebagai pengajuan yang masih perlu disetujui.
+------------------------------------------------------------------- --}}
+<div id="loanFormModal" class="fixed inset-0 z-[100] !mt-0 hidden items-center justify-center p-4" role="dialog" aria-modal="true">
+
+    <div onclick="closeLoanForm()" class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"></div>
+
+    <div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
+            <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-brand-50 border border-brand-200 text-brand-700 flex items-center justify-center">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                </div>
+                <span class="text-sm font-bold text-gray-900">Buatkan Peminjaman</span>
+            </div>
+            <button type="button" onclick="closeLoanForm()" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 flex items-center justify-center transition">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <form action="{{ route('admin.peminjaman.store') }}" method="POST" class="flex-1 overflow-y-auto p-5 space-y-3.5 text-xs">
+            @csrf
+            <input type="hidden" name="buku_id" id="loan-buku-id" value="">
+
+            {{-- Buku sudah dipilih lewat kartu yang diklik, jadi ditampilkan
+                 sebagai keterangan saja — bukan dropdown yang harus dicari ulang. --}}
+            <div class="p-3 bg-gray-50 rounded-xl border border-gray-200">
+                <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Buku Yang Dipinjam</span>
+                <span id="loan-judul" class="text-xs font-black text-gray-900 mt-0.5 block"></span>
+                <span id="loan-lokasi" class="text-[10px] text-gray-500 font-medium mt-0.5 block"></span>
+                <span id="loan-stok" class="text-[10px] font-bold text-emerald-700 mt-1 block"></span>
+            </div>
+
+            <div>
+                <label class="block font-bold text-gray-700 mb-1">Nama Lengkap Siswa / Peminjam <span class="text-rose-500">*</span></label>
+                <input type="text" name="nama_peminjam" id="loan-nama" required maxlength="255" placeholder="Contoh: Muhammad Ihwal Maulana"
+                       class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">Jurusan / Kelas <span class="text-rose-500">*</span></label>
+                    <input type="text" name="jurusan" required maxlength="150" placeholder="Contoh: XII RPL 1"
+                           class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">NIS / NIP <span class="text-gray-400 font-normal">(Opsional)</span></label>
+                    <input type="text" name="nomor_induk" maxlength="50" placeholder="Nomor induk"
+                           class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                </div>
+            </div>
+
+            <div>
+                <label class="block font-bold text-gray-700 mb-1">Jumlah Buku Dipinjam <span class="text-rose-500">*</span></label>
+                {{-- Batas atasnya mengikuti stok buku ini, tapi tidak melewati 10
+                     -- batas yang sama dengan yang divalidasi di server. --}}
+                <input type="number" name="jumlah" id="loan-jumlah" value="1" required min="1" max="10"
+                       class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1 focus:ring-brand-700 focus:bg-white focus:outline-none font-black text-brand-700">
+                <p id="loan-jumlah-ket" class="text-[10px] text-gray-500 font-medium mt-1"></p>
+            </div>
+
+            <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] leading-relaxed">
+                <p class="font-bold flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-amber-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>Langsung tercatat sebagai peminjaman aktif</span>
+                </p>
+                <p class="mt-0.5 text-amber-800">Stok buku berkurang saat disimpan dan transaksinya langsung muncul di menu Peminjaman Aktif — tidak perlu disetujui lagi.</p>
+            </div>
+
+            <div class="pt-3 border-t border-gray-100 flex justify-end gap-2 shrink-0">
+                <button type="button" onclick="closeLoanForm()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-xs">Batal</button>
+                <button type="submit" class="px-5 py-2 bg-brand-700 text-white font-extrabold rounded-xl hover:bg-brand-800 text-xs">Simpan Peminjaman</button>
+            </div>
+        </form>
     </div>
 </div>
 
 @push('scripts')
 <script>
+    let bukuTerbuka = null;
+
+    function openLoanForm(data) {
+        document.getElementById('loan-buku-id').value = data.id;
+        document.getElementById('loan-judul').textContent  = data.judul;
+        document.getElementById('loan-lokasi').textContent =
+            data.nama_rak + ' (' + data.kode_rak + ') \u2192 ' + data.nama_laci;
+        document.getElementById('loan-stok').textContent =
+            'Tersedia ' + data.available + ' dari ' + data.total_quantity + ' eksemplar';
+
+        // Server membatasi maksimal 10 per transaksi. Kalau stoknya kurang dari
+        // itu, stoklah yang jadi batas -- supaya petugas tidak mengetik angka
+        // yang sudah pasti ditolak.
+        const batas = Math.max(1, Math.min(10, data.available));
+        const jumlah = document.getElementById('loan-jumlah');
+        jumlah.max = batas;
+        jumlah.value = 1;
+        document.getElementById('loan-jumlah-ket').textContent =
+            'Maksimal ' + batas + ' eksemplar untuk satu transaksi.';
+
+        document.getElementById('bookDetailModal').classList.add('hidden');
+        document.getElementById('bookDetailModal').classList.remove('flex');
+
+        const modal = document.getElementById('loanFormModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+        document.getElementById('loan-nama').focus();
+    }
+
+    function closeLoanForm() {
+        const modal = document.getElementById('loanFormModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+    }
+
+    /** Dari modal detail, lanjut ke formulir untuk buku yang sedang dibuka. */
+    function lanjutkanKeFormulirPinjam() {
+        if (bukuTerbuka && bukuTerbuka.bisa_dipinjam) {
+            openLoanForm(bukuTerbuka);
+        }
+    }
+
     function openBookDetail(data) {
         const modal = document.getElementById('bookDetailModal');
 
@@ -404,7 +564,16 @@
         }
 
         document.getElementById('modal-katalog-link').href = data.katalog_url;
-        document.getElementById('modal-pinjam-link').href  = data.pinjam_url;
+
+        // Diingat supaya tombol "Catat Pinjam" di bawah tahu buku mana yang
+        // sedang dibuka, dan bisa dimatikan kalau stoknya memang habis.
+        bukuTerbuka = data;
+        const tombolPinjam = document.getElementById('modal-pinjam-link');
+        tombolPinjam.disabled = !data.bisa_dipinjam;
+        tombolPinjam.title = data.bisa_dipinjam ? '' : 'Seluruh eksemplar sedang dipinjam';
+        tombolPinjam.className = data.bisa_dipinjam
+            ? 'px-3.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white font-bold rounded-xl transition shadow-2xs text-[11px] flex items-center gap-1'
+            : 'px-3.5 py-1.5 bg-gray-100 text-gray-400 font-bold rounded-xl text-[11px] flex items-center gap-1 cursor-not-allowed';
 
         modal.classList.remove('hidden');
         modal.classList.add('flex');
@@ -419,7 +588,16 @@
     }
 
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closeBookDetail();
+        if (e.key !== 'Escape') {
+            return;
+        }
+        // Formulir ditutup lebih dulu: kalau dibuka dari modal detail, yang
+        // terlihat di depan mata petugas memang formulirnya.
+        if (!document.getElementById('loanFormModal').classList.contains('hidden')) {
+            closeLoanForm();
+            return;
+        }
+        closeBookDetail();
     });
 </script>
 @endpush

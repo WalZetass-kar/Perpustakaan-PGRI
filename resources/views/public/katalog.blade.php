@@ -357,6 +357,8 @@
                             'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi sekolah.',
                             'tersedia' => $item->available_quantity,
                             'total' => $item->total_quantity,
+                            'antre' => $item->antrean_pending,
+                            'sisa_antre' => $item->sisa_untuk_diantre,
                             'cover' => $item->cover_card_url ?? ''
                         ];
                     @endphp
@@ -484,6 +486,8 @@
                             'sinopsis' => $item->sinopsis ?? 'Buku perpustakaan resmi sekolah.',
                             'tersedia' => $item->available_quantity,
                             'total' => $item->total_quantity,
+                            'antre' => $item->antrean_pending,
+                            'sisa_antre' => $item->sisa_untuk_diantre,
                             'cover' => $item->cover_card_url ?? ''
                         ];
                     @endphp
@@ -678,6 +682,12 @@
                                 <i class="fa-solid fa-book-open text-[9px]"></i>
                                 <span x-text="(loanData.total - loanData.tersedia) + ' dipinjam'"></span>
                             </span>
+                            <template x-if="loanData.antre > 0">
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold bg-amber-50 border-amber-200 text-amber-700">
+                                    <i class="fa-solid fa-hourglass-half text-[9px]"></i>
+                                    <span x-text="loanData.antre + ' diantre'"></span>
+                                </span>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -743,10 +753,10 @@
 
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">Jumlah Buku yang Dipinjam <span class="text-rose-600">*</span></label>
-                    <template x-if="loanData.tersedia > 0">
-                        <input type="number" x-model.number="loanData.jumlah" :min="1" :max="loanData.tersedia" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                    <template x-if="loanData.sisa_antre > 0">
+                        <input type="number" x-model.number="loanData.jumlah" :min="1" :max="loanData.sisa_antre" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                     </template>
-                    <template x-if="loanData.tersedia <= 0">
+                    <template x-if="loanData.sisa_antre <= 0">
                         <div class="w-full px-3 py-2 bg-red-50 border border-red-200 rounded-xl text-rose-700 font-bold text-center text-xs">
                             <i class="fa-solid fa-circle-xmark mr-1"></i> Stok habis — tidak dapat dipinjam
                         </div>
@@ -757,7 +767,7 @@
                     <button type="button" @click="openLoanModal = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-xs">
                         Batal
                     </button>
-                    <button type="submit" :disabled="submittingLoan || loanData.tersedia <= 0" class="px-6 py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold rounded-xl text-xs transition shadow-md flex items-center gap-1.5 disabled:opacity-50">
+                    <button type="submit" :disabled="submittingLoan || loanData.sisa_antre <= 0" class="px-6 py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-extrabold rounded-xl text-xs transition shadow-md flex items-center gap-1.5 disabled:opacity-50">
                         <template x-if="submittingLoan">
                             <i class="fa-solid fa-spinner fa-spin"></i>
                         </template>
@@ -801,6 +811,8 @@ function katalogPage() {
             rak: '',
             laci: '',
             tersedia: 0,
+            antre: 0,
+            sisa_antre: 0,
             total: 0,
             nama_peminjam: '',
             jurusan: '',
@@ -849,6 +861,21 @@ function katalogPage() {
                 }
                 return;
             }
+            // Bukunya memang masih di rak, tapi sisanya sudah diantre siswa
+            // lain yang menunggu konfirmasi petugas.
+            if (book.sisa_antre <= 0) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Sedang Diantre Siswa Lain',
+                        text: 'Eksemplar yang tersisa sudah diajukan siswa lain dan sedang menunggu konfirmasi petugas. Silakan coba lagi nanti.',
+                        confirmButtonColor: '#991b1b'
+                    });
+                } else {
+                    alert('Eksemplar yang tersisa sudah diantre siswa lain.');
+                }
+                return;
+            }
             this.loanData.buku_id  = book.id;
             this.loanData.judul    = book.judul;
             this.loanData.cover    = book.cover;
@@ -862,6 +889,8 @@ function katalogPage() {
             this.loanData.laci     = book.laci;
             this.loanData.tersedia = book.tersedia;
             this.loanData.total    = book.total;
+            this.loanData.antre    = book.antre;
+            this.loanData.sisa_antre = book.sisa_antre;
             this.loanData.jumlah   = 1;
             this.openDetailModal = false;
             this.openLoanModal = true;
