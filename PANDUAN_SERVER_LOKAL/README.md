@@ -6,7 +6,15 @@ Satu komputer di ruang perpustakaan dijadikan server, lalu komputer lain di
 sekolah (meja petugas, komputer siswa, bahkan HP) membuka sistem melalui
 jaringan lokal (LAN / WiFi sekolah).
 
-Seluruh sistem berjalan **100% tanpa internet**.
+Seluruh sistem berjalan **tanpa internet**. Semua berkas tampilan — Tailwind,
+Alpine.js, jQuery, DataTables, Chart.js, SweetAlert2, Font Awesome, dan AOS —
+sudah tersimpan di dalam proyek pada folder `public/vendor/`, sehingga tidak ada
+satu pun yang perlu diunduh saat halaman dibuka.
+
+> **Satu-satunya pengecualian:** halaman login petugas masih mencoba mengambil
+> berkas *huruf* (font) dari internet. Bila tidak tersedia, tulisannya otomatis
+> memakai huruf bawaan komputer — tata letak, warna, tombol, dan seluruh fungsi
+> tetap normal. Jadi tidak ada yang perlu diperbaiki bila hal ini terjadi.
 
 ---
 

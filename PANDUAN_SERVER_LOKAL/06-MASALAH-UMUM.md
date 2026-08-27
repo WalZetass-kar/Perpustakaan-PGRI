@@ -212,6 +212,22 @@ lalu perhatikan baris `<link ... tailwind.min.css">`. Bila alamatnya diawali
 
 ---
 
+## Huruf pada Halaman Login Terlihat Berbeda
+
+Gejalanya: sistem berjalan normal, warna dan tata letak benar, hanya **bentuk
+hurufnya** pada halaman login terlihat lain dari biasanya.
+
+Ini **bukan kerusakan** dan tidak perlu diperbaiki. Halaman login mencoba
+mengambil berkas huruf dari internet; pada komputer server yang memang tidak
+tersambung internet, browser otomatis memakai huruf bawaan sistem.
+
+Seluruh tombol, menu, dan proses login tetap berfungsi sepenuhnya.
+
+> Berbeda dengan gejala "polos tanpa gaya" di atas — bila yang hilang adalah
+> **warna dan tata letaknya**, penyebabnya `APP_ENV`, bukan huruf.
+
+---
+
 ## Halaman Tampil Putih Polos Tanpa Pesan Apa Pun
 
 Ada galat yang disembunyikan karena `APP_DEBUG=false`.

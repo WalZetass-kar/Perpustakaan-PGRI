@@ -57,12 +57,89 @@ Untuk mempermudah teknisi sekolah dalam melakukan pemasangan dan membantu pustak
 - **Ekstensi PHP Wajib Aktif**: `bcmath`, `ctype`, `curl`, `dom`, `fileinfo`, `gd`, `json`, `mbstring`, `openssl`, `pcre`, `pdo`, `pdo_mysql`, `tokenizer`, `xml`, `zip`
   > Periksa dengan `php -m`. Tanpa `gd` thumbnail cover gagal dibuat, tanpa `zip` fitur backup ZIP tidak jalan.
 - **Frontend**: Blade Templating, Tailwind CSS, Alpine.js
-- **Aset & Icon**: FontAwesome 6, Chart.js, SweetAlert2, AOS (Tersimpan lokal di `public/vendor/` untuk performa 100% luring)
-- **Ekspor Dokumen**: PhpSpreadsheet & Blade HTML Print
+- **Aset & Icon**: FontAwesome 6, jQuery, DataTables, Chart.js, SweetAlert2, AOS
+  > Seluruhnya dilayani dari `public/vendor/`, bukan dari CDN, agar sistem tetap
+  > utuh saat jaringan sekolah putus. Satu-satunya berkas yang masih diambil dari
+  > internet adalah **font** pada halaman login; bila gagal dimuat, tulisan jatuh
+  > ke huruf bawaan sistem dan seluruh fungsi tetap berjalan normal.
+- **Ekspor Dokumen**: tanpa pustaka tambahan.
+  - **Excel** — laporan disusun sebagai tabel HTML ber-CSS yang dikenali Excel
+    sebagai lembar kerja (`.xls`). Berkasnya dirakit di
+    `resources/views/admin/laporan/excel/`.
+  - **PDF** — halaman cetak A4 dari Blade, dicetak lewat dialog cetak browser.
 
 ---
 
-## 4. Panduan Singkat Menjalankan di Lingkungan Lokal
+## 4. Struktur Kode & Alur Pengembangan
+
+Bagian ini untuk siapa pun yang akan melanjutkan pengembangan sistem.
+
+### A. Tiga Lapisan
+
+Kode dipisah berdasarkan **tanggung jawab**, bukan berdasarkan jenis berkas:
+
+| Lapisan | Letak | Tanggung jawab | Tidak boleh |
+|---|---|---|---|
+| **HTTP** | `app/Http/Controllers/Admin/` | Memvalidasi masukan, memeriksa hak akses, memilih tampilan/pengalihan | Menyentuh model atau menulis aturan bisnis |
+| **Bisnis** | `app/Services/` | Aturan perpustakaan: stok, transaksi, syarat boleh/tidaknya menghapus, pencatatan audit | Mengenal `Request`, `response()`, atau `view()` |
+| **Data** | `app/Models/` | Tabel dan relasinya | — |
+
+```
+app/
+├── Http/
+│   ├── Controllers/Admin/    17 controller, satu bagian layar per berkas
+│   ├── DataTables/           penerjemah parameter tabel server-side
+│   └── Laporan/              perakit respons unduhan Excel
+├── Services/                 17 service — seluruh aturan bisnis ada di sini
+│   ├── Buku/                 katalog & penelusuran koleksi
+│   ├── Sirkulasi/            peminjaman, pengembalian, pengajuan OPAC
+│   ├── Rak/                  rak & laci
+│   ├── Pengguna/             akun pengelola
+│   ├── MasterData/           kategori, penulis, penerbit, kelas
+│   └── Statistik/            angka & grafik dashboard
+├── Rules/                    aturan validasi khusus (mis. laci harus milik raknya)
+└── Exceptions/               AturanBisnisException
+
+routes/
+├── web.php                   kerangka: siapa boleh masuk ke mana
+├── publik.php                halaman pengunjung (OPAC)
+├── auth.php                  masuk & keluar petugas
+└── admin/                    7 berkas, satu per bagian
+```
+
+### B. Cara Kedua Lapisan Berbicara
+
+Ketika sebuah operasi melanggar aturan perpustakaan — stok kurang, pengajuan
+sudah diproses petugas lain, buku masih tercatat di riwayat — service
+**melempar `AturanBisnisException`** berisi kalimat yang siap dibaca petugas.
+Controller menangkapnya dan memutuskan tampilannya:
+
+```php
+try {
+    $this->peminjaman->catat($data);
+} catch (AturanBisnisException $e) {
+    return back()->with('error', $e->getMessage());
+}
+```
+
+Dengan begitu aturan bisnisnya bisa diuji tanpa menjalankan HTTP sama sekali.
+
+### C. Menambah Sesuatu yang Baru
+
+| Yang ingin ditambah | Berkas yang disentuh |
+|---|---|
+| Halaman admin baru | berkas di `routes/admin/` → controller baru di `app/Http/Controllers/Admin/` → view |
+| Aturan baru (mis. batas maksimal pinjam) | service terkait di `app/Services/`, **bukan** controller |
+| Kolom baru pada tabel | migrasi → `$fillable` model → aturan validasi di controller → service |
+| Laporan Excel baru | service penyedia datanya → view di `resources/views/admin/laporan/excel/` |
+
+> **Aturan praktis:** controller yang baik hampir tidak pernah memanggil model
+> secara langsung. Bila di controller muncul `DB::transaction`, `Model::create`,
+> atau perhitungan stok, tempatnya sebenarnya di service.
+
+---
+
+## 5. Panduan Singkat Menjalankan di Lingkungan Lokal
 
 > Butuh panduan yang jauh lebih rinci, termasuk cara menjadikan satu komputer
 > sebagai server yang diakses komputer lain lewat jaringan sekolah? Lihat folder
@@ -135,7 +212,35 @@ php artisan serve
 
 ---
 
-## 5. Daftar Perintah Artisan Khusus
+## 6. Menjalankan Pengujian
+
+Sistem disertai **21 berkas uji otomatis** di folder `tests/`. Isinya bukan
+sekadar formalitas: uji-uji itu mengunci perilaku yang pernah bermasalah —
+ketahanan stok saat dua petugas bekerja bersamaan, pembatasan hak akses Super
+Administrator, sampai keutuhan berkas cadangan.
+
+```bash
+php artisan test
+```
+
+Jalankan setiap kali selesai mengubah kode; bila ada yang gagal, perubahan
+tersebut mengubah perilaku yang seharusnya tetap.
+
+> Pengujian memakai SQLite di memori (lihat `phpunit.xml`), sehingga **tidak
+> menyentuh database MySQL** perpustakaan dan tidak meninggalkan berkas apa pun.
+> Karena itu ekstensi PHP `sqlite3` perlu aktif di komputer pengembang —
+> di Ubuntu/Debian: `sudo apt install php8.5-sqlite3` (sesuaikan dengan
+> versi PHP yang terpasang, cek dengan `php -v`).
+
+Menjalankan sebagian saja:
+
+```bash
+php artisan test --filter=KetahananStokTest
+```
+
+---
+
+## 7. Daftar Perintah Artisan Khusus
 
 | Perintah | Deskripsi Fungsi |
 |---|---|
@@ -147,6 +252,6 @@ php artisan serve
 
 ---
 
-## 6. Hak Cipta & Lisensi
+## 8. Hak Cipta & Lisensi
 
 Sistem Informasi Perpustakaan Digital Sekolah. Seluruh hak kepemilikan dan pemeliharaan diserahkan kepada pihak sekolah sesuai Berita Acara Serah Terima (BAST).
