@@ -92,6 +92,7 @@ class BuatPinjamDariTemukanBukuTest extends TestCase
                 'nama_peminjam' => 'Ihwal Maulana',
                 'jurusan'       => 'XII RPL 1',
                 'nomor_induk'   => '0065123489',
+                'no_wa'         => '081234567890',
                 'buku_id'       => $buku->id,
                 'jumlah'        => 2,
             ])
@@ -119,7 +120,8 @@ class BuatPinjamDariTemukanBukuTest extends TestCase
         $this->loginPetugas();
 
         $this->post(route('admin.peminjaman.store'), [
-            'nama_peminjam' => 'Rani', 'jurusan' => 'XI TKJ', 'buku_id' => $buku->id, 'jumlah' => 1,
+            'nama_peminjam' => 'Rani', 'jurusan' => 'XI TKJ', 'no_wa' => '081234567890',
+            'buku_id' => $buku->id, 'jumlah' => 1,
         ]);
 
         $this->assertSame(0, Peminjaman::where('status', 'pending')->count(),
@@ -139,7 +141,8 @@ class BuatPinjamDariTemukanBukuTest extends TestCase
 
         $this->from(route('admin.temukan-buku'))
             ->post(route('admin.peminjaman.store'), [
-                'nama_peminjam' => 'Budi', 'jurusan' => 'XII', 'buku_id' => $buku->id, 'jumlah' => 5,
+                'nama_peminjam' => 'Budi', 'jurusan' => 'XII', 'no_wa' => '081234567890',
+                'buku_id' => $buku->id, 'jumlah' => 5,
             ])
             ->assertRedirect(route('admin.temukan-buku'))
             ->assertSessionHas('error');
@@ -155,7 +158,8 @@ class BuatPinjamDariTemukanBukuTest extends TestCase
 
         $this->from(route('admin.temukan-buku'))
             ->post(route('admin.peminjaman.store'), [
-                'nama_peminjam' => '', 'jurusan' => 'XII', 'buku_id' => $buku->id, 'jumlah' => 1,
+                'nama_peminjam' => '', 'jurusan' => 'XII', 'no_wa' => '081234567890',
+                'buku_id' => $buku->id, 'jumlah' => 1,
             ])
             ->assertSessionHasErrors('nama_peminjam');
 
@@ -164,10 +168,52 @@ class BuatPinjamDariTemukanBukuTest extends TestCase
         $html = $this->followingRedirects()
             ->from(route('admin.temukan-buku'))
             ->post(route('admin.peminjaman.store'), [
-                'nama_peminjam' => '', 'jurusan' => 'XII', 'buku_id' => $buku->id, 'jumlah' => 1,
+                'nama_peminjam' => '', 'jurusan' => 'XII', 'no_wa' => '081234567890',
+                'buku_id' => $buku->id, 'jumlah' => 1,
             ])->getContent();
 
         $this->assertStringContainsString('Terdapat kesalahan pada input formulir', $html);
+    }
+
+    /**
+     * Petugas sering perlu mengingatkan buku yang jatuh tempo, dan satu-satunya
+     * cara menghubungi siswa adalah nomor yang dicatat saat meminjam.
+     */
+    public function test_nomor_telepon_ikut_tersimpan_dan_bisa_dihubungi(): void
+    {
+        $buku = $this->buatBuku();
+        $this->loginPetugas();
+
+        $html = $this->get(route('admin.temukan-buku'))->assertOk()->getContent();
+        $this->assertStringContainsString('name="no_wa"', $html,
+            'Formulir buat pinjam harus punya kolom nomor telepon.');
+
+        $this->post(route('admin.peminjaman.store'), [
+            'nama_peminjam' => 'Ihwal Maulana', 'jurusan' => 'XII RPL 1',
+            'no_wa' => '0812-3456-7890', 'buku_id' => $buku->id, 'jumlah' => 1,
+        ])->assertSessionHas('success');
+
+        $loan = Peminjaman::first();
+        $this->assertSame('0812-3456-7890', $loan->no_wa);
+        // Yang dipakai tombol "Hubungi lewat WhatsApp" di halaman sirkulasi.
+        $this->assertSame('6281234567890', $loan->nomor_wa_internasional);
+        $this->assertSame('0812-3456-7890', $loan->data_detail['no_wa']);
+    }
+
+    /** Wajib, sama seperti pengajuan lewat katalog OPAC. */
+    public function test_nomor_telepon_wajib_diisi(): void
+    {
+        $buku = $this->buatBuku();
+        $this->loginPetugas();
+
+        $this->from(route('admin.temukan-buku'))
+            ->post(route('admin.peminjaman.store'), [
+                'nama_peminjam' => 'Rani', 'jurusan' => 'XI TKJ', 'buku_id' => $buku->id, 'jumlah' => 1,
+            ])
+            ->assertSessionHasErrors('no_wa');
+
+        $this->assertSame(0, Peminjaman::count());
+        $this->assertSame(5, $buku->refresh()->available_quantity, 'Stok tidak boleh berkurang.');
     }
 
     public function test_petugas_biasa_juga_boleh_membuat_peminjaman(): void
@@ -181,7 +227,8 @@ class BuatPinjamDariTemukanBukuTest extends TestCase
 
         $this->get(route('admin.temukan-buku'))->assertOk();
         $this->post(route('admin.peminjaman.store'), [
-            'nama_peminjam' => 'Sari', 'jurusan' => 'X MM', 'buku_id' => $buku->id, 'jumlah' => 1,
+            'nama_peminjam' => 'Sari', 'jurusan' => 'X MM', 'no_wa' => '081234567890',
+            'buku_id' => $buku->id, 'jumlah' => 1,
         ])->assertSessionHas('success');
 
         $this->assertSame('dipinjam', Peminjaman::first()->status);

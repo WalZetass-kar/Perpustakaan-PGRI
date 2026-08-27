@@ -27,7 +27,7 @@ class RiwayatSirkulasiTest extends TestCase
         // Petugas mencatat 3 peminjaman, semuanya SUDAH dikembalikan.
         $this->actingAs($petugas);
         for ($i=0;$i<3;$i++) {
-            $this->post(route('admin.peminjaman.store'), ['nama_peminjam'=>"Siswa $i",'jurusan'=>'XII','buku_id'=>$buku->id,'jumlah'=>1]);
+            $this->post(route('admin.peminjaman.store'), ['nama_peminjam'=>"Siswa $i",'jurusan'=>'XII','no_wa'=>'081234567890','buku_id'=>$buku->id,'jumlah'=>1]);
         }
         foreach (Peminjaman::all() as $p) $this->post(route('admin.peminjaman.kembali', $p->id));
 
@@ -46,7 +46,7 @@ class RiwayatSirkulasiTest extends TestCase
 
         $this->actingAs($petugas);
         for ($i=0;$i<3;$i++) {
-            $this->post(route('admin.peminjaman.store'), ['nama_peminjam'=>"Siswa $i",'jurusan'=>'XII','buku_id'=>$buku->id,'jumlah'=>1]);
+            $this->post(route('admin.peminjaman.store'), ['nama_peminjam'=>"Siswa $i",'jurusan'=>'XII','no_wa'=>'081234567890','buku_id'=>$buku->id,'jumlah'=>1]);
         }
         foreach (Peminjaman::all() as $p) $this->post(route('admin.peminjaman.kembali', $p->id));
 

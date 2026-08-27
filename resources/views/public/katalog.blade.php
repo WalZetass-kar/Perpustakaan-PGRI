@@ -726,7 +726,7 @@
             <form @submit.prevent="submitLoanRequest()" class="space-y-3 text-xs">
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">Nama Lengkap Siswa / Peminjam <span class="text-rose-600">*</span></label>
-                    <input type="text" x-model="loanData.nama_peminjam" required placeholder="Contoh: Muhammad Ihwal" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                    <input type="text" x-model="loanData.nama_peminjam" required placeholder="Nama lengkap siswa" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">

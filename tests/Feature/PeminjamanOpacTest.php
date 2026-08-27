@@ -118,6 +118,7 @@ class PeminjamanOpacTest extends TestCase
         $this->post(route('admin.peminjaman.store'), [
             'nama_peminjam' => 'Siti Aminah',
             'jurusan'       => 'XI TKJ 2',
+            'no_wa'         => '081234567890',
             'buku_id'       => $buku->id,
             'jumlah'        => 1,
         ])->assertSessionHasNoErrors();

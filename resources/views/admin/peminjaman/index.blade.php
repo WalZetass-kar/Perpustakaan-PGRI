@@ -253,7 +253,7 @@
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">Nama Lengkap Siswa / Peminjam <span class="text-rose-500">*</span></label>
                     <div class="relative">
-                        <input type="text" name="nama_peminjam" required placeholder="Contoh: Muhammad Ihwal Maulana" autofocus
+                        <input type="text" name="nama_peminjam" required placeholder="Nama lengkap siswa" autofocus
                                class="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                         <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                     </div>
@@ -277,6 +277,18 @@
                                    class="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                             <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
                         </div>
+                    </div>
+                </div>
+
+                <div>
+                    {{-- Wajib, sama seperti pengajuan lewat katalog OPAC -- nomor
+                         ini yang dipakai tombol "Hubungi lewat WhatsApp" di modal
+                         detail untuk menagih buku yang jatuh tempo. --}}
+                    <label class="block font-bold text-gray-700 mb-1">No. WhatsApp / Telepon <span class="text-rose-500">*</span></label>
+                    <div class="relative">
+                        <input type="tel" name="no_wa" required maxlength="30" placeholder="Contoh: 081234567890"
+                               class="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                        <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                     </div>
                 </div>
 
@@ -313,9 +325,8 @@
         </div>
     </div>
 
-    {{-- Modal: data lengkap peminjam. Isian yang hanya bisa didapat lewat
-         katalog OPAC (No. WhatsApp, catatan siswa) tidak muat di tabel, jadi
-         ditampilkan di sini. --}}
+    {{-- Modal: data lengkap peminjam. Isian yang tidak muat di tabel
+         (No. WhatsApp, catatan siswa dari OPAC) ditampilkan di sini. --}}
     <div x-show="openDetailModal" @click.self="openDetailModal = false" @keydown.escape.window="openDetailModal = false"
          class="fixed inset-0 z-[100] !mt-0 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto"
          x-transition:enter="transition ease-out duration-300"

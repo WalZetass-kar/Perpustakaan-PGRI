@@ -1469,8 +1469,12 @@ class AdminController extends Controller
             'nama_peminjam' => 'required|string|max:255',
             'jurusan'       => 'required|string|max:150',
             'nomor_induk'   => 'nullable|string|max:50',
+            'no_wa'         => 'required|string|max:30',
             'buku_id'       => 'required|exists:buku,id',
             'jumlah'        => 'required|integer|min:1|max:10',
+        ], [
+            'no_wa.required' => 'Nomor WhatsApp / telepon peminjam wajib diisi agar buku yang jatuh tempo bisa ditagih.',
+            'no_wa.max'      => 'Nomor WhatsApp terlalu panjang (maksimal 30 karakter).',
         ]);
 
         $buku = Buku::findOrFail($request->buku_id);
@@ -1501,6 +1505,7 @@ class AdminController extends Controller
                     'nama_peminjam'       => trim($request->nama_peminjam),
                     'jurusan'             => trim($request->jurusan),
                     'nomor_induk'         => $request->filled('nomor_induk') ? trim($request->nomor_induk) : null,
+                    'no_wa'               => trim($request->no_wa),
                     'user_id'             => auth()->id(),
                     'buku_id'             => $buku->id,
                     'jumlah'              => $jumlahPinjam,
