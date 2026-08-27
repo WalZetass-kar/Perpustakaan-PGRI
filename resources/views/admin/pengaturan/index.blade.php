@@ -261,12 +261,33 @@
                 </div>
 
                 @if(auth()->user()->isSuperAdmin())
-                    <a href="{{ route('admin.pengaturan.backup') }}" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center gap-2 shadow-xs transition shrink-0">
-                        <i class="fa-solid fa-download"></i>
-                        <span>Unduh Backup Database (.SQL)</span>
-                    </a>
+                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                        <a href="{{ route('admin.pengaturan.backup-lengkap') }}" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center gap-2 shadow-xs transition shrink-0">
+                            <i class="fa-solid fa-download"></i>
+                            <span>Unduh Backup Lengkap (.ZIP)</span>
+                        </a>
+                        <a href="{{ route('admin.pengaturan.backup') }}" class="px-3.5 py-2 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 rounded-xl font-bold text-xs flex items-center gap-2 shadow-xs transition shrink-0">
+                            <i class="fa-solid fa-file-code"></i>
+                            <span>.SQL Saja</span>
+                        </a>
+                    </div>
                 @endif
             </div>
+
+            @if(auth()->user()->isSuperAdmin())
+                <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 space-y-2">
+                    <h4 class="font-bold text-emerald-900 text-xs flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Panduan Cadangan Data Rutin</span>
+                    </h4>
+                    <ul class="text-[11px] text-emerald-900 space-y-1 list-disc list-inside">
+                        <li><strong>Backup Lengkap (.ZIP)</strong> berisi seluruh isi database ({{ number_format($systemInfo['total_buku'] ?? 0) }} judul buku, anggota, riwayat peminjaman, pengaturan, log aktivitas) <strong>ditambah</strong> berkas gambar sampul buku. Ini yang sebaiknya diunduh untuk arsip berkala.</li>
+                        <li><strong>.SQL Saja</strong> hanya isi database tanpa gambar sampul. Ukurannya kecil, cocok untuk pemeriksaan cepat lewat phpMyAdmin.</li>
+                        <li>Disarankan diunduh <strong>minimal sekali seminggu</strong> dan disimpan di luar server (Google Drive, flashdisk, atau komputer petugas), bukan hanya di hosting.</li>
+                        <li>Pemulihan: impor berkas <code class="font-mono">.sql</code> lewat phpMyAdmin, lalu salin kembali isi folder <code class="font-mono">covers</code> dari ZIP ke <code class="font-mono">storage/app/public/covers</code>.</li>
+                    </ul>
+                </div>
+            @endif
 
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div class="p-4 rounded-xl bg-gray-50 border border-gray-200 text-center">

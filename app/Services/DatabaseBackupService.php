@@ -144,7 +144,17 @@ class DatabaseBackupService
         }
 
         $timestamp = date('Ymd_His');
-        $zipPath = $backupDir . "/backup_perpustakaan_{$timestamp}.zip";
+
+        // Penanda acak di belakang tanggal, bukan sekadar tanggal-jam-detik.
+        //
+        // Nama berkas yang hanya presisi sampai DETIK membuat dua pencadangan
+        // pada detik yang sama memakai nama yang persis sama, dan bendera
+        // OVERWRITE di bawah membuat yang kedua menimpa yang pertama. Karena
+        // berkas di server dihapus setelah terkirim, unduhan yang sedang
+        // berjalan bisa kehilangan berkasnya di tengah jalan -- dua petugas
+        // yang mengklik bersamaan berakhir dengan cadangan rusak atau kosong.
+        $penanda = bin2hex(random_bytes(3));
+        $zipPath = $backupDir . "/backup_perpustakaan_{$timestamp}_{$penanda}.zip";
 
         $zip = new ZipArchive();
         if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {

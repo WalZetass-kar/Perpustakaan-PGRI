@@ -2394,4 +2394,47 @@ class AdminController extends Controller
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ]);
     }
+
+    /**
+     * Cadangan lengkap: dump SQL sekaligus berkas sampul buku.
+     *
+     * Berkas .SQL saja tidak cukup untuk memulihkan perpustakaan seperti
+     * semula. Kolom `cover` pada tabel buku hanya menyimpan NAMA berkasnya,
+     * gambarnya sendiri ada di storage. Kalau server bermasalah dan yang
+     * dipegang teknisi cuma .SQL, seluruh data buku memang kembali, tetapi
+     * sampulnya hilang semua dan harus diunggah ulang satu per satu.
+     */
+    public function backupDatabaseLengkap()
+    {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Administrator yang berwenang mengunduh cadangan basis data.');
+        }
+
+        if (!class_exists(\ZipArchive::class)) {
+            return back()->with('error', 'Ekstensi ZIP tidak aktif di server ini. Silakan gunakan tombol "Unduh .SQL Saja", lalu salin folder storage/app/public/covers secara manual.');
+        }
+
+        $backupService = app(\App\Services\DatabaseBackupService::class);
+        $zipPath = $backupService->createZipBackup();
+
+        if (!$zipPath || !file_exists($zipPath)) {
+            return back()->with('error', 'Gagal membuat berkas cadangan ZIP. Periksa izin tulis pada folder storage/app/backups.');
+        }
+
+        $filename = basename($zipPath);
+
+        AuditLog::create([
+            'user_id'    => auth()->id(),
+            'user_name'  => auth()->user()->name,
+            'aktivitas'  => 'DOWNLOAD_BACKUP_ZIP',
+            'deskripsi'  => "Super Admin mengunduh cadangan lengkap database + sampul buku ({$filename})",
+            'ip_address' => request()->ip(),
+        ]);
+
+        // Salinan sementara ini dihapus setelah terkirim supaya folder backup
+        // di server tidak menumpuk setiap kali teknisi mengunduh.
+        return response()->download($zipPath, $filename, [
+            'Content-Type' => 'application/zip',
+        ])->deleteFileAfterSend(true);
+    }
 }

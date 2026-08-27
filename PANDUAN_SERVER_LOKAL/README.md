@@ -112,5 +112,5 @@ Alamat yang dibuka dari komputer lain: `http://<IP-SERVER>:8000`
 | Dokumen | Untuk Situasi |
 |---|---|
 | **PANDUAN_SERVER_LOKAL/** (folder ini) | Sekolah tanpa internet, satu komputer jadi server LAN |
-| [PANDUAN_PEMASANGAN_TEKNISI.md](../PANDUAN_PEMASANGAN_TEKNISI.md) | Hosting cPanel, VPS, atau layanan cloud |
-| [PANDUAN_PENGGUNAAN_PETUGAS.md](../PANDUAN_PENGGUNAAN_PETUGAS.md) | Cara memakai aplikasi sehari-hari oleh pustakawan |
+| [PANDUAN_PEMASANGAN_TEKNISI.md](PANDUAN_PEMASANGAN_TEKNISI.md) | Hosting cPanel, VPS, atau layanan cloud |
+| [PANDUAN_PENGGUNAAN_PETUGAS.md](PANDUAN_PENGGUNAAN_PETUGAS.md) | Cara memakai aplikasi sehari-hari oleh pustakawan |
