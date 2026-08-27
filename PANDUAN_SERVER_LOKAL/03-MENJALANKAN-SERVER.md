@@ -249,7 +249,7 @@ Nyalakan ulang server setelah mengubahnya.
 
 Bila di kemudian hari sekolah membutuhkan kapasitas lebih besar, pasang Apache
 atau Nginx dengan mengikuti bagian **VPS / Dedicated Linux** pada
-[PANDUAN_PEMASANGAN_TEKNISI.md](../PANDUAN_PEMASANGAN_TEKNISI.md). Aplikasinya
+[PANDUAN_PEMASANGAN_TEKNISI.md](PANDUAN_PEMASANGAN_TEKNISI.md). Aplikasinya
 sama persis, hanya cara penyajiannya yang berbeda.
 
 ---

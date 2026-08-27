@@ -509,7 +509,7 @@ ada di [03-MENJALANKAN-SERVER.md](03-MENJALANKAN-SERVER.md).
 
 Bila masih terasa berat, pasang Apache atau Nginx mengikuti bagian
 **VPS / Dedicated Linux** pada
-[PANDUAN_PEMASANGAN_TEKNISI.md](../PANDUAN_PEMASANGAN_TEKNISI.md).
+[PANDUAN_PEMASANGAN_TEKNISI.md](PANDUAN_PEMASANGAN_TEKNISI.md).
 
 Pengguna Windows dapat memakai Apache bawaan Laragon/XAMPP dengan mengarahkan
 *document root* ke folder `public/` milik proyek.

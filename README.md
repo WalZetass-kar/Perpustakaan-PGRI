@@ -9,12 +9,12 @@ Sistem Informasi Manajemen Perpustakaan dan Katalog Publik (OPAC) modern yang di
 
 Untuk mempermudah teknisi sekolah dalam melakukan pemasangan dan membantu pustakawan dalam pengoperasian sistem, telah disediakan dokumen panduan terpisah:
 
-1. **[Panduan Pemasangan & Pemeliharaan untuk Teknisi IT](PANDUAN_PEMASANGAN_TEKNISI.md)**:
+1. **[Panduan Pemasangan & Pemeliharaan untuk Teknisi IT](PANDUAN_SERVER_LOKAL/PANDUAN_PEMASANGAN_TEKNISI.md)**:
    - Persyaratan server & ekstensi PHP
    - Langkah demi langkah instalasi, migrasi, dan konfigurasi `.env`
    - Pengaturan Web Server (Apache VirtualHost, Nginx, dan cPanel)
    - Otomasi pencadangan database (Cron Job) & pemecahan masalah (Troubleshooting)
-2. **[Panduan Penggunaan untuk Petugas Perpustakaan](PANDUAN_PENGGUNAAN_PETUGAS.md)**:
+2. **[Panduan Penggunaan untuk Petugas Perpustakaan](PANDUAN_SERVER_LOKAL/PANDUAN_PENGGUNAAN_PETUGAS.md)**:
    - Alur pengelolaan master buku, kategori, penulis, penerbit, dan kelas
    - Manajemen rak buku & peta denah interaktif 2D
    - Alur persetujuan peminjaman online siswa & pencatatan langsung (Walk-in)
