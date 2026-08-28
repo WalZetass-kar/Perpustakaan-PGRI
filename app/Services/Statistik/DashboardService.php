@@ -21,8 +21,8 @@ class DashboardService
 {
     private const NAMA_BULAN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 
-    /** Kategori terlaris ditampilkan sebanyak ini, sisanya dijadikan satu. */
-    private const KATEGORI_DITAMPILKAN = 6;
+    /** Hanya peringkat teratas sebanyak ini yang masuk daftar kategori; sisanya tidak ditampilkan. */
+    private const KATEGORI_DITAMPILKAN = 3;
 
     /**
      * Seluruh data yang ditampilkan di dashboard.
@@ -39,7 +39,8 @@ class DashboardService
             'kategoriTerpopuler'  => $kategoriTerpopuler,
             'kategoriBorrowTotal' => $kategoriBorrowTotal,
             'recentLoans'         => Peminjaman::with(['user', 'buku'])->latest()->take(6)->get(),
-            'mostBorrowedBooks'   => Buku::withCount('peminjaman')->orderBy('peminjaman_count', 'desc')->take(5)->get(),
+            'mostBorrowedBooks'   => Buku::withCount(['peminjaman' => fn ($q) => $q->whereNotIn('status', ['pending', 'ditolak'])])
+                ->orderBy('peminjaman_count', 'desc')->take(5)->get(),
             'recentAuditLogs'     => AuditLog::latest()->take(6)->get(),
         ];
     }
@@ -78,7 +79,7 @@ class DashboardService
     {
         $tahun = (int) date('Y');
 
-        $pinjam  = $this->jumlahEksemplarPer('n', Peminjaman::whereYear('tanggal_pinjam', $tahun), 'tanggal_pinjam');
+        $pinjam  = $this->jumlahEksemplarPer('n', $this->sirkulasiNyata()->whereYear('tanggal_pinjam', $tahun), 'tanggal_pinjam');
         $kembali = $this->jumlahEksemplarPer('n', Peminjaman::where('status', 'dikembalikan')->whereYear('waktu_kembali', $tahun), 'waktu_kembali');
 
         $grafik = [
@@ -108,7 +109,7 @@ class DashboardService
         $tahunIni = (int) date('Y');
         $rentang = range($tahunIni - 4, $tahunIni);
 
-        $pinjam  = $this->jumlahEksemplarPer('Y', Peminjaman::whereYear('tanggal_pinjam', '>=', $tahunIni - 4), 'tanggal_pinjam');
+        $pinjam  = $this->jumlahEksemplarPer('Y', $this->sirkulasiNyata()->whereYear('tanggal_pinjam', '>=', $tahunIni - 4), 'tanggal_pinjam');
         $kembali = $this->jumlahEksemplarPer('Y', Peminjaman::where('status', 'dikembalikan')->whereYear('waktu_kembali', '>=', $tahunIni - 4), 'waktu_kembali');
 
         $grafik = [
@@ -123,6 +124,19 @@ class DashboardService
         }
 
         return $grafik;
+    }
+
+    /**
+     * Peminjaman yang benar-benar terjadi. Pengajuan yang masih `pending`
+     * belum diserahkan ke peminjam dan yang `ditolak` tidak pernah keluar
+     * dari rak, jadi keduanya bukan sirkulasi. Kalau ikut dihitung, garis
+     * peminjaman selalu berdiri lebih tinggi dari garis pengembalian meski
+     * semua buku sudah kembali -- selisihnya persis sebanyak eksemplar yang
+     * ditolak atau menunggu.
+     */
+    private function sirkulasiNyata()
+    {
+        return Peminjaman::whereNotIn('status', ['pending', 'ditolak']);
     }
 
     /**
@@ -154,6 +168,7 @@ class DashboardService
         $peringkat = DB::table('peminjaman')
             ->join('buku', 'peminjaman.buku_id', '=', 'buku.id')
             ->join('kategori', 'buku.kategori_id', '=', 'kategori.id')
+            ->whereNotIn('peminjaman.status', ['pending', 'ditolak'])
             ->selectRaw('kategori.nama as nama, SUM(peminjaman.jumlah) as total')
             ->groupBy('kategori.id', 'kategori.nama')
             ->orderByDesc('total')
@@ -168,16 +183,10 @@ class DashboardService
             'persen' => $persen($baris->total),
         ])->values();
 
-        // Ekor daftarnya digabung jadi satu irisan supaya diagramnya tetap terbaca.
-        $sisa = (int) $peringkat->slice(self::KATEGORI_DITAMPILKAN)->sum('total');
-        if ($sisa > 0) {
-            $grafik->push([
-                'nama'   => 'Kategori Lainnya',
-                'total'  => $sisa,
-                'persen' => $persen($sisa),
-            ]);
-        }
-
+        // Ekor daftarnya sengaja dibuang, bukan digabung: daftar ini dibaca
+        // sebagai papan peringkat, dan baris "lainnya" cuma jadi batang tanpa
+        // nama. Persentase tiap batang tetap dihitung terhadap seluruh
+        // peminjaman, jadi tiga batang ini memang tidak genap 100%.
         return [$grafik, $peringkat->first(), $totalSemua];
     }
 }

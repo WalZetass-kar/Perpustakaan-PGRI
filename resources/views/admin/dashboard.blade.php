@@ -334,7 +334,7 @@
 
     @php
         // Warna diurutkan dari yang paling menonjol untuk peringkat teratas.
-        $kategoriWarna = ['#B91C1C', '#D97706', '#059669', '#0284C7', '#7C3AED', '#9CA3AF'];
+        $kategoriWarna = ['#B91C1C', '#D97706', '#059669'];
     @endphp
     <div class="bg-white rounded-3xl border-2 border-gray-200 shadow-sm p-6 sm:p-8 space-y-5">
         @if($kategoriChart->isEmpty())
