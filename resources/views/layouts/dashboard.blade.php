@@ -20,6 +20,8 @@
     @stack('styles')
     <script src="{{ asset('vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
 
+    @include('partials.gaya-formulir')
+
     <style>
         [x-cloak] { display: none !important; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; }

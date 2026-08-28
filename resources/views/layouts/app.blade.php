@@ -163,6 +163,8 @@
     <script defer src="{{ asset('vendor/alpine/alpine.min.js') }}"></script>
     <script defer src="{{ asset('vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
 
+    @include('partials.gaya-formulir')
+
     <style>
         [x-cloak] { display: none !important; }
         html { scroll-behavior: smooth; }
