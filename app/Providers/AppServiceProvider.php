@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
@@ -20,6 +21,12 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
         }
+
+        // Tampilan bawaan Laravel memakai kelas Tailwind yang tidak ikut
+        // ter-generate di public/vendor/tailwind/tailwind.min.css yang sudah
+        // dipurge, sehingga tombolnya tampil bertumpuk dan keterangannya masih
+        // berbahasa Inggris. Yang ini menyamai pagination halaman Koleksi Buku.
+        Paginator::defaultView('vendor.pagination.perpustakaan');
 
         try {
             View::composer('*', function ($view) {

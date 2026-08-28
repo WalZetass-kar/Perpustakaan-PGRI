@@ -551,7 +551,7 @@
 
         @if($buku->hasPages())
             <div class="mt-8 pt-4 border-t border-gray-100">
-                {{ $buku->links() }}
+                {{ $buku->links('vendor.pagination.perpustakaan', ['satuan' => 'buku']) }}
             </div>
         @endif
     </div>

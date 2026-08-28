@@ -239,7 +239,7 @@
     
     @if($bukuList->hasPages())
         <div class="p-3 bg-white rounded-2xl border border-gray-200 shadow-2xs">
-            {{ $bukuList->links() }}
+            {{ $bukuList->links('vendor.pagination.perpustakaan', ['satuan' => 'buku']) }}
         </div>
     @endif
 
