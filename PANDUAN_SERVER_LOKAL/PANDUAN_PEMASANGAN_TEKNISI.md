@@ -211,15 +211,28 @@ Struktur direktori Laravel menempatkan file publik di folder `public/` demi keam
    APP_URL=https://perpustakaan.sekolah.sch.id
    APP_TIMEZONE=Asia/Jakarta
 
+   ADMIN_LOGIN_PATH=akses-perpustakaan
+
+   SEED_ADMIN_PASSWORD=IsiPasswordAwalDiSini
+
    DB_CONNECTION=mysql
    DB_HOST=127.0.0.1
    DB_PORT=3306
    DB_DATABASE=usercpanel_perpus
    DB_USERNAME=usercpanel_dbadmin
    DB_PASSWORD=password_database_anda
-
-   ADMIN_LOGIN_PATH=akses-perpustakaan
    ```
+
+   > Seluruh baris di atas **sudah ada** di dalam `.env` — Anda hanya mengganti
+   > nilainya, bukan menambah baris baru. Urutannya dibuat sama dengan urutan
+   > di dalam berkasnya: `ADMIN_LOGIN_PATH` dan `SEED_ADMIN_PASSWORD` berada
+   > **di atas** blok `DB_*`, bukan di bawahnya.
+   >
+   > `SEED_ADMIN_PASSWORD` bawaannya **kosong** dan menentukan password dua akun
+   > bawaan yang dibuat `migrate --seed` pada Langkah berikutnya. Bila dibiarkan
+   > kosong, keduanya memakai password acak yang tidak pernah ditampilkan
+   > sehingga tidak bisa dipakai. Isi sekarang, atau lewati dan buat akun
+   > sendiri dengan `php artisan perpus:buat-admin`.
 6. Klik **Save Changes**.
 
 ---
@@ -318,12 +331,21 @@ EXIT;
 cp .env.example .env
 nano .env
 ```
-Isi konfigurasi database:
+Isi konfigurasi berikut — semuanya **sudah ada** di dalam `.env`, tinggal
+diganti nilainya:
 ```env
 APP_NAME="Sistem Informasi Perpustakaan"
 APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://perpustakaan.sekolah.sch.id
+
+ADMIN_LOGIN_PATH=akses-perpustakaan
+
+# Bawaannya kosong. Menentukan password dua akun bawaan yang dibuat
+# `migrate --seed` di bawah; bila dikosongkan, keduanya memakai password acak
+# yang tidak ditampilkan sehingga harus dibuat ulang lewat perpus:buat-admin.
+SEED_ADMIN_PASSWORD=IsiPasswordAwalDiSini
+
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -394,6 +416,9 @@ Jika menggunakan platform PaaS modern seperti Railway:
    - `DB_USERNAME` : `${{MySQL.MYSQLUSER}}`
    - `DB_PASSWORD` : `${{MySQL.MYSQLPASSWORD}}`
    - `ADMIN_LOGIN_PATH` : `akses-perpustakaan`
+   - `SEED_ADMIN_PASSWORD` : `(password awal akun bawaan)` — bila dikosongkan,
+     akun bawaan memakai password acak yang tidak ditampilkan, sehingga akunnya
+     harus dibuat sendiri lewat `php artisan perpus:buat-admin`
 4. Set **Custom Start Command** pada service web:
    ```bash
    php artisan migrate --seed --force && php artisan storage:link && /start-container.sh

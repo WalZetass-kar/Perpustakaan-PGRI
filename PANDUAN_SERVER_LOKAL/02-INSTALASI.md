@@ -149,7 +149,12 @@ php artisan key:generate
 > tidak pernah terbentuk, padahal berkas itulah yang dibaca saat mencari
 > penyebab masalah di [06-MASALAH-UMUM.md](06-MASALAH-UMUM.md).
 
-Buka `.env` dengan editor teks, lalu sesuaikan:
+Buka `.env` dengan editor teks, lalu **ubah nilainya** seperti di bawah.
+
+> Seluruh baris berikut **sudah ada** di dalam `.env` hasil salinan tadi —
+> Anda hanya mengganti nilainya, **tidak perlu menambah baris baru**.
+> Urutan di bawah ini sengaja dibuat sama persis dengan urutan di dalam
+> berkasnya, supaya mudah ditelusuri dari atas ke bawah.
 
 ```env
 APP_NAME="Perpustakaan SMK PGRI"
@@ -163,16 +168,19 @@ APP_DEBUG=false
 APP_TIMEZONE=Asia/Jakarta
 APP_URL=http://192.168.1.10:8000
 
+# Dua baris berikut letaknya DI ATAS blok DATABASE, bukan di bawahnya.
+ADMIN_LOGIN_PATH=akses-perpustakaan
+
+# Bawaannya KOSONG (tertulis `SEED_ADMIN_PASSWORD=` tanpa nilai apa pun),
+# sehingga mudah terlewat saat menelusuri berkas. Isi sekarang juga.
+SEED_ADMIN_PASSWORD=RahasiaAdmin123
+
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=perpustakaan
 DB_USERNAME=perpus
 DB_PASSWORD=GantiDenganPasswordKuat
-
-SEED_ADMIN_PASSWORD=RahasiaAdmin123
-
-ADMIN_LOGIN_PATH=akses-perpustakaan
 ```
 
 > **Peringatan untuk pengguna Windows:** jangan menyunting `.env` dengan
@@ -188,8 +196,8 @@ ADMIN_LOGIN_PATH=akses-perpustakaan
 | `APP_ENV` | **Harus `local`.** Pada `production`, aplikasi memaksa seluruh alamat menjadi `https://` sementara server lokal hanya melayani `http` — akibatnya halaman tampil polos tanpa gaya dan tidak bisa dipakai. Ini terpisah dari `APP_DEBUG`, jadi galat teknis tetap tersembunyi dari siswa. |
 | `APP_URL` | Isi dengan **alamat IP komputer server beserta portnya**, misalnya `http://192.168.1.10:8000`. Cara mencari IP-nya ada di [04-AKSES-DARI-KOMPUTER-LAIN.md](04-AKSES-DARI-KOMPUTER-LAIN.md). Dipakai sebagai alamat acuan sistem; halaman biasa tetap tampil walau nilainya salah, tetapi sebaiknya diisi benar agar tidak membingungkan saat menelusuri masalah. |
 | `APP_DEBUG` | Isi `false` untuk pemakaian harian agar galat teknis tidak terlihat siswa. Ubah sementara ke `true` hanya saat mencari penyebab masalah. |
-| `SEED_ADMIN_PASSWORD` | **Wajib diisi sebelum Langkah 5.** Jika dibiarkan kosong, sistem membuat password acak yang tidak pernah ditampilkan, sehingga akun bawaan tidak bisa dipakai. |
-| `ADMIN_LOGIN_PATH` | Alamat rahasia halaman login petugas. Boleh diganti, misalnya `pintu-petugas`, agar tidak mudah ditebak siswa. |
+| `SEED_ADMIN_PASSWORD` | Sudah ada di berkas, **tetapi nilainya kosong** dan **wajib diisi sebelum Langkah 5.** Jika dibiarkan kosong, sistem membuat password acak yang tidak pernah ditampilkan, sehingga akun bawaan tidak bisa dipakai. |
+| `ADMIN_LOGIN_PATH` | Sudah ada di berkas dan sudah terisi `akses-perpustakaan`. Ini alamat halaman login petugas; boleh diganti, misalnya `pintu-petugas`, agar tidak mudah ditebak siswa. |
 
 ---
 
