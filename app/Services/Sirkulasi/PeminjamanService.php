@@ -165,6 +165,17 @@ class PeminjamanService
                 throw new AturanBisnisException('Transaksi peminjaman ini sudah berstatus dikembalikan sebelumnya.');
             }
 
+            // Hanya peminjaman yang benar-benar berjalan yang memotong stok.
+            // Pengajuan `pending` baru memotong stok saat disetujui, dan yang
+            // `ditolak` tidak pernah memotong sama sekali. Tanpa penjaga ini,
+            // memanggil pengembalian atas keduanya menambahkan eksemplar yang
+            // tidak pernah keluar dari rak: stok di sistem naik melebihi yang
+            // ada di lemari, dan pengajuannya ikut berubah jadi
+            // "dikembalikan" sehingga hilang dari tab yang menunggu.
+            if (!in_array($terkunci->status, ['dipinjam', 'terlambat'], true)) {
+                throw new AturanBisnisException('Hanya peminjaman yang sedang berjalan yang bisa dikembalikan. Pengajuan yang belum disetujui atau sudah ditolak tidak memotong stok, jadi tidak ada yang perlu dikembalikan.');
+            }
+
             $buku = Buku::where('id', $terkunci->buku_id)->lockForUpdate()->first();
             if ($buku) {
                 // Dibatasi total_quantity supaya stok tidak pernah melebihi
