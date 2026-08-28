@@ -97,9 +97,8 @@ class PenelusuranBukuService
     }
 
     /**
-     * Pencarian bebas untuk halaman Temukan Buku: menelusuri judul, ISBN, dan
-     * seluruh data terkait termasuk kode rak serta nama laci — karena petugas
-     * kerap lebih ingat letaknya daripada judulnya.
+     * Pencarian bebas untuk halaman Temukan Buku, lengkap dengan penyaring
+     * kategori, rak, dan status stok.
      */
     public function cari(array $filter)
     {
@@ -113,29 +112,7 @@ class PenelusuranBukuService
         ]);
 
         if (filled($filter['cari'] ?? null)) {
-            $cari = trim($filter['cari']);
-            $query->where(function ($q) use ($cari) {
-                $q->where('judul', 'like', "%{$cari}%")
-                  ->orWhere('isbn', 'like', "%{$cari}%")
-                  ->orWhereHas('penulis', function ($qp) use ($cari) {
-                      $qp->where('nama', 'like', "%{$cari}%");
-                  })
-                  ->orWhereHas('penerbit', function ($qp) use ($cari) {
-                      $qp->where('nama', 'like', "%{$cari}%");
-                  })
-                  ->orWhereHas('kategori', function ($qk) use ($cari) {
-                      $qk->where('nama', 'like', "%{$cari}%");
-                  })
-                  ->orWhereHas('rak', function ($qr) use ($cari) {
-                      $qr->where('kode_rak', 'like', "%{$cari}%")
-                         ->orWhere('nama_rak', 'like', "%{$cari}%")
-                         ->orWhere('lokasi', 'like', "%{$cari}%");
-                  })
-                  ->orWhereHas('laci', function ($ql) use ($cari) {
-                      $ql->where('nama_laci', 'like', "%{$cari}%")
-                         ->orWhere('keterangan', 'like', "%{$cari}%");
-                  });
-            });
+            $this->terapkanKataKunci($query, trim($filter['cari']));
         }
 
         if (filled($filter['kategori_id'] ?? null)) {
@@ -156,6 +133,53 @@ class PenelusuranBukuService
         }
 
         return $query->orderBy('judul', 'asc')->paginate(12)->withQueryString();
+    }
+
+    /**
+     * Saran yang muncul di bawah kotak pencarian Temukan Buku sementara
+     * petugas mengetik. Sengaja lewat `terapkanKataKunci()` yang sama dengan
+     * `cari()`: kalau keduanya memakai daftar kolom yang berbeda, petugas
+     * bisa mengetik kode rak, tidak melihat saran apa pun, lalu mengira
+     * bukunya tidak ada -- padahal menekan Enter menemukannya.
+     */
+    public function saran(string $cari, int $batas = 8)
+    {
+        $query = Buku::with(['penulis', 'kategori', 'rak', 'laci']);
+
+        $this->terapkanKataKunci($query, trim($cari));
+
+        return $query->orderBy('judul', 'asc')->take($batas)->get();
+    }
+
+    /**
+     * Satu kata kunci ditelusuri ke judul, ISBN, dan seluruh data terkait
+     * termasuk kode rak serta nama laci -- karena petugas kerap lebih ingat
+     * letaknya daripada judulnya.
+     */
+    private function terapkanKataKunci($query, string $cari): void
+    {
+        $query->where(function ($q) use ($cari) {
+            $q->where('judul', 'like', "%{$cari}%")
+              ->orWhere('isbn', 'like', "%{$cari}%")
+              ->orWhereHas('penulis', function ($qp) use ($cari) {
+                  $qp->where('nama', 'like', "%{$cari}%");
+              })
+              ->orWhereHas('penerbit', function ($qp) use ($cari) {
+                  $qp->where('nama', 'like', "%{$cari}%");
+              })
+              ->orWhereHas('kategori', function ($qk) use ($cari) {
+                  $qk->where('nama', 'like', "%{$cari}%");
+              })
+              ->orWhereHas('rak', function ($qr) use ($cari) {
+                  $qr->where('kode_rak', 'like', "%{$cari}%")
+                     ->orWhere('nama_rak', 'like', "%{$cari}%")
+                     ->orWhere('lokasi', 'like', "%{$cari}%");
+              })
+              ->orWhereHas('laci', function ($ql) use ($cari) {
+                  $ql->where('nama_laci', 'like', "%{$cari}%")
+                     ->orWhere('keterangan', 'like', "%{$cari}%");
+              });
+        });
     }
 
     /**

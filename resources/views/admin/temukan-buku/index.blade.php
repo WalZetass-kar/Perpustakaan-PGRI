@@ -3,6 +3,22 @@
 @section('title', 'Temukan Buku & Pelacak Lokasi Rak')
 @section('page_heading', 'Temukan Buku & Pelacak Lokasi')
 
+@push('styles')
+<style>
+    /* Kotak pencariannya cuma selebar 16rem di desktop (lg:w-64), terlalu
+       sempit untuk judul + sampul + badge lokasi. Dilebarkan lewat CSS polos,
+       bukan kelas Tailwind, karena public/vendor/tailwind/tailwind.min.css
+       adalah hasil purge dan varian lebar responsifnya tidak ada di sana. */
+    @media (min-width: 1024px) {
+        .saran-temukan {
+            width: 24rem;
+            left: auto;
+            right: 0;
+        }
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="space-y-5">
 
@@ -22,7 +38,8 @@
 
     <div class="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200 shadow-2xs">
         <form action="{{ route('admin.temukan-buku') }}" method="GET"
-              x-data="{ filterOpen: {{ request()->anyFilled(['kategori_id', 'rak_id', 'status_stok']) ? 'true' : 'false' }} }"
+              x-data="saranTemukanBuku({{ request()->anyFilled(['kategori_id', 'rak_id', 'status_stok']) ? 'true' : 'false' }})"
+              @click.outside="tutupSaran()"
               class="flex flex-wrap lg:flex-nowrap items-stretch lg:items-center gap-2 text-xs">
 
             {{-- Tombol toggle filter: mobile/tablet saja --}}
@@ -39,8 +56,65 @@
             <div class="order-2 lg:order-3 flex items-center gap-1.5 flex-1 lg:flex-none">
                 <div class="relative flex-1 lg:w-64">
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul, ISBN, penulis, kode rak..."
+                           autocomplete="off"
+                           x-ref="kotakCari"
+                           @input.debounce.250ms="ambilSaran($event.target.value)"
+                           @focus="ambilSaran($event.target.value)"
+                           @keydown.escape="tutupSaran()"
                            class="w-full pl-8 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-900 focus:ring-1 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
                     <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+
+                    <div x-show="memuatSaran" x-cloak class="absolute right-2.5 top-2.5">
+                        <i class="fa-solid fa-spinner fa-spin text-brand-700 text-xs"></i>
+                    </div>
+
+                    {{-- Saran judul, sepadan dengan yang ada di katalog OPAC. --}}
+                    <div x-show="saranTampil" x-cloak
+                         class="saran-temukan absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl border-2 border-gray-200 shadow-2xl z-50 max-h-80 overflow-y-auto p-2 space-y-1.5 text-left text-gray-900">
+                        <div class="px-2.5 py-1 text-[10px] font-black text-gray-400 uppercase tracking-wider flex items-center justify-between border-b border-gray-100">
+                            <span>Saran Judul</span>
+                            <span class="text-emerald-600 font-bold" x-text="saran.length + ' Ditemukan'"></span>
+                        </div>
+
+                        <template x-if="saran.length > 0">
+                            <div class="space-y-1">
+                                <template x-for="item in saran" :key="item.id">
+                                    <button type="button" @click="pilihSaran(item)"
+                                            class="w-full p-2.5 rounded-xl hover:bg-brand-50/80 transition flex items-center gap-3 group border border-transparent hover:border-brand-200 text-left">
+                                        <div class="w-10 h-14 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center">
+                                            <template x-if="item.cover_url">
+                                                <img :src="item.cover_url" width="40" height="56" loading="lazy" class="w-full h-full object-cover">
+                                            </template>
+                                            <template x-if="!item.cover_url">
+                                                <div class="w-full h-full bg-brand-900 text-white font-black flex flex-col items-center justify-center">
+                                                    <i class="fa-solid fa-book text-[11px] opacity-40"></i>
+                                                    <span class="text-[7.5px] mt-0.5" x-text="item.judul.substr(0, 1)"></span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                        <div class="min-w-0 flex-1 text-xs">
+                                            <p class="font-bold text-gray-900 truncate group-hover:text-brand-700" x-text="item.judul"></p>
+                                            <p class="text-[10px] text-gray-500 truncate" x-text="item.penulis + ' • ' + item.kategori"></p>
+                                            <div class="flex items-center gap-1.5 mt-1 text-[9.5px]">
+                                                <span class="px-1.5 py-0.5 rounded bg-gray-100 font-bold text-gray-700 border border-gray-200" x-text="item.rak + ' (' + item.laci + ')'"></span>
+                                                <span class="px-1.5 py-0.5 rounded font-black"
+                                                      :class="item.available_quantity > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'"
+                                                      x-text="'Stok: ' + item.available_quantity + ' Eks'"></span>
+                                            </div>
+                                        </div>
+                                        <i class="fa-solid fa-arrow-right text-gray-300 group-hover:text-brand-700 text-xs shrink-0 transform group-hover:translate-x-0.5 transition"></i>
+                                    </button>
+                                </template>
+                            </div>
+                        </template>
+
+                        <template x-if="saran.length === 0 && !memuatSaran">
+                            <div class="py-6 px-4 text-center">
+                                <p class="text-xs font-bold text-gray-700">Tidak ada buku ditemukan</p>
+                                <p class="text-[11px] text-gray-400 mt-0.5">Coba judul, penulis, ISBN, atau kode rak lain</p>
+                            </div>
+                        </template>
+                    </div>
                 </div>
 
                 <button type="submit" class="p-2 bg-brand-700 hover:bg-brand-800 text-white rounded-xl font-bold transition flex items-center justify-center shrink-0" title="Cari">
@@ -609,6 +683,73 @@
         }
         closeBookDetail();
     });
+</script>
+@endpush
+
+@push('scripts')
+<script>
+    /*
+     * Saran judul untuk kotak pencarian Temukan Buku, sepadan dengan yang ada
+     * di katalog OPAC. Nilai kotaknya sengaja tidak diikat dengan x-model:
+     * input-nya sudah membawa value dari server, dan x-model akan menimpanya
+     * dengan string kosong saat Alpine memulai -- kata kunci yang sedang aktif
+     * ikut terhapus begitu halaman dimuat.
+     */
+    function saranTemukanBuku(filterTerbuka) {
+        return {
+            filterOpen: filterTerbuka,
+            saran: [],
+            memuatSaran: false,
+            saranTampil: false,
+            // Penanda permintaan terakhir. Jawaban yang datang terlambat dari
+            // ketikan sebelumnya harus diabaikan, bukan menimpa yang terbaru.
+            permintaanKe: 0,
+
+            ambilSaran(kata) {
+                kata = (kata || '').trim();
+
+                if (kata.length < 2) {
+                    this.tutupSaran();
+                    return;
+                }
+
+                const nomor = ++this.permintaanKe;
+                this.memuatSaran = true;
+
+                fetch('{{ route('admin.temukan-buku.saran') }}?q=' + encodeURIComponent(kata), {
+                        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(res => res.ok ? res.json() : [])
+                    .then(data => {
+                        if (nomor !== this.permintaanKe) return;
+                        this.saran = data;
+                        this.saranTampil = true;
+                        this.memuatSaran = false;
+                    })
+                    .catch(() => {
+                        if (nomor !== this.permintaanKe) return;
+                        this.memuatSaran = false;
+                    });
+            },
+
+            /*
+             * Formulirnya yang dikirim, bukan window.location: kategori, rak,
+             * dan status stok yang sedang aktif ikut terbawa apa adanya.
+             */
+            pilihSaran(item) {
+                const kotak = this.$refs.kotakCari;
+                kotak.value = item.judul;
+                this.saranTampil = false;
+                kotak.form.submit();
+            },
+
+            tutupSaran() {
+                this.saranTampil = false;
+                this.memuatSaran = false;
+                this.permintaanKe++;
+            },
+        };
+    }
 </script>
 @endpush
 

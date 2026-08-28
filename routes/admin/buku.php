@@ -25,6 +25,8 @@ Route::get('/data-buku/rak/{rakId}', [DataBukuController::class, 'rak'])->name('
 Route::get('/data-buku/rak/{rakId}/tanpa-laci', [DataBukuController::class, 'tanpaLaci'])->name('data-buku.tanpa-laci')->whereNumber('rakId');
 Route::get('/data-buku/rak/{rakId}/laci/{laciId}', [DataBukuController::class, 'laci'])->name('data-buku.laci')->whereNumber('rakId')->whereNumber('laciId');
 Route::get('/temukan-buku', [TemukanBukuController::class, 'index'])->name('temukan-buku');
+// Dipanggil sekali per ketukan tombol (sudah di-debounce di sisi browser), jadi tetap dibatasi.
+Route::get('/temukan-buku/saran', [TemukanBukuController::class, 'saran'])->name('temukan-buku.saran')->middleware('throttle:60,1');
 
 Route::get('/buku', [BukuController::class, 'index'])->name('buku');
 Route::get('/buku/export/excel', [BukuController::class, 'exportExcel'])->name('buku.export.excel');
