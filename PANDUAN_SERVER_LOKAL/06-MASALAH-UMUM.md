@@ -532,6 +532,79 @@ Pengguna Windows dapat memakai Apache bawaan Laragon/XAMPP dengan mengarahkan
 
 ---
 
+## Galat "Method Not Allowed" atau Halaman "Cara Akses Tidak Sesuai"
+
+Muncul saat sebuah alamat dibuka langsung lewat bilah alamat peramban, padahal
+alamat itu hanya melayani pengiriman dari tombol di dalam sistem. Contoh yang
+paling sering: alamat keluar (`/logout`) dan alamat pengajuan peminjaman.
+
+**Ini bukan kerusakan.** Biasanya terjadi tanpa disengaja, ketika tombol
+Kembali atau Maju pada peramban mengulang navigasi bekas penekanan tombol, atau
+saat peramban memulihkan tab lama setelah ditutup.
+
+**Yang perlu dilakukan:** tekan tombol **Kembali ke Beranda** pada halaman itu,
+lalu ulangi lewat tombol di dalam sistem. Tidak ada data yang hilang, dan sesi
+Anda tidak berakhir.
+
+> Bila yang muncul justru layar hitam berisi potongan kode program dan jalur
+> berkas, berarti `APP_DEBUG` pada `.env` masih bernilai `true`. Di server yang
+> dipakai sehari-hari nilainya **wajib** `false` — lihat berkas `02-INSTALASI.md`.
+> Layar debug memperlihatkan struktur dalam sistem kepada siapa pun yang
+> membukanya.
+
+---
+
+## Galat "Sesi Halaman Kedaluwarsa" (419) Saat Menyimpan Formulir
+
+Formulir ditolak dengan pesan sesi kedaluwarsa, atau siswa melihat pesan
+"Halaman Perlu Dimuat Ulang" saat mengajukan peminjaman.
+
+**Penyebab paling umum:** halaman dibiarkan terbuka terlalu lama, **atau** ada
+yang login petugas pada peramban yang sama sementara halaman katalog masih
+terbuka di tab lain. Masuk sebagai petugas otomatis memperbarui pengaman
+formulir, sehingga halaman lama yang masih memegang pengaman versi sebelumnya
+ikut ditolak.
+
+**Yang perlu dilakukan:** muat ulang halaman (F5), lalu isi kembali. Pada
+halaman katalog, tombol **Muat Ulang** sudah disediakan langsung di pesannya.
+
+**Mencegahnya:** jangan memakai satu peramban untuk dua peran sekaligus. Bila
+komputer OPAC dipakai bersama, gunakan jendela penyamaran (incognito) untuk
+login petugas, atau login dari komputer petugas sendiri.
+
+---
+
+## Galat "Terlalu Banyak Permintaan" (429)
+
+Sistem menahan permintaan yang datang terlalu cepat dari satu perangkat, demi
+menjaga server sekolah tetap ringan. Tunggu kira-kira satu menit lalu coba
+lagi — tidak ada yang rusak dan tidak ada data yang hilang.
+
+**Bila ini sering terjadi padahal siswa tidak banyak:** kemungkinan sistem
+dipasang di hosting internet dan seluruh perangkat sekolah keluar lewat satu
+alamat IP yang sama, sehingga jatah semua orang terhitung menjadi satu.
+Sampaikan ke teknisi: batas lajunya diatur pada berkas `routes/publik.php` dan
+`routes/auth.php`, dan angkanya bisa dinaikkan. Pada pemasangan server lokal di
+sekolah hal ini tidak terjadi, karena setiap perangkat punya alamat sendiri.
+
+---
+
+## Pesan "Kelas Sudah Terdaftar" Padahal Tulisannya Berbeda
+
+Sistem membandingkan kelas berdasarkan maknanya, bukan tulisannya. `11 RPL`,
+`XI RPL`, `11rpl`, dan `RPL` pada Tingkat 11 semuanya dianggap **kelas yang
+sama**, sehingga yang kedua akan ditolak.
+
+Pesan penolakannya menyebutkan nama kelas yang sudah ada. Cari nama itu di
+daftar Kelas — hampir selalu itu kelas yang Anda maksud, hanya ditulis dengan
+gaya berbeda oleh petugas sebelumnya. Bila memang perlu diperbaiki tulisannya,
+ubah kelas yang sudah ada, jangan membuat yang baru.
+
+Penjelasan lengkap aturannya ada di `PANDUAN_PENGGUNAAN_PETUGAS.md` bagian
+**Data Pendukung**.
+
+---
+
 ## Bila Semua Cara Sudah Dicoba
 
 Kumpulkan informasi berikut sebelum menghubungi pengembang:

@@ -28,6 +28,9 @@ Kedua file contoh tersebut sudah tersedia di folder proyek. Salin salah satu ses
    - [Langkah 4: Menjalankan Migrasi & Data Awal](#langkah-4-menjalankan-migrasi--data-awal)
    - [Langkah 5: Membuat Symlink Storage (Cover Buku)](#langkah-5-membuat-symlink-storage-cover-buku)
    - [Langkah 6: Membuat Akun Administrator](#langkah-6-membuat-akun-administrator)
+2B. [Menjaga Performa Tetap Ringan](#2b-menjaga-performa-tetap-ringan)
+   - [Cache di peramban pengunjung](#a-cache-di-peramban-pengunjung-sudah-otomatis)
+   - [Cache konfigurasi di server](#b-cache-konfigurasi-di-server-dijalankan-manual)
 3. [Panduan Pemasangan di VPS / Dedicated Linux (Ubuntu/Debian)](#3-panduan-pemasangan-di-vps--dedicated-linux-ubuntudebian)
 4. [Panduan Pemasangan di Cloud PaaS (Railway / Docker Container)](#4-panduan-pemasangan-di-cloud-paas-railway--docker-container)
 5. [Daftar Perintah Artisan untuk Pemeliharaan](#5-daftar-perintah-artisan-untuk-pemeliharaan)
@@ -300,6 +303,89 @@ ln -s /home/usercpanel/perpustakaan_core/storage/app/public /home/usercpanel/pub
 3. Buka URL login admin di browser:
    `https://perpustakaan.sekolah.sch.id/akses-perpustakaan`
 4. Masuk menggunakan email dan password yang baru saja Anda buat.
+
+---
+
+## 2B. MENJAGA PERFORMA TETAP RINGAN
+
+Sistem ini sengaja tidak memerlukan Redis, Memcached, maupun layanan tambahan
+apa pun. Performanya bertumpu pada dua hal berikut.
+
+### A. Cache di peramban pengunjung (sudah otomatis)
+
+Pustaka tampilan (Tailwind, Alpine, jQuery, DataTables, Chart.js, SweetAlert2,
+AOS, FontAwesome) berukuran sekitar **1,1 MB**, dan sampul buku menambah lagi.
+Tanpa cache, seluruhnya diunduh ulang setiap kali halaman dibuka — terasa berat
+di WiFi sekolah ketika banyak siswa membuka katalog bersamaan.
+
+Sistem sudah mengirim masa simpan dan penanda versi (`ETag`) untuk seluruh aset
+statis, sehingga kunjungan berikutnya dijawab **304 Not Modified** tanpa
+mengirim ulang isinya:
+
+| Jenis berkas | Masa simpan | Alasan |
+|---|---|---|
+| Gambar, sampul buku, berkas huruf | 1 tahun | Nama berkas sampul dibuat acak; mengganti sampul menghasilkan nama baru, jadi isinya tidak pernah berubah |
+| CSS & JavaScript | 1 minggu | Bisa berubah saat aplikasi diperbarui sementara namanya belum tentu ikut berganti |
+
+Pengaturannya ada di dua tempat, dan keduanya perlu ikut tersalin saat
+memindahkan sistem:
+
+- `public/.htaccess` — dipakai bila server memakai **Apache atau cPanel**.
+- `server.php` — dipakai bila server dijalankan dengan **`php artisan serve`**,
+  yaitu cara pemasangan server lokal di sekolah. Server bawaan PHP tidak
+  mengenal `.htaccess`, jadi aturannya ditulis ulang di sini.
+
+> **Bila memakai Nginx**, kedua berkas di atas tidak terbaca. Tambahkan blok
+> berikut ke dalam `server { ... }`:
+>
+> ```nginx
+> location ~* \.(jpg|jpeg|png|webp|gif|svg|ico|woff2|woff|ttf)$ {
+>     expires 1y;
+>     add_header Cache-Control "public";
+> }
+> location ~* \.(css|js)$ {
+>     expires 7d;
+>     add_header Cache-Control "public";
+> }
+> ```
+
+> **Setelah memperbarui aplikasi**, tampilan bisa terlihat "belum berubah" pada
+> peramban yang masih menyimpan CSS lama. Minta pengguna menekan
+> **Ctrl+Shift+R** sekali, atau tunggu sampai masa simpannya habis.
+
+Halaman katalog itu sendiri **sengaja tidak** disimpan di cache peramban.
+Isinya memuat sisa stok yang harus selalu akurat — buku yang sudah dipinjam
+tidak boleh tetap tampil tersedia hanya karena halamannya berasal dari cache.
+
+### B. Cache konfigurasi di server (dijalankan manual)
+
+Pada server yang sudah berjalan tetap — bukan komputer pengembangan —
+jalankan sekali setelah pemasangan selesai:
+
+```bash
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+Ketiganya menggabungkan konfigurasi, daftar alamat, dan tampilan menjadi
+berkas siap pakai, sehingga setiap permintaan tidak perlu menyusunnya lagi
+dari nol.
+
+> **PENTING — sering menjebak.** Setelah `config:cache` dijalankan, perubahan
+> pada berkas `.env` **tidak lagi berpengaruh** sampai cache-nya disusun ulang.
+> Jadi setiap kali `.env` diubah:
+>
+> ```bash
+> php artisan config:clear && php artisan config:cache
+> ```
+>
+> Bila ragu, cukup jalankan `php artisan optimize:clear` untuk membersihkan
+> semuanya, lalu susun ulang bila perlu.
+
+Jangan menjalankan ketiga perintah itu di komputer pengembangan — perubahan
+kode dan `.env` jadi tidak langsung terlihat, dan itu membingungkan saat
+menelusuri masalah.
 
 ---
 

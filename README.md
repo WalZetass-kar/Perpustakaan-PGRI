@@ -18,7 +18,7 @@ Untuk mempermudah teknisi sekolah dalam melakukan pemasangan dan membantu pustak
    - Alur pengelolaan master buku, kategori, penulis, penerbit, dan kelas
    - Manajemen rak buku & peta denah interaktif 2D
    - Alur persetujuan peminjaman online siswa & pencatatan langsung (Walk-in)
-   - Pelacakan keterlambatan, perpanjangan, dan pengembalian buku
+   - Pelacakan keterlambatan dan pengembalian buku
    - Rekapitulasi laporan Excel dan cetak PDF resmi format A4
    - Pengaturan instansi & fitur pencadangan database mandiri
 3. **[Panduan Server Lokal (Satu Komputer sebagai Server)](PANDUAN_SERVER_LOKAL/)**:
@@ -34,14 +34,17 @@ Untuk mempermudah teknisi sekolah dalam melakukan pemasangan dan membantu pustak
 - **Pencarian Cepat & Instan**: Pencarian berbasis judul, penulis, penerbit, ISBN, kelas sasaran, dan kategori modul.
 - **Ketersediaan Stok Real-Time**: Status stok fisik siap pinjam vs sedang dipinjam yang selalu sinkron.
 - **Penunjuk Lokasi Rak & Laci**: Informasi lokasi rak dan tingkat laci fisik pada setiap kartu buku.
-- **Formulir Pengajuan Peminjaman Mandiri**: Siswa dapat mengajukan peminjaman buku langsung dari halaman detail buku dengan validasi batas pinjaman aktif.
+- **Formulir Pengajuan Peminjaman Mandiri**: Siswa dapat mengajukan peminjaman buku langsung dari katalog maupun halaman detail buku. Pengajuan kembar dan permintaan yang melebihi eksemplar tersisa ditolak di dalam satu transaksi terkunci, sehingga dua siswa yang menekan tombol bersamaan tidak bisa sama-sama lolos.
+- **Pemantauan Keputusan Petugas secara Langsung**: Setelah mengajukan, siswa melihat popup "Menunggu Verifikasi Petugas" yang berubah sendiri menjadi tanda centang (beserta kode dan jatuh tempo) atau tanda silang beserta alasan penolakan, tanpa perlu memuat ulang halaman. Pemantauannya terikat pada sesi peramban pengaju, sehingga tidak ada alamat yang bisa ditebak untuk mengintip pengajuan siswa lain.
 
 ### B. Portal Back-Office Pengelola Perpustakaan
 - **Dashboard KPI Sirkulasi**: Metrik sirkulasi hari ini, buku sedang dipinjam, pengembalian, dan penghitung buku terlambat jatuh tempo.
 - **Visualisasi Grafik Aktivitas**: Grafik aktivitas sirkulasi bulanan dan tahunan.
 - **Manajemen Inventaris Koleksi**: Penambahan, pengubahan, dan penghapusan buku dengan proteksi transaksi aktif.
 - **Denah Lokasi Rak 2D (Wayfinding)**: Tampilan visual tata letak rak dan laci perpustakaan.
-- **Sirkulasi & Overdue Tracker**: Penyaringan status peminjaman (Semua, Aktif, Terlambat, Selesai, Pending) serta perpanjangan masa pinjam terukur.
+- **Sirkulasi & Overdue Tracker**: Penyaringan status peminjaman (Semua, Aktif, Terlambat, Selesai, Pending), dengan nomor WhatsApp peminjam yang bisa langsung dihubungi.
+- **Panel Persetujuan Pengajuan**: Halaman tersendiri berisi pengajuan yang menunggu, menampilkan jumlah eksemplar yang diminta dari total yang dimiliki berdampingan dengan sisa stoknya, serta penolakan beserta alasan yang dapat dibaca kembali oleh pengaju.
+- **Master Kelas dengan Penjagaan Duplikat**: Kelas dibandingkan menurut maknanya, bukan tulisannya — huruf besar/kecil, spasi, angka Romawi (`XI` = `11`), dan pengulangan tingkat di dalam nama semuanya disetarakan, sehingga satu kelas tidak tercatat berkali-kali. Daftarnya pun terurut menurut jenjang sebenarnya.
 - **Rekapitulasi Laporan Formal**:
   - Ekspor Excel koleksi buku dengan format kolom rapi.
   - Cetak PDF laporan inventaris buku dan sirkulasi peminjaman (A4 Portrait) lengkap dengan Kop Surat Instansi dan blok tanda tangan formal 2 kolom simetris.
@@ -62,6 +65,15 @@ Untuk mempermudah teknisi sekolah dalam melakukan pemasangan dan membantu pustak
   > utuh saat jaringan sekolah putus. Satu-satunya berkas yang masih diambil dari
   > internet adalah **font** pada halaman login; bila gagal dimuat, tulisan jatuh
   > ke huruf bawaan sistem dan seluruh fungsi tetap berjalan normal.
+- **Performa**: tanpa Redis, Memcached, atau layanan tambahan apa pun.
+  - Seluruh aset statis dikirim dengan masa simpan cache dan penanda versi
+    (`ETag`), sehingga kunjungan berikutnya dijawab `304 Not Modified` tanpa
+    mengunduh ulang — gambar & huruf 1 tahun, CSS & JS 1 minggu. Diatur di
+    `public/.htaccess` (Apache/cPanel) dan `server.php` (`php artisan serve`).
+  - Halaman katalog sengaja **tidak** disimpan di cache peramban, karena sisa
+    stoknya harus selalu akurat.
+  - Untuk server yang sudah berjalan tetap, jalankan `php artisan config:cache`,
+    `route:cache`, dan `view:cache` — lihat panduan teknisi bagian 2B.
 - **Ekspor Dokumen**: tanpa pustaka tambahan.
   - **Excel** — laporan disusun sebagai tabel HTML ber-CSS yang dikenali Excel
     sebagai lembar kerja (`.xls`). Berkasnya dirakit di
@@ -214,10 +226,19 @@ php artisan serve
 
 ## 6. Menjalankan Pengujian
 
-Sistem disertai **21 berkas uji otomatis** di folder `tests/`. Isinya bukan
-sekadar formalitas: uji-uji itu mengunci perilaku yang pernah bermasalah —
-ketahanan stok saat dua petugas bekerja bersamaan, pembatasan hak akses Super
-Administrator, sampai keutuhan berkas cadangan.
+Sistem disertai **36 berkas uji otomatis** (250 pengujian) di folder `tests/`.
+Isinya bukan sekadar formalitas: uji-uji itu mengunci perilaku yang pernah
+bermasalah, di antaranya
+
+- ketahanan stok saat dua petugas menyetujui pengajuan yang sama bersamaan;
+- pembatasan hak akses Super Administrator dan keutuhan berkas cadangan;
+- penjagaan kelas kembar beserta penyetaraan angka Romawi dan urutan jenjangnya;
+- pemisahan jatah pembatasan laju antar rute, agar penelusuran katalog oleh
+  siswa tidak sampai mengunci halaman login petugas;
+- identitas kota pada blok tanda tangan laporan, agar tidak ada nama kota yang
+  tertanam di dalam kode;
+- setiap halaman terbuka tanpa galat server, disusuri langsung dari daftar rute
+  sehingga halaman baru ikut terperiksa tanpa perlu diingat.
 
 ```bash
 php artisan test
