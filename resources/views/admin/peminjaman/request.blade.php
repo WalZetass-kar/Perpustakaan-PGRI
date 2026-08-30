@@ -117,6 +117,9 @@
                                                 <span class="text-amber-700 font-bold">{{ $req->buku->laci->nama_laci ?? ($req->buku->rak ? 'Laci 1' : '-') }}</span>
                                             </div>
                                             <p class="text-[10px] text-gray-400 font-bold mt-0.5">
+                                                Diminta: <span class="text-brand-700">{{ (int) $req->jumlah }} dari {{ $req->buku->total_quantity }}</span> eksemplar
+                                            </p>
+                                            <p class="text-[10px] text-gray-400 font-bold mt-0.5">
                                                 Sisa Stok: <span class="{{ $req->buku->available_quantity > 0 ? 'text-emerald-700' : 'text-rose-600' }}">{{ $req->buku->available_quantity }} / {{ $req->buku->total_quantity }}</span>
                                             </p>
                                         </div>
@@ -258,6 +261,9 @@
                                         <span>&bull;</span>
                                         <span class="text-amber-700 font-bold">{{ $req->buku->laci->nama_laci ?? ($req->buku->rak ? 'Laci 1' : '-') }}</span>
                                     </div>
+                                    <p class="text-[10px] text-gray-400 font-bold mt-0.5">
+                                        Diminta: <span class="text-brand-700">{{ (int) $req->jumlah }} dari {{ $req->buku->total_quantity }}</span> eksemplar
+                                    </p>
                                     <p class="text-[10px] text-gray-400 font-bold mt-0.5">
                                         Sisa Stok: <span class="{{ $req->buku->available_quantity > 0 ? 'text-emerald-700' : 'text-rose-600' }}">{{ $req->buku->available_quantity }} / {{ $req->buku->total_quantity }}</span>
                                     </p>
