@@ -939,19 +939,20 @@ function katalogPage() {
                             title: 'Pengajuan Terkirim!',
                             html: '<p class="text-xs text-gray-600 mb-2">Pengajuan peminjaman buku <strong>' + res.body.judul_buku + '</strong> berhasil dikirim ke Admin Perpustakaan.</p><p class="text-sm font-mono font-bold text-brand-800 bg-gray-100 py-1.5 px-3 rounded-lg border border-gray-200">Kode Ref: ' + res.body.kode + '</p><p class="text-[11px] text-gray-500 mt-2">Silakan konfirmasi ke meja sirkulasi perpustakaan saat mengambil buku fisik.</p>',
                             confirmButtonColor: '#991b1b'
+                        }).then(function () {
+                            // Popup "terkirim" ditutup siswa: langsung ganti
+                            // dengan pemantau keputusan petugas.
+                            if (typeof window.pantauPengajuan === 'function') {
+                                window.pantauPengajuan(res.body.id, res.body.judul_buku, res.body.kode);
+                            }
                         });
                     } else {
                         alert('Pengajuan peminjaman berhasil dikirim! Kode Referensi: ' + res.body.kode);
                     }
                 } else {
                     const msg = res.body.message || 'Gagal mengajukan peminjaman buku.';
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Pengajuan Gagal',
-                            text: msg,
-                            confirmButtonColor: '#991b1b'
-                        });
+                    if (typeof window.tampilkanKegagalanPengajuan === 'function') {
+                        window.tampilkanKegagalanPengajuan(res.status, msg);
                     } else {
                         alert(msg);
                     }
@@ -974,4 +975,5 @@ function katalogPage() {
     };
 }
 </script>
+@include('public.partials.pemantau-pengajuan')
 @endsection

@@ -17,6 +17,9 @@ use Carbon\Carbon;
 
 class PublicController extends Controller
 {
+    /** Kunci sesi berisi id pengajuan yang boleh dipantau peramban ini. */
+    private const SESI_PENGAJUAN = 'pengajuan_dipantau';
+
     public function home()
     {
         try {
@@ -370,6 +373,8 @@ class PublicController extends Controller
 
         $requestCode = $loan->kode_peminjaman;
 
+        $this->ingatPengajuan($request, $loan->id);
+
         AuditLog::create([
             'user_id'    => auth()->id(),
             'user_name'  => $loan->nama_peminjam,
@@ -381,6 +386,10 @@ class PublicController extends Controller
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success'     => true,
+                // `id` dipakai halaman untuk memantau keputusan petugas. Aman
+                // dikirim apa adanya karena alamat pemantauannya hanya melayani
+                // pengajuan yang tercatat di sesi peramban pengaju sendiri.
+                'id'          => $loan->id,
                 'kode'        => $requestCode,
                 'judul_buku'  => $buku->judul,
                 'message'     => 'Pengajuan peminjaman berhasil dikirim. Silakan tunggu konfirmasi petugas perpustakaan.'
@@ -388,5 +397,64 @@ class PublicController extends Controller
         }
 
         return back()->with('success', "Pengajuan peminjaman untuk buku '{$buku->judul}' berhasil dikirim! Kode Referensi: {$requestCode}");
+    }
+
+    /**
+     * Catat pengajuan yang baru dikirim pada sesi peramban pengaju.
+     *
+     * Daftar inilah satu-satunya kunci ke halaman status: tanpa tercatat di
+     * sini, sebuah id pengajuan tidak bisa dibaca siapa pun. Dengan begitu
+     * tidak ada alamat yang bisa ditebak orang lain untuk mengintip pengajuan
+     * siswa lain — berbeda dengan memakai kode pengajuan sebagai kunci.
+     */
+    private function ingatPengajuan(Request $request, int $id): void
+    {
+        $daftar = array_values(array_unique(array_merge(
+            array_map('intval', (array) $request->session()->get(self::SESI_PENGAJUAN, [])),
+            [$id]
+        )));
+
+        // Hanya sebagian terakhir yang disimpan: sesi berbasis cookie punya
+        // batas ukuran, dan siswa hanya perlu memantau pengajuan yang baru
+        // saja dikirim, bukan seluruh riwayatnya.
+        $request->session()->put(self::SESI_PENGAJUAN, array_slice($daftar, -20));
+    }
+
+    /**
+     * Keputusan petugas atas sebuah pengajuan, untuk dipantau halaman katalog
+     * selama siswa masih menunggu.
+     *
+     * Yang dikembalikan sengaja seminim mungkin — status, kode, judul buku,
+     * dan alasan penolakan — tanpa identitas pengaju, supaya isinya tetap
+     * tidak berarti apa-apa seandainya sesi seseorang berpindah tangan.
+     */
+    public function statusPengajuan(Request $request, $id)
+    {
+        $id = (int) $id;
+        $dipantau = array_map('intval', (array) $request->session()->get(self::SESI_PENGAJUAN, []));
+
+        if (!in_array($id, $dipantau, true)) {
+            return response()->json(['message' => 'Pengajuan tidak ditemukan.'], 404);
+        }
+
+        $pengajuan = Peminjaman::with('buku')->find($id);
+
+        if (!$pengajuan) {
+            return response()->json(['message' => 'Pengajuan tidak ditemukan.'], 404);
+        }
+
+        return response()->json([
+            'status'           => $pengajuan->status,
+            'kode'             => $pengajuan->kode_peminjaman,
+            'judul_buku'       => $pengajuan->buku->judul ?? null,
+            'jumlah'           => (int) $pengajuan->jumlah,
+            'jatuh_tempo'      => $pengajuan->tanggal_jatuh_tempo
+                ? Carbon::parse($pengajuan->tanggal_jatuh_tempo)->translatedFormat('d F Y')
+                : null,
+            // Alasan hanya berarti pada pengajuan yang benar-benar ditolak.
+            'alasan_penolakan' => $pengajuan->status === 'ditolak'
+                ? $pengajuan->alasan_penolakan
+                : null,
+        ]);
     }
 }
