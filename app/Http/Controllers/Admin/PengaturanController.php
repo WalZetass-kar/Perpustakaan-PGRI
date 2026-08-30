@@ -33,6 +33,10 @@ class PengaturanController extends Controller
             'kepala_perpustakaan'     => 'nullable|string|max:255',
             'nip_kepala_perpustakaan' => 'nullable|string|max:50',
             'alamat'                  => 'nullable|string|max:500',
+            // Dicetak mendahului tanggal pada blok tanda tangan setiap laporan
+            // resmi. Tanpa baris ini isian Kota tidak pernah ikut tersimpan,
+            // dan laporan sekolah mana pun mencetak kota yang keliru.
+            'kota'                    => 'nullable|string|max:100',
             'email_perpustakaan'      => 'nullable|string|max:255',
             'telepon'                 => 'nullable|string|max:50',
             'website_sekolah'         => 'nullable|string|max:255',

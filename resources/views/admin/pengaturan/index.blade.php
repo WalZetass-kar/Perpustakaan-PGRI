@@ -141,6 +141,14 @@
                               class="w-full px-3.5 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">{{ old('alamat', $pengaturan['alamat'] ?? '') }}</textarea>
                 </div>
 
+                <div class="space-y-1 sm:col-span-2">
+                    <label class="block font-bold text-gray-800">Kota / Kabupaten</label>
+                    <input type="text" name="kota" value="{{ old('kota', $pengaturan['kota'] ?? '') }}"
+                           placeholder="Nama kota atau kabupaten sekolah"
+                           class="w-full px-3.5 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-1.5 focus:ring-brand-700 focus:bg-white focus:outline-none font-medium">
+                    <p class="text-[11px] text-gray-500 font-medium">Dicetak mendahului tanggal pada blok tanda tangan laporan PDF dan Excel. Bila dikosongkan, hanya tanggalnya yang dicetak.</p>
+                </div>
+
                 <div class="space-y-1">
                     <label class="block font-bold text-gray-800">Email Resmi Layanan</label>
                     <input type="email" name="email_perpustakaan" value="{{ old('email_perpustakaan', $pengaturan['email_perpustakaan'] ?? '') }}"

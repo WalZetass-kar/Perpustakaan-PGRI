@@ -109,8 +109,10 @@
     <meta name="author" content="{{ $seoSchool }}">
     <meta name="publisher" content="{{ $seoSchool }}">
     <meta name="language" content="id">
-    <meta name="geo.region" content="ID-RI">
-    <meta name="geo.placename" content="Pekanbaru">
+    <meta name="geo.region" content="ID">
+    @if(filled($pengaturan['kota'] ?? null))
+        <meta name="geo.placename" content="{{ $pengaturan['kota'] }}">
+    @endif
 
     <link rel="canonical" href="{{ $seoCanonical }}">
     <link rel="alternate" hreflang="id" href="{{ $seoCanonical }}">

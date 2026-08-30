@@ -420,7 +420,7 @@
 
             <div class="sig-col">
                 <div class="sig-header">
-                    <div>{{ $pengaturan['kota'] ?? 'Pekanbaru' }}, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</div>
+                    <div>{{ filled($pengaturan['kota'] ?? null) ? $pengaturan['kota'] . ', ' : '' }}{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</div>
                     <div>Mengetahui,</div>
                     <div style="font-weight: bold;">Kepala Perpustakaan</div>
                 </div>
