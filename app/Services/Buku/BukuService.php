@@ -44,7 +44,7 @@ class BukuService
             'penulisList'  => Penulis::orderBy('nama', 'asc')->get(),
             'penerbitList' => Penerbit::orderBy('nama', 'asc')->get(),
             'kategoriList' => Kategori::orderBy('nama', 'asc')->get(),
-            'kelasList'    => Kelas::orderByRaw('CAST(tingkat AS UNSIGNED) asc')->orderBy('nama_kelas', 'asc')->get(),
+            'kelasList'    => Kelas::orderBy('tingkat_angka', 'asc')->orderBy('nama_kelas', 'asc')->get(),
             'rakList'      => Rak::with('laci')->orderBy('kode_rak', 'asc')->get(),
         ];
     }
